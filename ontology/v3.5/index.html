@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CKP Ontology v1</title>
+  <style>
+    body { font-family: system-ui, sans-serif; display: flex; justify-content: center; min-height: 100vh; margin: 0; background: #0a0a0a; color: #e0e0e0; }
+    .container { max-width: 720px; padding: 3rem 2rem; }
+    h1 { font-size: 1.8rem; color: #ff8a65; }
+    h2 { font-size: 1rem; color: #b0b0c0; margin-top: 1.5rem; border-bottom: 1px solid #1a1a2e; padding-bottom: 0.3rem; }
+    a { color: #66bb6a; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { background: #1a1a2e; padding: 0.15em 0.4em; border-radius: 3px; font-size: 0.9rem; }
+    table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; }
+    th, td { text-align: left; padding: 0.4rem 0.8rem; border-bottom: 1px solid #1a1a2e; font-size: 0.85rem; }
+    th { color: #888; font-weight: normal; }
+    .bfo { color: #42a5f5; font-family: monospace; font-size: 0.8rem; }
+    .note { color: #888; font-size: 0.8rem; font-style: italic; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CKP Ontology v3.5</h1>
+    <p>Canonical prefix: <code>@prefix ckp: &lt;https://conceptkernel.org/ontology/v3.5/&gt;</code></p>
+
+    <h2>Core Ontology Files (Turtle)</h2>
+    <table>
+      <tr><th>File</th><th>Description</th><th>BFO Classes</th></tr>
+      <tr><td><a href="core.ttl">core.ttl</a></td><td>Base continuants — Kernel, Edge, Instance</td><td><span class="bfo">0000040, 0000031</span></td></tr>
+      <tr><td><a href="kernel-metadata.ttl">kernel-metadata.ttl</a></td><td>Roles and Functions</td><td><span class="bfo">0000023, 0000034</span></td></tr>
+      <tr><td><a href="processes.ttl">processes.ttl</a></td><td>Temporal occurrents — Invocation, Communication</td><td><span class="bfo">0000015</span></td></tr>
+      <tr><td><a href="relations.ttl">relations.ttl</a></td><td>Properties, property chains, SWRL rules</td><td></td></tr>
+      <tr><td><a href="rbac.ttl">rbac.ttl</a></td><td>Authorization ontology</td><td></td></tr>
+      <tr><td><a href="workflow.ttl">workflow.ttl</a></td><td>Workflow temporal patterns</td><td><span class="bfo">0000015</span></td></tr>
+      <tr><td><a href="shapes.ttl">shapes.ttl</a></td><td>SHACL validation shapes</td><td></td></tr>
+      <tr><td><a href="proof.ttl">proof.ttl</a></td><td>ProofRecord, ProofCheck, cryptographic hash chain (v3.5)</td><td></td></tr>
+      <tr><td><a href="base-instances.ttl">base-instances.ttl</a></td><td>InstanceManifest, SealedInstance, LedgerEntry (v3.5)</td><td><span class="bfo">0000031</span></td></tr>
+      <tr><td><a href="spiffe.ttl">spiffe.ttl</a></td><td>SPIFFE identity mapping — SVID ↔ Kernel URN (v3.5)</td><td></td></tr>
+    </table>
+
+    <h2>Schema (LinkML)</h2>
+    <table>
+      <tr><th>File</th><th>Description</th></tr>
+      <tr><td><a href="schema.yaml">schema.yaml</a></td><td>LinkML type definitions — generates Turtle via gen-owl</td></tr>
+    </table>
+
+    <h2>Templates</h2>
+    <table>
+      <tr><th>File</th><th>Description</th></tr>
+      <tr><td><a href="kernel-entity-template.ttl">kernel-entity-template.ttl</a></td><td>Template for per-kernel ontology.ttl generation</td></tr>
+    </table>
+
+    <h2>BFO Alignment</h2>
+    <table>
+      <tr><th>BFO Class</th><th>CKP Entity</th><th>Loop</th></tr>
+      <tr><td><span class="bfo">bfo:0000040</span> MaterialEntity</td><td>Kernel, Edge</td><td>CK</td></tr>
+      <tr><td><span class="bfo">bfo:0000031</span> GenericDependentContinuant</td><td>Instance</td><td>DATA</td></tr>
+      <tr><td><span class="bfo">bfo:0000023</span> Role</td><td>Kernel roles</td><td>CK</td></tr>
+      <tr><td><span class="bfo">bfo:0000034</span> Function</td><td>Kernel functions</td><td>TOOL</td></tr>
+      <tr><td><span class="bfo">bfo:0000016</span> Disposition</td><td>Contracts</td><td>CK</td></tr>
+      <tr><td><span class="bfo">bfo:0000015</span> Process</td><td>Invocation, Workflow</td><td>TOOL</td></tr>
+    </table>
+
+    <h2>v3.5 Additions (alpha-3)</h2>
+    <table>
+      <tr><th>Addition</th><th>File</th><th>Status</th></tr>
+      <tr><td>Kernel-as-Datatype rule</td><td>base-instances.ttl + schema.yaml</td><td>Specified</td></tr>
+      <tr><td>Materialised proof with SHA-256 + SVID</td><td>proof.ttl</td><td>Specified</td></tr>
+      <tr><td>SPIFFE identity layer</td><td>spiffe.ttl</td><td>Specified</td></tr>
+      <tr><td>CK.Lib seal_instance() validation</td><td>(code change)</td><td>Planned</td></tr>
+      <tr><td>Namespace convergence</td><td>all files</td><td>In progress</td></tr>
+      <tr><td>ck tool v2→v3 schema bridge</td><td>(code change)</td><td>Planned</td></tr>
+    </table>
+
+    <p class="note">Ontology files are being migrated from three legacy namespaces to this canonical location.</p>
+  </div>
+</body>
+</html>

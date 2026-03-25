@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CKP v3.5 — Action Composition, Validation, SPIFFE</title>
+  <style>body{font-family:system-ui;background:#0a0a0a;color:#e0e0e0;display:flex;justify-content:center;min-height:100vh;margin:0}.c{max-width:720px;padding:3rem 2rem}h1{color:#ff8a65;font-size:1.8rem}h2{color:#b0b0c0;font-size:1rem;border-bottom:1px solid #1a1a2e;padding-bottom:.3rem;margin-top:1.5rem}a{color:#66bb6a;text-decoration:none}code{background:#1a1a2e;padding:.15em .4em;border-radius:3px;font-size:.9rem}ul{list-style:none;padding:0}li{padding:.3rem 0}li::before{content:"→ ";color:#555}.note{color:#888;font-size:.85rem;font-style:italic}</style>
+</head>
+<body>
+  <div class="c">
+    <h1>CKP v3.5</h1>
+    <p>Action Composition, Ontology Validation, SPIFFE Identity</p>
+
+    <h2>Alpha Documents</h2>
+    <ul>
+      <li><strong>alpha-1</strong> — Action Composition via Edge Graph (EXTENDS/COMPOSES/REQUIRES)</li>
+      <li><strong>alpha-2</strong> — Ontology-Governed Validation and Instance Proof</li>
+      <li><strong>alpha-3</strong> — SPIFFE Identity, CK.Lib PyPI, Cryptographic Proof Chain</li>
+    </ul>
+
+    <h2>Key Additions</h2>
+    <ul>
+      <li>Kernel-as-Datatype rule — <code>ontology.yaml</code> IS the type definition</li>
+      <li>Base instance shapes inherited from CKP parent ontology</li>
+      <li>SPIFFE/SPIRE replaces GPG for proof signing</li>
+      <li>CK.Lib as PyPI package — <code>seal_instance()</code> validates + signs</li>
+      <li>Materialised <code>proof.json</code> + SVID signature in instance folders</li>
+      <li>Namespace convergence to <code>https://conceptkernel.org/ontology/v1/</code></li>
+    </ul>
+
+    <p class="note">v3.5 is in alpha. These documents are amendment candidates for the v3.4 docx.</p>
+    <p><a href="../../">← back to conceptkernel.org</a></p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,581 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix ckp: <https://conceptkernel.org/ontology/v3.5/> .
+@prefix ckpw: <https://conceptkernel.org/ontology/v3.5/workflow#> .
+
+# ==============================================================================
+# ConceptKernel Workflow Ontology (CKDL Formalization)
+# ==============================================================================
+# Version: v1.3.18
+# Date: 2025-12-06
+# Purpose: Formalize CKDL (Concept Kernel Definition Language) workflow concepts
+#          for declarative kernel orchestration and autonomous system coordination
+# ==============================================================================
+
+<https://conceptkernel.org/ontology/v3.5/workflow>
+    rdf:type owl:Ontology ;
+    owl:imports <https://conceptkernel.org/ontology/v3.5/core> ;
+    owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
+    rdfs:label "ConceptKernel Workflow Ontology" ;
+    rdfs:comment "BFO-aligned ontology for declarative workflow orchestration in ConceptKernel" ;
+    owl:versionInfo "v1.3.18" .
+
+# ==============================================================================
+# WORKFLOW PROCESSES (BFO Occurrents)
+# ==============================================================================
+
+# --- Core Workflow Process ---
+ckpw:Workflow
+    rdf:type owl:Class ;
+    rdfs:subClassOf bfo:0000015 ;  # BFO:Process (Occurrent)
+    rdfs:label "Workflow" ;
+    rdfs:comment "A coordinated sequence of actions executed across multiple kernels to achieve a system-level goal. Examples: Self-improvement cycle, deployment pipeline, data processing workflow." ;
+    ckp:hasProperty ckpw:workflowUrn, ckpw:workflowLabel, ckpw:workflowDescription, ckpw:workflowTrigger, ckpw:workflowQuorum ;
+    ckp:hasTemporalParts ckpw:WorkflowPhase .
+
+ckpw:WorkflowPhase
+    rdf:type owl:Class ;
+    rdfs:subClassOf bfo:0000015 ;  # BFO:Process (temporal part of Workflow)
+    rdfs:label "Workflow Phase" ;
+    rdfs:comment "A temporal segment of a workflow with distinct purpose (e.g., Validation, Analysis, Consensus, Execution)." ;
+    ckp:hasProperty ckpw:phaseName, ckpw:phaseStatus, ckpw:phaseStartedAt, ckpw:phaseCompletedAt ;
+    ckp:partOf ckpw:Workflow .
+
+# --- Workflow Execution States (Process Quality) ---
+ckpw:WorkflowStatus
+    rdf:type owl:Class ;
+    rdfs:subClassOf bfo:0000019 ;  # BFO:Quality (Quality of Process)
+    rdfs:label "Workflow Status" ;
+    rdfs:comment "The execution state of a workflow or phase." .
+
+ckpw:StatusPending
+    rdf:type ckpw:WorkflowStatus ;
+    rdfs:label "Pending" ;
+    rdfs:comment "Workflow phase not yet started." .
+
+ckpw:StatusInProgress
+    rdf:type ckpw:WorkflowStatus ;
+    rdfs:label "In Progress" ;
+    rdfs:comment "Workflow phase currently executing." .
+
+ckpw:StatusCompleted
+    rdf:type ckpw:WorkflowStatus ;
+    rdfs:label "Completed" ;
+    rdfs:comment "Workflow phase successfully finished." .
+
+ckpw:StatusFailed
+    rdf:type ckpw:WorkflowStatus ;
+    rdfs:label "Failed" ;
+    rdfs:comment "Workflow phase encountered error and could not complete." .
+
+ckpw:StatusBlocked
+    rdf:type ckpw:WorkflowStatus ;
+    rdfs:label "Blocked" ;
+    rdfs:comment "Workflow phase waiting on external dependency or approval." .
+
+# ==============================================================================
+# WORKFLOW EDGES (BFO Relations)
+# ==============================================================================
+
+# --- Core Edge Definition ---
+ckpw:WorkflowEdge
+    rdf:type owl:Class ;
+    rdfs:subClassOf bfo:0000031 ;  # BFO:GenericallyDependentContinuant (relational pattern)
+    rdfs:label "Workflow Edge" ;
+    rdfs:comment "A directed relation between two kernels defining data flow or control flow in a workflow." ;
+    ckp:hasProperty ckpw:edgeUrn, ckpw:edgePredicate, ckpw:edgeSource, ckpw:edgeTarget, ckpw:edgeTrigger, ckpw:edgeAction .
+
+# --- Edge Predicates (specific relation types) ---
+ckpw:auditsComplianceOf
+    rdf:type owl:ObjectProperty ;
+    rdfs:subPropertyOf ckp:relatesTo ;
+    rdfs:label "audits compliance of" ;
+    rdfs:comment "Source kernel performs compliance validation on target kernel." ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel .
+
+ckpw:reportsIssueTo
+    rdf:type owl:ObjectProperty ;
+    rdfs:subPropertyOf ckp:relatesTo ;
+    rdfs:label "reports issue to" ;
+    rdfs:comment "Source kernel sends validation issues to target kernel for processing." ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel .
+
+ckpw:solicitsAnalysisFrom
+    rdf:type owl:ObjectProperty ;
+    rdfs:subPropertyOf ckp:relatesTo ;
+    rdfs:label "solicits analysis from" ;
+    rdfs:comment "Source kernel requests AI/expert analysis from target kernel." ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel .
+
+ckpw:proposesSolutionTo
+    rdf:type owl:ObjectProperty ;
+    rdfs:subPropertyOf ckp:relatesTo ;
+    rdfs:label "proposes solution to" ;
+    rdfs:comment "Source kernel provides solution recommendation to target kernel." ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel .
+
+ckpw:submitsProposalTo
+    rdf:type owl:ObjectProperty ;
+    rdfs:subPropertyOf ckp:relatesTo ;
+    rdfs:label "submits proposal to" ;
+    rdfs:comment "Source kernel submits formal proposal to target kernel for governance review." ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel .
+
+ckpw:authorizesActionBy
+    rdf:type owl:ObjectProperty ;
+    rdfs:subPropertyOf ckp:relatesTo ;
+    rdfs:label "authorizes action by" ;
+    rdfs:comment "Source kernel grants authorization for target kernel to execute action." ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel .
+
+ckpw:broadcastsUpdateVia
+    rdf:type owl:ObjectProperty ;
+    rdfs:subPropertyOf ckp:relatesTo ;
+    rdfs:label "broadcasts update via" ;
+    rdfs:comment "Source kernel distributes update notification via target kernel's broadcast mechanism." ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel .
+
+ckpw:triggersRescanBy
+    rdf:type owl:ObjectProperty ;
+    rdfs:subPropertyOf ckp:relatesTo ;
+    rdfs:label "triggers rescan by" ;
+    rdfs:comment "Source kernel initiates re-validation by target kernel (workflow loop closure)." ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel .
+
+# ==============================================================================
+# WORKFLOW ACTIONS (BFO Functions realized by Processes)
+# ==============================================================================
+
+ckpw:WorkflowAction
+    rdf:type owl:Class ;
+    rdfs:subClassOf bfo:0000034 ;  # BFO:Function (realized by Process)
+    rdfs:label "Workflow Action" ;
+    rdfs:comment "A specific capability that a kernel can execute in response to an action request." ;
+    ckp:hasProperty ckpw:actionName, ckpw:actionInput, ckpw:actionOutput, ckpw:actionLogic, ckpw:actionSparqlQuery .
+
+# --- Action Request/Response (Information Entities) ---
+ckpw:ActionRequest
+    rdf:type owl:Class ;
+    rdfs:subClassOf ckp:InformationEntity ;
+    rdfs:label "Action Request" ;
+    rdfs:comment "A message requesting a kernel to execute a specific action with given payload." ;
+    ckp:hasProperty ckpw:requestUrn, ckpw:requestTarget, ckpw:requestAction, ckpw:requestPayload, ckpw:requestTimestamp .
+
+ckpw:ActionResponse
+    rdf:type owl:Class ;
+    rdfs:subClassOf ckp:InformationEntity ;
+    rdfs:label "Action Response" ;
+    rdfs:comment "A message containing the result of an executed action." ;
+    ckp:hasProperty ckpw:responseUrn, ckpw:responseStatus, ckpw:responsePayload, ckpw:responseError, ckpw:responseTimestamp .
+
+# ==============================================================================
+# WORKFLOW TRIGGERS (BFO Dispositions)
+# ==============================================================================
+
+ckpw:WorkflowTrigger
+    rdf:type owl:Class ;
+    rdfs:subClassOf bfo:0000016 ;  # BFO:Disposition
+    rdfs:label "Workflow Trigger" ;
+    rdfs:comment "A condition that, when satisfied, initiates workflow execution." ;
+    ckp:hasProperty ckpw:triggerCondition, ckpw:triggerFrequency .
+
+ckpw:TriggerOnDaemonStartup
+    rdf:type ckpw:WorkflowTrigger ;
+    rdfs:label "Trigger on Daemon Startup" ;
+    rdfs:comment "Workflow executes when daemon initializes." .
+
+ckpw:TriggerOnActionRequest
+    rdf:type ckpw:WorkflowTrigger ;
+    rdfs:label "Trigger on Action Request" ;
+    rdfs:comment "Workflow executes when explicit action request received." .
+
+ckpw:TriggerOnSchedule
+    rdf:type ckpw:WorkflowTrigger ;
+    rdfs:label "Trigger on Schedule" ;
+    rdfs:comment "Workflow executes on regular schedule (hourly, daily, weekly)." ;
+    ckp:hasProperty ckpw:scheduleInterval .
+
+ckpw:TriggerOnEvent
+    rdf:type ckpw:WorkflowTrigger ;
+    rdfs:label "Trigger on Event" ;
+    rdfs:comment "Workflow executes when specific system event occurs." ;
+    ckp:hasProperty ckpw:eventType .
+
+# ==============================================================================
+# WORKFLOW COORDINATOR (Kernel with Special Role)
+# ==============================================================================
+
+ckpw:WorkflowCoordinatorRole
+    rdf:type bfo:0000023 ;  # BFO:Role
+    rdfs:label "Workflow Coordinator" ;
+    rdfs:comment "Role realized by System.Workflow kernel to parse, execute, and monitor CKDL workflows." ;
+    ckp:grants ckpw:permission-parse-ckdl,
+               ckpw:permission-execute-workflow,
+               ckpw:permission-track-workflow-state,
+               ckpw:permission-send-action-requests .
+
+ckpw:CoordinateWorkflowFunction
+    rdf:type bfo:0000034 ;  # BFO:Function
+    rdfs:label "Coordinate Workflow" ;
+    rdfs:comment "Function realized when coordinator executes workflow by sending action requests and tracking state." ;
+    ckp:realizedBy ckp:Kernel ;
+    ckp:requires ckpw:WorkflowCoordinatorRole .
+
+# ==============================================================================
+# CKDL LANGUAGE CONSTRUCTS (Information Entities)
+# ==============================================================================
+
+ckpw:CkdlDocument
+    rdf:type owl:Class ;
+    rdfs:subClassOf ckp:InformationEntity ;
+    rdfs:label "CKDL Document" ;
+    rdfs:comment "A CKDL file defining workflow, kernels, edges, and execution strategy." ;
+    ckp:hasProperty ckpw:ckdlVersion, ckpw:ckdlDomain, ckpw:ckdlSpecification .
+
+ckpw:ExternDeclaration
+    rdf:type owl:Class ;
+    rdfs:subClassOf ckp:InformationEntity ;
+    rdfs:label "EXTERN Declaration" ;
+    rdfs:comment "Declaration of upstream kernel dependency in CKDL (e.g., EXTERN ckp://System.Consensus:v1.0)." ;
+    ckp:hasProperty ckpw:externUrn, ckpw:externRole, ckpw:externActions .
+
+ckpw:KernelDeclaration
+    rdf:type owl:Class ;
+    rdfs:subClassOf ckp:InformationEntity ;
+    rdfs:label "KERNEL Declaration" ;
+    rdfs:comment "Declaration of workflow kernel with capabilities and actions (e.g., KERNEL ckp://System.Improvement.Validator:v0.1)." ;
+    ckp:hasProperty ckpw:kernelUrn, ckpw:kernelType, ckpw:kernelRuntime, ckpw:kernelCapabilities, ckpw:kernelActions .
+
+ckpw:EdgeDeclaration
+    rdf:type owl:Class ;
+    rdfs:subClassOf ckp:InformationEntity ;
+    rdfs:label "EDGE Declaration" ;
+    rdfs:comment "Declaration of workflow edge defining interaction between kernels (e.g., EDGE ckp://Edge.REPORTS_ISSUE.A-to-B)." ;
+    ckp:hasProperty ckpw:edgeUrn, ckpw:edgePredicate, ckpw:edgeSource, ckpw:edgeTarget, ckpw:edgeTrigger, ckpw:edgeAction .
+
+# ==============================================================================
+# WORKFLOW PROPERTIES (Data Properties)
+# ==============================================================================
+
+# --- Workflow Properties ---
+ckpw:workflowUrn
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "workflow URN" ;
+    rdfs:domain ckpw:Workflow ;
+    rdfs:range xsd:anyURI .
+
+ckpw:workflowLabel
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "workflow label" ;
+    rdfs:domain ckpw:Workflow ;
+    rdfs:range xsd:string .
+
+ckpw:workflowDescription
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "workflow description" ;
+    rdfs:domain ckpw:Workflow ;
+    rdfs:range xsd:string .
+
+ckpw:workflowTrigger
+    rdf:type owl:ObjectProperty ;
+    rdfs:label "workflow trigger" ;
+    rdfs:domain ckpw:Workflow ;
+    rdfs:range ckpw:WorkflowTrigger .
+
+ckpw:workflowQuorum
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "workflow quorum" ;
+    rdfs:comment "Quorum requirement for consensus decisions (e.g., MAJORITY, UNANIMOUS)." ;
+    rdfs:domain ckpw:Workflow ;
+    rdfs:range xsd:string .
+
+# --- Phase Properties ---
+ckpw:phaseName
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "phase name" ;
+    rdfs:domain ckpw:WorkflowPhase ;
+    rdfs:range xsd:string .
+
+ckpw:phaseStatus
+    rdf:type owl:ObjectProperty ;
+    rdfs:label "phase status" ;
+    rdfs:domain ckpw:WorkflowPhase ;
+    rdfs:range ckpw:WorkflowStatus .
+
+ckpw:phaseStartedAt
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "phase started at" ;
+    rdfs:domain ckpw:WorkflowPhase ;
+    rdfs:range xsd:dateTime .
+
+ckpw:phaseCompletedAt
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "phase completed at" ;
+    rdfs:domain ckpw:WorkflowPhase ;
+    rdfs:range xsd:dateTime .
+
+# --- Edge Properties ---
+ckpw:edgeUrn
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "edge URN" ;
+    rdfs:domain ckpw:WorkflowEdge ;
+    rdfs:range xsd:anyURI .
+
+ckpw:edgePredicate
+    rdf:type owl:ObjectProperty ;
+    rdfs:label "edge predicate" ;
+    rdfs:comment "The semantic relation type (e.g., auditsComplianceOf, reportsIssueTo)." ;
+    rdfs:domain ckpw:WorkflowEdge .
+
+ckpw:edgeSource
+    rdf:type owl:ObjectProperty ;
+    rdfs:label "edge source" ;
+    rdfs:domain ckpw:WorkflowEdge ;
+    rdfs:range ckp:Kernel .
+
+ckpw:edgeTarget
+    rdf:type owl:ObjectProperty ;
+    rdfs:label "edge target" ;
+    rdfs:domain ckpw:WorkflowEdge ;
+    rdfs:range ckp:Kernel .
+
+ckpw:edgeTrigger
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "edge trigger" ;
+    rdfs:comment "Condition for edge execution (e.g., 'when ValidationIssue[] created')." ;
+    rdfs:domain ckpw:WorkflowEdge ;
+    rdfs:range xsd:string .
+
+ckpw:edgeAction
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "edge action" ;
+    rdfs:comment "Action logic executed when edge is traversed." ;
+    rdfs:domain ckpw:WorkflowEdge ;
+    rdfs:range xsd:string .
+
+# --- Action Properties ---
+ckpw:actionName
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "action name" ;
+    rdfs:domain ckpw:WorkflowAction ;
+    rdfs:range xsd:string .
+
+ckpw:actionInput
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "action input" ;
+    rdfs:comment "Expected input type/schema for action." ;
+    rdfs:domain ckpw:WorkflowAction ;
+    rdfs:range xsd:string .
+
+ckpw:actionOutput
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "action output" ;
+    rdfs:comment "Expected output type/schema for action." ;
+    rdfs:domain ckpw:WorkflowAction ;
+    rdfs:range xsd:string .
+
+ckpw:actionLogic
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "action logic" ;
+    rdfs:comment "Pseudocode or description of action implementation." ;
+    rdfs:domain ckpw:WorkflowAction ;
+    rdfs:range xsd:string .
+
+ckpw:actionSparqlQuery
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "action SPARQL query" ;
+    rdfs:comment "SPARQL query executed by action (if applicable)." ;
+    rdfs:domain ckpw:WorkflowAction ;
+    rdfs:range xsd:string .
+
+# --- Action Request Properties ---
+ckpw:requestUrn
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "request URN" ;
+    rdfs:domain ckpw:ActionRequest ;
+    rdfs:range xsd:anyURI .
+
+ckpw:requestTarget
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "request target" ;
+    rdfs:comment "URN of kernel to receive action request." ;
+    rdfs:domain ckpw:ActionRequest ;
+    rdfs:range xsd:anyURI .
+
+ckpw:requestAction
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "request action" ;
+    rdfs:comment "Name of action to execute." ;
+    rdfs:domain ckpw:ActionRequest ;
+    rdfs:range xsd:string .
+
+ckpw:requestPayload
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "request payload" ;
+    rdfs:comment "JSON payload containing action parameters." ;
+    rdfs:domain ckpw:ActionRequest ;
+    rdfs:range xsd:string .
+
+ckpw:requestTimestamp
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "request timestamp" ;
+    rdfs:domain ckpw:ActionRequest ;
+    rdfs:range xsd:dateTime .
+
+# --- Action Response Properties ---
+ckpw:responseUrn
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "response URN" ;
+    rdfs:domain ckpw:ActionResponse ;
+    rdfs:range xsd:anyURI .
+
+ckpw:responseStatus
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "response status" ;
+    rdfs:comment "Execution status (success, error, timeout)." ;
+    rdfs:domain ckpw:ActionResponse ;
+    rdfs:range xsd:string .
+
+ckpw:responsePayload
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "response payload" ;
+    rdfs:comment "JSON payload containing action results." ;
+    rdfs:domain ckpw:ActionResponse ;
+    rdfs:range xsd:string .
+
+ckpw:responseError
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "response error" ;
+    rdfs:comment "Error message if action failed." ;
+    rdfs:domain ckpw:ActionResponse ;
+    rdfs:range xsd:string .
+
+ckpw:responseTimestamp
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "response timestamp" ;
+    rdfs:domain ckpw:ActionResponse ;
+    rdfs:range xsd:dateTime .
+
+# --- CKDL Properties ---
+ckpw:ckdlVersion
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "CKDL version" ;
+    rdfs:domain ckpw:CkdlDocument ;
+    rdfs:range xsd:string .
+
+ckpw:ckdlDomain
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "CKDL domain" ;
+    rdfs:domain ckpw:CkdlDocument ;
+    rdfs:range xsd:string .
+
+ckpw:ckdlSpecification
+    rdf:type owl:DatatypeProperty ;
+    rdfs:label "CKDL specification" ;
+    rdfs:domain ckpw:CkdlDocument ;
+    rdfs:range xsd:string .
+
+# ==============================================================================
+# WORKFLOW PERMISSIONS (RBAC)
+# ==============================================================================
+
+ckpw:permission-parse-ckdl
+    rdf:type ckp:Permission ;
+    rdfs:label "Permission: Parse CKDL" ;
+    rdfs:comment "Allows parsing CKDL files and loading workflow definitions." .
+
+ckpw:permission-execute-workflow
+    rdf:type ckp:Permission ;
+    rdfs:label "Permission: Execute Workflow" ;
+    rdfs:comment "Allows executing workflow by coordinating kernel actions." .
+
+ckpw:permission-track-workflow-state
+    rdf:type ckp:Permission ;
+    rdfs:label "Permission: Track Workflow State" ;
+    rdfs:comment "Allows reading and writing workflow process state in Oxigraph." .
+
+ckpw:permission-send-action-requests
+    rdf:type ckp:Permission ;
+    rdfs:label "Permission: Send Action Requests" ;
+    rdfs:comment "Allows sending action requests to other kernels via ckp:// protocol." .
+
+# ==============================================================================
+# EXAMPLE WORKFLOW INSTANTIATION (Self-Improvement Cycle)
+# ==============================================================================
+
+<ckp://Process#SelfImprovementCycle:v1.3.18>
+    rdf:type ckpw:Workflow ;
+    rdf:type bfo:0000015 ;  # BFO:Process
+    ckpw:workflowUrn "ckp://Process#SelfImprovementCycle:v1.3.18" ;
+    ckpw:workflowLabel "Autonomous Self-Improvement Workflow" ;
+    ckpw:workflowDescription "Closed-loop system validation, AI analysis, consensus voting, and automated improvement" ;
+    ckpw:workflowTrigger ckpw:TriggerOnDaemonStartup, ckpw:TriggerOnActionRequest ;
+    ckpw:workflowQuorum "MAJORITY" ;
+    ckp:hasTemporalParts <ckp://Phase#Validation>,
+                         <ckp://Phase#Analysis>,
+                         <ckp://Phase#Recommendation>,
+                         <ckp://Phase#Consensus>,
+                         <ckp://Phase#Execution>,
+                         <ckp://Phase#Verification> .
+
+<ckp://Phase#Validation>
+    rdf:type ckpw:WorkflowPhase ;
+    ckpw:phaseName "Validation" ;
+    ckpw:phaseStatus ckpw:StatusPending ;
+    ckp:realizedBy <ckp://System.Improvement.Validator:v0.1> .
+
+<ckp://Phase#Analysis>
+    rdf:type ckpw:WorkflowPhase ;
+    ckpw:phaseName "Analysis" ;
+    ckpw:phaseStatus ckpw:StatusPending ;
+    ckp:realizedBy <ckp://System.Improvement.Recommender:v0.1>,
+                   <ckp://ConceptKernel.LLM.Fabric:v0.1> .
+
+<ckp://Phase#Recommendation>
+    rdf:type ckpw:WorkflowPhase ;
+    ckpw:phaseName "Recommendation" ;
+    ckpw:phaseStatus ckpw:StatusPending ;
+    ckp:realizedBy <ckp://System.Improvement.Recommender:v0.1> .
+
+<ckp://Phase#Consensus>
+    rdf:type ckpw:WorkflowPhase ;
+    ckpw:phaseName "Consensus" ;
+    ckpw:phaseStatus ckpw:StatusPending ;
+    ckp:realizedBy <ckp://System.Consensus:v1.3.16> .
+
+<ckp://Phase#Execution>
+    rdf:type ckpw:WorkflowPhase ;
+    ckpw:phaseName "Execution" ;
+    ckpw:phaseStatus ckpw:StatusPending ;
+    ckp:realizedBy <ckp://System.Improvement.Executor:v0.1> .
+
+<ckp://Phase#Verification>
+    rdf:type ckpw:WorkflowPhase ;
+    ckpw:phaseName "Verification" ;
+    ckpw:phaseStatus ckpw:StatusPending ;
+    ckp:realizedBy <ckp://System.Improvement.Validator:v0.1> .
+
+# --- Example Workflow Edge (Validation -> Analysis) ---
+<ckp://Edge.REPORTS_ISSUE.Validator-to-Recommender>
+    rdf:type ckpw:WorkflowEdge ;
+    ckpw:edgeUrn "ckp://Edge.REPORTS_ISSUE.System.Improvement.Validator:v0.1-to-System.Improvement.Recommender:v0.1" ;
+    ckpw:edgePredicate ckpw:reportsIssueTo ;
+    ckpw:edgeSource <ckp://System.Improvement.Validator:v0.1> ;
+    ckpw:edgeTarget <ckp://System.Improvement.Recommender:v0.1> ;
+    ckpw:edgeTrigger "when ValidationIssue[] created" ;
+    ckpw:edgeAction "Send action-request: ckp://System.Improvement.Recommender:v0.1#generate-recommendations" .
+
+# ==============================================================================
+# EOF
+# ==============================================================================

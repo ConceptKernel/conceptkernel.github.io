@@ -1,0 +1,337 @@
+{
+  "ontology": {
+    "name": "ConceptKernel BFO Ontology",
+    "version": "v3.5",
+    "draft": "ALPHA",
+    "date": "2026-03-25",
+    "description": "Formal ontology mapping ConceptKernel architecture to Basic Formal Ontology (BFO)",
+    "baseUri": "https://conceptkernel.org/ontology/v3.5/",
+    "bfoVersion": "2020",
+    "bfoUri": "http://purl.obolibrary.org/obo/bfo.owl"
+  },
+  "files": {
+    "core": {
+      "filename": "core.ttl",
+      "path": "ontology/v3.5/core.ttl",
+      "format": "text/turtle",
+      "description": "Core BFO mappings for ConceptKernel continuants (Kernel, Edge, Instance, Ontology)",
+      "coverage": {
+        "entities": [
+          "ckp:Kernel",
+          "ckp:HotKernel",
+          "ckp:ColdKernel",
+          "ckp:Edge",
+          "ckp:Instance",
+          "ckp:KernelOntology",
+          "ckp:EdgeKernel",
+          "ckp:ConsensusKernel",
+          "ckp:WssHubKernel"
+        ],
+        "bfoClasses": [
+          "bfo:IndependentContinuant",
+          "bfo:MaterialEntity",
+          "bfo:GenericallyDependentContinuant",
+          "bfo:SpecificallyDependentContinuant",
+          "bfo:Quality",
+          "bfo:Disposition"
+        ]
+      }
+    },
+    "kernel-metadata": {
+      "filename": "kernel-metadata.ttl",
+      "path": "ontology/v3.5/kernel-metadata.ttl",
+      "format": "text/turtle",
+      "description": "RDF schema for kernel metadata (runtime, ports, capabilities, dependencies, status)"
+    },
+    "kernel-entity-template": {
+      "filename": "kernel-entity-template.ttl",
+      "path": "ontology/v3.5/kernel-entity-template.ttl",
+      "format": "text/turtle",
+      "description": "BFO-aligned template for defining individual kernel entities"
+    },
+    "processes": {
+      "filename": "processes.ttl",
+      "path": "ontology/v3.5/processes.ttl",
+      "format": "text/turtle",
+      "description": "Occurrent (Process) definitions for ConceptKernel temporal events",
+      "coverage": {
+        "entities": [
+          "ckpp:InvocationProcess",
+          "ckpp:EdgeCommunicationProcess",
+          "ckpp:EdgeSubscriptionProcess",
+          "ckpp:ConsensusProcess",
+          "ckpp:BroadcastProcess",
+          "ckpp:TemporalPart",
+          "ckpp:ProcessBoundary",
+          "ckpp:StatusChangeEvent"
+        ],
+        "bfoClasses": [
+          "bfo:Process",
+          "bfo:ProcessBoundary",
+          "bfo:TemporalRegion"
+        ]
+      }
+    },
+    "relations": {
+      "filename": "relations.ttl",
+      "path": "ontology/v3.5/relations.ttl",
+      "format": "text/turtle",
+      "description": "Relationships and inference rules for automatic reasoning",
+      "coverage": {
+        "properties": [
+          "ckpr:connected_by",
+          "ckpr:depends_on",
+          "ckpr:participates_in",
+          "ckpr:mediates",
+          "ckpr:created_by_process",
+          "ckpr:can_reach",
+          "ckpr:upstream_of",
+          "ckpr:downstream_of",
+          "ckpr:sibling_of",
+          "ckpr:authorizes_edge",
+          "ckpr:requires_consensus"
+        ],
+        "swrlRules": [
+          "InstanceProvenanceRule",
+          "EdgeCommunicationInferenceRule",
+          "SiblingKernelRule",
+          "WorkflowChainRule",
+          "AuthorizationRequirementRule",
+          "InstanceDependencyRule",
+          "ConsensusRequirementRule"
+        ],
+        "propertyChains": [
+          "connected_by (hasOutgoingEdge o hasTarget)",
+          "creates (hasOutputInstance)",
+          "can_reach (transitive closure)"
+        ]
+      }
+    },
+    "shapes": {
+      "filename": "shapes.ttl",
+      "path": "ontology/v3.5/shapes.ttl",
+      "format": "text/turtle",
+      "description": "SHACL shapes for triple validation constraints"
+    },
+    "rbac": {
+      "filename": "rbac.ttl",
+      "path": "ontology/v3.5/rbac.ttl",
+      "format": "text/turtle",
+      "description": "Role-Based Access Control ontology for agents, roles, and permissions"
+    },
+    "workflow": {
+      "filename": "workflow.ttl",
+      "path": "ontology/v3.5/workflow.ttl",
+      "format": "text/turtle",
+      "description": "CKDL formalization for declarative workflow orchestration"
+    },
+    "self-improvement": {
+      "filename": "self-improvement.ttl",
+      "path": "ontology/v3.5/self-improvement.ttl",
+      "format": "text/turtle",
+      "description": "Autonomous self-improvement and ontology-driven validation processes"
+    },
+    "base-instances": {
+      "filename": "base-instances.ttl",
+      "path": "ontology/v3.5/base-instances.ttl",
+      "format": "text/turtle",
+      "description": "Base instance shapes: InstanceManifest, SealedInstance, LedgerEntry (from SPEC.CKP.v3.5.alpha-3 Section 4.1)",
+      "new_in": "v3.5",
+      "coverage": {
+        "entities": [
+          "ckp:InstanceManifest",
+          "ckp:SealedInstance",
+          "ckp:LedgerEntry"
+        ],
+        "bfoClasses": [
+          "bfo:GenericallyDependentContinuant"
+        ],
+        "provOClasses": [
+          "prov:wasGeneratedBy",
+          "prov:wasAttributedTo",
+          "prov:generatedAtTime"
+        ]
+      }
+    },
+    "proof": {
+      "filename": "proof.ttl",
+      "path": "ontology/v3.5/proof.ttl",
+      "format": "text/turtle",
+      "description": "Proof verification: ProofRecord, ProofCheck, ProofOutcome, CheckType",
+      "new_in": "v3.5",
+      "coverage": {
+        "entities": [
+          "ckp:ProofRecord",
+          "ckp:ProofCheck",
+          "ckp:ProofOutcome",
+          "ckp:CheckType"
+        ],
+        "individuals": [
+          "ckp:ProofOutcome-PASS",
+          "ckp:ProofOutcome-FAIL",
+          "ckp:ProofOutcome-PARTIAL",
+          "ckp:CheckType-SCHEMA",
+          "ckp:CheckType-SHACL",
+          "ckp:CheckType-PROVENANCE",
+          "ckp:CheckType-STRUCTURE",
+          "ckp:CheckType-INTEGRITY",
+          "ckp:CheckType-OPERATIONAL"
+        ]
+      }
+    },
+    "schema": {
+      "filename": "schema.yaml",
+      "path": "ontology/v3.5/schema.yaml",
+      "format": "application/x-yaml",
+      "description": "LinkML schema governing Concept Kernel shape (drives scaffolding tool)"
+    }
+  },
+  "coverage": {
+    "overall": {
+      "score": 0.65,
+      "description": "Overall BFO alignment coverage: 65%"
+    },
+    "continuants": {
+      "score": 0.85,
+      "status": "WELL_IMPLEMENTED",
+      "entities": {
+        "Kernel": {
+          "score": 0.85,
+          "status": "WELL_IMPLEMENTED",
+          "gaps": [
+            "Process URN tracking missing",
+            "Temporal lifecycle events not tracked"
+          ]
+        },
+        "Edge": {
+          "score": 0.85,
+          "status": "WELL_IMPLEMENTED",
+          "gaps": [
+            "Edge creation doesn't trigger consensus",
+            "SHACL validation stub only"
+          ]
+        },
+        "Instance": {
+          "score": 0.80,
+          "status": "WELL_IMPLEMENTED",
+          "gaps": [
+            "No Process URN linkage",
+            "ckp:// URI not fully implemented"
+          ]
+        },
+        "InstanceManifest": {
+          "score": 1.0,
+          "status": "NEW_IN_V3.5",
+          "description": "Base instance shape with PROV-O provenance properties"
+        },
+        "SealedInstance": {
+          "score": 1.0,
+          "status": "NEW_IN_V3.5",
+          "description": "Finalized instance with data, tool_ref, ck_ref"
+        },
+        "LedgerEntry": {
+          "score": 1.0,
+          "status": "NEW_IN_V3.5",
+          "description": "Append-only action log entry"
+        },
+        "ProofRecord": {
+          "score": 1.0,
+          "status": "NEW_IN_V3.5",
+          "description": "Verification record with checks, hashes, and outcome"
+        },
+        "ProofCheck": {
+          "score": 1.0,
+          "status": "NEW_IN_V3.5",
+          "description": "Individual verification check (schema, shacl, provenance, etc.)"
+        }
+      }
+    },
+    "occurrents": {
+      "score": 0.45,
+      "status": "PARTIAL",
+      "processes": {
+        "Invocation": {
+          "score": 0.60,
+          "status": "PARTIAL",
+          "gaps": [
+            "No Process URN generation",
+            "Temporal parts not tracked"
+          ]
+        },
+        "EdgeCommunication": {
+          "score": 0.65,
+          "status": "PARTIAL",
+          "gaps": [
+            "No Process URN generation",
+            "Temporal parts implicit only"
+          ]
+        },
+        "EdgeSubscription": {
+          "score": 0.00,
+          "status": "NOT_IMPLEMENTED",
+          "gaps": [
+            "Edge creation is manual (ck create-edge)",
+            "No consensus integration",
+            "No WssHub announcements"
+          ]
+        },
+        "Consensus": {
+          "score": 0.50,
+          "status": "PARTIAL",
+          "gaps": [
+            "No Process URN",
+            "Approved proposals don't auto-execute",
+            "No WssHub integration"
+          ]
+        },
+        "Broadcast": {
+          "score": 0.70,
+          "status": "PARTIAL",
+          "gaps": [
+            "No Process URN",
+            "No consensus event handling",
+            "No client filtering"
+          ]
+        }
+      }
+    },
+    "mediators": {
+      "EdgeKernel": {
+        "score": 0.85,
+        "status": "WELL_IMPLEMENTED",
+        "role": "Communication Mediator"
+      },
+      "ConsensusKernel": {
+        "score": 0.50,
+        "status": "PARTIAL",
+        "role": "Governance Mediator",
+        "criticalGap": "Not integrated with EdgeKernel"
+      },
+      "WssHubKernel": {
+        "score": 0.70,
+        "status": "WELL_IMPLEMENTED",
+        "role": "Broadcast Mediator",
+        "criticalGap": "No consensus announcements"
+      }
+    }
+  },
+  "changelog": {
+    "v3.5": {
+      "date": "2026-03-25",
+      "changes": [
+        "Unified all namespaces under https://conceptkernel.org/ontology/v3.5/ (was mixed http/https unversioned)",
+        "NEW: base-instances.ttl — InstanceManifest, SealedInstance, LedgerEntry (SPEC.CKP.v3.5.alpha-3 Section 4.1)",
+        "NEW: proof.ttl — ProofRecord, ProofCheck, ProofOutcome, CheckType for verifiable instance integrity",
+        "Updated schema.yaml with LinkML classes for InstanceManifest, SealedInstance, LedgerEntry, ProofRecord, ProofCheck",
+        "Added ProofOutcome and CheckType enums to schema.yaml",
+        "All sub-namespaces versioned: process/, relation/, workflow/, rbac/, improvement/"
+      ]
+    }
+  },
+  "references": {
+    "bfo": "http://purl.obolibrary.org/obo/bfo.owl",
+    "bfoSpecification": "https://basic-formal-ontology.org/",
+    "provO": "http://www.w3.org/ns/prov#",
+    "spec": "SPEC.CKP.v3.5.alpha-3.md"
+  }
+}

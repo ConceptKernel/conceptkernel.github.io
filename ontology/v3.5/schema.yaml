@@ -1,0 +1,325 @@
+id: https://conceptkernel.org/ontology/v3.5/schema
+name: conceptkernel-org-v3.5
+title: ConceptKernel Governance Schema v3.5
+description: >
+  LinkML schema governing Concept Kernel shape. Drives scaffolding tool —
+  the tool reads this schema to create CK folders and enforce structure.
+  Aligned with BFO2020 + PROV-O.
+
+prefixes:
+  ck: https://conceptkernel.org/ontology/v3.5/
+  bfo: http://purl.obolibrary.org/obo/BFO_
+  prov: http://www.w3.org/ns/prov#
+  linkml: https://w3id.org/linkml/
+
+default_range: string
+
+classes:
+
+  Kernel:
+    class_uri: bfo:0000040
+    description: >
+      A sovereign concept kernel — one capability, one identity, one tool.
+      BFO Material Entity. Folder prefix: CK.{Name}
+    attributes:
+      apiVersion: { required: true, ifabsent: "conceptkernel/v1" }
+      kind: { required: true, ifabsent: "Kernel" }
+      metadata: { range: KernelMetadata, required: true }
+      spec: { range: KernelSpec, required: true }
+
+  KernelMetadata:
+    attributes:
+      name:
+        required: true
+        pattern: "^[A-Z][a-zA-Z]+\\.[A-Z][a-zA-Z]+$"
+        description: "{Domain}.{Name} PascalCase"
+      urn:
+        required: true
+        pattern: "^ckp://Kernel#.+:v\\d+\\.\\d+$"
+      version: { required: true }
+      created_at: { range: datetime }
+
+  KernelSpec:
+    attributes:
+      type: { range: KernelType, required: true }
+      description: { required: true }
+      nats: { range: NATSConfig, required: true }
+      tool: { range: ToolSpec, required: true }
+      web: { range: WebConfig }
+      resources: { range: ResourceSpec }
+      edges: { range: EdgeSpec }
+      lifecycle: { range: LifecycleConfig }
+      workspace: { range: WorkspaceConfig }
+      governance_mode: { range: GovernanceMode, required: true }
+
+  NATSConfig:
+    attributes:
+      input_topic: { required: true }
+      result_topic: { required: true }
+      event_topic: { required: true }
+      conversation: { range: ConversationConfig }
+
+  ConversationConfig:
+    description: >
+      When enabled, kernel accepts conversation over NATS WSS
+      and streams responses back to result topic.
+    attributes:
+      enabled: { range: boolean, required: true }
+      stream_responses: { range: boolean }
+
+  ToolSpec:
+    attributes:
+      language: { required: true }
+      entrypoint: { required: true, ifabsent: "tool/processor.py" }
+      runtime: { required: true }
+
+  WebConfig:
+    description: >
+      If serve=true, web/index.html is deployed to subdomain via
+      ConfigMap + nginx + Service + HTTPRoute.
+    attributes:
+      serve: { range: boolean }
+      subdomain: {}
+
+  ResourceSpec:
+    attributes:
+      requests: { range: ResourceLimits }
+      limits: { range: ResourceLimits }
+
+  ResourceLimits:
+    attributes:
+      cpu: {}
+      memory: {}
+
+  EdgeSpec:
+    attributes:
+      outbound:
+        range: Edge
+        multivalued: true
+
+  Edge:
+    class_uri: bfo:0000040
+    description: First-class BFO Material Entity mediating K-to-K communication
+    attributes:
+      target_kernel: { required: true }
+      predicate: { range: EdgePredicate, required: true }
+      nats_subject: { required: true }
+      requires_consensus: { range: boolean }
+      requires_target_auth: { range: boolean }
+
+  LifecycleConfig:
+    description: For temporal CKs (sites spawned for limited duration)
+    attributes:
+      temporal: { range: boolean }
+      duration: { description: "ISO 8601 duration (e.g. P30D)" }
+      created_by: { description: "URN of the factory kernel that created this CK" }
+
+  WorkspaceConfig:
+    description: >
+      Virtual desktop layout config for CK.Layout. Controls how
+      VS Code + Terminal are tiled on a virtual desktop via yb runners.
+    attributes:
+      runner:
+        description: "yb runner script name (split, tile, solo)"
+        ifabsent: "split"
+      bar:
+        description: "SketchyBar style (standard, minimal, none)"
+        ifabsent: "standard"
+      gap:
+        range: integer
+        description: "Pixel gap between tiled windows"
+        ifabsent: "0"
+      padding:
+        description: "Window padding T,B,L,R (e.g. 52,0,0,0)"
+        ifabsent: "52,0,0,0"
+      zoom:
+        range: integer
+        description: "VS Code zoom level (Cmd+= count)"
+        ifabsent: "0"
+      cmd:
+        description: "Optional command to run in Terminal"
+
+  Instance:
+    class_uri: bfo:0000031
+    description: >
+      Immutable result artifact (BFO GenericallyDependentContinuant).
+      Stored at instances/i-{identifier}/
+    attributes:
+      id: { required: true }
+      created_at: { range: datetime, required: true }
+      status: { range: InstanceStatus, required: true }
+      kernel_urn: { required: true }
+
+  # --- v3.5 Base Instance Shapes (from SPEC.CKP.v3.5.alpha-3 Section 4.1) ---
+
+  InstanceManifest:
+    class_uri: bfo:0000031
+    description: >
+      Base shape for all CKP instances. An immutable information entity
+      produced by a kernel action. Every instance directory contains a
+      manifest.json conforming to this shape. (BFO GenericallyDependentContinuant)
+    attributes:
+      instance_id:
+        required: true
+        pattern: "^i-.+-\\d+$"
+        description: "Unique instance ID, format: i-{slug}-{epoch}"
+      kernel_class:
+        required: true
+        description: "Class name of the kernel that produced this instance"
+      kernel_id:
+        required: true
+        description: "GUID of the kernel that produced this instance"
+      created_at: { range: datetime, required: true }
+      wasGeneratedBy:
+        description: "URN of the action/activity that generated this instance (prov:wasGeneratedBy)"
+      wasAttributedTo:
+        description: "URN of the kernel/agent responsible (prov:wasAttributedTo)"
+      generatedAtTime: { range: datetime }
+
+  SealedInstance:
+    is_a: InstanceManifest
+    description: >
+      A finalized, immutable instance sealed with data, tool reference,
+      and CK reference. Once sealed, contents cannot be modified.
+    attributes:
+      data:
+        description: "JSON-serialized output data (stored as data.json)"
+      tool_ref:
+        description: "Reference to the tool loop processor (e.g., tool/processor.py)"
+      ck_ref:
+        description: "Reference to the CK loop identity (conceptkernel.yaml) at seal time"
+
+  LedgerEntry:
+    class_uri: bfo:0000031
+    description: >
+      Append-only log entry recording a state transition or action event.
+      Stored in storage/ledger/ as JSONL files. (BFO GenericallyDependentContinuant)
+    attributes:
+      timestamp: { range: datetime, required: true }
+      event:
+        required: true
+        description: "Event type or action name (e.g., spawn, seal, context)"
+      before:
+        description: "JSON-serialized state before the event"
+      after:
+        description: "JSON-serialized state after the event"
+
+  # --- v3.5 Proof Types ---
+
+  ProofRecord:
+    class_uri: bfo:0000031
+    description: >
+      Verification record documenting that a sealed instance has been checked
+      for integrity, schema compliance, provenance, and structure.
+      Stored at storage/proof/{instance_id}/proof.json.
+    attributes:
+      proof_id: { required: true }
+      instance_id:
+        required: true
+        description: "The instance_id of the sealed instance that was verified"
+      data_hash:
+        required: true
+        description: "SHA-256 hash of instance data.json"
+      manifest_hash:
+        required: true
+        description: "SHA-256 hash of instance manifest.json"
+      checks:
+        range: ProofCheck
+        multivalued: true
+        description: "Individual proof checks executed"
+      outcome:
+        range: ProofOutcome
+        required: true
+      checked_by_kernel:
+        description: "Kernel class name that performed verification"
+      checked_by_identity:
+        description: "Kernel URN identity that performed verification"
+      svid:
+        description: "SPIFFE Verifiable Identity Document of the verifier"
+
+  ProofCheck:
+    class_uri: bfo:0000031
+    description: >
+      Individual verification check within a proof record. Each check
+      validates a specific aspect of the instance.
+    attributes:
+      check_name:
+        required: true
+        description: "Human-readable name (e.g., manifest-schema, data-hash)"
+      check_type:
+        range: CheckType
+        required: true
+      expected:
+        description: "Expected value or condition for pass"
+      actual:
+        description: "Actual observed value during verification"
+      passed: { range: boolean, required: true }
+
+  FolderStructure:
+    description: >
+      Required folders and files for every CK. The scaffolding tool
+      reads this to create compliant CK directories.
+    attributes:
+      required_folders:
+        range: string
+        multivalued: true
+        ifabsent: '["tool", "llm", "log", "web", "instances", "inbox"]'
+      required_files:
+        range: string
+        multivalued: true
+        ifabsent: '["conceptkernel.yaml", "tool/processor.py", "llm/CLAUDE.md", "web/index.html"]'
+      instance_prefix:
+        ifabsent: "i-"
+        description: "Instance folder prefix"
+
+enums:
+
+  KernelType:
+    permissible_values:
+      node:cold: { description: "Always running, low latency" }
+      node:hot: { description: "Scales to zero, on-demand" }
+      service: { description: "Stateful service" }
+      agent: { description: "Autonomous agent" }
+
+  GovernanceMode:
+    permissible_values:
+      STRICT: { description: "Unanimous consensus" }
+      RELAXED: { description: "Simple majority" }
+      AUTONOMOUS: { description: "Owner only" }
+
+  EdgePredicate:
+    permissible_values:
+      PRODUCES: {}
+      REQUIRES: {}
+      TRIGGERS: {}
+      CONSUMES: {}
+      ENHANCES: {}
+      VALIDATES: {}
+      TRANSFORMS: {}
+
+  InstanceStatus:
+    permissible_values:
+      pending: {}
+      active: {}
+      completed: {}
+      failed: {}
+      archived: {}
+
+  # --- v3.5 Proof Enums ---
+
+  ProofOutcome:
+    description: "Overall result of a proof verification"
+    permissible_values:
+      PASS: { description: "All proof checks passed successfully" }
+      FAIL: { description: "One or more critical proof checks failed" }
+      PARTIAL: { description: "Some checks passed, some non-critical failed" }
+
+  CheckType:
+    description: "Category of a proof verification check"
+    permissible_values:
+      SCHEMA: { description: "JSON Schema validation of manifest and data structure" }
+      SHACL: { description: "SHACL shape validation against CKP ontology constraints" }
+      PROVENANCE: { description: "PROV-O provenance chain validation" }
+      STRUCTURE: { description: "File/folder structure validation" }
+      INTEGRITY: { description: "Data integrity validation (SHA-256 hash verification)" }
+      OPERATIONAL: { description: "Operational validation (tool execution correctness)" }

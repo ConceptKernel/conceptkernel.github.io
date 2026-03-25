@@ -1,0 +1,378 @@
+# ConceptKernel RBAC Ontology
+# Version: v1.3.16-DRAFT-10-PHASE02
+# Date: 2025-12-01
+# Purpose: Role-Based Access Control ontology for ConceptKernel agents, roles, and permissions
+# Architecture: Distributed ontology model - kernels define roles/permissions, System.Ontology aggregates
+
+@prefix : <https://conceptkernel.org/ontology/v3.4/> .
+@prefix ckp: <https://conceptkernel.org/ontology/v3.4/> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://conceptkernel.org/ontology/v3.4/rbac/> a owl:Ontology ;
+    dc:title "ConceptKernel RBAC Ontology" ;
+    dc:description "Role-Based Access Control framework for ConceptKernel - agents, roles, permissions, quorum" ;
+    dcterms:created "2025-12-01"^^xsd:date ;
+    dcterms:modified "2025-12-01"^^xsd:date ;
+    owl:versionInfo "v1.3.16-DRAFT-10-PHASE02" ;
+    rdfs:comment "Defines WHO (agents), CAN DO WHAT (permissions), WHEN (quorum), and WHY (roles)" ;
+    owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
+    owl:imports <https://conceptkernel.org/ontology/v3.4/> .
+
+#################################################################
+#    Agents - WHO (Continuants)
+#################################################################
+
+### Agent (Material Entity - Continuant)
+### URN Format: ckp://Agent/user:{username} or ckp://Agent/process:{KernelName}
+
+ckp:Agent a owl:Class ;
+    rdfs:subClassOf bfo:0000040 ;  # bfo:MaterialEntity (Independent Continuant)
+    rdfs:label "Agent"@en ;
+    rdfs:comment "An autonomous entity capable of performing actions. Agents persist through time and bear roles that grant permissions."@en ;
+    dc:description "WHO: User agents (humans) or process agents (kernels as autonomous actors)" ;
+    ckp:implementationStatus "PARTIAL"^^xsd:string ;
+    ckp:coverageScore "0.40"^^xsd:decimal .
+
+### User Agent (Human operator)
+
+ckp:UserAgent a owl:Class ;
+    rdfs:subClassOf ckp:Agent ;
+    rdfs:label "User Agent"@en ;
+    rdfs:comment "A human user authenticated via OIDC who can perform operations on ConceptKernel system."@en ;
+    dc:description "URN: ckp://Agent/user:{username}" ;
+    dc:description "Authenticated via System.Oidc.Provider" ;
+    dc:description "Example: ckp://Agent/user:conceptkernel (default admin)" .
+
+### Process Agent (Kernel as autonomous actor)
+
+ckp:ProcessAgent a owl:Class ;
+    rdfs:subClassOf ckp:Agent ;
+    rdfs:label "Process Agent"@en ;
+    rdfs:comment "A kernel executing as an autonomous agent capable of performing actions."@en ;
+    dc:description "URN: ckp://Agent/process:{KernelName}" ;
+    dc:description "Example: ckp://Agent/process:System.Consensus (governance agent)" ;
+    dc:description "Example: ckp://Agent/process:ConceptKernel.LLM.Claude (autonomous LLM)" .
+
+### Agent Properties
+
+ckp:hasUsername a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:UserAgent ;
+    rdfs:range xsd:string ;
+    rdfs:label "has username"@en ;
+    rdfs:comment "OIDC authenticated username"@en .
+
+ckp:hasKernelName a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:ProcessAgent ;
+    rdfs:range xsd:string ;
+    rdfs:label "has kernel name"@en ;
+    rdfs:comment "Kernel name acting as process agent"@en .
+
+#################################################################
+#    Roles - WHAT YOU CAN BECOME (Realizable Entities)
+#################################################################
+
+### Role (BFO Role - Realizable Entity)
+### URN Format: ckp://Role/{role-name}
+### NOTE: Already defined in BFO as bfo:0000023, we just add CKP semantics
+
+ckp:Role a owl:Class ;
+    rdfs:subClassOf bfo:0000023 ;  # bfo:Role
+    rdfs:label "Role"@en ;
+    rdfs:comment "A realizable entity that an agent can bear. Roles grant permissions when realized."@en ;
+    dc:description "URN: ckp://Role/{role-name}" ;
+    dc:description "Example: ckp://Role/system-admin" ;
+    dc:description "Example: ckp://Role/ontology-curator" ;
+    dc:description "Each kernel defines its own roles in ontology.ttl" ;
+    ckp:implementationStatus "PARTIAL"^^xsd:string ;
+    ckp:coverageScore "0.40"^^xsd:decimal .
+
+### Role Properties
+
+ckp:hasRoleName a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Role ;
+    rdfs:range xsd:string ;
+    rdfs:label "has role name"@en ;
+    rdfs:comment "Human-readable role name (e.g., 'system-admin', 'ontology-curator')"@en .
+
+ckp:hasRoleContext a owl:DatatypeProperty ;
+    rdfs:domain ckp:Role ;
+    rdfs:range xsd:string ;
+    rdfs:label "has role context"@en ;
+    rdfs:comment "Context in which role is valid (e.g., 'http-ingress', 'governance')"@en .
+
+#################################################################
+#    Agent-Role Binding
+#################################################################
+
+ckp:hasRole a owl:ObjectProperty ;
+    rdfs:domain ckp:Agent ;
+    rdfs:range ckp:Role ;
+    rdfs:label "has role"@en ;
+    rdfs:comment "An agent bears a role (many-to-many relationship)"@en ;
+    dc:description "Agent → Role binding stored in concepts/.ontology/agent-bindings.ttl" .
+
+ckp:bearer a owl:ObjectProperty ;
+    rdfs:domain ckp:Role ;
+    rdfs:range ckp:Agent ;
+    rdfs:label "bearer"@en ;
+    rdfs:comment "The agent that bears this role (inverse of hasRole)"@en ;
+    owl:inverseOf ckp:hasRole .
+
+#################################################################
+#    Permissions - WHAT YOU CAN DO (Dispositions)
+#################################################################
+
+### Permission (BFO Disposition)
+### Format: <domain>.<action>.<target>
+### Examples: "kernel.start", "edge.create.PRODUCES", "consensus.vote"
+
+ckp:Permission a owl:Class ;
+    rdfs:subClassOf bfo:0000016 ;  # bfo:Disposition
+    rdfs:label "Permission"@en ;
+    rdfs:comment "A disposition to perform a specific action. Permissions are granted by roles."@en ;
+    dc:description "Format: <domain>.<action>.<target>" ;
+    dc:description "Example: http.handle (handle HTTP requests)" ;
+    dc:description "Example: kernel.start (start a kernel)" ;
+    dc:description "Example: edge.create.PRODUCES (create PRODUCES edge)" ;
+    dc:description "Each kernel defines permissions in ontology.ttl" ;
+    ckp:implementationStatus "PARTIAL"^^xsd:string ;
+    ckp:coverageScore "0.30"^^xsd:decimal .
+
+### Permission Properties
+
+ckp:permissionString a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Permission ;
+    rdfs:range xsd:string ;
+    rdfs:label "permission string"@en ;
+    rdfs:comment "String representation of permission in format <domain>.<action>.<target>"@en ;
+    dc:description "Example: 'kernel.start', 'consensus.vote', 'edge.create.PRODUCES'" .
+
+ckp:permissionDomain a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Permission ;
+    rdfs:range xsd:string ;
+    rdfs:label "permission domain"@en ;
+    rdfs:comment "Domain component (e.g., 'kernel', 'edge', 'consensus')"@en .
+
+ckp:permissionAction a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Permission ;
+    rdfs:range xsd:string ;
+    rdfs:label "permission action"@en ;
+    rdfs:comment "Action component (e.g., 'start', 'create', 'vote')"@en .
+
+ckp:permissionTarget a owl:DatatypeProperty ;
+    rdfs:domain ckp:Permission ;
+    rdfs:range xsd:string ;
+    rdfs:label "permission target"@en ;
+    rdfs:comment "Optional target component (e.g., 'PRODUCES', 'System.Gateway')"@en .
+
+#################################################################
+#    Role-Permission Granting
+#################################################################
+
+ckp:grants a owl:ObjectProperty ;
+    rdfs:domain ckp:Role ;
+    rdfs:range ckp:Permission ;
+    rdfs:label "grants"@en ;
+    rdfs:comment "A role grants a permission to its bearer"@en ;
+    dc:description "Role → Permission mapping defined in kernel ontology.ttl" .
+
+ckp:grantedBy a owl:ObjectProperty ;
+    rdfs:domain ckp:Permission ;
+    rdfs:range ckp:Role ;
+    rdfs:label "granted by"@en ;
+    rdfs:comment "The role that grants this permission (inverse of grants)"@en ;
+    owl:inverseOf ckp:grants .
+
+#################################################################
+#    Actions - WHAT GETS DONE (Processes/Occurrents)
+#################################################################
+
+### Action (BFO Process - Occurrent)
+
+ckp:Action a owl:Class ;
+    rdfs:subClassOf bfo:0000015 ;  # bfo:Process
+    rdfs:label "Action"@en ;
+    rdfs:comment "A temporal process performed by an agent. Actions require permissions."@en ;
+    dc:description "Examples: StartKernelAction, CreateEdgeAction, VoteAction" ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
+
+### Action-Permission Requirement
+
+ckp:requires a owl:ObjectProperty ;
+    rdfs:domain ckp:Action ;
+    rdfs:range ckp:Permission ;
+    rdfs:label "requires"@en ;
+    rdfs:comment "An action requires a permission to be performed"@en .
+
+ckp:requiredBy a owl:ObjectProperty ;
+    rdfs:domain ckp:Permission ;
+    rdfs:range ckp:Action ;
+    rdfs:label "required by"@en ;
+    rdfs:comment "The action that requires this permission (inverse of requires)"@en ;
+    owl:inverseOf ckp:requires .
+
+#################################################################
+#    Authorization Check (Process/Occurrent)
+#################################################################
+
+### Authorization Check (BFO Process)
+
+ckp:AuthorizationCheck a owl:Class ;
+    rdfs:subClassOf bfo:0000015 ;  # bfo:Process
+    rdfs:label "Authorization Check"@en ;
+    rdfs:comment "A temporal process that validates whether an agent has permission to perform an action. Implemented as SPARQL ASK query against unified ontology."@en ;
+    dc:description "Performed by: EdgeKernel (before routing), PermissionChecker (before action)" ;
+    dc:description "Query: ASK { ?agent ckp:hasRole ?role . ?role ckp:grants ?perm . ?perm ckp:permissionString ?permString }" ;
+    ckp:implementationStatus "PARTIAL"^^xsd:string ;
+    ckp:criticalGap "Not ontology-driven yet, uses hardcoded logic"^^xsd:string .
+
+### Authorization Properties
+
+ckp:authorizes a owl:ObjectProperty ;
+    rdfs:domain ckp:AuthorizationCheck ;
+    rdfs:range ckp:Action ;
+    rdfs:label "authorizes"@en ;
+    rdfs:comment "The action authorized by this check"@en .
+
+ckp:denies a owl:ObjectProperty ;
+    rdfs:domain ckp:AuthorizationCheck ;
+    rdfs:range ckp:Action ;
+    rdfs:label "denies"@en ;
+    rdfs:comment "The action denied by this check"@en .
+
+#################################################################
+#    Quorum - WHEN CONSENSUS IS NEEDED (Enums/Classes)
+#################################################################
+
+### Quorum Level (Classification)
+
+ckp:QuorumLevel a owl:Class ;
+    rdfs:label "Quorum Level"@en ;
+    rdfs:comment "Classification of consensus required for a permission"@en ;
+    dc:description "Levels: none (0 votes), low (1 vote), high (51% of role holders)" .
+
+ckp:QuorumNone a owl:Class ;
+    rdfs:subClassOf ckp:QuorumLevel ;
+    rdfs:label "Quorum None"@en ;
+    rdfs:comment "No consensus required - permission check is sufficient"@en .
+
+ckp:QuorumLow a owl:Class ;
+    rdfs:subClassOf ckp:QuorumLevel ;
+    rdfs:label "Quorum Low"@en ;
+    rdfs:comment "Low consensus required - 1 additional approval from role holders"@en .
+
+ckp:QuorumHigh a owl:Class ;
+    rdfs:subClassOf ckp:QuorumLevel ;
+    rdfs:label "Quorum High"@en ;
+    rdfs:comment "High consensus required - 51% of role holders must approve"@en .
+
+### Quorum-Permission Relationship
+
+ckp:requiresQuorum a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Permission ;
+    rdfs:range ckp:QuorumLevel ;
+    rdfs:label "requires quorum"@en ;
+    rdfs:comment "The quorum level required for this permission"@en .
+
+#################################################################
+#    System Ontology Aggregation (System.Ontology kernel)
+#################################################################
+
+### System.Ontology Kernel (Special Aggregator)
+
+ckp:SystemOntologyKernel a owl:Class ;
+    rdfs:subClassOf ckp:Kernel , ckp:HotKernel ;
+    rdfs:label "System Ontology Kernel"@en ;
+    rdfs:comment "Special system kernel that aggregates all kernel ontologies into unified SPARQL graph. Acts as discovery endpoint for capabilities, roles, permissions."@en ;
+    dc:description "URN: ckp://System.Ontology:v1.0" ;
+    dc:description "Startup flow: Kernels → System.Wss (notify) → System.Ontology (pull ontology.ttl)" ;
+    dc:description "Queue processing: Receives ontology.ttl → parses → adds to unified graph" ;
+    dc:description "Discovery: Other systems query System.Ontology for capabilities/permissions" ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string ;
+    ckp:architecturalRole "Ontology Aggregator"^^xsd:string .
+
+### Ontology Aggregation Process
+
+ckp:OntologyAggregation a owl:Class ;
+    rdfs:subClassOf bfo:0000015 ;  # bfo:Process
+    rdfs:label "Ontology Aggregation"@en ;
+    rdfs:comment "Process of loading kernel ontology.ttl files and integrating into unified SPARQL graph"@en ;
+    dc:description "Performed by System.Ontology kernel on startup and on-demand" .
+
+ckp:aggregates a owl:ObjectProperty ;
+    rdfs:domain ckp:SystemOntologyKernel ;
+    rdfs:range ckp:KernelOntology ;
+    rdfs:label "aggregates"@en ;
+    rdfs:comment "System.Ontology aggregates this kernel ontology into unified graph"@en .
+
+#################################################################
+#    SPARQL Query Interface (for permission checking)
+#################################################################
+
+### Query Patterns (as annotation properties for documentation)
+
+ckp:sparqlQueryPattern a owl:AnnotationProperty ;
+    rdfs:label "SPARQL query pattern"@en ;
+    rdfs:comment "SPARQL query pattern for implementing this authorization check"@en .
+
+### Annotate Permission class with query pattern
+
+ckp:Permission
+    ckp:sparqlQueryPattern """
+        PREFIX ckp: <https://conceptkernel.org/ontology/v3.4/>
+        PREFIX bfo: <http://purl.obolibrary.org/obo/BFO_>
+        ASK {
+            ?agent ckp:hasRole ?role .
+            ?role rdf:type bfo:0000023 .
+            ?role ckp:grants ?perm .
+            ?perm ckp:permissionString ?permString .
+            FILTER(?permString = "<requested-permission>")
+        }
+    """ .
+
+### Annotate Role class with query pattern
+
+ckp:Role
+    ckp:sparqlQueryPattern """
+        PREFIX ckp: <https://conceptkernel.org/ontology/v3.4/>
+        SELECT ?role WHERE {
+            ?agent ckp:hasRole ?role .
+            ?role rdf:type bfo:0000023 .
+            FILTER(?agent = <agent-urn>)
+        }
+    """ .
+
+#################################################################
+#    Implementation Notes
+#################################################################
+
+# NOTE 1: Distributed Ontology Model
+# - Project ontologies: concepts/.ontology/*.ttl (framework definitions)
+# - Kernel ontologies: concepts/{KernelName}/ontology.ttl (roles/permissions)
+# - Runtime: System.Ontology kernel aggregates into unified SPARQL graph
+
+# NOTE 2: Event-Driven Aggregation
+# - Kernel startup → notification via System.Wss
+# - System.Ontology receives notification → pulls kernel's ontology.ttl
+# - Processes through queue → adds to unified graph
+# - Other systems query System.Ontology for discovery
+
+# NOTE 3: Authorization Enforcement Points
+# - EdgeKernel: Queries ontology BEFORE routing (edge authorization)
+# - PermissionChecker: Queries ontology BEFORE action (permission check)
+# - System.Consensus: Queries ontology for quorum validation
+
+# NOTE 4: No Separate Config Files
+# - Everything is RDF ontology.ttl
+# - No YAML/JSON permission registries
+# - Permission checking = SPARQL queries
+
+#################################################################
+# End of ConceptKernel RBAC Ontology
+#################################################################

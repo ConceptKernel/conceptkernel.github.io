@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept Kernel Protocol</title>
+  <style>
+    body { font-family: system-ui, sans-serif; display: flex; justify-content: center; min-height: 100vh; margin: 0; background: #0a0a0a; color: #e0e0e0; }
+    .container { max-width: 720px; padding: 4rem 2rem; }
+    h1 { font-size: 2.2rem; color: #ff8a65; margin-bottom: 0.25rem; }
+    .subtitle { color: #888; font-size: 1rem; margin-bottom: 2rem; }
+    h2 { font-size: 1.1rem; color: #b0b0c0; margin-top: 2rem; border-bottom: 1px solid #1a1a2e; padding-bottom: 0.3rem; }
+    a { color: #66bb6a; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { background: #1a1a2e; padding: 0.15em 0.4em; border-radius: 3px; font-size: 0.9rem; }
+    ul { list-style: none; padding: 0; }
+    ul li { padding: 0.4rem 0; }
+    ul li::before { content: "→ "; color: #555; }
+    .bfo { color: #42a5f5; font-family: monospace; font-size: 0.85rem; }
+    footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #1a1a2e; color: #555; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Concept Kernel Protocol</h1>
+    <p class="subtitle">How a Material Entity wakes into being, executes its purpose, and accumulates knowledge.</p>
+
+    <p>A Concept Kernel is a <span class="bfo">BFO:0000040</span> Material Entity with three independently-versioned loops: identity (CK), capability (TOOL), and knowledge (DATA).</p>
+
+    <h2>Ontology</h2>
+    <ul>
+      <li><a href="ontology/v3.4/">v3.4</a> — BFO-aligned ontology (Turtle, from ck v1.3.21 rust)</li>
+      <li><a href="ontology/v3.5/">v3.5</a> — v3.4 + base shapes, proof, SPIFFE (alpha-3)</li>
+    </ul>
+    <p>Canonical prefix: <code>@prefix ckp: &lt;https://conceptkernel.org/ontology/v3.5/&gt;</code></p>
+
+    <h2>Specification</h2>
+    <ul>
+      <li><a href="spec/v3.4/">v3.4</a> — Three Loops System (Ontological Enterprise)</li>
+      <li><a href="spec/v3.5/">v3.5</a> — Action Composition, Validation, SPIFFE Identity</li>
+    </ul>
+
+    <h2>Three Loops</h2>
+    <ul>
+      <li><strong>CK Loop</strong> — Who am I and why am I? <span class="bfo">Identity &amp; Awakening</span></li>
+      <li><strong>TOOL Loop</strong> — What can I do? <span class="bfo">Executable Capability</span></li>
+      <li><strong>DATA Loop</strong> — What have I produced? <span class="bfo">Knowledge &amp; Production</span></li>
+    </ul>
+
+    <footer>
+      conceptkernel.org · tech.games · CKP
+    </footer>
+  </div>
+</body>
+</html>

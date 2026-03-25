@@ -1,0 +1,538 @@
+# ConceptKernel Processes BFO Ontology
+# Version: v1.3.11-DRAFT-01
+# Date: 2025-11-23
+# Purpose: Occurrent (Process) definitions for ConceptKernel temporal events
+
+@prefix : <https://conceptkernel.org/ontology/v3.4/process/> .
+@prefix ckp: <https://conceptkernel.org/ontology/v3.4/> .
+@prefix ckpp: <https://conceptkernel.org/ontology/v3.4/process/> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://conceptkernel.org/ontology/v3.4/process/> a owl:Ontology ;
+    dc:title "ConceptKernel Process Ontology" ;
+    dc:description "Formal ontology defining Occurrents (processes that unfold over time) in ConceptKernel" ;
+    dcterms:created "2025-11-23"^^xsd:date ;
+    owl:versionInfo "v1.3.11-DRAFT-01" ;
+    rdfs:comment "Defines processes: Invocation, EdgeCommunication, Consensus, Broadcast, StatusChange" ;
+    owl:imports <https://conceptkernel.org/ontology/v3.4/> ,
+                <http://purl.obolibrary.org/obo/bfo.owl> .
+
+#################################################################
+#    Occurrents - Entities that unfold over time
+#################################################################
+
+### Base Process Class
+
+ckpp:Process a owl:Class ;
+    rdfs:subClassOf bfo:0000015 ;  # bfo:Process
+    rdfs:label "ConceptKernel Process"@en ;
+    rdfs:comment "Base class for all processes in ConceptKernel. Processes unfold over time, have temporal parts, and involve participants."@en .
+
+### Process Properties
+
+ckpp:hasProcessUrn a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:Process ;
+    rdfs:range xsd:string ;
+    rdfs:label "has process URN"@en ;
+    rdfs:comment "Unique identifier for the process instance: ckp://Process#{type}-{txId}"@en ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string ;
+    ckp:criticalGap "Process URNs not generated. No explicit tracking of Occurrents."^^xsd:string .
+
+ckpp:hasStartTime a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:Process ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "has start time"@en ;
+    rdfs:comment "ISO 8601 timestamp when process began"@en .
+
+ckpp:hasEndTime a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:Process ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "has end time"@en ;
+    rdfs:comment "ISO 8601 timestamp when process completed"@en .
+
+ckpp:hasDuration a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:Process ;
+    rdfs:range xsd:duration ;
+    rdfs:label "has duration"@en ;
+    rdfs:comment "Duration of process execution (endTime - startTime)"@en ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
+
+ckpp:hasStatus a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:Process ;
+    rdfs:range xsd:string ;
+    rdfs:label "has status"@en ;
+    rdfs:comment "Current status: pending, processing, completed, failed"@en .
+
+### Temporal Parts
+
+ckpp:TemporalPart a owl:Class ;
+    rdfs:subClassOf bfo:0000015 ;  # bfo:Process
+    rdfs:label "Temporal Part"@en ;
+    rdfs:comment "A phase or stage within a larger process"@en ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string ;
+    ckp:criticalGap "Temporal parts not explicitly tracked. No phase recording."^^xsd:string .
+
+ckpp:hasTemporalPart a owl:ObjectProperty ;
+    rdfs:domain ckpp:Process ;
+    rdfs:range ckpp:TemporalPart ;
+    rdfs:label "has temporal part"@en ;
+    rdfs:comment "A temporal phase of this process"@en .
+
+ckpp:hasPhase a owl:DatatypeProperty ;
+    rdfs:domain ckpp:TemporalPart ;
+    rdfs:range xsd:string ;
+    rdfs:label "has phase"@en ;
+    rdfs:comment "Name of the phase: accepted, processing, completed, etc."@en .
+
+ckpp:phaseTimestamp a owl:DatatypeProperty ;
+    rdfs:domain ckpp:TemporalPart ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "phase timestamp"@en ;
+    rdfs:comment "When this phase occurred"@en .
+
+### Temporal Region
+
+ckpp:TemporalRegion a owl:Class ;
+    rdfs:subClassOf bfo:0000008 ;  # bfo:TemporalRegion
+    rdfs:label "Temporal Region"@en ;
+    rdfs:comment "The time span during which a process occurs"@en .
+
+ckpp:occursIn a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:Process ;
+    rdfs:range ckpp:TemporalRegion ;
+    rdfs:label "occurs in"@en ;
+    rdfs:comment "The temporal region during which this process occurs"@en ;
+    rdfs:subPropertyOf bfo:0000066 .  # bfo:occurs_in
+
+#################################################################
+#    1. Invocation Process
+#    Implementation: /core/src/Kernel.js:handleJob()
+#################################################################
+
+ckpp:InvocationProcess a owl:Class ;
+    rdfs:subClassOf ckpp:Process ;
+    rdfs:label "Invocation Process"@en ;
+    rdfs:comment "A computational process that unfolds over time when a kernel processes a job. Lifecycle: Acceptance → Processing → Completion."@en ;
+    dc:description "Implemented in /core/src/Kernel.js:handleJob():69-126, finalize():165-213" ;
+    ckp:implementationStatus "PARTIAL"^^xsd:string ;
+    ckp:coverageScore "0.60"^^xsd:decimal ;
+    ckp:criticalGap "No Process URN generation. Temporal parts not tracked."^^xsd:string .
+
+### Invocation Participants
+
+ckpp:hasInputInstance a owl:ObjectProperty ;
+    rdfs:domain ckpp:InvocationProcess ;
+    rdfs:range ckp:Instance ;
+    rdfs:label "has input instance"@en ;
+    rdfs:comment "The input instance(s) consumed by this invocation"@en .
+
+ckpp:hasKernelParticipant a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:InvocationProcess ;
+    rdfs:range ckp:Kernel ;
+    rdfs:label "has kernel participant"@en ;
+    rdfs:comment "The kernel that executed this process"@en ;
+    rdfs:subPropertyOf bfo:0000057 .  # bfo:has_participant
+
+ckpp:hasOutputInstance a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:InvocationProcess ;
+    rdfs:range ckp:Instance ;
+    rdfs:label "has output instance"@en ;
+    rdfs:comment "The output instance created by this invocation"@en .
+
+### Invocation Temporal Parts (phases)
+
+ckpp:AcceptedPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Accepted Phase"@en ;
+    rdfs:comment "The instantaneous moment when a job is accepted (Process Boundary)"@en ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
+
+ckpp:ProcessingPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Processing Phase"@en ;
+    rdfs:comment "The continuous phase during which the kernel processes the job"@en ;
+    ckp:implementationStatus "IMPLICIT"^^xsd:string .
+
+ckpp:CompletedPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Completed Phase"@en ;
+    rdfs:comment "The instantaneous moment when processing completes (Process Boundary)"@en ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
+
+#################################################################
+#    2. Edge Communication Process (FUNDAMENTAL)
+#    Implementation: /core/src/EdgeKernel.js:relayDirect()
+#################################################################
+
+ckpp:EdgeCommunicationProcess a owl:Class ;
+    rdfs:subClassOf ckpp:Process ;
+    rdfs:label "Edge Communication Process"@en ;
+    rdfs:comment "The FUNDAMENTAL process by which kernels interact - mediated by EdgeKernel. This is the ONLY way kernels can communicate (architectural constraint)."@en ;
+    dc:description "Implemented in /core/src/EdgeKernel.js:relayDirect():183-236" ;
+    dc:description "Also: EdgeRequestBuilder.js:createEdgeRequests():64-128" ;
+    ckp:implementationStatus "PARTIAL"^^xsd:string ;
+    ckp:coverageScore "0.65"^^xsd:decimal ;
+    ckp:architecturalConstraint "NO direct Kernel-to-Kernel communication. ONLY via EdgeKernel."^^xsd:string ;
+    ckp:criticalGap "No Process URN generation. Temporal parts not tracked."^^xsd:string .
+
+### Edge Communication Participants
+
+ckpp:hasSourceKernel a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:EdgeCommunicationProcess ;
+    rdfs:range ckp:Kernel ;
+    rdfs:label "has source kernel"@en ;
+    rdfs:comment "The kernel that created the instance being routed"@en .
+
+ckpp:hasEdge a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:EdgeCommunicationProcess ;
+    rdfs:range ckp:Edge ;
+    rdfs:label "has edge"@en ;
+    rdfs:comment "The edge through which communication flows"@en .
+
+ckpp:hasTargetKernel a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:EdgeCommunicationProcess ;
+    rdfs:range ckp:Kernel ;
+    rdfs:label "has target kernel"@en ;
+    rdfs:comment "The kernel receiving the routed instance"@en .
+
+ckpp:hasMediatorKernel a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:EdgeCommunicationProcess ;
+    rdfs:range ckp:EdgeKernel ;
+    rdfs:label "has mediator kernel"@en ;
+    rdfs:comment "The EdgeKernel that mediates this communication"@en ;
+    ckp:architecturalInvariant "ALWAYS System.EdgeKernel"^^xsd:string .
+
+ckpp:routesInstance a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:EdgeCommunicationProcess ;
+    rdfs:range ckp:Instance ;
+    rdfs:label "routes instance"@en ;
+    rdfs:comment "The instance being routed through the edge"@en .
+
+### Edge Communication Temporal Parts
+
+ckpp:InstanceCreatedPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Instance Created Phase"@en ;
+    rdfs:comment "Source kernel creates instance (Process Boundary)"@en ;
+    ckp:implementationStatus "IMPLICIT"^^xsd:string .
+
+ckpp:EdgeDetectedPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Edge Detected Phase"@en ;
+    rdfs:comment "EdgeKernel detects new instance and queries outgoing edges"@en ;
+    ckp:implementationStatus "IMPLICIT"^^xsd:string .
+
+ckpp:TypeValidatedPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Type Validated Phase"@en ;
+    rdfs:comment "EdgeKernel validates instance type against edge type_mapping"@en ;
+    dc:description "Code: /core/src/EdgeKernel.js:validateSource():245-250" ;
+    ckp:implementationStatus "IMPLICIT"^^xsd:string .
+
+ckpp:RoutedPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Routed Phase"@en ;
+    rdfs:comment "EdgeKernel creates symlink in target inbox (routing)"@en ;
+    dc:description "Code: /core/src/EdgeKernel.js:createDestinationLink():332-362" ;
+    ckp:implementationStatus "IMPLICIT"^^xsd:string .
+
+ckpp:DeliveredPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Delivered Phase"@en ;
+    rdfs:comment "Target kernel receives and processes instance"@en ;
+    ckp:implementationStatus "IMPLICIT"^^xsd:string .
+
+#################################################################
+#    3. Edge Subscription Process (Consensus-Driven)
+#    Implementation: MISSING (critical gap)
+#################################################################
+
+ckpp:EdgeSubscriptionProcess a owl:Class ;
+    rdfs:subClassOf ckpp:Process ;
+    rdfs:label "Edge Subscription Process"@en ;
+    rdfs:comment "The process of establishing a new Edge between kernels. Requires consensus approval and public announcement."@en ;
+    dc:description "NOT IMPLEMENTED: EdgeKernel doesn't trigger consensus for edge creation" ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string ;
+    ckp:coverageScore "0.00"^^xsd:decimal ;
+    ckp:criticalGap "Edge creation is manual (ck create-edge). No consensus integration."^^xsd:string .
+
+### Desired Temporal Parts (specification)
+
+ckpp:SubscriptionRequestPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Subscription Request Phase"@en ;
+    rdfs:comment "SystemB requests subscription to SystemA (POST /subscribe)"@en ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
+
+ckpp:ConsensusProposalPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Consensus Proposal Phase"@en ;
+    rdfs:comment "EdgeKernel creates consensus proposal"@en ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
+
+ckpp:VotingPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Voting Phase"@en ;
+    rdfs:comment "Participants cast votes (approve/reject)"@en ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
+
+ckpp:EdgeCreationPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Edge Creation Phase"@en ;
+    rdfs:comment "Upon approval, EdgeKernel creates Edge entity"@en ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
+
+ckpp:AnnouncementPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Announcement Phase"@en ;
+    rdfs:comment "WssHub broadcasts new Edge (public announcement)"@en ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
+
+#################################################################
+#    4. Consensus Process (Governance)
+#    Implementation: /concepts/System.Consensus/tool/tool.js
+#################################################################
+
+ckpp:ConsensusProcess a owl:Class ;
+    rdfs:subClassOf ckpp:Process ;
+    rdfs:label "Consensus Process"@en ;
+    rdfs:comment "The governance mechanism for all significant changes requiring multi-party approval. Lifecycle: Proposal → Voting → Resolution → Application."@en ;
+    dc:description "Implemented in /concepts/System.Consensus/tool/tool.js:43-146" ;
+    ckp:implementationStatus "PARTIAL"^^xsd:string ;
+    ckp:coverageScore "0.50"^^xsd:decimal ;
+    ckp:criticalGap "No Process URN. Approved proposals don't auto-execute. No WssHub integration."^^xsd:string .
+
+### Consensus Participants
+
+ckpp:hasProposer a owl:DatatypeProperty ;
+    rdfs:domain ckpp:ConsensusProcess ;
+    rdfs:range xsd:string ;
+    rdfs:label "has proposer"@en ;
+    rdfs:comment "The entity that created the proposal"@en .
+
+ckpp:hasVoter a owl:DatatypeProperty ;
+    rdfs:domain ckpp:ConsensusProcess ;
+    rdfs:range xsd:string ;
+    rdfs:label "has voter"@en ;
+    rdfs:comment "An entity eligible to vote on this proposal"@en .
+
+ckpp:hasConsensusMediator a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:ConsensusProcess ;
+    rdfs:range ckp:ConsensusKernel ;
+    rdfs:label "has consensus mediator"@en ;
+    rdfs:comment "The System.Consensus kernel managing this process"@en .
+
+### Consensus Temporal Parts
+
+ckpp:ProposalCreatedPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Proposal Created Phase"@en ;
+    rdfs:comment "Proposal created with voting rules (Process Boundary)"@en ;
+    dc:description "Code: /concepts/System.Consensus/tool/tool.js:createProposal():110-146" ;
+    ckp:implementationStatus "IMPLICIT"^^xsd:string .
+
+ckpp:VotingPeriodPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Voting Period Phase"@en ;
+    rdfs:comment "Participants cast votes (continuous process)"@en ;
+    ckp:implementationStatus "IMPLICIT"^^xsd:string .
+
+ckpp:ResolutionPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Resolution Phase"@en ;
+    rdfs:comment "Threshold reached or timeout (Process Boundary)"@en ;
+    ckp:implementationStatus "IMPLICIT"^^xsd:string .
+
+ckpp:ApplicationPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Application Phase"@en ;
+    rdfs:comment "Approved changes are applied (Process)"@en ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string ;
+    ckp:criticalGap "No automatic enforcement. Approved proposals require manual execution."^^xsd:string .
+
+### Consensus Outcome
+
+ckpp:createsProposal a owl:ObjectProperty ;
+    rdfs:domain ckpp:ConsensusProcess ;
+    rdfs:range ckpp:Proposal ;
+    rdfs:label "creates proposal"@en ;
+    rdfs:comment "The proposal entity created by this consensus process"@en .
+
+ckpp:Proposal a owl:Class ;
+    rdfs:subClassOf bfo:0000040 ;  # bfo:IndependentContinuant
+    rdfs:label "Proposal"@en ;
+    rdfs:comment "A proposal document persisting through the consensus process"@en ;
+    dc:description "Stored in {kernel}/consensus/proposals/{proposalId}.json" .
+
+#################################################################
+#    5. Broadcast Process (Real-time Communication)
+#    Implementation: /concepts/System.WssHub/tool/tool.js
+#################################################################
+
+ckpp:BroadcastProcess a owl:Class ;
+    rdfs:subClassOf ckpp:Process ;
+    rdfs:label "Broadcast Process"@en ;
+    rdfs:comment "The announcement mechanism for distributing events to all interested parties via WebSocket. Enables real-time collaboration."@en ;
+    dc:description "Implemented in /concepts/System.WssHub/tool/tool.js:59-64, 84-136" ;
+    ckp:implementationStatus "PARTIAL"^^xsd:string ;
+    ckp:coverageScore "0.70"^^xsd:decimal ;
+    ckp:criticalGap "No Process URN. No consensus event handling."^^xsd:string .
+
+### Broadcast Participants
+
+ckpp:hasEventSource a owl:ObjectProperty ;
+    rdfs:domain ckpp:BroadcastProcess ;
+    rdfs:range ckp:Kernel ;
+    rdfs:label "has event source"@en ;
+    rdfs:comment "The kernel that generated the event"@en .
+
+ckpp:hasBroadcastMediator a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:BroadcastProcess ;
+    rdfs:range ckp:WssHubKernel ;
+    rdfs:label "has broadcast mediator"@en ;
+    rdfs:comment "The WssHub kernel broadcasting this event"@en .
+
+ckpp:hasClientRecipient a owl:DatatypeProperty ;
+    rdfs:domain ckpp:BroadcastProcess ;
+    rdfs:range xsd:string ;
+    rdfs:label "has client recipient"@en ;
+    rdfs:comment "A WebSocket client receiving this broadcast"@en .
+
+### Broadcast Temporal Parts
+
+ckpp:EventGeneratedPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Event Generated Phase"@en ;
+    rdfs:comment "Source kernel generates event (e.g., instance created)"@en ;
+    ckp:implementationStatus "IMPLICIT"^^xsd:string .
+
+ckpp:EventReceivedPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Event Received Phase"@en ;
+    rdfs:comment "WssHub receives event (via inbox symlink)"@en ;
+    dc:description "Code: /concepts/System.WssHub/tool/tool.js:watcher.on('add'):84-136" ;
+    ckp:implementationStatus "IMPLICIT"^^xsd:string .
+
+ckpp:FilteringPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Filtering Phase"@en ;
+    rdfs:comment "WssHub filters based on client subscriptions"@en ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string ;
+    ckp:criticalGap "No filtering. All clients receive all events."^^xsd:string .
+
+ckpp:DeliveryPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Delivery Phase"@en ;
+    rdfs:comment "Parallel delivery to N WebSocket clients"@en ;
+    dc:description "Code: /concepts/System.WssHub/tool/tool.js:broadcast():59-64" ;
+    ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string .
+
+ckpp:CompletionPhase a owl:Class ;
+    rdfs:subClassOf ckpp:TemporalPart ;
+    rdfs:label "Completion Phase"@en ;
+    rdfs:comment "All deliveries completed or timed out"@en ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string ;
+    ckp:criticalGap "No completion tracking or delivery statistics."^^xsd:string .
+
+#################################################################
+#    6. Process Boundaries (Instantaneous Events)
+#################################################################
+
+ckpp:ProcessBoundary a owl:Class ;
+    rdfs:subClassOf bfo:0000035 ;  # bfo:ProcessBoundary
+    rdfs:label "Process Boundary"@en ;
+    rdfs:comment "An instantaneous event marking the start or end of a process"@en ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
+
+ckpp:StartBoundary a owl:Class ;
+    rdfs:subClassOf ckpp:ProcessBoundary ;
+    rdfs:label "Start Boundary"@en ;
+    rdfs:comment "Instantaneous moment when process begins"@en .
+
+ckpp:EndBoundary a owl:Class ;
+    rdfs:subClassOf ckpp:ProcessBoundary ;
+    rdfs:label "End Boundary"@en ;
+    rdfs:comment "Instantaneous moment when process ends"@en .
+
+ckpp:hasStartBoundary a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:Process ;
+    rdfs:range ckpp:StartBoundary ;
+    rdfs:label "has start boundary"@en ;
+    rdfs:comment "The instantaneous start of this process"@en .
+
+ckpp:hasEndBoundary a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpp:Process ;
+    rdfs:range ckpp:EndBoundary ;
+    rdfs:label "has end boundary"@en ;
+    rdfs:comment "The instantaneous end of this process"@en .
+
+#################################################################
+#    7. Status Change Events (Process Boundaries)
+#################################################################
+
+ckpp:StatusChangeEvent a owl:Class ;
+    rdfs:subClassOf ckpp:ProcessBoundary ;
+    rdfs:label "Status Change Event"@en ;
+    rdfs:comment "Instantaneous event marking a kernel status transition"@en ;
+    dc:description "Example: Kernel IDLE → ONLINE (instantaneous)" ;
+    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
+
+ckpp:hasPreviousStatus a owl:DatatypeProperty ;
+    rdfs:domain ckpp:StatusChangeEvent ;
+    rdfs:range xsd:string ;
+    rdfs:label "has previous status"@en .
+
+ckpp:hasNewStatus a owl:DatatypeProperty ;
+    rdfs:domain ckpp:StatusChangeEvent ;
+    rdfs:range xsd:string ;
+    rdfs:label "has new status"@en .
+
+#################################################################
+#    Process Relationships (BFO-Aligned)
+#################################################################
+
+### Participates In (Continuant → Occurrent)
+
+ckpp:participatesIn a owl:ObjectProperty ;
+    rdfs:domain bfo:0000002 ;  # bfo:Continuant
+    rdfs:range ckpp:Process ;
+    rdfs:label "participates in"@en ;
+    rdfs:comment "A continuant (Kernel, Instance) participates in this process"@en ;
+    rdfs:subPropertyOf bfo:0000056 .  # bfo:participates_in
+
+### Creates (Occurrent → Continuant)
+
+ckpp:creates a owl:ObjectProperty ;
+    rdfs:domain ckpp:Process ;
+    rdfs:range bfo:0000002 ;  # bfo:Continuant
+    rdfs:label "creates"@en ;
+    rdfs:comment "This process creates a continuant (Instance, Edge, etc.)"@en .
+
+### Precedes (Occurrent → Occurrent)
+
+ckpp:precedes a owl:ObjectProperty ;
+    rdfs:domain ckpp:Process ;
+    rdfs:range ckpp:Process ;
+    rdfs:label "precedes"@en ;
+    rdfs:comment "This process occurs before another process"@en ;
+    rdfs:subPropertyOf bfo:0000063 .  # bfo:precedes
+
+#################################################################
+#    Coverage Summary
+#################################################################
+
+:OccurrentCoverage a owl:NamedIndividual ;
+    rdfs:label "Occurrent Coverage"@en ;
+    ckp:coverageScore "0.45"^^xsd:decimal ;
+    rdfs:comment "Overall Occurrent coverage: Invocation (60%), EdgeCommunication (65%), EdgeSubscription (0%), Consensus (50%), Broadcast (70%)"@en ;
+    ckp:criticalGap "No Process URN generation. No temporal parts tracking. EdgeKernel-Consensus not integrated."^^xsd:string .
+
+#################################################################
+# End of ConceptKernel Processes Ontology
+#################################################################

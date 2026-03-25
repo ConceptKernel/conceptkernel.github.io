@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   title: 'Concept Kernel Protocol',
   description: 'An open protocol for autonomous concept governance across distributed agents',
 
@@ -20,10 +21,17 @@ export default defineConfig({
     siteTitle: 'Concept Kernel',
 
     nav: [
-      { text: 'Docs', link: '/introduction' },
-      { text: 'Architecture', link: '/architecture' },
-      { text: 'Concepts', link: '/concepts/kernels' },
-      { text: 'Get Started', link: '/getting-started/quickstart' },
+      {
+        text: 'v3.4',
+        items: [
+          { text: 'v3.4 (stable)', link: '/v3.4/' },
+          { text: 'v3.5-alpha3', link: '/v3.5-alpha3/' },
+        ]
+      },
+      { text: 'Docs', link: '/v3.4/introduction' },
+      { text: 'Architecture', link: '/v3.4/architecture' },
+      { text: 'Concepts', link: '/v3.4/concepts/kernels' },
+      { text: 'Get Started', link: '/v3.4/getting-started/quickstart' },
       {
         text: 'Community',
         items: [
@@ -33,40 +41,89 @@ export default defineConfig({
       }
     ],
 
-    sidebar: [
-      {
-        text: 'Introduction',
-        items: [
-          { text: 'What is CKP?', link: '/introduction' },
-          { text: 'Architecture', link: '/architecture' },
-        ]
-      },
-      {
-        text: 'Core Concepts',
-        items: [
-          { text: 'Kernels', link: '/concepts/kernels' },
-          { text: 'Ontology', link: '/concepts/ontology' },
-          { text: 'Protocol', link: '/concepts/protocol' },
-          { text: 'Consensus', link: '/concepts/consensus' },
-          { text: 'Governance', link: '/concepts/governance' },
-        ]
-      },
-      {
-        text: 'Getting Started',
-        items: [
-          { text: 'Quickstart', link: '/getting-started/quickstart' },
-          { text: 'Installation', link: '/getting-started/installation' },
-        ]
-      },
-      {
-        text: 'Community',
-        items: [
-          { text: 'Join Discord', link: 'https://discord.gg/sTbfxV9xyU' },
-          { text: 'GitHub', link: 'https://github.com/ConceptKernel' },
-          { text: 'Contributing', link: '/contributing' },
-        ]
-      }
-    ],
+    sidebar: {
+      '/v3.4/': [
+        {
+          text: 'Introduction',
+          items: [
+            { text: 'What is CKP?', link: '/v3.4/introduction' },
+            { text: 'Architecture', link: '/v3.4/architecture' },
+          ]
+        },
+        {
+          text: 'Core Concepts',
+          items: [
+            { text: 'Kernels', link: '/v3.4/concepts/kernels' },
+            { text: 'Ontology', link: '/v3.4/concepts/ontology' },
+            { text: 'Protocol', link: '/v3.4/concepts/protocol' },
+            { text: 'Consensus', link: '/v3.4/concepts/consensus' },
+            { text: 'Governance', link: '/v3.4/concepts/governance' },
+          ]
+        },
+        {
+          text: 'Getting Started',
+          items: [
+            { text: 'Quickstart', link: '/v3.4/getting-started/quickstart' },
+            { text: 'Installation', link: '/v3.4/getting-started/installation' },
+          ]
+        },
+        {
+          text: 'Community',
+          items: [
+            { text: 'Join Discord', link: 'https://discord.gg/sTbfxV9xyU' },
+            { text: 'GitHub', link: 'https://github.com/ConceptKernel' },
+            { text: 'Contributing', link: '/v3.4/contributing' },
+          ]
+        }
+      ],
+      '/v3.5-alpha3/': [
+        {
+          text: 'Introduction',
+          items: [
+            { text: 'What is CKP?', link: '/v3.5-alpha3/introduction' },
+            { text: 'Architecture', link: '/v3.5-alpha3/architecture' },
+          ]
+        },
+        {
+          text: 'Core Concepts',
+          items: [
+            { text: 'Kernels', link: '/v3.5-alpha3/concepts/kernels' },
+            { text: 'Ontology', link: '/v3.5-alpha3/concepts/ontology' },
+            { text: 'Protocol', link: '/v3.5-alpha3/concepts/protocol' },
+            { text: 'Consensus', link: '/v3.5-alpha3/concepts/consensus' },
+            { text: 'Governance', link: '/v3.5-alpha3/concepts/governance' },
+          ]
+        },
+        {
+          text: 'Ontology',
+          items: [
+            { text: 'Versions', link: '/v3.5-alpha3/ontology/versions' },
+          ]
+        },
+        {
+          text: 'Spec',
+          items: [
+            { text: 'Three Loops', link: '/v3.5-alpha3/spec/three-loops' },
+            { text: 'Proof Model', link: '/v3.5-alpha3/spec/proof-model' },
+          ]
+        },
+        {
+          text: 'Getting Started',
+          items: [
+            { text: 'Quickstart', link: '/v3.5-alpha3/getting-started/quickstart' },
+            { text: 'Installation', link: '/v3.5-alpha3/getting-started/installation' },
+          ]
+        },
+        {
+          text: 'Community',
+          items: [
+            { text: 'Join Discord', link: 'https://discord.gg/sTbfxV9xyU' },
+            { text: 'GitHub', link: 'https://github.com/ConceptKernel' },
+            { text: 'Contributing', link: '/v3.5-alpha3/contributing' },
+          ]
+        }
+      ],
+    },
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/ConceptKernel' },
@@ -86,5 +143,7 @@ export default defineConfig({
       pattern: 'https://github.com/ConceptKernel/conceptkernel.github.io/edit/main/docs/:path',
       text: 'Edit this page on GitHub'
     }
-  }
-})
+  },
+
+  mermaid: {},
+}))

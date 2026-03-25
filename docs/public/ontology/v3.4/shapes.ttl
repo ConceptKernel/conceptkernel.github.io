@@ -1,0 +1,304 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix ckp: <https://conceptkernel.org/ontology/v3.4/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# ============================================================================
+# ConceptKernel SHACL Shapes - Triple Validation Constraints
+# ============================================================================
+# Purpose: Ensure ALL triples in Jena Fuseki conform to CKP protocol rules
+# Method: SHACL validation (more powerful than RDFS inference alone)
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Kernel Shape - Validates all ckp:Kernel instances
+# ----------------------------------------------------------------------------
+ckp:KernelShape
+    a sh:NodeShape ;
+    sh:targetClass ckp:Kernel ;
+
+    # Required properties
+    sh:property [
+        sh:path ckp:kernelName ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:pattern "^[a-zA-Z][a-zA-Z0-9_-]*$" ;
+        sh:message "Kernel must have exactly one valid kernelName (alphanumeric, starts with letter)" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:apiVersion ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:pattern "^conceptkernel/v[0-9]+\\.[0-9]+\\.[0-9]+$" ;
+        sh:message "Kernel must have apiVersion matching 'conceptkernel/v1.3.20' format" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:kind ;
+        sh:in ( "ConceptKernel" ) ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Kernel kind must be 'ConceptKernel'" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:hasOntology ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:minCount 1 ;
+        sh:message "Kernel must have at least one ontology definition" ;
+    ] ;
+
+    # Communication Constraint: Kernels can ONLY communicate via Edges
+    sh:sparql [
+        sh:message "Kernels can ONLY communicate via authorized Edges (Data Sovereignty)" ;
+        sh:prefixes ckp: ;
+        sh:select """
+            SELECT $this ?directComm
+            WHERE {
+                $this ?directComm ?target .
+                ?target a ckp:Kernel .
+                FILTER NOT EXISTS {
+                    ?edge a ckp:Edge ;
+                          ckp:source $this ;
+                          ckp:target ?target ;
+                          ckp:isAuthorized true .
+                }
+            }
+        """ ;
+    ] .
+
+# ----------------------------------------------------------------------------
+# Edge Shape - Validates all ckp:Edge instances
+# ----------------------------------------------------------------------------
+ckp:EdgeShape
+    a sh:NodeShape ;
+    sh:targetClass ckp:Edge ;
+
+    # Required properties
+    sh:property [
+        sh:path ckp:source ;
+        sh:class ckp:Kernel ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Edge must have exactly one source Kernel" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:target ;
+        sh:class ckp:Kernel ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Edge must have exactly one target Kernel" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:predicate ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        # Valid CKP predicates (from ck-predicates.v1.3.16.ttl)
+        sh:in (
+            "requires" "notifies" "validates" "provides"
+            "invokes" "governs" "audits" "precedes" "triggers"
+        ) ;
+        sh:message "Edge predicate must be one of the approved CKP predicates" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:isAuthorized ;
+        sh:datatype xsd:boolean ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:hasValue true ;
+        sh:message "Edge MUST be authorized (isAuthorized=true) for Data Sovereignty" ;
+    ] ;
+
+    # Authorization Constraint: ONLY Governor can create Edges
+    sh:property [
+        sh:path ckp:createdBy ;
+        sh:pattern "^ckp://System\\.Governor:v[0-9]+\\.[0-9]+\\.[0-9]+$" ;
+        sh:minCount 1 ;
+        sh:message "Edge can ONLY be created by Governor (Data Sovereignty)" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:createdAt ;
+        sh:datatype xsd:dateTime ;
+        sh:minCount 1 ;
+        sh:message "Edge must have creation timestamp" ;
+    ] ;
+
+    # Self-loop prevention
+    sh:sparql [
+        sh:message "Edge cannot connect Kernel to itself (no self-loops)" ;
+        sh:prefixes ckp: ;
+        sh:select """
+            SELECT $this
+            WHERE {
+                $this ckp:source ?source ;
+                      ckp:target ?target .
+                FILTER(?source = ?target)
+            }
+        """ ;
+    ] .
+
+# ----------------------------------------------------------------------------
+# Instance Shape - Validates all ckp:Instance instances
+# ----------------------------------------------------------------------------
+ckp:InstanceShape
+    a sh:NodeShape ;
+    sh:targetClass ckp:Instance ;
+
+    sh:property [
+        sh:path ckp:instanceId ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Instance must have exactly one instanceId" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:kernelName ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Instance must reference parent Kernel" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:createdAt ;
+        sh:datatype xsd:dateTime ;
+        sh:minCount 1 ;
+        sh:message "Instance must have creation timestamp" ;
+    ] ;
+
+    # Provenance Constraint: Instance MUST be traceable to Edge
+    sh:property [
+        sh:path ckp:sourceEdge ;
+        sh:class ckp:Edge ;
+        sh:minCount 1 ;
+        sh:message "Instance MUST be traceable to source Edge (provenance requirement)" ;
+    ] .
+
+# ----------------------------------------------------------------------------
+# Audit Event Shape - Validates audit log entries
+# ----------------------------------------------------------------------------
+ckp:AuditEventShape
+    a sh:NodeShape ;
+    sh:targetClass ckp:AuditEvent ;
+
+    sh:property [
+        sh:path ckp:operation ;
+        sh:in ( "CREATE" "UPDATE" "DELETE" "QUERY" ) ;
+        sh:minCount 1 ;
+        sh:message "Audit event must specify operation type" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:actor ;
+        sh:pattern "^ckp://System\\.(Governor|EdgeRouter):v[0-9]+\\.[0-9]+\\.[0-9]+$" ;
+        sh:minCount 1 ;
+        sh:message "Audit event must identify CKP system actor" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:timestamp ;
+        sh:datatype xsd:dateTime ;
+        sh:minCount 1 ;
+        sh:message "Audit event must have timestamp" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:graphUri ;
+        sh:nodeKind sh:IRI ;
+        sh:minCount 1 ;
+        sh:message "Audit event must specify target graph" ;
+    ] .
+
+# ----------------------------------------------------------------------------
+# Graph-Level Constraints
+# ----------------------------------------------------------------------------
+
+# Protocol Ontology Graph - IMMUTABLE
+ckp:ProtocolOntologyGraphShape
+    a sh:NodeShape ;
+    sh:targetObjectsOf rdf:type ;
+    sh:sparql [
+        sh:message "Protocol ontology graph is IMMUTABLE - cannot be modified after loading" ;
+        sh:prefixes ckp: ;
+        sh:select """
+            SELECT $this
+            WHERE {
+                GRAPH <https://conceptkernel.org/ontology/v3.4/protocol> {
+                    $this ?p ?o .
+                }
+                # Check if modification occurred after initial load
+                FILTER EXISTS {
+                    GRAPH <https://conceptkernel.org/audit> {
+                        ?event a ckp:AuditEvent ;
+                               ckp:operation "UPDATE" ;
+                               ckp:graphUri <https://conceptkernel.org/ontology/v3.4/protocol> .
+                    }
+                }
+            }
+        """ ;
+    ] .
+
+# Edge Graph - Governor-only writes
+ckp:EdgeGraphShape
+    a sh:NodeShape ;
+    sh:targetClass ckp:Edge ;
+    sh:sparql [
+        sh:message "Edge graph can ONLY be modified by Governor (Data Sovereignty)" ;
+        sh:prefixes ckp: ;
+        sh:select """
+            SELECT $this
+            WHERE {
+                GRAPH <https://conceptkernel.org/edges> {
+                    $this a ckp:Edge .
+                }
+                FILTER NOT EXISTS {
+                    GRAPH <https://conceptkernel.org/audit> {
+                        ?event ckp:subject $this ;
+                               ckp:actor ?actor .
+                        FILTER(STRSTARTS(STR(?actor), "ckp://System.Governor:"))
+                    }
+                }
+            }
+        """ ;
+    ] .
+
+# ----------------------------------------------------------------------------
+# Cross-Graph Consistency Constraints
+# ----------------------------------------------------------------------------
+
+# Ensure all referenced Kernels exist
+ckp:KernelReferenceIntegrityShape
+    a sh:NodeShape ;
+    sh:targetClass ckp:Edge ;
+    sh:sparql [
+        sh:message "Edge references non-existent Kernel (referential integrity violation)" ;
+        sh:prefixes ckp: ;
+        sh:select """
+            SELECT $this ?missing
+            WHERE {
+                $this ckp:source ?missing .
+                FILTER NOT EXISTS {
+                    ?missing a ckp:Kernel .
+                }
+            }
+            UNION
+            {
+                $this ckp:target ?missing .
+                FILTER NOT EXISTS {
+                    ?missing a ckp:Kernel .
+                }
+            }
+        """ ;
+    ] .
+
+# EOF - ConceptKernel SHACL Shapes v1.3.20

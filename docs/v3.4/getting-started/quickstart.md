@@ -72,8 +72,8 @@ SESSION[s001] (Cat Admission)
 
 ## Next Steps
 
-- Read the [Architecture](/architecture) to understand the system design
-- Explore [Core Concepts](/concepts/kernels) to learn about kernels, ontology, and consensus
+- Read the [Architecture](/v3.4/architecture) to understand the system design
+- Explore [Core Concepts](/v3.4/concepts/kernels) to learn about kernels, ontology, and consensus
 - Browse the [GitHub repositories](https://github.com/ConceptKernel) for source code
 
 ---

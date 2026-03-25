@@ -1,0 +1,382 @@
+{
+  "ontology": {
+    "name": "ConceptKernel BFO Ontology",
+    "version": "v1.3.18",
+    "draft": "STABLE",
+    "date": "2025-12-06",
+    "description": "Formal ontology mapping ConceptKernel architecture to Basic Formal Ontology (BFO)",
+    "baseUri": "https://conceptkernel.org/ontology/v3.4/",
+    "bfoVersion": "2020",
+    "bfoUri": "http://purl.obolibrary.org/obo/bfo.owl"
+  },
+  "files": {
+    "base": {
+      "filename": "conceptkernel-bfo-base.ttl",
+      "path": "/concepts/.ontology/conceptkernel-bfo-base.ttl",
+      "format": "text/turtle",
+      "description": "Core BFO mappings for ConceptKernel continuants (Kernel, Edge, Instance, Ontology)",
+      "coverage": {
+        "entities": [
+          "ckp:Kernel",
+          "ckp:HotKernel",
+          "ckp:ColdKernel",
+          "ckp:Edge",
+          "ckp:Instance",
+          "ckp:KernelOntology",
+          "ckp:EdgeKernel",
+          "ckp:ConsensusKernel",
+          "ckp:WssHubKernel"
+        ],
+        "bfoClasses": [
+          "bfo:IndependentContinuant",
+          "bfo:MaterialEntity",
+          "bfo:GenericallyDependentContinuant",
+          "bfo:SpecificallyDependentContinuant",
+          "bfo:Quality",
+          "bfo:Disposition"
+        ]
+      }
+    },
+    "processes": {
+      "filename": "conceptkernel-processes.ttl",
+      "path": "/concepts/.ontology/conceptkernel-processes.ttl",
+      "format": "text/turtle",
+      "description": "Occurrent (Process) definitions for ConceptKernel temporal events",
+      "coverage": {
+        "entities": [
+          "ckpp:InvocationProcess",
+          "ckpp:EdgeCommunicationProcess",
+          "ckpp:EdgeSubscriptionProcess",
+          "ckpp:ConsensusProcess",
+          "ckpp:BroadcastProcess",
+          "ckpp:TemporalPart",
+          "ckpp:ProcessBoundary",
+          "ckpp:StatusChangeEvent"
+        ],
+        "bfoClasses": [
+          "bfo:Process",
+          "bfo:ProcessBoundary",
+          "bfo:TemporalRegion"
+        ]
+      }
+    },
+    "relations": {
+      "filename": "conceptkernel-relations.ttl",
+      "path": "/concepts/.ontology/conceptkernel-relations.ttl",
+      "format": "text/turtle",
+      "description": "Relationships and inference rules for automatic reasoning",
+      "coverage": {
+        "properties": [
+          "ckpr:connected_by",
+          "ckpr:depends_on",
+          "ckpr:participates_in",
+          "ckpr:mediates",
+          "ckpr:created_by_process",
+          "ckpr:can_reach",
+          "ckpr:upstream_of",
+          "ckpr:downstream_of",
+          "ckpr:sibling_of",
+          "ckpr:authorizes_edge",
+          "ckpr:requires_consensus"
+        ],
+        "swrlRules": [
+          "InstanceProvenanceRule",
+          "EdgeCommunicationInferenceRule",
+          "SiblingKernelRule",
+          "WorkflowChainRule",
+          "AuthorizationRequirementRule",
+          "InstanceDependencyRule",
+          "ConsensusRequirementRule"
+        ],
+        "propertyChains": [
+          "connected_by (hasOutgoingEdge o hasTarget)",
+          "creates (hasOutputInstance)",
+          "can_reach (transitive closure)"
+        ]
+      }
+    }
+  },
+  "coverage": {
+    "overall": {
+      "score": 0.65,
+      "description": "Overall BFO alignment coverage: 65%"
+    },
+    "continuants": {
+      "score": 0.85,
+      "status": "WELL_IMPLEMENTED",
+      "entities": {
+        "Kernel": {
+          "score": 0.85,
+          "status": "WELL_IMPLEMENTED",
+          "implementation": "/core/src/Kernel.js:9-216",
+          "gaps": [
+            "Process URN tracking missing",
+            "Temporal lifecycle events not tracked"
+          ]
+        },
+        "Edge": {
+          "score": 0.85,
+          "status": "WELL_IMPLEMENTED",
+          "implementation": "/core/src/EdgeKernel.js:1-448",
+          "gaps": [
+            "Edge creation doesn't trigger consensus",
+            "SHACL validation stub only"
+          ]
+        },
+        "Instance": {
+          "score": 0.80,
+          "status": "WELL_IMPLEMENTED",
+          "implementation": "/core/src/drivers/FileSystemDriver.js:71-83",
+          "gaps": [
+            "No Process URN linkage",
+            "ckp:// URI not fully implemented"
+          ]
+        },
+        "Ontology": {
+          "score": 0.70,
+          "status": "PARTIAL",
+          "implementation": "/core/src/drivers/localstorage/ontology.js",
+          "gaps": [
+            "No BFO class mappings in conceptkernel.yaml",
+            "No formal ontology reasoning"
+          ]
+        }
+      }
+    },
+    "occurrents": {
+      "score": 0.45,
+      "status": "PARTIAL",
+      "processes": {
+        "Invocation": {
+          "score": 0.60,
+          "status": "PARTIAL",
+          "implementation": "/core/src/Kernel.js:handleJob():69-126",
+          "gaps": [
+            "No Process URN generation",
+            "Temporal parts not tracked"
+          ]
+        },
+        "EdgeCommunication": {
+          "score": 0.65,
+          "status": "PARTIAL",
+          "implementation": "/core/src/EdgeKernel.js:relayDirect():183-236",
+          "gaps": [
+            "No Process URN generation",
+            "Temporal parts implicit only"
+          ]
+        },
+        "EdgeSubscription": {
+          "score": 0.00,
+          "status": "NOT_IMPLEMENTED",
+          "implementation": "MISSING",
+          "gaps": [
+            "Edge creation is manual (ck create-edge)",
+            "No consensus integration",
+            "No WssHub announcements"
+          ]
+        },
+        "Consensus": {
+          "score": 0.50,
+          "status": "PARTIAL",
+          "implementation": "/concepts/System.Consensus/tool/tool.js:43-146",
+          "gaps": [
+            "No Process URN",
+            "Approved proposals don't auto-execute",
+            "No WssHub integration"
+          ]
+        },
+        "Broadcast": {
+          "score": 0.70,
+          "status": "PARTIAL",
+          "implementation": "/concepts/System.WssHub/tool/tool.js:59-136",
+          "gaps": [
+            "No Process URN",
+            "No consensus event handling",
+            "No client filtering"
+          ]
+        }
+      }
+    },
+    "mediators": {
+      "EdgeKernel": {
+        "score": 0.85,
+        "status": "WELL_IMPLEMENTED",
+        "role": "Communication Mediator",
+        "implementation": "/core/src/EdgeKernel.js"
+      },
+      "ConsensusKernel": {
+        "score": 0.50,
+        "status": "PARTIAL",
+        "role": "Governance Mediator",
+        "implementation": "/concepts/System.Consensus/tool/tool.js",
+        "criticalGap": "Not integrated with EdgeKernel"
+      },
+      "WssHubKernel": {
+        "score": 0.70,
+        "status": "WELL_IMPLEMENTED",
+        "role": "Broadcast Mediator",
+        "implementation": "/concepts/System.WssHub/tool/tool.js",
+        "criticalGap": "No consensus announcements"
+      }
+    }
+  },
+  "criticalGaps": [
+    {
+      "priority": "HIGH",
+      "category": "Process Tracking",
+      "gap": "No explicit Process URN generation for Occurrents",
+      "impact": "Cannot reference or query past processes, no audit trail",
+      "affectedProcesses": [
+        "Invocation",
+        "EdgeCommunication",
+        "Consensus",
+        "Broadcast"
+      ]
+    },
+    {
+      "priority": "HIGH",
+      "category": "Temporal Reasoning",
+      "gap": "Temporal parts not explicitly tracked",
+      "impact": "No process phase recording, poor debugging, no performance metrics",
+      "affectedProcesses": [
+        "Invocation",
+        "EdgeCommunication",
+        "Consensus"
+      ]
+    },
+    {
+      "priority": "CRITICAL",
+      "category": "Three Mediators Integration",
+      "gap": "EdgeKernel ↔ Consensus ↔ WssHub not integrated",
+      "impact": "Architectural constraint (consensus-required Edge creation) not enforced",
+      "affectedProcesses": [
+        "EdgeSubscription"
+      ]
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "Instance URIs",
+      "gap": "Instances not fully addressable via ckp:// protocol",
+      "impact": "No uniform resource identifier, breaks protocol consistency",
+      "affectedEntities": [
+        "Instance"
+      ]
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "Type Safety",
+      "gap": "SHACL validation stub only",
+      "impact": "Type safety not enforced, contract violations possible",
+      "affectedEntities": [
+        "Edge"
+      ]
+    }
+  ],
+  "recommendations": {
+    "phase1": {
+      "name": "Core BFO Tracking",
+      "duration": "1-2 weeks",
+      "tasks": [
+        "Create /core/src/ProcessTracker.js for centralized process tracking",
+        "Update Kernel.js:handleJob() to generate Invocation Process URNs",
+        "Update EdgeKernel.js:relayDirect() to generate EdgeCommunication Process URNs",
+        "Record temporal parts (accepted, processing, completed) in all processes",
+        "Add Process URN to transaction records"
+      ],
+      "deliverables": [
+        "All processes have explicit URNs",
+        "Temporal parts tracked",
+        "Process duration metrics available"
+      ]
+    },
+    "phase2": {
+      "name": "Three Mediators Integration",
+      "duration": "3-4 weeks",
+      "tasks": [
+        "Add EdgeKernel subscription endpoint (POST /subscribe)",
+        "EdgeKernel triggers consensus for Edge creation",
+        "System.Consensus adds edge_creation proposal type",
+        "System.Consensus implements enforcement (execute approved proposals)",
+        "WssHub adds edge:created and consensus:* event types"
+      ],
+      "deliverables": [
+        "Edge creation requires consensus",
+        "Public announcements for all Edge creation",
+        "Full audit trail of governance decisions"
+      ]
+    },
+    "phase3": {
+      "name": "Type Safety & Validation",
+      "duration": "5-6 weeks",
+      "tasks": [
+        "Implement SHACL validation in EdgeKernel",
+        "Add ckp:// instance URI resolution",
+        "Create SHACL rule templates",
+        "Add contract validation to Kernel bootstrap"
+      ],
+      "deliverables": [
+        "Type safety enforced at Edge boundaries",
+        "Uniform ckp:// addressing",
+        "Contract violations caught at runtime"
+      ]
+    },
+    "phase4": {
+      "name": "BFO Formal Mappings",
+      "duration": "7-8 weeks",
+      "tasks": [
+        "Create /core/src/BFOValidator.js",
+        "Add BFO annotations schema to conceptkernel.yaml",
+        "Update Compliance.js with BFO validation",
+        "Generate BFO-compliant RDF/OWL exports"
+      ],
+      "deliverables": [
+        "All kernels declare BFO classes",
+        "Automatic BFO compliance checking",
+        "RDF/OWL export for formal reasoning"
+      ]
+    }
+  },
+  "tooling": {
+    "reasoners": [
+      "Pellet",
+      "HermiT",
+      "FaCT++",
+      "ELK"
+    ],
+    "editors": [
+      "Protégé",
+      "TopBraid Composer"
+    ],
+    "sparqlEngines": [
+      "Apache Jena Fuseki",
+      "GraphDB",
+      "Stardog"
+    ],
+    "validators": [
+      "shacl-js",
+      "rdf-validate-shacl",
+      "TopBraid SHACL API"
+    ]
+  },
+  "compliance": {
+    "integration": {
+      "file": "/core/src/Compliance.js",
+      "recommendation": "Load ontology index and validate kernel conceptkernel.yaml against BFO base classes",
+      "tasks": [
+        "Check if kernel declares BFO class mappings in conceptkernel.yaml",
+        "Validate queue_contract dispositions against BFO:Disposition",
+        "Verify Edge relationships are authorized",
+        "Check Process URN generation compliance"
+      ]
+    }
+  },
+  "references": {
+    "bfo": "http://purl.obolibrary.org/obo/bfo.owl",
+    "bfoSpecification": "https://basic-formal-ontology.org/",
+    "documentation": [
+      "/CKP_BFO_ONTOLOGY.v1.3.11.DRAFT-01.md",
+      "/BFO_ALIGNMENT_ANALYSIS.v1.3.11.DRAFT-01.md",
+      "/SPARQL_QUERIES.v1.3.11.DRAFT-01.md"
+    ]
+  }
+}

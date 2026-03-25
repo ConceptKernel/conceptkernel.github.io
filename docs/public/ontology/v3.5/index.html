@@ -1,24 +1,113 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>CKP Ontology v3.5</title>
-<style>body{font-family:system-ui;background:#1a1a2e;color:#e0e0e0;max-width:600px;margin:4rem auto;padding:0 2rem}
-a{color:#60a5fa}h1{color:#a78bfa}code{background:#111;padding:2px 6px;border-radius:3px;font-size:0.9rem}
-.file{display:block;padding:0.3rem 0}.new{color:#eab308;font-size:0.75rem}</style></head><body>
-<h1>CKP Ontology v3.5 <span class="new">alpha-3</span></h1>
-<p><code>@prefix ckp: &lt;https://conceptkernel.org/ontology/v3.5/&gt;</code></p>
-<h3>Turtle Files</h3>
-<a class="file" href="core.ttl">core.ttl</a>
-<a class="file" href="kernel-metadata.ttl">kernel-metadata.ttl</a>
-<a class="file" href="processes.ttl">processes.ttl</a>
-<a class="file" href="relations.ttl">relations.ttl</a>
-<a class="file" href="rbac.ttl">rbac.ttl</a>
-<a class="file" href="self-improvement.ttl">self-improvement.ttl</a>
-<a class="file" href="shapes.ttl">shapes.ttl</a>
-<a class="file" href="workflow.ttl">workflow.ttl</a>
-<a class="file" href="kernel-entity-template.ttl">kernel-entity-template.ttl</a>
-<a class="file" href="base-instances.ttl">base-instances.ttl <span class="new">new in v3.5</span></a>
-<a class="file" href="proof.ttl">proof.ttl <span class="new">new in v3.5</span></a>
-<h3>Schema</h3>
-<a class="file" href="schema.yaml">schema.yaml (LinkML)</a>
-<a class="file" href="index.json">index.json</a>
-<p style="margin-top:2rem;color:#888;font-size:0.8rem"><a href="/">← conceptkernel.org</a></p>
-</body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CKP Ontology v3.5 — Concept Kernel Protocol</title>
+  <style>
+    body { font-family: 'Noto Sans', 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background: #fff; color: #333; line-height: 1.6; }
+    .header { background: #005a9c; color: #fff; padding: 0.8rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .header a { color: #fff; text-decoration: none; font-size: 0.95rem; }
+    .header .title { font-weight: 600; }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    .meta { background: #f8f9fa; border-left: 4px solid #b45309; padding: 1rem 1.5rem; margin-bottom: 2rem; font-size: 0.88rem; }
+    .meta dt { font-weight: 600; color: #005a9c; }
+    .meta dd { margin: 0 0 0.4rem 0; }
+    .meta a { color: #005a9c; }
+    h1 { color: #005a9c; font-size: 1.6rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.15rem; color: #005a9c; border-bottom: 1px solid #ddd; padding-bottom: 0.3rem; margin-top: 2rem; }
+    .status { display: inline-block; padding: 2px 10px; border-radius: 3px; font-size: 0.75rem; font-weight: 600; }
+    .status-alpha { background: #fef3c7; color: #b45309; }
+    .new-tag { display: inline-block; background: #fef3c7; color: #b45309; font-size: 0.7rem; padding: 1px 6px; border-radius: 3px; font-weight: 600; margin-left: 0.3rem; vertical-align: middle; }
+    .prefix-box { background: #f0f4f8; border: 1px solid #d0dae4; padding: 0.7rem 1rem; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.88rem; margin: 1rem 0; }
+    table { border-collapse: collapse; width: 100%; margin: 0.8rem 0; }
+    th { text-align: left; background: #f0f0f0; padding: 0.45rem 0.7rem; border: 1px solid #ddd; font-size: 0.8rem; color: #555; }
+    td { padding: 0.45rem 0.7rem; border: 1px solid #ddd; font-size: 0.88rem; }
+    td a { color: #005a9c; text-decoration: none; }
+    td a:hover { text-decoration: underline; }
+    code { background: #f4f4f4; padding: 0.1em 0.35em; border-radius: 2px; font-size: 0.82rem; font-family: 'Consolas', monospace; }
+    .bfo { font-family: monospace; font-size: 0.82rem; color: #666; }
+    .footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #ddd; color: #999; font-size: 0.78rem; }
+    .footer a { color: #005a9c; }
+    p.abstract { font-size: 0.92rem; max-width: 720px; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <span class="title"><a href="https://conceptkernel.org">Concept Kernel Protocol</a></span>
+  <span><a href="https://conceptkernel.org/ontology/v3.4/">v3.4 (stable)</a></span>
+</div>
+<div class="container">
+
+<h1>CKP Ontology v3.5 <span class="status status-alpha">Alpha-3</span></h1>
+
+<dl class="meta">
+  <dt>This version</dt>
+  <dd><a href="https://conceptkernel.org/ontology/v3.5/">https://conceptkernel.org/ontology/v3.5/</a></dd>
+  <dt>Previous version</dt>
+  <dd><a href="https://conceptkernel.org/ontology/v3.4/">https://conceptkernel.org/ontology/v3.4/</a> (stable)</dd>
+  <dt>Namespace URI</dt>
+  <dd><code>https://conceptkernel.org/ontology/v3.5/</code></dd>
+  <dt>Status</dt>
+  <dd>Alpha-3 — extends v3.4 with base instance shapes, materialised proof, governance enforcement</dd>
+  <dt>Editors</dt>
+  <dd>Peter Styk, ConceptKernel</dd>
+  <dt>Source</dt>
+  <dd><a href="https://github.com/ConceptKernel/conceptkernel.github.io">GitHub</a></dd>
+</dl>
+
+<div class="prefix-box">@prefix ckp: &lt;https://conceptkernel.org/ontology/v3.5/&gt; .</div>
+
+<h2>Abstract</h2>
+<p class="abstract">v3.5 extends the CKP ontology with base instance shapes inherited by all kernels, a materialised proof model with SHA-256 hash chains, and the kernel-as-datatype rule — every kernel's <code>ontology.yaml</code> is its type definition, and every instance is a typed individual. The ontology governs the tool, not the reverse.</p>
+
+<h2>Ontology Modules</h2>
+<table>
+  <tr><th>Module</th><th>File</th><th>Description</th><th>BFO</th></tr>
+  <tr><td>Core</td><td><a href="core.ttl">core.ttl</a></td><td>Kernel, Edge, Instance, HotKernel, ColdKernel</td><td class="bfo">0000040, 0000031</td></tr>
+  <tr><td>Base Instances</td><td><a href="base-instances.ttl">base-instances.ttl</a> <span class="new-tag">v3.5</span></td><td>InstanceManifest, SealedInstance, LedgerEntry</td><td class="bfo">0000031</td></tr>
+  <tr><td>Proof</td><td><a href="proof.ttl">proof.ttl</a> <span class="new-tag">v3.5</span></td><td>ProofRecord, ProofCheck, CheckType, ProofOutcome</td><td></td></tr>
+  <tr><td>Kernel Metadata</td><td><a href="kernel-metadata.ttl">kernel-metadata.ttl</a></td><td>Roles and Functions borne by kernels</td><td class="bfo">0000023, 0000034</td></tr>
+  <tr><td>Processes</td><td><a href="processes.ttl">processes.ttl</a></td><td>Invocation, EdgeCommunication, Consensus, Broadcast</td><td class="bfo">0000015</td></tr>
+  <tr><td>Relations</td><td><a href="relations.ttl">relations.ttl</a></td><td>Properties, property chains, SWRL rules</td><td></td></tr>
+  <tr><td>RBAC</td><td><a href="rbac.ttl">rbac.ttl</a></td><td>Authorization for inter-kernel communication</td><td></td></tr>
+  <tr><td>Workflow</td><td><a href="workflow.ttl">workflow.ttl</a></td><td>Workflow execution temporal patterns</td><td class="bfo">0000015</td></tr>
+  <tr><td>Self-Improvement</td><td><a href="self-improvement.ttl">self-improvement.ttl</a></td><td>Validation issues and recommendations</td><td></td></tr>
+  <tr><td>Shapes</td><td><a href="shapes.ttl">shapes.ttl</a></td><td>SHACL validation for protocol conformance</td><td></td></tr>
+</table>
+
+<h2>v3.5 Additions</h2>
+<table>
+  <tr><th>Addition</th><th>Module</th><th>Description</th></tr>
+  <tr><td>Kernel-as-Datatype</td><td>base-instances.ttl</td><td>A kernel IS a datatype. <code>ontology.yaml</code> defines the type. Instances are typed individuals.</td></tr>
+  <tr><td>Materialised Proof</td><td>proof.ttl</td><td>SHA-256 hash chain in <code>proof.json</code> stored with every instance. Governance evidence.</td></tr>
+  <tr><td>Base Instance Shapes</td><td>base-instances.ttl</td><td>InstanceManifest, SealedInstance, LedgerEntry — inherited by every kernel.</td></tr>
+  <tr><td>Namespace Convergence</td><td>all</td><td>Three legacy namespaces unified to <code>https://conceptkernel.org/ontology/v3.5/</code></td></tr>
+</table>
+
+<h2>Supporting Files</h2>
+<table>
+  <tr><th>File</th><th>Format</th><th>Description</th></tr>
+  <tr><td><a href="kernel-entity-template.ttl">kernel-entity-template.ttl</a></td><td>Turtle</td><td>Template for per-kernel ontology.ttl generation</td></tr>
+  <tr><td><a href="schema.yaml">schema.yaml</a></td><td>LinkML</td><td>Governance definitions + base instance classes + proof types</td></tr>
+  <tr><td><a href="index.json">index.json</a></td><td>JSON</td><td>Machine-readable metadata with coverage scores</td></tr>
+</table>
+
+<h2>Namespaces</h2>
+<table>
+  <tr><th>Prefix</th><th>URI</th></tr>
+  <tr><td><code>ckp:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/</code></td></tr>
+  <tr><td><code>ckpp:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/process/</code></td></tr>
+  <tr><td><code>ckpr:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/relation/</code></td></tr>
+  <tr><td><code>ckpw:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/workflow/</code></td></tr>
+  <tr><td><code>ckpi:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/improvement/</code></td></tr>
+</table>
+
+<div class="footer">
+  <a href="https://conceptkernel.org">conceptkernel.org</a> · <a href="https://github.com/ConceptKernel">GitHub</a> · <a href="https://discord.gg/sTbfxV9xyU">Discord</a><br>
+  Copyright 2024-present ConceptKernel Contributors. MIT License.
+</div>
+
+</div>
+</body>
+</html>

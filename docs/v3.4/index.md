@@ -3,71 +3,161 @@ layout: home
 hero:
   name: Concept Kernel
   text: Protocol
-  tagline: An open protocol for autonomous concept governance across distributed agents and semantic systems.
+  tagline: Autonomous governance for distributed agents through boundary isolation and ontological enforcement.
   actions:
     - theme: brand
-      text: Get Started
-      link: /v3.4/getting-started/quickstart
-    - theme: alt
-      text: Introduction
+      text: Read the Docs
       link: /v3.4/introduction
     - theme: alt
-      text: Join Discord
+      text: v3.5 Alpha
+      link: /v3.5-alpha3/
+    - theme: alt
+      text: Discord
       link: https://discord.gg/sTbfxV9xyU
-
-features:
-  - icon: "\U0001F9E0"
-    title: Autonomous Kernels
-    details: Every concept is a self-governing kernel that defends its own ontology, enforces constraints, and participates in consensus.
-  - icon: "\U0001F310"
-    title: Protocol-Driven
-    details: All operations flow through explicit protocol messages. No side effects without logging. Full auditability and replay capability.
-  - icon: "\U0001F50F"
-    title: Ontology-First
-    details: Built on LinkML schemas and SHACL constraints. Every concept is type-safe, validated, and semantically grounded.
-  - icon: "\U0001F91D"
-    title: Consensus Governance
-    details: Concept mutations require cryptographic proofs and consensus. No unilateral changes. Trust through verification.
-  - icon: "\U0001F4E1"
-    title: Burst Propagation
-    details: Protocol-driven trigger waves traverse ontological relationships, evaluating constraints at each hop across the concept graph.
-  - icon: "\U0001F680"
-    title: Agent-Ready
-    details: Designed for billions of autonomous agents to share, govern, and evolve concepts with semantic coherence at scale.
 ---
 
+<script setup>
+import { onMounted } from 'vue'
+
+onMounted(async () => {
+  if (typeof window === 'undefined') return
+  const c = document.getElementById('kernel-canvas-v34')
+  if (!c) return
+  const ctx = c.getContext('2d')
+  const dpr = window.devicePixelRatio || 1
+
+  function resize() {
+    c.width = c.offsetWidth * dpr
+    c.height = c.offsetHeight * dpr
+    ctx.scale(dpr, dpr)
+  }
+  resize()
+  window.addEventListener('resize', resize)
+
+  const nodes = []
+  const edges = []
+  const w = () => c.offsetWidth
+  const h = () => c.offsetHeight
+
+  const names = ['CK.Lib', 'CK.Task', 'CK.Goal', 'CK.Ontology', 'CK.Discovery',
+                 'CK.Compliance', 'LOCAL.Claude', 'CS.Voting', 'CK.Email']
+
+  for (let i = 0; i < names.length; i++) {
+    nodes.push({
+      x: Math.random() * 0.8 + 0.1,
+      y: Math.random() * 0.8 + 0.1,
+      vx: (Math.random() - 0.5) * 0.0003,
+      vy: (Math.random() - 0.5) * 0.0003,
+      r: 3 + Math.random() * 2,
+      name: names[i],
+      phase: Math.random() * Math.PI * 2,
+    })
+  }
+
+  for (let i = 0; i < nodes.length; i++) {
+    const targets = Math.floor(Math.random() * 2) + 1
+    for (let t = 0; t < targets; t++) {
+      const j = Math.floor(Math.random() * nodes.length)
+      if (j !== i) edges.push([i, j])
+    }
+  }
+
+  let frame = 0
+  function draw() {
+    frame++
+    ctx.clearRect(0, 0, w(), h())
+
+    for (const n of nodes) {
+      n.x += n.vx
+      n.y += n.vy
+      if (n.x < 0.05 || n.x > 0.95) n.vx *= -1
+      if (n.y < 0.05 || n.y > 0.95) n.vy *= -1
+    }
+
+    for (const [i, j] of edges) {
+      const a = nodes[i], b = nodes[j]
+      ctx.beginPath()
+      ctx.moveTo(a.x * w(), a.y * h())
+      ctx.lineTo(b.x * w(), b.y * h())
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.12)'
+      ctx.lineWidth = 1
+      ctx.stroke()
+    }
+
+    for (const n of nodes) {
+      const pulse = Math.sin(frame * 0.02 + n.phase) * 0.3 + 0.7
+      ctx.beginPath()
+      ctx.arc(n.x * w(), n.y * h(), n.r * pulse * 1.5, 0, Math.PI * 2)
+      ctx.fillStyle = `rgba(96, 165, 250, ${0.15 + pulse * 0.15})`
+      ctx.fill()
+
+      ctx.beginPath()
+      ctx.arc(n.x * w(), n.y * h(), n.r * 0.7, 0, Math.PI * 2)
+      ctx.fillStyle = `rgba(139, 92, 246, ${0.5 + pulse * 0.3})`
+      ctx.fill()
+
+      ctx.font = '9px system-ui'
+      ctx.fillStyle = `rgba(200, 200, 220, ${0.3 + pulse * 0.2})`
+      ctx.fillText(n.name, n.x * w() + n.r + 4, n.y * h() + 3)
+    }
+
+    requestAnimationFrame(draw)
+  }
+  draw()
+})
+</script>
+
+<div class="kernel-graph">
+  <canvas id="kernel-canvas-v34" style="width:100%;height:200px;display:block"></canvas>
+</div>
+
+<div class="home-links">
+  <div class="link-section">
+    <h3>Ontology</h3>
+    <p>BFO-aligned type definitions for every kernel.</p>
+    <a href="/ontology/v3.4/">v3.4 Stable</a> · <a href="/ontology/v3.5/">v3.5 Alpha</a>
+  </div>
+  <div class="link-section">
+    <h3>Specification</h3>
+    <p>The Three Loops System — identity, capability, knowledge.</p>
+    <a href="/v3.4/architecture">v3.4 Architecture</a> · <a href="/v3.5-alpha3/architecture">v3.5 Alpha</a>
+  </div>
+  <div class="link-section">
+    <h3>Community</h3>
+    <p>Shape the future of autonomous concept governance.</p>
+    <a href="https://discord.gg/sTbfxV9xyU">Discord</a> · <a href="https://github.com/ConceptKernel">GitHub</a>
+  </div>
+</div>
+
 <style>
-.discord-banner {
-  text-align: center;
-  padding: 3rem 1.5rem;
-  margin: 2rem auto;
-  max-width: 720px;
+.kernel-graph {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
-.discord-banner h2 {
-  font-size: 1.5rem;
+.home-links {
+  display: flex;
+  gap: 2rem;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+.link-section {
+  flex: 1;
+}
+.link-section h3 {
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+}
+.link-section p {
+  color: var(--vp-c-text-2);
+  font-size: 0.85rem;
   margin-bottom: 0.5rem;
 }
-.discord-banner p {
-  color: var(--vp-c-text-2);
-  margin-bottom: 1.5rem;
+.link-section a {
+  font-size: 0.85rem;
 }
-.discord-btn {
-  display: inline-block;
-  padding: 0.75rem 2rem;
-  background: #5865F2;
-  color: white !important;
-  border-radius: 8px;
-  font-weight: 600;
-  text-decoration: none !important;
-  transition: opacity 0.2s;
-}
-.discord-btn:hover {
-  opacity: 0.9;
+@media (max-width: 640px) {
+  .home-links { flex-direction: column; gap: 1.5rem; }
 }
 </style>
-
-<div class="discord-banner">
-  <h2>Join the Community</h2>
-  <p>Connect with contributors, ask questions, and help shape the future of concept governance.</p>
-  <a href="https://discord.gg/sTbfxV9xyU" class="discord-btn">Join our Discord</a>
-</div>

@@ -1,12 +1,16 @@
 # Quickstart
 
+::: warning Coming Soon
+The CK.Lib Python package is under active development and not yet published to PyPI. Follow the [GitHub org](https://github.com/ConceptKernel) for release announcements, or join [Discord](https://discord.gg/sTbfxV9xyU) for early access.
+:::
+
 Get a concept kernel running in minutes. This guide walks through creating a kernel directory, writing a processor, and executing your first action.
 
 ## Prerequisites
 
 You need Python 3.11 or later and pip. NATS is optional for local development -- the processor can run in CLI mode without it.
 
-## Install CK.Lib
+## Install CK.Lib (when available)
 
 ```bash
 pip install cklib

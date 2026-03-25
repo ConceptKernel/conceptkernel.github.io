@@ -31,6 +31,7 @@ export default withMermaid(defineConfig({
       { text: 'Docs', link: '/v3.4/introduction' },
       { text: 'Architecture', link: '/v3.4/architecture' },
       { text: 'Concepts', link: '/v3.4/concepts/kernels' },
+      { text: 'Ontology', link: '/ontology/v3.4/' },
       { text: 'Get Started', link: '/v3.4/getting-started/quickstart' },
       {
         text: 'Community',
@@ -65,6 +66,13 @@ export default withMermaid(defineConfig({
           items: [
             { text: 'Quickstart', link: '/v3.4/getting-started/quickstart' },
             { text: 'Installation', link: '/v3.4/getting-started/installation' },
+          ]
+        },
+        {
+          text: 'Ontology Files',
+          items: [
+            { text: 'v3.4 (Turtle)', link: '/ontology/v3.4/' },
+            { text: 'v3.5 (Turtle)', link: '/ontology/v3.5/' },
           ]
         },
         {
@@ -112,6 +120,13 @@ export default withMermaid(defineConfig({
           items: [
             { text: 'Quickstart', link: '/v3.5-alpha3/getting-started/quickstart' },
             { text: 'Installation', link: '/v3.5-alpha3/getting-started/installation' },
+          ]
+        },
+        {
+          text: 'Ontology Files',
+          items: [
+            { text: 'v3.4 (Turtle)', link: '/ontology/v3.4/' },
+            { text: 'v3.5 (Turtle)', link: '/ontology/v3.5/' },
           ]
         },
         {

@@ -1,80 +1,24 @@
 # Quickstart
 
-Get up and running with the Concept Kernel Protocol in minutes.
+::: warning Coming Soon
+The CK.Lib Python package is under active development and not yet published to PyPI. Follow the [GitHub org](https://github.com/ConceptKernel) for release announcements, or join [Discord](https://discord.gg/sTbfxV9xyU) for early access.
+:::
 
-## Prerequisites
+## What You'll Need
 
-- Python 3.11+
-- Git
-
-## Install
+The Concept Kernel Protocol is implemented through a Python runtime library called CK.Lib. When released, installation will be:
 
 ```bash
-git clone https://github.com/ConceptKernel/conceptkernel-python.git
-cd conceptkernel-python
-pip install -r requirements.txt
+pip install cklib
 ```
 
-## Define a Concept
+## In the Meantime
 
-Create a concept definition using LinkML:
+Explore the [Architecture](/v3.4/architecture) to understand the Three Loops model, or read the [Ontology](/v3.4/concepts/ontology) page to see how kernels define their type systems.
 
-```yaml
-# concepts/Cat/ontology.yaml
-id: https://conceptkernel.org/concepts/Cat
-name: Cat
-classes:
-  Cat:
-    description: A domesticated feline
-    is_a: Mammal
-    slots:
-      - name
-      - breed
-slots:
-  name:
-    range: string
-    required: true
-  breed:
-    range: string
-```
-
-## Propose a Concept
-
-Submit your concept to the protocol:
-
-```python
-from ck5_lib import ConceptKernel
-
-ck = ConceptKernel()
-
-# Propose a new concept
-result = ck.propose_concept(
-    name="Cat",
-    schema_path="concepts/Cat/ontology.yaml"
-)
-
-print(result)
-# → PROPOSED[tx1]: Cat submitted for admission
-```
-
-## Watch the Protocol
-
-The protocol logs every step:
-
-```
-SESSION[s001] (Cat Admission)
-  → PROPOSE[tx1] : CK_ADM → propose → CK_ONT : Cat
-  → VALIDATE[tx2]: ontology check passed
-  → VALIDATE[tx3]: SHACL check passed (5 constraints)
-  → ASSIMILATE[tx4]: concept stored (version: 1)
-  ← LOG[tx5]: protocol_log saved
-```
-
-## Next Steps
-
-- Read the [Architecture](/v3.4/architecture) to understand the system design
-- Explore [Core Concepts](/v3.4/concepts/kernels) to learn about kernels, ontology, and consensus
-- Browse the [GitHub repositories](https://github.com/ConceptKernel) for source code
+The ontology files are already published and browsable:
+- [Ontology v3.4](/ontology/v3.4/) -- BFO-aligned Turtle files
+- [Ontology v3.5](/ontology/v3.5/) -- Alpha additions (base shapes, proof model)
 
 ---
 

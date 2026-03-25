@@ -1,12 +1,16 @@
 # Installation
 
-Detailed setup instructions for running concept kernels with CK.Lib.
+::: warning Coming Soon
+The CK.Lib Python package is under active development and not yet published to PyPI. Follow the [GitHub org](https://github.com/ConceptKernel) for release announcements, or join [Discord](https://discord.gg/sTbfxV9xyU) for early access.
+:::
+
+Detailed setup instructions for running concept kernels with CK.Lib. The instructions below preview what installation will look like once the package is released.
 
 ## Requirements
 
 Python 3.11 or later is required. CK.Lib is a pure Python package with minimal dependencies.
 
-## Install from PyPI
+## Install from PyPI (when available)
 
 ```bash
 pip install cklib

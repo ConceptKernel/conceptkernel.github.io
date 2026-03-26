@@ -112,14 +112,13 @@ ckpp:occursIn a owl:ObjectProperty , owl:FunctionalProperty ;
 
 #################################################################
 #    1. Invocation Process
-#    Implementation: /core/src/Kernel.js:handleJob()
 #################################################################
 
 ckpp:InvocationProcess a owl:Class ;
     rdfs:subClassOf ckpp:Process ;
     rdfs:label "Invocation Process"@en ;
     rdfs:comment "A computational process that unfolds over time when a kernel processes a job. Lifecycle: Acceptance → Processing → Completion."@en ;
-    dc:description "Implemented in /core/src/Kernel.js:handleJob():69-126, finalize():165-213" ;
+    dc:description "Kernel invocation process — tool execution lifecycle" ;
     ckp:implementationStatus "PARTIAL"^^xsd:string ;
     ckp:coverageScore "0.60"^^xsd:decimal ;
     ckp:criticalGap "No Process URN generation. Temporal parts not tracked."^^xsd:string .
@@ -167,14 +166,13 @@ ckpp:CompletedPhase a owl:Class ;
 
 #################################################################
 #    2. Edge Communication Process (FUNDAMENTAL)
-#    Implementation: /core/src/EdgeKernel.js:relayDirect()
 #################################################################
 
 ckpp:EdgeCommunicationProcess a owl:Class ;
     rdfs:subClassOf ckpp:Process ;
     rdfs:label "Edge Communication Process"@en ;
     rdfs:comment "The FUNDAMENTAL process by which kernels interact - mediated by EdgeKernel. This is the ONLY way kernels can communicate (architectural constraint)."@en ;
-    dc:description "Implemented in /core/src/EdgeKernel.js:relayDirect():183-236" ;
+    dc:description "Edge communication process — inter-kernel message relay" ;
     dc:description "Also: EdgeRequestBuilder.js:createEdgeRequests():64-128" ;
     ckp:implementationStatus "PARTIAL"^^xsd:string ;
     ckp:coverageScore "0.65"^^xsd:decimal ;
@@ -232,14 +230,14 @@ ckpp:TypeValidatedPhase a owl:Class ;
     rdfs:subClassOf ckpp:TemporalPart ;
     rdfs:label "Type Validated Phase"@en ;
     rdfs:comment "EdgeKernel validates instance type against edge type_mapping"@en ;
-    dc:description "Code: /core/src/EdgeKernel.js:validateSource():245-250" ;
+    dc:description "Validates source kernel identity before accepting edge communication" ;
     ckp:implementationStatus "IMPLICIT"^^xsd:string .
 
 ckpp:RoutedPhase a owl:Class ;
     rdfs:subClassOf ckpp:TemporalPart ;
     rdfs:label "Routed Phase"@en ;
     rdfs:comment "EdgeKernel creates symlink in target inbox (routing)"@en ;
-    dc:description "Code: /core/src/EdgeKernel.js:createDestinationLink():332-362" ;
+    dc:description "Establishes destination link for edge communication" ;
     ckp:implementationStatus "IMPLICIT"^^xsd:string .
 
 ckpp:DeliveredPhase a owl:Class ;

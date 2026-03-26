@@ -99,7 +99,7 @@ ckp:data a owl:DatatypeProperty ;
     rdfs:domain ckp:SealedInstance ;
     rdfs:range xsd:string ;
     rdfs:label "data"@en ;
-    rdfs:comment "JSON-serialized output data of the sealed instance (stored as data.json)"@en .
+    rdfs:comment "JSON-serialized output data of the sealed instance (stored as data.json). Required — every SealedInstance must contain data."@en .
 
 ckp:tool_ref a owl:DatatypeProperty , owl:FunctionalProperty ;
     rdfs:domain ckp:SealedInstance ;

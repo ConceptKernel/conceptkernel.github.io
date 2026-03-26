@@ -1,6 +1,6 @@
 # ConceptKernel Base BFO Ontology
-# Version: v1.3.11-DRAFT-01
-# Date: 2025-11-23
+# Version: v3.5.0
+# Date: 2026-03-26
 # Purpose: Core BFO mappings for ConceptKernel continuants
 
 @prefix : <https://conceptkernel.org/ontology/v3.5/> .
@@ -17,10 +17,12 @@
     dc:title "ConceptKernel BFO Base Ontology" ;
     dc:description "Formal ontology mapping ConceptKernel entities to Basic Formal Ontology (BFO) classes" ;
     dcterms:created "2025-11-23"^^xsd:date ;
-    dcterms:modified "2025-11-23"^^xsd:date ;
-    owl:versionInfo "v1.3.11-DRAFT-01" ;
-    rdfs:comment "Defines core continuants: Kernel, Edge, Instance, Ontology" ;
-    owl:imports <http://purl.obolibrary.org/obo/bfo.owl> .
+    dcterms:modified "2026-03-26"^^xsd:date ;
+    owl:versionInfo "v3.5.0" ;
+    rdfs:comment "Core continuants and occurrents: Kernel, Edge, Instance, Ontology, Action, GovernanceMode"@en ;
+    owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ,
+                <https://conceptkernel.org/ontology/v3.5/base-instances.ttl> ,
+                <https://conceptkernel.org/ontology/v3.5/proof.ttl> .
 
 #################################################################
 #    Continuants - Entities that persist through time
@@ -122,14 +124,23 @@ ckp:hasNotificationContract a owl:ObjectProperty ;
     rdfs:label "has notification contract"@en .
 
 #################################################################
-#    Edge (Independent Continuant - Relational Entity)
+#    InformationEntity (Generically Dependent Continuant)
+#################################################################
+
+ckp:InformationEntity a owl:Class ;
+    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant
+    rdfs:label "Information Entity"@en ;
+    rdfs:comment "An abstract information-bearing entity that can be concretized in multiple bearers. Base class for Instance, Edge, and other information artifacts."@en .
+
+#################################################################
+#    Edge (Generically Dependent Continuant - Relational Entity)
 #    Implementation: /core/src/EdgeKernel.js
 #################################################################
 
 ckp:Edge a owl:Class ;
-    rdfs:subClassOf bfo:0000040 ;  # bfo:IndependentContinuant
+    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant
     rdfs:label "Edge"@en ;
-    rdfs:comment "A persistent relationship between two kernels - the ONLY mechanism for inter-Kernel communication."@en ;
+    rdfs:comment "An abstract relationship between two kernels - the ONLY mechanism for inter-Kernel communication. Edges are information entities that depend on the kernels they connect."@en ;
     dc:description "Implemented in /core/src/EdgeKernel.js:1-448" ;
     dc:description "Edge kernel structure created in /edges/{EdgeType}.{Source}.{Target}/" ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
@@ -167,6 +178,20 @@ ckp:TRANSFORMS a ckp:RelationshipType ;
     rdfs:label "TRANSFORMS"@en ;
     rdfs:comment "Source data is transformed by target"@en .
 
+### v3.5 Edge Predicates (governance-loop relationship types)
+
+ckp:EXTENDS a ckp:RelationshipType ;
+    rdfs:label "EXTENDS"@en ;
+    rdfs:comment "Source kernel extends target kernel's capabilities (inheritance-like composition)"@en .
+
+ckp:COMPOSES a ckp:RelationshipType ;
+    rdfs:label "COMPOSES"@en ;
+    rdfs:comment "Source kernel composes target kernel's actions into its own pipeline"@en .
+
+ckp:TRIGGERS a ckp:RelationshipType ;
+    rdfs:label "TRIGGERS"@en ;
+    rdfs:comment "Source kernel triggers execution of target kernel (event-driven activation)"@en .
+
 ### Edge Properties
 
 ckp:hasSource a owl:ObjectProperty , owl:FunctionalProperty ;
@@ -187,7 +212,7 @@ ckp:hasRelationshipType a owl:ObjectProperty , owl:FunctionalProperty ;
     rdfs:domain ckp:Edge ;
     rdfs:range ckp:RelationshipType ;
     rdfs:label "has relationship type"@en ;
-    rdfs:comment "The semantic type of the relationship (PRODUCES, NOTIFIES, etc.)"@en .
+    rdfs:comment "The semantic type of the relationship (PRODUCES, NOTIFIES, TRIGGERS, etc.)"@en .
 
 ckp:hasOutgoingEdge a owl:ObjectProperty ;
     rdfs:domain ckp:Kernel ;
@@ -213,7 +238,7 @@ ckp:isAuthorized a owl:DatatypeProperty ;
     dc:description "Validated in /core/src/EdgeKernel.js:validateAuthorization():259-286" .
 
 #################################################################
-#    Instance (Independent Continuant - Immaterial Entity)
+#    Instance (Generically Dependent Continuant - Information Entity)
 #    Implementation: /core/src/drivers/FileSystemDriver.js
 #################################################################
 
@@ -261,6 +286,56 @@ ckp:producesInstance a owl:ObjectProperty ;
     rdfs:label "produces instance"@en ;
     rdfs:comment "An instance produced by this kernel"@en ;
     owl:inverseOf ckp:createdByKernel .
+
+#################################################################
+#    Action (Occurrent - Process)
+#    v3.5: Actions are the executable operations a kernel exposes
+#################################################################
+
+ckp:Action a owl:Class ;
+    rdfs:subClassOf bfo:0000015 ;  # bfo:Process
+    rdfs:label "Action"@en ;
+    rdfs:comment "An executable operation exposed by a kernel. Actions are processes that transform inputs into instances. Defined in conceptkernel.yaml under spec.actions."@en .
+
+ckp:hasAction a owl:ObjectProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Action ;
+    rdfs:label "has action"@en ;
+    rdfs:comment "An action exposed by this kernel"@en .
+
+ckp:hasAccessLevel a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Action ;
+    rdfs:range xsd:string ;
+    rdfs:label "has access level"@en ;
+    rdfs:comment "Access control level for the action: anon, auth, admin"@en .
+
+#################################################################
+#    GovernanceMode (Disposition)
+#    v3.5: How a kernel governs itself
+#################################################################
+
+ckp:GovernanceMode a owl:Class ;
+    rdfs:subClassOf bfo:0000016 ;  # bfo:Disposition
+    rdfs:label "Governance Mode"@en ;
+    rdfs:comment "The governance disposition of a kernel, determining how decisions are made and enforced."@en .
+
+ckp:STRICT a ckp:GovernanceMode ;
+    rdfs:label "STRICT"@en ;
+    rdfs:comment "All changes require consensus approval before execution"@en .
+
+ckp:RELAXED a ckp:GovernanceMode ;
+    rdfs:label "RELAXED"@en ;
+    rdfs:comment "Changes proceed with post-hoc review; consensus is advisory"@en .
+
+ckp:AUTONOMOUS a ckp:GovernanceMode ;
+    rdfs:label "AUTONOMOUS"@en ;
+    rdfs:comment "Kernel self-governs without external consensus requirements"@en .
+
+ckp:hasGovernanceMode a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:GovernanceMode ;
+    rdfs:label "has governance mode"@en ;
+    rdfs:comment "The governance disposition of this kernel"@en .
 
 #################################################################
 #    Ontology (Dependent Continuant - Universal)
@@ -350,7 +425,7 @@ ckp:mediatesEdge a owl:ObjectProperty ;
 #################################################################
 
 ### Constraint 1: Communication requires Edge
-# ∀ kernels A, B: canCommunicate(A, B) ↔ ∃ edge E: connected_by(A, B, E)
+# kernels A, B: canCommunicate(A, B) <-> edge E: connected_by(A, B, E)
 
 ckp:canCommunicateWith a owl:ObjectProperty ;
     rdfs:domain ckp:Kernel ;
@@ -367,7 +442,7 @@ ckp:CommunicatingKernels a owl:Class ;
     ] .
 
 ### Constraint 2: Edge creation requires authorization
-# ∀ edge E: created(E) → authorized(E)
+# edge E: created(E) -> authorized(E)
 
 ckp:AuthorizedEdge a owl:Class ;
     rdfs:subClassOf ckp:Edge ;
@@ -418,5 +493,5 @@ ckp:criticalGap a owl:AnnotationProperty ;
     rdfs:comment "Overall BFO alignment: Continuants (85%), Occurrents (45%)"@en .
 
 #################################################################
-# End of ConceptKernel Base BFO Ontology
+# End of ConceptKernel Base BFO Ontology v3.5.0
 #################################################################

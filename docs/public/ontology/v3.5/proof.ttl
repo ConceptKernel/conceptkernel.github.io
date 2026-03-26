@@ -84,11 +84,17 @@ ckp:checked_by_identity a owl:DatatypeProperty , owl:FunctionalProperty ;
     rdfs:label "checked by identity"@en ;
     rdfs:comment "The kernel URN identity that performed the verification"@en .
 
+ckp:checked_at a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:ProofRecord ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "checked at"@en ;
+    rdfs:comment "ISO 8601 timestamp of when the proof verification was performed"@en .
+
 ckp:svid a owl:DatatypeProperty , owl:FunctionalProperty ;
     rdfs:domain ckp:ProofRecord ;
     rdfs:range xsd:string ;
     rdfs:label "SVID"@en ;
-    rdfs:comment "SPIFFE Verifiable Identity Document of the verifier, enabling trust chain validation"@en .
+    rdfs:comment "SPIFFE Verifiable Identity Document of the verifier, enabling trust chain validation. Required per spec — every ProofRecord must carry the verifier's SVID for trust chain validation."@en .
 
 #################################################################
 #    ProofCheck — individual verification check

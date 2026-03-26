@@ -98,8 +98,8 @@ classes:
         multivalued: true
 
   Edge:
-    class_uri: bfo:0000040
-    description: First-class BFO Material Entity mediating K-to-K communication
+    class_uri: bfo:0000031
+    description: First-class BFO GenericallyDependentContinuant (information entity) mediating K-to-K communication
     attributes:
       target_kernel: { required: true }
       predicate: { range: EdgePredicate, required: true }
@@ -183,6 +183,7 @@ classes:
       and CK reference. Once sealed, contents cannot be modified.
     attributes:
       data:
+        required: true
         description: "JSON-serialized output data (stored as data.json)"
       tool_ref:
         description: "Reference to the tool loop processor (e.g., tool/processor.py)"
@@ -234,8 +235,13 @@ classes:
         description: "Kernel class name that performed verification"
       checked_by_identity:
         description: "Kernel URN identity that performed verification"
+      checked_at:
+        range: datetime
+        required: true
+        description: "ISO 8601 timestamp of when the proof verification was performed"
       svid:
-        description: "SPIFFE Verifiable Identity Document of the verifier"
+        required: true
+        description: "SPIFFE Verifiable Identity Document of the verifier — required for trust chain validation"
 
   ProofCheck:
     class_uri: bfo:0000031
@@ -257,17 +263,26 @@ classes:
 
   FolderStructure:
     description: >
-      Required folders and files for every CK. The scaffolding tool
-      reads this to create compliant CK directories.
+      Three Loops directory structure for every CK. The scaffolding tool
+      reads this to create compliant CK directories. Each loop is an
+      independently-versioned volume on SeaweedFS.
     attributes:
-      required_folders:
+      ck_loop_files:
         range: string
         multivalued: true
-        ifabsent: '["tool", "llm", "log", "web", "instances", "inbox"]'
-      required_files:
+        ifabsent: '["conceptkernel.yaml", ".ck-guid", "README.md", "CLAUDE.md", "SKILL.md", "CHANGELOG.md", "ontology.yaml", "rules.shacl", "serving.json"]'
+        description: "Files at CK root (identity loop — ck-{guid}-ck volume)"
+      tool_dir:
+        ifabsent: "tool/"
+        description: "Tool loop directory (capability — ck-{guid}-tool volume)"
+      storage_dir:
+        ifabsent: "storage/"
+        description: "Data loop directory (knowledge — ck-{guid}-storage volume)"
+      storage_subdirs:
         range: string
         multivalued: true
-        ifabsent: '["conceptkernel.yaml", "tool/processor.py", "llm/CLAUDE.md", "web/index.html"]'
+        ifabsent: '["instances/", "ledger/", "proof/", "index/", "llm/", "web/"]'
+        description: "Required subdirectories under storage/"
       instance_prefix:
         ifabsent: "i-"
         description: "Instance folder prefix"

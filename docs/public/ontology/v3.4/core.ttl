@@ -122,14 +122,14 @@ ckp:hasNotificationContract a owl:ObjectProperty ;
     rdfs:label "has notification contract"@en .
 
 #################################################################
-#    Edge (Independent Continuant - Relational Entity)
+#    Edge (Generically Dependent Continuant - Relational Entity)
 #    Implementation: /core/src/EdgeKernel.js
 #################################################################
 
 ckp:Edge a owl:Class ;
-    rdfs:subClassOf bfo:0000040 ;  # bfo:IndependentContinuant
+    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant
     rdfs:label "Edge"@en ;
-    rdfs:comment "A persistent relationship between two kernels - the ONLY mechanism for inter-Kernel communication."@en ;
+    rdfs:comment "An abstract relationship between two kernels - the ONLY mechanism for inter-Kernel communication. Edges are information entities that depend on the kernels they connect."@en ;
     dc:description "Implemented in /core/src/EdgeKernel.js:1-448" ;
     dc:description "Edge kernel structure created in /edges/{EdgeType}.{Source}.{Target}/" ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;

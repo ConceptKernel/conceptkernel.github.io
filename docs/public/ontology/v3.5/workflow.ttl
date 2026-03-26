@@ -9,8 +9,8 @@
 # ==============================================================================
 # ConceptKernel Workflow Ontology (CKDL Formalization)
 # ==============================================================================
-# Version: v1.3.18
-# Date: 2025-12-06
+# Version: v3.5.0
+# Date: 2026-03-26
 # Purpose: Formalize CKDL (Concept Kernel Definition Language) workflow concepts
 #          for declarative kernel orchestration and autonomous system coordination
 # ==============================================================================
@@ -21,7 +21,7 @@
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
     rdfs:label "ConceptKernel Workflow Ontology" ;
     rdfs:comment "BFO-aligned ontology for declarative workflow orchestration in ConceptKernel" ;
-    owl:versionInfo "v1.3.18" .
+    owl:versionInfo "v3.5.0" .
 
 # ==============================================================================
 # WORKFLOW PROCESSES (BFO Occurrents)

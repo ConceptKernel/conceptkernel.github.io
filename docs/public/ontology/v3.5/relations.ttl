@@ -1,6 +1,6 @@
 # ConceptKernel Relations BFO Ontology
-# Version: v1.3.11-DRAFT-01
-# Date: 2025-11-23
+# Version: v3.5.0
+# Date: 2026-03-26
 # Purpose: Relationships and inference rules for automatic reasoning
 
 @prefix : <https://conceptkernel.org/ontology/v3.5/relation#> .
@@ -21,7 +21,8 @@
     dc:title "ConceptKernel Relations Ontology" ;
     dc:description "Relationships and inference rules for automatic reasoning about ConceptKernel entities" ;
     dcterms:created "2025-11-23"^^xsd:date ;
-    owl:versionInfo "v1.3.11-DRAFT-01" ;
+    dcterms:modified "2026-03-26"^^xsd:date ;
+    owl:versionInfo "v3.5.0" ;
     rdfs:comment "Defines properties, property chains, and SWRL rules for inference" ;
     owl:imports <https://conceptkernel.org/ontology/v3.5/> ,
                 <https://conceptkernel.org/ontology/v3.5/process> ,

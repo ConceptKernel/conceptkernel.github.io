@@ -1,6 +1,6 @@
 # ConceptKernel Processes BFO Ontology
-# Version: v1.3.11-DRAFT-01
-# Date: 2025-11-23
+# Version: v3.5.0
+# Date: 2026-03-26
 # Purpose: Occurrent (Process) definitions for ConceptKernel temporal events
 
 @prefix : <https://conceptkernel.org/ontology/v3.5/process#> .
@@ -18,7 +18,8 @@
     dc:title "ConceptKernel Process Ontology" ;
     dc:description "Formal ontology defining Occurrents (processes that unfold over time) in ConceptKernel" ;
     dcterms:created "2025-11-23"^^xsd:date ;
-    owl:versionInfo "v1.3.11-DRAFT-01" ;
+    dcterms:modified "2026-03-26"^^xsd:date ;
+    owl:versionInfo "v3.5.0" ;
     rdfs:comment "Defines processes: Invocation, EdgeCommunication, Consensus, Broadcast, StatusChange" ;
     owl:imports <https://conceptkernel.org/ontology/v3.5/> ,
                 <http://purl.obolibrary.org/obo/bfo.owl> .

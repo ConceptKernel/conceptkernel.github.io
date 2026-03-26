@@ -1,6 +1,6 @@
 # ConceptKernel Kernel Metadata Ontology
-# Version: v1.3.20
-# Date: 2025-12-21
+# Version: v3.5.0
+# Date: 2026-03-26
 # Purpose: RDF schema for kernel metadata (from kernel.yaml) for semantic registry
 # Enables SPARQL queries across kernels, capabilities, dependencies, and status
 
@@ -18,8 +18,8 @@
     dc:title "ConceptKernel Kernel Metadata Ontology" ;
     dc:description "Formal ontology for kernel metadata enabling semantic registry and SPARQL queries" ;
     dcterms:created "2025-12-21"^^xsd:date ;
-    dcterms:modified "2025-12-21"^^xsd:date ;
-    owl:versionInfo "v1.3.20" ;
+    dcterms:modified "2026-03-26"^^xsd:date ;
+    owl:versionInfo "v3.5.0" ;
     rdfs:comment "Defines metadata structure for kernels: runtime, ports, capabilities, dependencies, status" ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ,
                 <https://conceptkernel.org/ontology/v3.5/> .

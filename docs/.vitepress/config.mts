@@ -21,10 +21,13 @@ export default withMermaid(defineConfig({
     siteTitle: 'Concept Kernel',
 
     nav: [
-      { text: 'Docs', link: '/v3.4/introduction' },
-      { text: 'Architecture', link: '/v3.4/architecture' },
-      { text: 'Ontology', link: '/ontology/v3.5/' },
-      { text: 'Get Started', link: '/v3.4/getting-started/quickstart' },
+      {
+        text: 'Ontology',
+        items: [
+          { text: 'v3.4 (stable)', link: '/ontology/v3.4/' },
+          { text: 'v3.5 (alpha-3)', link: '/ontology/v3.5/' },
+        ]
+      },
       {
         text: 'Community',
         items: [

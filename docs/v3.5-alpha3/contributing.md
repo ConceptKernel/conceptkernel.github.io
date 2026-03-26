@@ -13,17 +13,12 @@ The Concept Kernel Protocol is an open project and we welcome contributions of a
 ## Getting Started
 
 1. Join our [Discord](https://discord.gg/sTbfxV9xyU) and introduce yourself
-2. Browse [open issues](https://github.com/ConceptKernel/conceptkernel-python/issues) on GitHub
-3. Fork the repository and submit a pull request
+2. Browse the [GitHub org](https://github.com/ConceptKernel) for repositories
+3. Read the [ontology files](/ontology/v3.5/) to understand the type system
 
-## Development Setup
-
-```bash
-git clone https://github.com/ConceptKernel/conceptkernel-python.git
-cd conceptkernel-python
-pip install -r requirements.txt
-python -m pytest tests/
-```
+::: warning Python SDK Coming Soon
+The CK.Lib Python package is under active development and not yet published to PyPI. Join Discord for early access.
+:::
 
 ## Code of Conduct
 

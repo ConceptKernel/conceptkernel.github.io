@@ -272,6 +272,11 @@ ckp:QuorumHigh a owl:Class ;
     rdfs:label "Quorum High"@en ;
     rdfs:comment "High consensus required - 51% of role holders must approve"@en .
 
+ckp:QuorumMajority a owl:Class ;
+    rdfs:subClassOf ckp:QuorumLevel ;
+    rdfs:label "Quorum Majority"@en ;
+    rdfs:comment "Majority consensus required - more than 50% of eligible voters must approve"@en .
+
 ### Quorum-Permission Relationship
 
 ckp:requiresQuorum a owl:ObjectProperty , owl:FunctionalProperty ;

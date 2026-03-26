@@ -21,21 +21,19 @@
     owl:versionInfo "v3.5.0" ;
     rdfs:comment "Core continuants and occurrents: Kernel, Edge, Instance, Ontology, Action, GovernanceMode"@en ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ,
-                <https://conceptkernel.org/ontology/v3.5/base-instances.ttl> ,
-                <https://conceptkernel.org/ontology/v3.5/proof.ttl> .
+                <https://conceptkernel.org/ontology/v3.5/base-instances> ,
+                <https://conceptkernel.org/ontology/v3.5/proof> .
 
 #################################################################
 #    Continuants - Entities that persist through time
 #################################################################
 
 ### Kernel (Independent Continuant - Material Entity)
-### Implementation: /core/src/Kernel.js
 
 ckp:Kernel a owl:Class ;
     rdfs:subClassOf bfo:0000040 ;  # bfo:MaterialEntity
     rdfs:label "Concept Kernel"@en ;
     rdfs:comment "A persistent computational entity that maintains identity across time. Kernels are the fundamental atomic units of computation in ConceptKernel architecture."@en ;
-    dc:description "Implemented in /core/src/Kernel.js:9-216" ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
     ckp:coverageScore "0.85"^^xsd:decimal .
 
@@ -56,8 +54,7 @@ ckp:ColdKernel a owl:Class ;
     rdfs:subClassOf ckp:Kernel ;
     rdfs:label "Cold Kernel"@en ;
     rdfs:comment "On-demand kernels triggered by file system events (symlinks in queue/inbox)"@en ;
-    dc:description "Node.js: metadata.type='node:cold', Python: metadata.type='python:cold'" ;
-    dc:description "Watched by ConceptKernel.js governor: /core/src/ConceptKernel.js" .
+    dc:description "Node.js: metadata.type='node:cold', Python: metadata.type='python:cold'" .
 
 ### Kernel Properties
 
@@ -72,8 +69,7 @@ ckp:hasDomain a owl:DatatypeProperty , owl:FunctionalProperty ;
     rdfs:domain ckp:Kernel ;
     rdfs:range xsd:string ;
     rdfs:label "has domain"@en ;
-    rdfs:comment "The organizational domain of the kernel"@en ;
-    dc:description "Configured in /concepts/ck-config.yaml" .
+    rdfs:comment "The organizational domain of the kernel"@en .
 
 ckp:hasVersion a owl:DatatypeProperty , owl:FunctionalProperty ;
     rdfs:domain ckp:Kernel ;
@@ -134,15 +130,12 @@ ckp:InformationEntity a owl:Class ;
 
 #################################################################
 #    Edge (Generically Dependent Continuant - Relational Entity)
-#    Implementation: /core/src/EdgeKernel.js
 #################################################################
 
 ckp:Edge a owl:Class ;
     rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant
     rdfs:label "Edge"@en ;
     rdfs:comment "An abstract relationship between two kernels - the ONLY mechanism for inter-Kernel communication. Edges are information entities that depend on the kernels they connect."@en ;
-    dc:description "Implemented in /core/src/EdgeKernel.js:1-448" ;
-    dc:description "Edge kernel structure created in /edges/{EdgeType}.{Source}.{Target}/" ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
     ckp:coverageScore "0.85"^^xsd:decimal ;
     ckp:architecturalConstraint "NO direct Kernel-to-Kernel communication. ONLY through EdgeKernel-managed Edges."^^xsd:string .
@@ -234,20 +227,16 @@ ckp:isAuthorized a owl:DatatypeProperty ;
     rdfs:domain ckp:Edge ;
     rdfs:range xsd:boolean ;
     rdfs:label "is authorized"@en ;
-    rdfs:comment "Whether the target kernel explicitly authorizes this edge in its queue_contract.edges"@en ;
-    dc:description "Validated in /core/src/EdgeKernel.js:validateAuthorization():259-286" .
+    rdfs:comment "Whether the target kernel explicitly authorizes this edge in its queue_contract.edges"@en .
 
 #################################################################
 #    Instance (Generically Dependent Continuant - Information Entity)
-#    Implementation: /core/src/drivers/FileSystemDriver.js
 #################################################################
 
 ckp:Instance a owl:Class ;
     rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant (information entity)
     rdfs:label "Instance"@en ;
-    rdfs:comment "A persistent information entity - the result of a Process. Instances are immutable artifacts stored in {kernel}/storage/{txId}.inst/"@en ;
-    dc:description "Minted in /core/src/drivers/FileSystemDriver.js:mintStorageArtifact():71-83" ;
-    dc:description "Storage structure: /concepts/{KernelName}/storage/{txId}.inst/receipt.bin" ;
+    rdfs:comment "A persistent information entity - the result of a Process. Instances are immutable artifacts stored in {kernel}/storage/instances/i-{identifier}/"@en ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
     ckp:coverageScore "0.80"^^xsd:decimal .
 
@@ -257,8 +246,7 @@ ckp:hasTransactionId a owl:DatatypeProperty , owl:FunctionalProperty ;
     rdfs:domain ckp:Instance ;
     rdfs:range xsd:string ;
     rdfs:label "has transaction ID"@en ;
-    rdfs:comment "Unique transaction ID in format: yyMMddHHmmssf-shortId"@en ;
-    dc:description "Generated by txIdGenerator.js" .
+    rdfs:comment "Unique transaction ID in format: yyMMddHHmmssf-shortId"@en .
 
 ckp:hasTimestamp a owl:DatatypeProperty , owl:FunctionalProperty ;
     rdfs:domain ckp:Instance ;
@@ -339,14 +327,12 @@ ckp:hasGovernanceMode a owl:ObjectProperty , owl:FunctionalProperty ;
 
 #################################################################
 #    Ontology (Dependent Continuant - Universal)
-#    Implementation: /core/src/drivers/localstorage/ontology.js
 #################################################################
 
 ckp:KernelOntology a owl:Class ;
     rdfs:subClassOf bfo:0000020 ;  # bfo:SpecificallyDependentContinuant
     rdfs:label "Kernel Ontology"@en ;
     rdfs:comment "Ontology defines the essential nature of a Kernel (its qualities and dispositions). Stored as ontology.yaml in each kernel directory."@en ;
-    dc:description "Managed by /core/src/drivers/localstorage/ontology.js" ;
     dc:description "Format: YAML conforming to apiVersion: conceptkernel/v1, kind: Ontology" ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
     ckp:coverageScore "0.70"^^xsd:decimal .
@@ -374,7 +360,6 @@ ckp:EdgeKernel a owl:Class ;
     rdfs:subClassOf ckp:Kernel , ckp:HotKernel ;
     rdfs:label "Edge Kernel"@en ;
     rdfs:comment "Special system kernel that mediates ALL inter-Kernel communication. Enforces Edge-only communication (architectural constraint)."@en ;
-    dc:description "Implemented in /core/src/EdgeKernel.js:1-448" ;
     dc:description "URN: ckp://System.EdgeKernel:v1.0" ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
     ckp:architecturalRole "Communication Mediator"^^xsd:string .
@@ -385,7 +370,6 @@ ckp:ConsensusKernel a owl:Class ;
     rdfs:subClassOf ckp:Kernel , ckp:HotKernel ;
     rdfs:label "Consensus Kernel"@en ;
     rdfs:comment "Special system kernel that mediates ALL governance decisions (proposals, voting, enforcement)."@en ;
-    dc:description "Implemented in /concepts/System.Consensus/tool/tool.js" ;
     dc:description "URN: ckp://System.Consensus:v1.0" ;
     ckp:implementationStatus "PARTIAL"^^xsd:string ;
     ckp:architecturalRole "Governance Mediator"^^xsd:string ;
@@ -397,11 +381,18 @@ ckp:WssHubKernel a owl:Class ;
     rdfs:subClassOf ckp:Kernel , ckp:HotKernel ;
     rdfs:label "WebSocket Hub Kernel"@en ;
     rdfs:comment "Special system kernel that mediates ALL real-time broadcasts (WebSocket events to all clients)."@en ;
-    dc:description "Implemented in /concepts/System.WssHub/tool/tool.js:1-201" ;
     dc:description "URN: ckp://System.WssHub:v1.0" ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
     ckp:architecturalRole "Broadcast Mediator"^^xsd:string ;
     ckp:criticalGap "No consensus announcements (not integrated)"^^xsd:string .
+
+#################################################################
+#    Base Relationship Property
+#################################################################
+
+ckp:relatesTo a owl:ObjectProperty ;
+    rdfs:label "relates to"@en ;
+    rdfs:comment "Base property for kernel-to-kernel relationships. All specific edge predicates (auditsComplianceOf, reportsIssueTo, etc.) are sub-properties of this."@en .
 
 #################################################################
 #    Mediation Relationships
@@ -453,6 +444,16 @@ ckp:AuthorizedEdge a owl:Class ;
     ] ;
     rdfs:label "Authorized Edge"@en ;
     rdfs:comment "An edge where the target kernel explicitly authorizes the relationship in its queue_contract.edges"@en .
+
+#################################################################
+#    Consensus Proposal (alias for process:Proposal)
+#################################################################
+
+ckp:ConsensusProposal a owl:Class ;
+    rdfs:subClassOf bfo:0000040 ;  # bfo:IndependentContinuant
+    rdfs:label "Consensus Proposal"@en ;
+    rdfs:comment "A proposal submitted for consensus governance review. Equivalent to ckpp:Proposal in the process ontology."@en ;
+    dc:description "Stored in {kernel}/consensus/proposals/{proposalId}.json" .
 
 #################################################################
 #    Implementation Status Annotations

@@ -17,7 +17,7 @@
 
 <https://conceptkernel.org/ontology/v3.5/workflow>
     rdf:type owl:Ontology ;
-    owl:imports <https://conceptkernel.org/ontology/v3.5/core> ;
+    owl:imports <https://conceptkernel.org/ontology/v3.5/> ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
     rdfs:label "ConceptKernel Workflow Ontology" ;
     rdfs:comment "BFO-aligned ontology for declarative workflow orchestration in ConceptKernel" ;

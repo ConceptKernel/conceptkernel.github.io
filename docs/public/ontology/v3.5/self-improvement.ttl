@@ -14,9 +14,9 @@
 
 <https://conceptkernel.org/ontology/v3.5/improvement>
   rdf:type owl:Ontology ;
-  owl:imports <https://conceptkernel.org/ontology/v3.5/core> ;
+  owl:imports <https://conceptkernel.org/ontology/v3.5/> ;
   owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
-  owl:imports <https://conceptkernel.org/ontology/v3.5/processes> ;
+  owl:imports <https://conceptkernel.org/ontology/v3.5/process> ;
   rdfs:label "ConceptKernel Self-Improvement Ontology" ;
   rdfs:comment "Ontology for autonomous validation, improvement recommendations, and consensus-driven evolution" ;
   owl:versionInfo "1.3.18" .
@@ -91,31 +91,31 @@ ckpi:ImprovementProcess
 
 ckpi:ValidationPhase
   rdf:type owl:Class ;
-  rdfs:subClassOf bfo:0000138 ;  # BFO:TemporalInterval
+  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
   rdfs:label "Validation Phase" ;
   rdfs:comment "Temporal part where kernel ontology is validated against canonical ontologies" .
 
 ckpi:AnalysisPhase
   rdf:type owl:Class ;
-  rdfs:subClassOf bfo:0000138 ;  # BFO:TemporalInterval
+  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
   rdfs:label "Analysis Phase" ;
   rdfs:comment "Temporal part where AI agents analyze validation issues" .
 
 ckpi:RecommendationPhase
   rdf:type owl:Class ;
-  rdfs:subClassOf bfo:0000138 ;  # BFO:TemporalInterval
+  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
   rdfs:label "Recommendation Phase" ;
   rdfs:comment "Temporal part where improvement recommendations are generated" .
 
 ckpi:ConsensusPhase
   rdf:type owl:Class ;
-  rdfs:subClassOf bfo:0000138 ;  # BFO:TemporalInterval
+  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
   rdfs:label "Consensus Phase" ;
   rdfs:comment "Temporal part where recommendations are submitted for governance approval" .
 
 ckpi:ExecutionPhase
   rdf:type owl:Class ;
-  rdfs:subClassOf bfo:0000138 ;  # BFO:TemporalInterval
+  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
   rdfs:label "Execution Phase" ;
   rdfs:comment "Temporal part where approved recommendations are applied" .
 

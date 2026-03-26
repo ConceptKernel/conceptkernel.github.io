@@ -22,7 +22,7 @@
     owl:versionInfo "v1.3.20" ;
     rdfs:comment "Defines metadata structure for kernels: runtime, ports, capabilities, dependencies, status" ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ,
-                <https://conceptkernel.org/ontology/v3.5/core> .
+                <https://conceptkernel.org/ontology/v3.5/> .
 
 #################################################################
 #    Kernel Metadata Classes

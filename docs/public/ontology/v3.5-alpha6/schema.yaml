@@ -1,0 +1,446 @@
+id: https://conceptkernel.org/ontology/v3.5/schema
+name: conceptkernel-org-v3.5-alpha6
+title: ConceptKernel Governance Schema v3.5-alpha6
+description: >
+  LinkML schema governing Concept Kernel shape. Drives scaffolding tool —
+  the tool reads this schema to create CK folders and enforce structure.
+  Aligned with BFO2020 + PROV-O. Alpha-6 adds Project, InlineKernel,
+  StaticKernel, Reconciliation, StorageMedium, DeploymentMethod,
+  ServingDisposition.
+
+prefixes:
+  ck: https://conceptkernel.org/ontology/v3.5/
+  bfo: http://purl.obolibrary.org/obo/BFO_
+  prov: http://www.w3.org/ns/prov#
+  linkml: https://w3id.org/linkml/
+
+default_range: string
+
+classes:
+
+  Kernel:
+    class_uri: bfo:0000040
+    description: >
+      A sovereign concept kernel — one capability, one identity, one tool.
+      BFO Material Entity. Grounded in cco:Agent. Folder prefix: CK.{Name}
+    attributes:
+      apiVersion: { required: true, ifabsent: "conceptkernel/v1" }
+      kind: { required: true, ifabsent: "Kernel" }
+      metadata: { range: KernelMetadata, required: true }
+      spec: { range: KernelSpec, required: true }
+
+  # --- Alpha-6: InlineKernel ---
+  InlineKernel:
+    is_a: Kernel
+    description: >
+      Podless kernel: browser-side JS, NATS WSS, JWT.
+      No server-side process — runs entirely in the client browser.
+      Grounded in cco:Agent (acting autonomously from browser).
+    attributes:
+      nats_wss_endpoint: { required: true, description: "NATS WebSocket endpoint URL" }
+      jwt_issuer: { description: "JWT issuer for browser authentication" }
+
+  # --- Alpha-6: StaticKernel ---
+  StaticKernel:
+    is_a: Kernel
+    description: >
+      No process: gateway serves storage/web/ directly.
+      A kernel whose web/ assets are served by the gateway
+      without any running tool process.
+    attributes:
+      web_root: { ifabsent: "web/", description: "Root directory for static assets" }
+
+  # --- Alpha-6: Project ---
+  Project:
+    class_uri: bfo:0000031
+    description: >
+      .ckproject declaration, organizes kernels into a coherent unit.
+      Grounded in cco:Organization. A project is the top-level container
+      that groups related kernels, edges, and workflows.
+    attributes:
+      name:
+        required: true
+        description: "Project name (PascalCase)"
+      kernels:
+        range: Kernel
+        multivalued: true
+        description: "Kernels belonging to this project"
+      description: { description: "Human-readable project description" }
+
+  KernelMetadata:
+    attributes:
+      name:
+        required: true
+        pattern: "^[A-Z][a-zA-Z]+\\.[A-Z][a-zA-Z]+$"
+        description: "{Domain}.{Name} PascalCase"
+      urn:
+        required: true
+        pattern: "^ckp://Kernel#.+:v\\d+\\.\\d+$"
+      version: { required: true }
+      created_at: { range: datetime }
+
+  KernelSpec:
+    attributes:
+      type: { range: KernelType, required: true }
+      description: { required: true }
+      nats: { range: NATSConfig, required: true }
+      tool: { range: ToolSpec, required: true }
+      web: { range: WebConfig }
+      resources: { range: ResourceSpec }
+      edges: { range: EdgeSpec }
+      lifecycle: { range: LifecycleConfig }
+      workspace: { range: WorkspaceConfig }
+      governance_mode: { range: GovernanceMode, required: true }
+      storage_medium: { range: StorageMedium, description: "Alpha-6: How kernel code is stored" }
+      deployment_method: { range: DeploymentMethod, description: "Alpha-6: How kernel code is deployed" }
+      serving_dispositions:
+        range: ServingDisposition
+        multivalued: true
+        description: "Alpha-6: How the kernel serves functionality"
+
+  NATSConfig:
+    attributes:
+      input_topic: { required: true }
+      result_topic: { required: true }
+      event_topic: { required: true }
+      conversation: { range: ConversationConfig }
+
+  ConversationConfig:
+    description: >
+      When enabled, kernel accepts conversation over NATS WSS
+      and streams responses back to result topic.
+    attributes:
+      enabled: { range: boolean, required: true }
+      stream_responses: { range: boolean }
+
+  ToolSpec:
+    attributes:
+      language: { required: true }
+      entrypoint: { required: true, ifabsent: "tool/processor.py" }
+      runtime: { required: true }
+
+  WebConfig:
+    description: >
+      If serve=true, web/index.html is deployed to subdomain via
+      ConfigMap + nginx + Service + HTTPRoute.
+    attributes:
+      serve: { range: boolean }
+      subdomain: {}
+
+  ResourceSpec:
+    attributes:
+      requests: { range: ResourceLimits }
+      limits: { range: ResourceLimits }
+
+  ResourceLimits:
+    attributes:
+      cpu: {}
+      memory: {}
+
+  EdgeSpec:
+    attributes:
+      outbound:
+        range: Edge
+        multivalued: true
+
+  Edge:
+    class_uri: bfo:0000031
+    description: >
+      First-class BFO GenericallyDependentContinuant (information entity)
+      mediating K-to-K communication. Grounded in cco:Artifact.
+    attributes:
+      target_kernel: { required: true }
+      predicate: { range: EdgePredicate, required: true }
+      nats_subject: { required: true }
+      requires_consensus: { range: boolean }
+      requires_target_auth: { range: boolean }
+
+  LifecycleConfig:
+    description: For temporal CKs (sites spawned for limited duration)
+    attributes:
+      temporal: { range: boolean }
+      duration: { description: "ISO 8601 duration (e.g. P30D)" }
+      created_by: { description: "URN of the factory kernel that created this CK" }
+
+  WorkspaceConfig:
+    description: >
+      Virtual desktop layout config for CK.Layout. Controls how
+      VS Code + Terminal are tiled on a virtual desktop via yb runners.
+    attributes:
+      runner:
+        description: "yb runner script name (split, tile, solo)"
+        ifabsent: "split"
+      bar:
+        description: "SketchyBar style (standard, minimal, none)"
+        ifabsent: "standard"
+      gap:
+        range: integer
+        description: "Pixel gap between tiled windows"
+        ifabsent: "0"
+      padding:
+        description: "Window padding T,B,L,R (e.g. 52,0,0,0)"
+        ifabsent: "52,0,0,0"
+      zoom:
+        range: integer
+        description: "VS Code zoom level (Cmd+= count)"
+        ifabsent: "0"
+      cmd:
+        description: "Optional command to run in Terminal"
+
+  Instance:
+    class_uri: bfo:0000031
+    description: >
+      Immutable result artifact (BFO GenericallyDependentContinuant).
+      Grounded in iao:0000027 (DataItem).
+      Stored at instances/i-{identifier}/
+    attributes:
+      id: { required: true }
+      created_at: { range: datetime, required: true }
+      status: { range: InstanceStatus, required: true }
+      kernel_urn: { required: true }
+
+  # --- v3.5 Base Instance Shapes (from SPEC.CKP.v3.5.alpha-3 Section 4.1) ---
+
+  InstanceManifest:
+    class_uri: bfo:0000031
+    description: >
+      Base shape for all CKP instances. An immutable information entity
+      produced by a kernel action. Every instance directory contains a
+      manifest.json conforming to this shape. (BFO GenericallyDependentContinuant)
+    attributes:
+      instance_id:
+        required: true
+        pattern: "^i-.+-\\d+$"
+        description: "Unique instance ID, format: i-{slug}-{epoch}"
+      kernel_class:
+        required: true
+        description: "Class name of the kernel that produced this instance"
+      kernel_id:
+        required: true
+        description: "GUID of the kernel that produced this instance"
+      created_at: { range: datetime, required: true }
+      wasGeneratedBy:
+        description: "URN of the action/activity that generated this instance (prov:wasGeneratedBy)"
+      wasAttributedTo:
+        description: "URN of the kernel/agent responsible (prov:wasAttributedTo)"
+      generatedAtTime: { range: datetime }
+
+  SealedInstance:
+    is_a: InstanceManifest
+    description: >
+      A finalized, immutable instance sealed with data, tool reference,
+      and CK reference. Once sealed, contents cannot be modified.
+    attributes:
+      data:
+        required: true
+        description: "JSON-serialized output data (stored as data.json)"
+      tool_ref:
+        description: "Reference to the tool loop processor (e.g., tool/processor.py)"
+      ck_ref:
+        description: "Reference to the CK loop identity (conceptkernel.yaml) at seal time"
+
+  LedgerEntry:
+    class_uri: bfo:0000031
+    description: >
+      Append-only log entry recording a state transition or action event.
+      Stored in storage/ledger/ as JSONL files. (BFO GenericallyDependentContinuant)
+    attributes:
+      timestamp: { range: datetime, required: true }
+      event:
+        required: true
+        description: "Event type or action name (e.g., spawn, seal, context)"
+      before:
+        description: "JSON-serialized state before the event"
+      after:
+        description: "JSON-serialized state after the event"
+
+  # --- v3.5 Proof Types ---
+
+  ProofRecord:
+    class_uri: bfo:0000031
+    description: >
+      Verification record documenting that a sealed instance has been checked
+      for integrity, schema compliance, provenance, and structure.
+      Stored at storage/proof/{instance_id}/proof.json.
+    attributes:
+      proof_id: { required: true }
+      instance_id:
+        required: true
+        description: "The instance_id of the sealed instance that was verified"
+      data_hash:
+        required: true
+        description: "SHA-256 hash of instance data.json"
+      manifest_hash:
+        required: true
+        description: "SHA-256 hash of instance manifest.json"
+      checks:
+        range: ProofCheck
+        multivalued: true
+        description: "Individual proof checks executed"
+      outcome:
+        range: ProofOutcome
+        required: true
+      checked_by_kernel:
+        description: "Kernel class name that performed verification"
+      checked_by_identity:
+        description: "Kernel URN identity that performed verification"
+      checked_at:
+        range: datetime
+        required: true
+        description: "ISO 8601 timestamp of when the proof verification was performed"
+      svid:
+        required: true
+        description: "SPIFFE Verifiable Identity Document of the verifier — required for trust chain validation"
+
+  ProofCheck:
+    class_uri: bfo:0000031
+    description: >
+      Individual verification check within a proof record. Each check
+      validates a specific aspect of the instance.
+    attributes:
+      check_name:
+        required: true
+        description: "Human-readable name (e.g., manifest-schema, data-hash)"
+      check_type:
+        range: CheckType
+        required: true
+      expected:
+        description: "Expected value or condition for pass"
+      actual:
+        description: "Actual observed value during verification"
+      passed: { range: boolean, required: true }
+
+  # --- Alpha-6: Reconciliation ---
+  Reconciliation:
+    is_a: Action
+    class_uri: bfo:0000015
+    description: >
+      Operator reconciliation cycle. A periodic or event-driven process
+      where the operator compares desired state (conceptkernel.yaml)
+      against actual state (running resources) and converges.
+    attributes:
+      target_kernel:
+        required: true
+        description: "URN of the kernel being reconciled"
+      desired_state:
+        description: "JSON-serialized desired state from conceptkernel.yaml"
+      actual_state:
+        description: "JSON-serialized actual state from running resources"
+      drift_detected:
+        range: boolean
+        description: "Whether drift was detected between desired and actual"
+
+  Action:
+    class_uri: bfo:0000015
+    description: >
+      An executable operation exposed by a kernel. Actions are processes
+      that transform inputs into instances. Grounded in iao:0000104
+      (PlanSpecification).
+    attributes:
+      name: { required: true }
+      access_level: { description: "Access control: anon, auth, admin" }
+
+  FolderStructure:
+    description: >
+      Three Loops directory structure for every CK. The scaffolding tool
+      reads this to create compliant CK directories. Each loop is an
+      independently-versioned volume on SeaweedFS.
+    attributes:
+      ck_loop_files:
+        range: string
+        multivalued: true
+        ifabsent: '["conceptkernel.yaml", ".ck-guid", "README.md", "CLAUDE.md", "SKILL.md", "CHANGELOG.md", "ontology.yaml", "rules.shacl", "serving.json"]'
+        description: "Files at CK root (identity loop — ck-{guid}-ck volume)"
+      tool_dir:
+        ifabsent: "tool/"
+        description: "Tool loop directory (capability — ck-{guid}-tool volume)"
+      storage_dir:
+        ifabsent: "storage/"
+        description: "Data loop directory (knowledge — ck-{guid}-storage volume)"
+      storage_subdirs:
+        range: string
+        multivalued: true
+        ifabsent: '["instances/", "ledger/", "proof/", "index/", "llm/", "web/"]'
+        description: "Required subdirectories under storage/"
+      instance_prefix:
+        ifabsent: "i-"
+        description: "Instance folder prefix"
+
+enums:
+
+  KernelType:
+    permissible_values:
+      node:cold: { description: "Always running, low latency" }
+      node:hot: { description: "Scales to zero, on-demand" }
+      service: { description: "Stateful service" }
+      agent: { description: "Autonomous agent" }
+      inline: { description: "Alpha-6: Browser-side JS kernel, no pod" }
+      static: { description: "Alpha-6: No process, gateway serves web/ directly" }
+
+  GovernanceMode:
+    permissible_values:
+      STRICT: { description: "Unanimous consensus" }
+      RELAXED: { description: "Simple majority" }
+      AUTONOMOUS: { description: "Owner only" }
+
+  EdgePredicate:
+    permissible_values:
+      PRODUCES: {}
+      REQUIRES: {}
+      TRIGGERS: {}
+      CONSUMES: {}
+      ENHANCES: {}
+      VALIDATES: {}
+      TRANSFORMS: {}
+
+  InstanceStatus:
+    permissible_values:
+      pending: {}
+      active: {}
+      completed: {}
+      failed: {}
+      archived: {}
+
+  # --- v3.5 Proof Enums ---
+
+  ProofOutcome:
+    description: "Overall result of a proof verification"
+    permissible_values:
+      PASS: { description: "All proof checks passed successfully" }
+      FAIL: { description: "One or more critical proof checks failed" }
+      PARTIAL: { description: "Some checks passed, some non-critical failed" }
+
+  CheckType:
+    description: "Category of a proof verification check"
+    permissible_values:
+      SCHEMA: { description: "JSON Schema validation of manifest and data structure" }
+      SHACL: { description: "SHACL shape validation against CKP ontology constraints" }
+      PROVENANCE: { description: "PROV-O provenance chain validation" }
+      STRUCTURE: { description: "File/folder structure validation" }
+      INTEGRITY: { description: "Data integrity validation (SHA-256 hash verification)" }
+      OPERATIONAL: { description: "Operational validation (tool execution correctness)" }
+
+  # --- Alpha-6 Enums ---
+
+  StorageMedium:
+    description: "How kernel code/web assets are physically stored"
+    permissible_values:
+      FILESYSTEM: { description: "Mounted filesystem (SeaweedFS volume, PVC, hostPath)" }
+      DOCUMENT_STORE: { description: "Document store (FerretDB, MongoDB)" }
+      CONFIGMAP: { description: "Kubernetes ConfigMaps (size-limited)" }
+
+  DeploymentMethod:
+    description: "How kernel code is delivered to execution environment"
+    permissible_values:
+      VOLUME: { description: "Code mounted as volume (SeaweedFS CSI, PVC)" }
+      FILER: { description: "Code synced via SeaweedFS filer HTTP API" }
+      CONFIGMAP_DEPLOY: { description: "Code packaged as ConfigMaps into pods" }
+      INLINE_DEPLOY: { description: "Code delivered to browser as ES6 modules" }
+
+  ServingDisposition:
+    description: "How a kernel serves its functionality to consumers"
+    permissible_values:
+      API_SERVING: { description: "HTTP/REST API endpoint via gateway" }
+      WEB_SERVING: { description: "Static web assets from web/ directory" }
+      NATS_LISTENING: { description: "Server-side NATS subject listener" }
+      NATS_BROWSER_CLIENT: { description: "Browser NATS WSS client (InlineKernel)" }

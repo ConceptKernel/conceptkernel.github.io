@@ -1,0 +1,380 @@
+/**
+ * CKP Ontology Browser — Styles
+ * Concept Kernel Protocol v3.5-alpha6
+ */
+
+/* --- Base Font --- */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+    margin: 0;
+}
+
+/* --- CKP Header Bar --- */
+.ckp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0D2137;
+    color: #ffffff;
+    padding: 0 1.5rem;
+    height: 48px;
+    flex-shrink: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ckp-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ckp-header-brand {
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.ckp-header-brand:hover {
+    opacity: 0.9;
+}
+
+.ckp-header-separator {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.ckp-header-title {
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.ckp-header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.ckp-header-link {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.ckp-header-link:hover {
+    color: #ffffff;
+}
+
+/* --- Main App Layout --- */
+.app-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.app-container {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+/* --- Sidebar (1/4) --- */
+.sidebar {
+    width: 28%;
+    min-width: 350px;
+    height: 100%;
+    background: #f8f9fb;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Main Content (3/4) --- */
+.main-content {
+    flex: 1;
+    height: 100%;
+    overflow-y: auto;
+    background: #ffffff;
+    padding: 2.5rem;
+}
+
+#infoPlaceholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    flex-direction: column;
+    color: #6b7280;
+}
+#infoPlaceholder svg {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 1rem;
+}
+
+/* --- Sidebar Panel Styling --- */
+.panel {
+    background: white;
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+.loader-panel {
+    flex-shrink: 0;
+}
+.ontology-browser {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-bottom: none;
+}
+
+h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #0D2137;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 10px;
+}
+
+#dependencyCheck { padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 12px; margin-bottom: 10px; background: #f9fafb; }
+textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-family: 'Monaco', 'Menlo', monospace; font-size: 12px; resize: vertical; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; }
+textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; width: 100%; margin-top: 10px; }
+button:hover { background: #2563eb; }
+button:disabled { background: #9ca3af; cursor: not-allowed; }
+.progress { width: 100%; height: 4px; background: #e5e7eb; border-radius: 2px; margin-top: 12px; overflow: hidden; }
+.progress-bar { height: 100%; background: #3b82f6; transition: width 0.3s ease; border-radius: 2px; }
+.status { font-size: 12px; color: #6b7280; margin-top: 8px; }
+#loadLogs { margin-top: 5px; max-height: 60px; overflow-y: auto; background: #f9fafb; border: 1px solid #f3f4f6; border-radius: 4px; padding: 5px; }
+.log { font-size: 10px; color: #6b7280; margin-top: 2px; font-family: 'Monaco', 'Menlo', monospace; }
+.success { color: #16a34a; }
+.error { color: #dc2626; }
+.warning { color: #d97706; }
+
+/* --- Ontology Browser List (Sidebar) --- */
+.search-controls input { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; margin-bottom: 10px; box-sizing: border-box; }
+.entity-filter { display: flex; gap: 5px; margin-bottom: 10px; }
+.entity-filter button { flex: 1; font-size: 12px; background: #f3f4f6; color: #4b5563; padding: 6px 10px; margin-top: 0; }
+.entity-filter button.active { background: #0D2137; color: white; font-weight: 700; }
+.ontology-tree { flex: 1; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 5px; background: #fafafa; }
+.ontology-item { margin-bottom: 5px; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: #ffffff; }
+.ontology-header { background: #f8f9fb; padding: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; }
+.ontology-header:hover { background: #eef1f5; }
+.ontology-header strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ontology-header-uri { font-size: 11px; color: #666; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ontology-stats { font-size: 11px; color: #6b7280; display: flex; gap: 8px; flex-shrink: 0; }
+.ontology-stats span { white-space: nowrap; }
+.entity-list { background: white; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+.entity-list.expanded { max-height: 500px; overflow-y: auto; }
+
+/* Clickable Entity Item */
+.entity-item {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    margin: 0;
+}
+.entity-item:last-child { border-bottom: none; }
+.entity-item:hover { background: #f8fafc; }
+.entity-type { font-size: 10px; padding: 3px 8px; border-radius: 12px; font-weight: 700; min-width: 65px; text-align: center; white-space: nowrap; }
+.entity-type.Class { background: #dbeafe; color: #1e40af; }
+.entity-type.Property { background: #d4edda; color: #166534; }
+.entity-type.Individual { background: #fef3c7; color: #92400e; }
+.entity-type.Resource { background: #e5e7eb; color: #4b5563; }
+.entity-type.Ontology { background: #f3e5f5; color: #6B21A8; }
+
+
+/* --- Main Content Info Panel Styling --- */
+#breadcrumbs {
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+.breadcrumb-item {
+    font-weight: 500;
+    color: #3b82f6;
+    cursor: pointer;
+    text-decoration: none;
+}
+.breadcrumb-item:hover {
+    text-decoration: underline;
+}
+.breadcrumb-separator {
+    margin: 0 0.5rem;
+}
+
+#infoLabel {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 0.25rem;
+}
+
+#infoUri {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-family: 'Monaco', 'Menlo', monospace;
+    margin-bottom: 2rem;
+    word-break: break-all;
+}
+
+.info-section {
+    margin-top: 2rem;
+}
+.info-section h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0D2137;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.triple-row, .detail-row {
+    display: grid;
+    grid-template-columns: 2fr 5fr;
+    grid-gap: 1rem;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.875rem;
+    align-items: start;
+}
+.triple-row:last-child, .detail-row:last-child {
+    border-bottom: none;
+}
+
+/* Prose/paragraph content in the Details section */
+.prose-row {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.875rem;
+}
+.prose-row:last-child {
+    border-bottom: none;
+}
+.prose-row .predicate {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: 'Inter', sans-serif;
+}
+.prose-row .object-literal {
+    /* Styles inherited from group */
+}
+
+.predicate {
+    font-weight: 600;
+    color: #374151;
+    font-family: 'Monaco', 'Menlo', monospace;
+    word-break: break-all;
+}
+
+.object-link {
+    font-weight: 600;
+    color: #3b82f6;
+    text-decoration: none;
+}
+.object-link:hover {
+    text-decoration: underline;
+}
+.object-link.predicate {
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-weight: 600;
+    color: #4338ca;
+}
+.object-link.predicate:hover {
+    color: #3730a3;
+}
+
+.object-literal {
+    color: #1f2937;
+}
+
+.object-link-uri {
+    display: block;
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 400;
+    font-family: 'Monaco', 'Menlo', monospace;
+    margin-top: 0.25rem;
+}
+
+.load-external-btn {
+    background: #eef2ff;
+    color: #4338ca;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-left: 8px;
+    cursor: pointer;
+    border: 1px solid #c7d2fe;
+    transition: all 0.2s;
+    width: auto;
+}
+.load-external-btn:hover {
+    background: #e0e7ff;
+    border-color: #a5b4fc;
+}
+.load-external-btn:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    border-color: #d1d5db;
+}
+
+/* --- Grouping --- */
+.object-literal-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #1f2937;
+}
+.object-literal-item {
+    display: block;
+}
+/* Special styles for prose group */
+.prose-row .object-literal-group {
+    line-height: 1.6;
+    color: #111827;
+}
+
+.object-literal-lang {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 500;
+    margin-left: 0.25rem;
+    font-family: sans-serif;
+    border: 1px solid #e5e7eb;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: #f9fafb;
+}
+
+/* --- Placeholder / Empty State --- */
+.canvas-placeholder {
+    color: #9ca3af;
+    font-size: 13px;
+    text-align: center;
+    padding: 2rem 1rem;
+}

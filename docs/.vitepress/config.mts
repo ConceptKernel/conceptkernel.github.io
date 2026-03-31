@@ -21,11 +21,15 @@ export default withMermaid(defineConfig({
     siteTitle: 'Concept Kernel',
 
     nav: [
+      { text: 'v3.5', link: '/v3.5/' },
+      { text: 'v3.4', link: '/v3.4/introduction' },
       {
         text: 'Ontology',
         items: [
-          { text: 'v3.4 (stable)', link: '/ontology/v3.4/' },
-          { text: 'v3.5 (alpha-3)', link: '/ontology/v3.5/' },
+          { text: 'Browse Ontology', link: '/browse/' },
+          { text: 'v3.5-alpha6 (TTL)', link: '/ontology/v3.5-alpha6/' },
+          { text: 'v3.5 alpha-3 (TTL)', link: '/ontology/v3.5/' },
+          { text: 'v3.4 stable (TTL)', link: '/ontology/v3.4/' },
         ]
       },
       {
@@ -130,6 +134,89 @@ export default withMermaid(defineConfig({
             { text: 'Join Discord', link: 'https://discord.gg/sTbfxV9xyU' },
             { text: 'GitHub', link: 'https://github.com/ConceptKernel' },
             { text: 'Contributing', link: '/v3.5-alpha3/contributing' },
+          ]
+        }
+      ],
+      '/v3.5/': [
+        {
+          text: 'Foundation',
+          items: [
+            { text: 'Introduction', link: '/v3.5/introduction' },
+            { text: 'Three Loops (DL Boxes)', link: '/v3.5/three-loops' },
+            { text: 'Ontology Layering', link: '/v3.5/ontology-layering' },
+          ]
+        },
+        {
+          text: 'The Three Loops',
+          items: [
+            { text: 'CK Loop: Identity', link: '/v3.5/ck-loop' },
+            { text: 'TOOL Loop: Capability', link: '/v3.5/tool-loop' },
+            { text: 'DATA Loop: Knowledge', link: '/v3.5/data-loop' },
+            { text: 'System Integration', link: '/v3.5/system' },
+          ]
+        },
+        {
+          text: 'Physical Topology',
+          items: [
+            { text: 'Volumes & Paths', link: '/v3.5/topology' },
+          ]
+        },
+        {
+          text: 'Identity & Security',
+          items: [
+            { text: 'SPIFFE Identity', link: '/v3.5/spiffe' },
+          ]
+        },
+        {
+          text: 'Protocol',
+          items: [
+            { text: 'Kernel Lifecycle', link: '/v3.5/lifecycle' },
+            { text: 'NATS Topology', link: '/v3.5/nats' },
+            { text: 'URN Scheme', link: '/v3.5/urn' },
+            { text: 'CK.Operator', link: '/v3.5/operator' },
+          ]
+        },
+        {
+          text: 'Ontology Reference',
+          items: [
+            { text: 'BFO Type Mapping', link: '/v3.5/bfo-mapping' },
+            { text: 'Ontology Browser', link: '/v3.5/ontology-browser' },
+            { text: 'Compliance', link: '/v3.5/compliance' },
+            { text: 'System Kernels', link: '/v3.5/taxonomy' },
+          ]
+        },
+        {
+          text: 'Autonomous Operations',
+          items: [
+            { text: 'Autonomous Operations', link: '/v3.5/autonomous-ops' },
+          ]
+        },
+        {
+          text: 'Patterns',
+          items: [
+            { text: 'Implementation Patterns', link: '/v3.5/patterns' },
+          ]
+        },
+        {
+          text: 'Changelog',
+          collapsed: true,
+          items: [
+            { text: "What's New in v3.5", link: '/v3.5/whats-new' },
+          ]
+        },
+        {
+          text: 'Ontology Files',
+          items: [
+            { text: 'v3.5-alpha6 (Turtle)', link: '/ontology/v3.5-alpha6/' },
+            { text: 'v3.5 (Turtle)', link: '/ontology/v3.5/' },
+            { text: 'v3.4 (Turtle)', link: '/ontology/v3.4/' },
+          ]
+        },
+        {
+          text: 'Community',
+          items: [
+            { text: 'Discord', link: 'https://discord.gg/sTbfxV9xyU' },
+            { text: 'GitHub', link: 'https://github.com/ConceptKernel' },
           ]
         }
       ],

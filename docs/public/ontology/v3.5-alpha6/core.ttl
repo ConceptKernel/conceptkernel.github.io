@@ -1,0 +1,546 @@
+# ConceptKernel Base BFO Ontology
+# Version: v3.5-alpha6
+# Date: 2026-03-31
+# Purpose: Core BFO mappings for ConceptKernel continuants
+# Alpha-6: Adds InlineKernel, StaticKernel, Project, Reconciliation
+#           IAO/CCO grounding annotations per ontology layering strategy
+
+@prefix : <https://conceptkernel.org/ontology/v3.5/> .
+@prefix ckp: <https://conceptkernel.org/ontology/v3.5/> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://conceptkernel.org/ontology/v3.5/> a owl:Ontology ;
+    dc:title "ConceptKernel BFO Base Ontology" ;
+    dc:description "Formal ontology mapping ConceptKernel entities to Basic Formal Ontology (BFO) classes" ;
+    dcterms:created "2025-11-23"^^xsd:date ;
+    dcterms:modified "2026-03-31"^^xsd:date ;
+    owl:versionInfo "v3.5-alpha6" ;
+    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;    rdfs:comment "Core continuants and occurrents: Kernel, Edge, Instance, Ontology, Action, GovernanceMode. Alpha-6 adds InlineKernel, StaticKernel, Project, Reconciliation."@en ;
+    owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ,
+                <https://conceptkernel.org/ontology/v3.5/base-instances> ,
+                <https://conceptkernel.org/ontology/v3.5/proof> .
+
+#################################################################
+#    Continuants - Entities that persist through time
+#################################################################
+
+### Kernel (Independent Continuant - Material Entity)
+### Grounded in cco:Agent — a kernel is both material entity AND agent
+
+ckp:Kernel a owl:Class ;
+    rdfs:subClassOf bfo:0000040 ;  # bfo:MaterialEntity
+    rdfs:label "Concept Kernel"@en ;
+    rdfs:comment "A persistent computational entity that maintains identity across time. Kernels are the fundamental atomic units of computation in ConceptKernel architecture. Grounded in cco:Agent — a kernel acts autonomously."@en ;
+    ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
+    ckp:coverageScore "0.85"^^xsd:decimal .
+
+### Kernel Types (Qualities)
+
+ckp:KernelType a owl:Class ;
+    rdfs:subClassOf bfo:0000019 ;  # bfo:Quality
+    rdfs:label "Kernel Type"@en ;
+    rdfs:comment "The type quality of a kernel (hot, cold, hybrid, manual)"@en .
+
+ckp:HotKernel a owl:Class ;
+    rdfs:subClassOf ckp:Kernel ;
+    rdfs:label "Hot Kernel"@en ;
+    rdfs:comment "Always-on service kernels that listen for external events (HTTP, WebSocket, etc.)"@en ;
+    dc:description "Node.js: metadata.type='node:hot', Python: metadata.type='python:hot'" .
+
+ckp:ColdKernel a owl:Class ;
+    rdfs:subClassOf ckp:Kernel ;
+    rdfs:label "Cold Kernel"@en ;
+    rdfs:comment "On-demand kernels triggered by file system events (symlinks in queue/inbox)"@en ;
+    dc:description "Node.js: metadata.type='node:cold', Python: metadata.type='python:cold'" .
+
+### Alpha-6: InlineKernel — podless browser-side kernel
+
+ckp:InlineKernel a owl:Class ;
+    rdfs:subClassOf ckp:Kernel ;
+    rdfs:label "Inline Kernel"@en ;
+    rdfs:comment "Podless kernel: browser-side JS, NATS WSS, JWT. No server-side process — runs entirely in the client browser, communicating via NATS WebSocket and authenticating with JWT."@en ;
+    dc:description "Alpha-6 addition. Deployment method: INLINE_DEPLOY. Serving: NATSBrowserClient." ;
+    ckp:implementationStatus "PARTIAL"^^xsd:string .
+
+### Alpha-6: StaticKernel — no process, gateway serves storage/web/
+
+ckp:StaticKernel a owl:Class ;
+    rdfs:subClassOf ckp:Kernel ;
+    rdfs:label "Static Kernel"@en ;
+    rdfs:comment "No process: gateway serves storage/web/ directly. A kernel whose web/ assets are served by the gateway without any running tool process."@en ;
+    dc:description "Alpha-6 addition. Deployment method: VOLUME or FILER. Serving: WebServing only." ;
+    ckp:implementationStatus "PARTIAL"^^xsd:string .
+
+### Kernel Properties
+
+ckp:hasUrn a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string ;
+    rdfs:label "has URN"@en ;
+    rdfs:comment "The Universal Resource Name identifying the kernel: [Domain]:[Concept]:[Version]"@en ;
+    dc:description "Example: Org.ConceptKernel:Recipes.BakeCake:v0.1" .
+
+ckp:hasDomain a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string ;
+    rdfs:label "has domain"@en ;
+    rdfs:comment "The organizational domain of the kernel"@en .
+
+ckp:hasVersion a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string ;
+    rdfs:label "has version"@en ;
+    rdfs:comment "Git tag version of the kernel"@en ;
+    dc:description "Example: v0.1" .
+
+ckp:hasType a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:KernelType ;
+    rdfs:label "has type"@en ;
+    rdfs:comment "The type quality of the kernel (hot/cold/hybrid/manual)"@en .
+
+### Kernel Dispositions (Contract Capabilities)
+
+ckp:QueueContract a owl:Class ;
+    rdfs:subClassOf bfo:0000016 ;  # bfo:Disposition
+    rdfs:label "Queue Contract"@en ;
+    rdfs:comment "Disposition defining what inputs a kernel can accept. Grounded in iao:0000017 (DirectiveInformationEntity) — a contract directs how to interact."@en ;
+    dc:description "Defined in ontology.yaml: spec.queue_contract" .
+
+ckp:StorageContract a owl:Class ;
+    rdfs:subClassOf bfo:0000016 ;  # bfo:Disposition
+    rdfs:label "Storage Contract"@en ;
+    rdfs:comment "Disposition defining what outputs a kernel will produce"@en ;
+    dc:description "Defined in ontology.yaml: spec.storage_contract" .
+
+ckp:NotificationContract a owl:Class ;
+    rdfs:subClassOf bfo:0000016 ;  # bfo:Disposition
+    rdfs:label "Notification Contract"@en ;
+    rdfs:comment "Disposition defining which kernels will be notified of outputs"@en ;
+    dc:description "Defined in ontology.yaml: spec.notification_contract" .
+
+ckp:hasQueueContract a owl:ObjectProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:QueueContract ;
+    rdfs:label "has queue contract"@en .
+
+ckp:hasStorageContract a owl:ObjectProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:StorageContract ;
+    rdfs:label "has storage contract"@en .
+
+ckp:hasNotificationContract a owl:ObjectProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:NotificationContract ;
+    rdfs:label "has notification contract"@en .
+
+#################################################################
+#    InformationEntity (Generically Dependent Continuant)
+#################################################################
+
+ckp:InformationEntity a owl:Class ;
+    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant
+    rdfs:label "Information Entity"@en ;
+    rdfs:comment "An abstract information-bearing entity that can be concretized in multiple bearers. Base class for Instance, Edge, and other information artifacts."@en .
+
+#################################################################
+#    Edge (Generically Dependent Continuant - Relational Entity)
+#    Grounded in cco:Artifact — an edge is a constructed artifact
+#################################################################
+
+ckp:Edge a owl:Class ;
+    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant
+    rdfs:label "Edge"@en ;
+    rdfs:comment "An abstract relationship between two kernels - the ONLY mechanism for inter-Kernel communication. Edges are information entities that depend on the kernels they connect. Grounded in cco:Artifact — an edge is a constructed artifact connecting kernels."@en ;
+    ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
+    ckp:coverageScore "0.85"^^xsd:decimal ;
+    ckp:architecturalConstraint "NO direct Kernel-to-Kernel communication. ONLY through EdgeKernel-managed Edges."^^xsd:string .
+
+### Edge Relationship Types
+
+ckp:RelationshipType a owl:Class ;
+    rdfs:subClassOf bfo:0000019 ;  # bfo:Quality
+    rdfs:label "Relationship Type"@en ;
+    rdfs:comment "The semantic relationship type of an edge"@en .
+
+ckp:PRODUCES a ckp:RelationshipType ;
+    rdfs:label "PRODUCES"@en ;
+    rdfs:comment "Source kernel produces instances consumed by target"@en .
+
+ckp:NOTIFIES a ckp:RelationshipType ;
+    rdfs:label "NOTIFIES"@en ;
+    rdfs:comment "Source kernel notifies target of events"@en .
+
+ckp:REQUIRES a ckp:RelationshipType ;
+    rdfs:label "REQUIRES"@en ;
+    rdfs:comment "Target kernel requires instances from source"@en .
+
+ckp:VALIDATES a ckp:RelationshipType ;
+    rdfs:label "VALIDATES"@en ;
+    rdfs:comment "Source kernel validates target's outputs"@en .
+
+ckp:INFLUENCES a ckp:RelationshipType ;
+    rdfs:label "INFLUENCES"@en ;
+    rdfs:comment "Soft dependency (advisory, not blocking)"@en .
+
+ckp:TRANSFORMS a ckp:RelationshipType ;
+    rdfs:label "TRANSFORMS"@en ;
+    rdfs:comment "Source data is transformed by target"@en .
+
+### v3.5 Edge Predicates (governance-loop relationship types)
+
+ckp:EXTENDS a ckp:RelationshipType ;
+    rdfs:label "EXTENDS"@en ;
+    rdfs:comment "Source kernel extends target kernel's capabilities (inheritance-like composition)"@en .
+
+ckp:COMPOSES a ckp:RelationshipType ;
+    rdfs:label "COMPOSES"@en ;
+    rdfs:comment "Source kernel composes target kernel's actions into its own pipeline"@en .
+
+ckp:TRIGGERS a ckp:RelationshipType ;
+    rdfs:label "TRIGGERS"@en ;
+    rdfs:comment "Source kernel triggers execution of target kernel (event-driven activation)"@en .
+
+### Edge Properties
+
+ckp:hasSource a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Edge ;
+    rdfs:range ckp:Kernel ;
+    rdfs:label "has source"@en ;
+    rdfs:comment "The source kernel of the edge relationship"@en ;
+    owl:inverseOf ckp:hasOutgoingEdge .
+
+ckp:hasTarget a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Edge ;
+    rdfs:range ckp:Kernel ;
+    rdfs:label "has target"@en ;
+    rdfs:comment "The target kernel of the edge relationship"@en ;
+    owl:inverseOf ckp:hasIncomingEdge .
+
+ckp:hasRelationshipType a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Edge ;
+    rdfs:range ckp:RelationshipType ;
+    rdfs:label "has relationship type"@en ;
+    rdfs:comment "The semantic type of the relationship (PRODUCES, NOTIFIES, TRIGGERS, etc.)"@en .
+
+ckp:hasOutgoingEdge a owl:ObjectProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Edge ;
+    rdfs:label "has outgoing edge"@en ;
+    rdfs:comment "An edge originating from this kernel"@en ;
+    owl:inverseOf ckp:hasSource .
+
+ckp:hasIncomingEdge a owl:ObjectProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Edge ;
+    rdfs:label "has incoming edge"@en ;
+    rdfs:comment "An edge targeting this kernel"@en ;
+    owl:inverseOf ckp:hasTarget .
+
+### Edge Authorization (enforced by EdgeKernel)
+
+ckp:isAuthorized a owl:DatatypeProperty ;
+    rdfs:domain ckp:Edge ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "is authorized"@en ;
+    rdfs:comment "Whether the target kernel explicitly authorizes this edge in its queue_contract.edges"@en .
+
+#################################################################
+#    Instance (Generically Dependent Continuant - Information Entity)
+#    Grounded in iao:0000027 (DataItem) — an instance is a data item
+#################################################################
+
+ckp:Instance a owl:Class ;
+    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant (information entity)
+    rdfs:label "Instance"@en ;
+    rdfs:comment "A persistent information entity - the result of a Process. Instances are immutable artifacts stored in {kernel}/storage/instances/i-{identifier}/. Grounded in iao:0000027 (DataItem) — an instance is a truthful data item about something."@en ;
+    ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
+    ckp:coverageScore "0.80"^^xsd:decimal .
+
+### Instance Properties
+
+ckp:hasTransactionId a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Instance ;
+    rdfs:range xsd:string ;
+    rdfs:label "has transaction ID"@en ;
+    rdfs:comment "Unique transaction ID in format: yyMMddHHmmssf-shortId"@en .
+
+ckp:hasTimestamp a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Instance ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "has timestamp"@en ;
+    rdfs:comment "ISO 8601 timestamp of instance creation"@en .
+
+ckp:hasReceiptData a owl:DatatypeProperty ;
+    rdfs:domain ckp:Instance ;
+    rdfs:range xsd:string ;
+    rdfs:label "has receipt data"@en ;
+    rdfs:comment "JSON-serialized result data stored in receipt.bin"@en .
+
+### Instance-Kernel relationship
+
+ckp:createdByKernel a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Instance ;
+    rdfs:range ckp:Kernel ;
+    rdfs:label "created by kernel"@en ;
+    rdfs:comment "The kernel that produced this instance"@en .
+
+ckp:producesInstance a owl:ObjectProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Instance ;
+    rdfs:label "produces instance"@en ;
+    rdfs:comment "An instance produced by this kernel"@en ;
+    owl:inverseOf ckp:createdByKernel .
+
+#################################################################
+#    Action (Occurrent - Process)
+#    v3.5: Actions are the executable operations a kernel exposes
+#    Grounded in iao:0000104 (PlanSpecification) — an action is a plan
+#################################################################
+
+ckp:Action a owl:Class ;
+    rdfs:subClassOf bfo:0000015 ;  # bfo:Process
+    rdfs:label "Action"@en ;
+    rdfs:comment "An executable operation exposed by a kernel. Actions are processes that transform inputs into instances. Defined in conceptkernel.yaml under spec.actions. Grounded in iao:0000104 (PlanSpecification) — an action is a plan specification that gets realized as a process."@en .
+
+ckp:hasAction a owl:ObjectProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Action ;
+    rdfs:label "has action"@en ;
+    rdfs:comment "An action exposed by this kernel"@en .
+
+ckp:hasAccessLevel a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Action ;
+    rdfs:range xsd:string ;
+    rdfs:label "has access level"@en ;
+    rdfs:comment "Access control level for the action: anon, auth, admin"@en .
+
+#################################################################
+#    Alpha-6: Reconciliation (Occurrent - Process subclass of Action)
+#################################################################
+
+ckp:Reconciliation a owl:Class ;
+    rdfs:subClassOf ckp:Action ;
+    rdfs:label "Reconciliation"@en ;
+    rdfs:comment "Operator reconciliation cycle. A periodic or event-driven process where the operator compares desired state (conceptkernel.yaml) against actual state (running resources) and converges."@en ;
+    dc:description "Alpha-6 addition. Triggered by tg.sh apply or operator watch loop." ;
+    ckp:implementationStatus "PARTIAL"^^xsd:string .
+
+#################################################################
+#    GovernanceMode (Disposition)
+#    v3.5: How a kernel governs itself
+#################################################################
+
+ckp:GovernanceMode a owl:Class ;
+    rdfs:subClassOf bfo:0000016 ;  # bfo:Disposition
+    rdfs:label "Governance Mode"@en ;
+    rdfs:comment "The governance disposition of a kernel, determining how decisions are made and enforced."@en .
+
+ckp:STRICT a ckp:GovernanceMode ;
+    rdfs:label "STRICT"@en ;
+    rdfs:comment "All changes require consensus approval before execution"@en .
+
+ckp:RELAXED a ckp:GovernanceMode ;
+    rdfs:label "RELAXED"@en ;
+    rdfs:comment "Changes proceed with post-hoc review; consensus is advisory"@en .
+
+ckp:AUTONOMOUS a ckp:GovernanceMode ;
+    rdfs:label "AUTONOMOUS"@en ;
+    rdfs:comment "Kernel self-governs without external consensus requirements"@en .
+
+ckp:hasGovernanceMode a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:GovernanceMode ;
+    rdfs:label "has governance mode"@en ;
+    rdfs:comment "The governance disposition of this kernel"@en .
+
+#################################################################
+#    Ontology (Dependent Continuant - Universal)
+#    Grounded in iao:0000310 (Document) — an ontology is a document
+#################################################################
+
+ckp:KernelOntology a owl:Class ;
+    rdfs:subClassOf bfo:0000020 ;  # bfo:SpecificallyDependentContinuant
+    rdfs:label "Kernel Ontology"@en ;
+    rdfs:comment "Ontology defines the essential nature of a Kernel (its qualities and dispositions). Stored as ontology.yaml in each kernel directory. Grounded in iao:0000310 (Document) — an ontology is a document, not a quality of the kernel."@en ;
+    dc:description "Format: YAML conforming to apiVersion: conceptkernel/v1, kind: Ontology" ;
+    ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
+    ckp:coverageScore "0.70"^^xsd:decimal .
+
+ckp:definesKernel a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:KernelOntology ;
+    rdfs:range ckp:Kernel ;
+    rdfs:label "defines kernel"@en ;
+    rdfs:comment "The kernel whose nature is defined by this ontology"@en .
+
+ckp:hasOntology a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:KernelOntology ;
+    rdfs:label "has ontology"@en ;
+    rdfs:comment "The ontology defining this kernel's nature"@en ;
+    owl:inverseOf ckp:definesKernel .
+
+#################################################################
+#    Alpha-6: Project (Generically Dependent Continuant)
+#    Grounded in cco:Organization — a project organizes kernels
+#################################################################
+
+ckp:Project a owl:Class ;
+    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant
+    rdfs:label "Project"@en ;
+    rdfs:comment ".ckproject declaration, organizes kernels into a coherent unit. A project is the top-level container that groups related kernels, edges, and workflows. Grounded in cco:Organization — a project organizes kernels into a coherent unit."@en ;
+    dc:description "Alpha-6 addition. Declared via .ckproject file at project root." ;
+    ckp:implementationStatus "PARTIAL"^^xsd:string .
+
+#################################################################
+#    System Mediators (Special Independent Continuants)
+#################################################################
+
+### EdgeKernel - Communication Mediator
+
+ckp:EdgeKernel a owl:Class ;
+    rdfs:subClassOf ckp:Kernel , ckp:HotKernel ;
+    rdfs:label "Edge Kernel"@en ;
+    rdfs:comment "Special system kernel that mediates ALL inter-Kernel communication. Enforces Edge-only communication (architectural constraint)."@en ;
+    dc:description "URN: ckp://System.EdgeKernel:v1.0" ;
+    ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
+    ckp:architecturalRole "Communication Mediator"^^xsd:string .
+
+### System.Consensus - Governance Mediator
+
+ckp:ConsensusKernel a owl:Class ;
+    rdfs:subClassOf ckp:Kernel , ckp:HotKernel ;
+    rdfs:label "Consensus Kernel"@en ;
+    rdfs:comment "Special system kernel that mediates ALL governance decisions (proposals, voting, enforcement)."@en ;
+    dc:description "URN: ckp://System.Consensus:v1.0" ;
+    ckp:implementationStatus "PARTIAL"^^xsd:string ;
+    ckp:architecturalRole "Governance Mediator"^^xsd:string ;
+    ckp:criticalGap "Edge creation does not trigger consensus (not integrated)"^^xsd:string .
+
+### System.WssHub - Broadcast Mediator
+
+ckp:WssHubKernel a owl:Class ;
+    rdfs:subClassOf ckp:Kernel , ckp:HotKernel ;
+    rdfs:label "WebSocket Hub Kernel"@en ;
+    rdfs:comment "Special system kernel that mediates ALL real-time broadcasts (WebSocket events to all clients)."@en ;
+    dc:description "URN: ckp://System.WssHub:v1.0" ;
+    ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
+    ckp:architecturalRole "Broadcast Mediator"^^xsd:string ;
+    ckp:criticalGap "No consensus announcements (not integrated)"^^xsd:string .
+
+#################################################################
+#    Base Relationship Property
+#################################################################
+
+ckp:relatesTo a owl:ObjectProperty ;
+    rdfs:label "relates to"@en ;
+    rdfs:comment "Base property for kernel-to-kernel relationships. All specific edge predicates (auditsComplianceOf, reportsIssueTo, etc.) are sub-properties of this."@en .
+
+#################################################################
+#    Mediation Relationships
+#################################################################
+
+ckp:mediates a owl:ObjectProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range owl:Thing ;
+    rdfs:label "mediates"@en ;
+    rdfs:comment "A mediator kernel manages or controls some entity or process"@en .
+
+ckp:mediatesEdge a owl:ObjectProperty ;
+    rdfs:subPropertyOf ckp:mediates ;
+    rdfs:domain ckp:EdgeKernel ;
+    rdfs:range ckp:Edge ;
+    rdfs:label "mediates edge"@en ;
+    rdfs:comment "EdgeKernel manages this edge"@en .
+
+#################################################################
+#    Architectural Constraints (as OWL Axioms)
+#################################################################
+
+### Constraint 1: Communication requires Edge
+# kernels A, B: canCommunicate(A, B) <-> edge E: connected_by(A, B, E)
+
+ckp:canCommunicateWith a owl:ObjectProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel ;
+    rdfs:label "can communicate with"@en ;
+    rdfs:comment "Two kernels can communicate IF AND ONLY IF there exists an Edge connecting them."@en .
+
+# OWL Restriction: If KernelA canCommunicateWith KernelB, then there must exist an Edge with source=A and target=B
+ckp:CommunicatingKernels a owl:Class ;
+    owl:equivalentClass [
+        a owl:Restriction ;
+        owl:onProperty ckp:hasOutgoingEdge ;
+        owl:someValuesFrom ckp:Edge
+    ] .
+
+### Constraint 2: Edge creation requires authorization
+# edge E: created(E) -> authorized(E)
+
+ckp:AuthorizedEdge a owl:Class ;
+    rdfs:subClassOf ckp:Edge ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty ckp:isAuthorized ;
+        owl:hasValue true
+    ] ;
+    rdfs:label "Authorized Edge"@en ;
+    rdfs:comment "An edge where the target kernel explicitly authorizes the relationship in its queue_contract.edges"@en .
+
+#################################################################
+#    Consensus Proposal (alias for process:Proposal)
+#################################################################
+
+ckp:ConsensusProposal a owl:Class ;
+    rdfs:subClassOf bfo:0000040 ;  # bfo:IndependentContinuant
+    rdfs:label "Consensus Proposal"@en ;
+    rdfs:comment "A proposal submitted for consensus governance review. Equivalent to ckpp:Proposal in the process ontology."@en ;
+    dc:description "Stored in {kernel}/consensus/proposals/{proposalId}.json" .
+
+#################################################################
+#    Implementation Status Annotations
+#################################################################
+
+ckp:implementationStatus a owl:AnnotationProperty ;
+    rdfs:label "implementation status"@en ;
+    rdfs:comment "Current implementation status: WELL_IMPLEMENTED, PARTIAL, NOT_IMPLEMENTED"@en .
+
+ckp:coverageScore a owl:AnnotationProperty ;
+    rdfs:label "coverage score"@en ;
+    rdfs:comment "Decimal score 0.0-1.0 indicating BFO alignment coverage"@en .
+
+ckp:architecturalConstraint a owl:AnnotationProperty ;
+    rdfs:label "architectural constraint"@en ;
+    rdfs:comment "Invariant constraint enforced by the architecture"@en .
+
+ckp:architecturalRole a owl:AnnotationProperty ;
+    rdfs:label "architectural role"@en ;
+    rdfs:comment "The architectural role of a system mediator kernel"@en .
+
+ckp:criticalGap a owl:AnnotationProperty ;
+    rdfs:label "critical gap"@en ;
+    rdfs:comment "A critical missing feature or integration"@en .
+
+#################################################################
+#    Coverage Summary (as OWL Individuals)
+#################################################################
+
+:ContinuantCoverage a owl:NamedIndividual ;
+    rdfs:label "Continuant Coverage"@en ;
+    ckp:coverageScore "0.85"^^xsd:decimal ;
+    rdfs:comment "Overall coverage of BFO Continuants: Kernel (85%), Edge (85%), Instance (80%), Ontology (70%)"@en .
+
+:OverallCoverage a owl:NamedIndividual ;
+    rdfs:label "Overall BFO Coverage"@en ;
+    ckp:coverageScore "0.68"^^xsd:decimal ;
+    rdfs:comment "Overall BFO alignment: Continuants (85%), Occurrents (45%), Alpha-6 additions (50%)"@en .
+
+#################################################################
+# End of ConceptKernel Base BFO Ontology v3.5-alpha6
+#################################################################

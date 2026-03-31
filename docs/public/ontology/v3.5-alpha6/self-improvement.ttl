@@ -1,0 +1,308 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix ckp: <https://conceptkernel.org/ontology/v3.5/> .
+@prefix ckpi: <https://conceptkernel.org/ontology/v3.5/improvement#> .
+
+# ============================================================================
+# Self-Improvement Ontology for ConceptKernel v3.5.0
+# ============================================================================
+# Defines processes, roles, and functions for autonomous self-improvement
+# and ontology-driven validation with AI-powered recommendations
+
+<https://conceptkernel.org/ontology/v3.5/improvement>
+  rdf:type owl:Ontology ;
+  owl:imports <https://conceptkernel.org/ontology/v3.5/> ;
+  owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
+  owl:imports <https://conceptkernel.org/ontology/v3.5/process> ;
+  rdfs:label "ConceptKernel Self-Improvement Ontology" ;
+  rdfs:comment "Ontology for autonomous validation, improvement recommendations, and consensus-driven evolution" ;
+  owl:versionInfo "v3.5.0" .
+    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
+# ============================================================================
+# ROLES (BFO:Role) - Capabilities borne by kernels
+# ============================================================================
+
+ckpi:SelfInspectorRole
+  rdf:type bfo:0000023 ;  # BFO:Role
+  rdfs:label "Self-Inspector" ;
+  rdfs:comment "Role borne by kernels capable of validating themselves and generating improvement recommendations" ;
+  ckp:roleContext "self-improvement" ;
+  ckp:grants ckpi:permission-validate-self ;
+  ckp:grants ckpi:permission-recommend-improvement .
+
+ckpi:AIAnalystRole
+  rdf:type bfo:0000023 ;  # BFO:Role
+  rdfs:label "AI Analyst" ;
+  rdfs:comment "Role borne by LLM kernels (Fabric, Claude) that analyze validation issues and propose solutions" ;
+  ckp:roleContext "ai-analysis" ;
+  ckp:grants ckpi:permission-analyze-issues ;
+  ckp:grants ckpi:permission-propose-solutions .
+
+ckpi:GovernanceReviewerRole
+  rdf:type bfo:0000023 ;  # BFO:Role
+  rdfs:label "Governance Reviewer" ;
+  rdfs:comment "Role borne by System.Consensus for reviewing and approving improvement recommendations" ;
+  ckp:roleContext "governance" ;
+  ckp:grants ckpi:permission-approve-recommendations ;
+  ckp:grants ckpi:permission-reject-recommendations .
+
+# ============================================================================
+# FUNCTIONS (BFO:Function) - Operations realized by kernels
+# ============================================================================
+
+ckpi:ValidationFunction
+  rdf:type bfo:0000034 ;  # BFO:Function
+  rdfs:label "Ontology Validation" ;
+  rdfs:comment "Function of validating kernel ontology against canonical ontologies" ;
+  ckp:capability "ontology-validation" ;
+  ckp:capability "import-checking" ;
+  ckp:capability "bfo-alignment-check" .
+
+ckpi:RecommendationFunction
+  rdf:type bfo:0000034 ;  # BFO:Function
+  rdfs:label "Improvement Recommendation" ;
+  rdfs:comment "Function of generating actionable improvement recommendations from validation results" ;
+  ckp:capability "issue-detection" ;
+  ckp:capability "recommendation-generation" ;
+  ckp:capability "priority-assignment" .
+
+ckpi:AIAnalysisFunction
+  rdf:type bfo:0000034 ;  # BFO:Function
+  rdfs:label "AI-Powered Analysis" ;
+  rdfs:comment "Function of using LLM agents to analyze issues and propose detailed solutions" ;
+  ckp:capability "issue-analysis" ;
+  ckp:capability "solution-proposal" ;
+  ckp:capability "impact-assessment" .
+
+# ============================================================================
+# PROCESSES (BFO:Process) - Temporal improvement workflows
+# ============================================================================
+
+ckpi:ImprovementProcess
+  rdf:type owl:Class ;
+  rdfs:subClassOf bfo:0000015 ;  # BFO:Process
+  rdfs:label "Improvement Process" ;
+  rdfs:comment "A temporal process of validating, analyzing, and improving a kernel" ;
+  ckp:hasProcessUrn "ckp://Process#Improvement-{improvement_id}" ;
+  ckp:hasTemporalParts ckpi:ValidationPhase, ckpi:AnalysisPhase, ckpi:RecommendationPhase, ckpi:ConsensusPhase, ckpi:ExecutionPhase .
+
+ckpi:ValidationPhase
+  rdf:type owl:Class ;
+  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
+  rdfs:label "Validation Phase" ;
+  rdfs:comment "Temporal part where kernel ontology is validated against canonical ontologies" .
+
+ckpi:AnalysisPhase
+  rdf:type owl:Class ;
+  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
+  rdfs:label "Analysis Phase" ;
+  rdfs:comment "Temporal part where AI agents analyze validation issues" .
+
+ckpi:RecommendationPhase
+  rdf:type owl:Class ;
+  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
+  rdfs:label "Recommendation Phase" ;
+  rdfs:comment "Temporal part where improvement recommendations are generated" .
+
+ckpi:ConsensusPhase
+  rdf:type owl:Class ;
+  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
+  rdfs:label "Consensus Phase" ;
+  rdfs:comment "Temporal part where recommendations are submitted for governance approval" .
+
+ckpi:ExecutionPhase
+  rdf:type owl:Class ;
+  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
+  rdfs:label "Execution Phase" ;
+  rdfs:comment "Temporal part where approved recommendations are applied" .
+
+# ============================================================================
+# VALIDATION ISSUES - Information Entities
+# ============================================================================
+
+ckpi:ValidationIssue
+  rdf:type owl:Class ;
+  rdfs:subClassOf ckp:InformationEntity ;
+  rdfs:label "Validation Issue" ;
+  rdfs:comment "An issue detected during ontology validation" ;
+  ckp:hasProperty ckpi:severity, ckpi:issueType, ckpi:issueDescription .
+
+ckpi:MissingImportIssue
+  rdf:type owl:Class ;
+  rdfs:subClassOf ckpi:ValidationIssue ;
+  rdfs:label "Missing Import Issue" ;
+  rdfs:comment "Kernel ontology missing required owl:imports declaration" ;
+  ckpi:severity "HIGH" .
+
+ckpi:MissingBfoAlignmentIssue
+  rdf:type owl:Class ;
+  rdfs:subClassOf ckpi:ValidationIssue ;
+  rdfs:label "Missing BFO Alignment Issue" ;
+  rdfs:comment "Kernel ontology not using BFO classes properly" ;
+  ckpi:severity "MEDIUM" .
+
+# ============================================================================
+# IMPROVEMENT RECOMMENDATIONS - Information Entities
+# ============================================================================
+
+ckpi:ImprovementRecommendation
+  rdf:type owl:Class ;
+  rdfs:subClassOf ckp:InformationEntity ;
+  rdfs:label "Improvement Recommendation" ;
+  rdfs:comment "A concrete recommendation for improving a kernel" ;
+  ckp:hasProperty ckpi:priority, ckpi:affectedKernel, ckpi:actionType, ckpi:estimatedImpact .
+
+ckpi:OntologyImportRecommendation
+  rdf:type owl:Class ;
+  rdfs:subClassOf ckpi:ImprovementRecommendation ;
+  rdfs:label "Add Ontology Import" ;
+  rdfs:comment "Recommendation to add missing owl:imports declaration" ;
+  ckpi:priority "HIGH" ;
+  ckpi:actionType "ADD_IMPORT" .
+
+ckpi:BfoAlignmentRecommendation
+  rdf:type owl:Class ;
+  rdfs:subClassOf ckpi:ImprovementRecommendation ;
+  rdfs:label "Improve BFO Alignment" ;
+  rdfs:comment "Recommendation to add BFO class declarations to kernel entities" ;
+  ckpi:priority "MEDIUM" ;
+  ckpi:actionType "ADD_BFO_TYPE" .
+
+# ============================================================================
+# PERMISSIONS (BFO:Disposition) - RBAC
+# ============================================================================
+
+ckpi:permission-validate-self
+  rdf:type ckp:Permission ;
+  rdf:type bfo:0000016 ;  # BFO:Disposition
+  rdfs:label "Validate Self" ;
+  ckp:permissionString "improvement.validate-self" ;
+  ckp:permissionDomain "improvement" ;
+  ckp:permissionAction "validate-self" ;
+  ckp:requiresQuorum ckp:QuorumNone .
+
+ckpi:permission-recommend-improvement
+  rdf:type ckp:Permission ;
+  rdf:type bfo:0000016 ;
+  rdfs:label "Recommend Improvement" ;
+  ckp:permissionString "improvement.recommend" ;
+  ckp:permissionDomain "improvement" ;
+  ckp:permissionAction "recommend" ;
+  ckp:requiresQuorum ckp:QuorumNone .
+
+ckpi:permission-analyze-issues
+  rdf:type ckp:Permission ;
+  rdf:type bfo:0000016 ;
+  rdfs:label "Analyze Issues" ;
+  ckp:permissionString "improvement.analyze" ;
+  ckp:permissionDomain "improvement" ;
+  ckp:permissionAction "analyze" ;
+  ckp:requiresQuorum ckp:QuorumNone .
+
+ckpi:permission-propose-solutions
+  rdf:type ckp:Permission ;
+  rdf:type bfo:0000016 ;
+  rdfs:label "Propose Solutions" ;
+  ckp:permissionString "improvement.propose-solution" ;
+  ckp:permissionDomain "improvement" ;
+  ckp:permissionAction "propose-solution" ;
+  ckp:requiresQuorum ckp:QuorumNone .
+
+ckpi:permission-approve-recommendations
+  rdf:type ckp:Permission ;
+  rdf:type bfo:0000016 ;
+  rdfs:label "Approve Recommendations" ;
+  ckp:permissionString "improvement.approve" ;
+  ckp:permissionDomain "improvement" ;
+  ckp:permissionAction "approve" ;
+  ckp:requiresQuorum ckp:QuorumMajority .
+
+ckpi:permission-reject-recommendations
+  rdf:type ckp:Permission ;
+  rdf:type bfo:0000016 ;
+  rdfs:label "Reject Recommendations" ;
+  ckp:permissionString "improvement.reject" ;
+  ckp:permissionDomain "improvement" ;
+  ckp:permissionAction "reject" ;
+  ckp:requiresQuorum ckp:QuorumMajority .
+
+# ============================================================================
+# PROPERTIES - Relationships
+# ============================================================================
+
+ckpi:detectedIssue
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain ckpi:ImprovementProcess ;
+  rdfs:range ckpi:ValidationIssue ;
+  rdfs:label "detected issue" ;
+  rdfs:comment "Links improvement process to detected validation issue" .
+
+ckpi:generatedRecommendation
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain ckpi:ImprovementProcess ;
+  rdfs:range ckpi:ImprovementRecommendation ;
+  rdfs:label "generated recommendation" ;
+  rdfs:comment "Links improvement process to generated recommendation" .
+
+ckpi:analyzedBy
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain ckpi:ValidationIssue ;
+  rdfs:range ckp:Kernel ;
+  rdfs:label "analyzed by" ;
+  rdfs:comment "Links issue to AI analyst kernel (Fabric, Claude)" .
+
+ckpi:submittedToConsensus
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain ckpi:ImprovementRecommendation ;
+  rdfs:range ckp:ConsensusProposal ;
+  rdfs:label "submitted to consensus" ;
+  rdfs:comment "Links recommendation to consensus proposal" .
+
+# ============================================================================
+# DATA PROPERTIES
+# ============================================================================
+
+ckpi:severity
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain ckpi:ValidationIssue ;
+  rdfs:range xsd:string ;
+  rdfs:label "severity" ;
+  rdfs:comment "Severity level: HIGH, MEDIUM, LOW" .
+
+ckpi:priority
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain ckpi:ImprovementRecommendation ;
+  rdfs:range xsd:string ;
+  rdfs:label "priority" ;
+  rdfs:comment "Priority level: CRITICAL, HIGH, MEDIUM, LOW" .
+
+ckpi:affectedKernel
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain ckpi:ImprovementRecommendation ;
+  rdfs:range xsd:string ;
+  rdfs:label "affected kernel" ;
+  rdfs:comment "Kernel URN that would be affected by recommendation" .
+
+ckpi:actionType
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain ckpi:ImprovementRecommendation ;
+  rdfs:range xsd:string ;
+  rdfs:label "action type" ;
+  rdfs:comment "Type of action: ADD_IMPORT, ADD_BFO_TYPE, REFACTOR, etc." .
+
+ckpi:estimatedImpact
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain ckpi:ImprovementRecommendation ;
+  rdfs:range xsd:string ;
+  rdfs:label "estimated impact" ;
+  rdfs:comment "Estimated impact if recommendation is applied" .
+
+ckpi:consensusStatus
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain ckpi:ImprovementRecommendation ;
+  rdfs:range xsd:string ;
+  rdfs:label "consensus status" ;
+  rdfs:comment "Status: PENDING, APPROVED, REJECTED" .

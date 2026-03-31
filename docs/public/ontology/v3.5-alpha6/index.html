@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CKP Ontology v3.5-alpha6 — Concept Kernel Protocol</title>
+  <style>
+    body { font-family: 'Noto Sans', 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background: #fff; color: #333; line-height: 1.6; }
+    .header { background: #005a9c; color: #fff; padding: 0.8rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .header a { color: #fff; text-decoration: none; font-size: 0.95rem; }
+    .header .title { font-weight: 600; }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    .meta { background: #f8f9fa; border-left: 4px solid #b45309; padding: 1rem 1.5rem; margin-bottom: 2rem; font-size: 0.88rem; }
+    .meta dt { font-weight: 600; color: #005a9c; }
+    .meta dd { margin: 0 0 0.4rem 0; }
+    .meta a { color: #005a9c; }
+    h1 { color: #005a9c; font-size: 1.6rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.15rem; color: #005a9c; border-bottom: 1px solid #ddd; padding-bottom: 0.3rem; margin-top: 2rem; }
+    .status { display: inline-block; padding: 2px 10px; border-radius: 3px; font-size: 0.75rem; font-weight: 600; }
+    .status-alpha { background: #fef3c7; color: #b45309; }
+    .new-tag { display: inline-block; background: #fef3c7; color: #b45309; font-size: 0.7rem; padding: 1px 6px; border-radius: 3px; font-weight: 600; margin-left: 0.3rem; vertical-align: middle; }
+    .alpha6-tag { display: inline-block; background: #dbeafe; color: #1e40af; font-size: 0.7rem; padding: 1px 6px; border-radius: 3px; font-weight: 600; margin-left: 0.3rem; vertical-align: middle; }
+    .prefix-box { background: #f0f4f8; border: 1px solid #d0dae4; padding: 0.7rem 1rem; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.88rem; margin: 1rem 0; }
+    table { border-collapse: collapse; width: 100%; margin: 0.8rem 0; }
+    th { text-align: left; background: #f0f0f0; padding: 0.45rem 0.7rem; border: 1px solid #ddd; font-size: 0.8rem; color: #555; }
+    td { padding: 0.45rem 0.7rem; border: 1px solid #ddd; font-size: 0.88rem; }
+    td a { color: #005a9c; text-decoration: none; }
+    td a:hover { text-decoration: underline; }
+    code { background: #f4f4f4; padding: 0.1em 0.35em; border-radius: 2px; font-size: 0.82rem; font-family: 'Consolas', monospace; }
+    .bfo { font-family: monospace; font-size: 0.82rem; color: #666; }
+    .footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #ddd; color: #999; font-size: 0.78rem; }
+    .footer a { color: #005a9c; }
+    p.abstract { font-size: 0.92rem; max-width: 720px; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <span class="title"><a href="https://conceptkernel.org">Concept Kernel Protocol</a></span>
+  <span><a href="https://conceptkernel.org/ontology/v3.5/">v3.5 (alpha-4)</a></span>
+</div>
+<div class="container">
+
+<h1>CKP Ontology v3.5-alpha6 <span class="status status-alpha">Alpha-6</span></h1>
+
+<dl class="meta">
+  <dt>This version</dt>
+  <dd><a href="https://conceptkernel.org/ontology/v3.5-alpha6/">https://conceptkernel.org/ontology/v3.5-alpha6/</a></dd>
+  <dt>Previous version</dt>
+  <dd><a href="https://conceptkernel.org/ontology/v3.5/">https://conceptkernel.org/ontology/v3.5/</a> (alpha-4)</dd>
+  <dt>Namespace URI</dt>
+  <dd><code>https://conceptkernel.org/ontology/v3.5/</code></dd>
+  <dt>Status</dt>
+  <dd>Alpha-6 — extends v3.5 with InlineKernel, StaticKernel, Project, Reconciliation, StorageMedium, DeploymentMethod, ServingDisposition. IAO/CCO grounding annotations.</dd>
+  <dt>Editors</dt>
+  <dd>Peter Styk, ConceptKernel</dd>
+  <dt>Source</dt>
+  <dd><a href="https://github.com/ConceptKernel/conceptkernel.github.io">GitHub</a></dd>
+</dl>
+
+<div class="prefix-box">@prefix ckp: &lt;https://conceptkernel.org/ontology/v3.5/&gt; .</div>
+
+<h2>Abstract</h2>
+<p class="abstract">v3.5-alpha6 extends the CKP ontology with four-layer import chain grounding (BFO 2020 + IAO + CCO + PROV-O + ValueFlows), new kernel types for podless and static deployments, project-level organization, operator reconciliation, and a complete serving/storage/deployment model. Every class is annotated with its IAO/CCO grounding where applicable.</p>
+
+<h2>Ontology Modules</h2>
+<table>
+  <tr><th>Module</th><th>File</th><th>Description</th><th>BFO</th></tr>
+  <tr><td>Core</td><td><a href="core.ttl">core.ttl</a></td><td>Kernel, Edge, Instance, HotKernel, ColdKernel, <strong>InlineKernel</strong> <span class="alpha6-tag">a6</span>, <strong>StaticKernel</strong> <span class="alpha6-tag">a6</span>, <strong>Project</strong> <span class="alpha6-tag">a6</span>, GovernanceMode, Action, <strong>Reconciliation</strong> <span class="alpha6-tag">a6</span>, InformationEntity, ConsensusProposal; edge predicates EXTENDS, COMPOSES, TRIGGERS</td><td class="bfo">0000040, 0000031, 0000015, 0000016, 0000020</td></tr>
+  <tr><td>Base Instances</td><td><a href="base-instances.ttl">base-instances.ttl</a> <span class="new-tag">v3.5</span></td><td>InstanceManifest, SealedInstance, LedgerEntry</td><td class="bfo">0000031</td></tr>
+  <tr><td>Proof</td><td><a href="proof.ttl">proof.ttl</a> <span class="new-tag">v3.5</span></td><td>ProofRecord, ProofCheck, CheckType, ProofOutcome. SVID (SPIFFE identity) binding.</td><td class="bfo">0000031</td></tr>
+  <tr><td>Kernel Metadata</td><td><a href="kernel-metadata.ttl">kernel-metadata.ttl</a></td><td>Metadata registry: Runtime, Capability, KernelStatus, dependencies, ports. <strong>StorageMedium</strong> <span class="alpha6-tag">a6</span>, <strong>DeploymentMethod</strong> <span class="alpha6-tag">a6</span>, <strong>ServingDisposition</strong> <span class="alpha6-tag">a6</span></td><td class="bfo">0000031, 0000019, 0000016</td></tr>
+  <tr><td>Processes</td><td><a href="processes.ttl">processes.ttl</a></td><td>Invocation, EdgeCommunication, Consensus, Broadcast</td><td class="bfo">0000015</td></tr>
+  <tr><td>Relations</td><td><a href="relations.ttl">relations.ttl</a></td><td>Properties, property chains, SWRL rules. <strong>belongsToProject, hasKernel, hasStorageMedium, hasServingDisposition, hasDeploymentMethod, reconciles</strong> <span class="alpha6-tag">a6</span></td><td></td></tr>
+  <tr><td>RBAC</td><td><a href="rbac.ttl">rbac.ttl</a></td><td>Authorization for inter-kernel communication: agents, roles, permissions, quorum</td><td class="bfo">0000040, 0000023, 0000016</td></tr>
+  <tr><td>Workflow</td><td><a href="workflow.ttl">workflow.ttl</a></td><td>Workflow execution temporal patterns</td><td class="bfo">0000015</td></tr>
+  <tr><td>Self-Improvement</td><td><a href="self-improvement.ttl">self-improvement.ttl</a></td><td>Validation issues, recommendations, roles (SelfInspector, AIAnalyst, GovernanceReviewer), functions</td><td class="bfo">0000023, 0000034, 0000015, 0000016</td></tr>
+  <tr><td>Shapes</td><td><a href="shapes.ttl">shapes.ttl</a></td><td>SHACL validation for protocol conformance (legacy v1.3.20 shapes; v3.5 shapes TBD)</td><td></td></tr>
+</table>
+
+<h2>Alpha-6 Additions</h2>
+<table>
+  <tr><th>Addition</th><th>Module</th><th>BFO Type</th><th>IAO/CCO Grounding</th></tr>
+  <tr><td><code>ckp:InlineKernel</code></td><td>core.ttl</td><td>subClassOf Kernel (bfo:0000040)</td><td>cco:Agent</td></tr>
+  <tr><td><code>ckp:StaticKernel</code></td><td>core.ttl</td><td>subClassOf Kernel (bfo:0000040)</td><td>cco:Agent</td></tr>
+  <tr><td><code>ckp:Project</code></td><td>core.ttl</td><td>bfo:0000031 (GenDepCont)</td><td>cco:Organization</td></tr>
+  <tr><td><code>ckp:Reconciliation</code></td><td>core.ttl</td><td>subClassOf Action (bfo:0000015)</td><td>iao:0000104 (PlanSpecification)</td></tr>
+  <tr><td><code>ckp:StorageMedium</code></td><td>kernel-metadata.ttl</td><td>bfo:0000019 (Quality)</td><td>-</td></tr>
+  <tr><td><code>ckp:DeploymentMethod</code></td><td>kernel-metadata.ttl</td><td>bfo:0000019 (Quality)</td><td>-</td></tr>
+  <tr><td><code>ckp:ServingDisposition</code></td><td>kernel-metadata.ttl</td><td>bfo:0000016 (Disposition)</td><td>cco:Specification</td></tr>
+  <tr><td><code>ckp:APIServing</code></td><td>kernel-metadata.ttl</td><td>subClassOf ServingDisposition</td><td>cco:Specification</td></tr>
+  <tr><td><code>ckp:WebServing</code></td><td>kernel-metadata.ttl</td><td>subClassOf ServingDisposition</td><td>cco:Specification</td></tr>
+  <tr><td><code>ckp:NATSListening</code></td><td>kernel-metadata.ttl</td><td>subClassOf ServingDisposition</td><td>cco:Specification</td></tr>
+  <tr><td><code>ckp:NATSBrowserClient</code></td><td>kernel-metadata.ttl</td><td>subClassOf ServingDisposition</td><td>cco:Specification</td></tr>
+  <tr><td><code>ckp:belongsToProject</code></td><td>relations.ttl</td><td>ObjectProperty</td><td>-</td></tr>
+  <tr><td><code>ckp:hasKernel</code></td><td>relations.ttl</td><td>ObjectProperty (inverse)</td><td>-</td></tr>
+  <tr><td><code>ckp:hasStorageMedium</code></td><td>relations.ttl</td><td>ObjectProperty</td><td>-</td></tr>
+  <tr><td><code>ckp:hasServingDisposition</code></td><td>relations.ttl</td><td>ObjectProperty</td><td>-</td></tr>
+  <tr><td><code>ckp:hasDeploymentMethod</code></td><td>relations.ttl</td><td>ObjectProperty</td><td>-</td></tr>
+  <tr><td><code>ckp:reconciles</code></td><td>relations.ttl</td><td>ObjectProperty</td><td>-</td></tr>
+</table>
+
+<h2>Complete Class Hierarchy</h2>
+<table>
+  <tr><th>Class</th><th>Parent (BFO)</th><th>IAO/CCO Grounding</th><th>Module</th></tr>
+  <tr><td><code>ckp:Kernel</code></td><td>bfo:0000040 (MaterialEntity)</td><td>cco:Agent</td><td>core</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:HotKernel</code></td><td>ckp:Kernel</td><td>cco:Agent</td><td>core</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:ColdKernel</code></td><td>ckp:Kernel</td><td>cco:Agent</td><td>core</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:InlineKernel</code> <span class="alpha6-tag">a6</span></td><td>ckp:Kernel</td><td>cco:Agent</td><td>core</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:StaticKernel</code> <span class="alpha6-tag">a6</span></td><td>ckp:Kernel</td><td>cco:Agent</td><td>core</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:EdgeKernel</code></td><td>ckp:Kernel, ckp:HotKernel</td><td>cco:Agent</td><td>core</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:ConsensusKernel</code></td><td>ckp:Kernel, ckp:HotKernel</td><td>cco:Agent</td><td>core</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:WssHubKernel</code></td><td>ckp:Kernel, ckp:HotKernel</td><td>cco:Agent</td><td>core</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:SystemKernel</code></td><td>ckp:Kernel</td><td>cco:Agent</td><td>kernel-metadata</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:ApplicationKernel</code></td><td>ckp:Kernel</td><td>cco:Agent</td><td>kernel-metadata</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:UIKernel</code></td><td>ckp:Kernel</td><td>cco:Agent</td><td>kernel-metadata</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:TemplateKernel</code></td><td>ckp:Kernel</td><td>cco:Agent</td><td>kernel-metadata</td></tr>
+  <tr><td><code>ckp:Project</code> <span class="alpha6-tag">a6</span></td><td>bfo:0000031 (GenDepCont)</td><td>cco:Organization</td><td>core</td></tr>
+  <tr><td><code>ckp:Edge</code></td><td>bfo:0000031 (GenDepCont)</td><td>cco:Artifact</td><td>core</td></tr>
+  <tr><td><code>ckp:Instance</code></td><td>bfo:0000031 (GenDepCont)</td><td>iao:0000027 (DataItem)</td><td>core</td></tr>
+  <tr><td><code>ckp:InformationEntity</code></td><td>bfo:0000031 (GenDepCont)</td><td>-</td><td>core</td></tr>
+  <tr><td><code>ckp:InstanceManifest</code></td><td>bfo:0000031 (GenDepCont)</td><td>iao:0000027 (DataItem)</td><td>base-instances</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:SealedInstance</code></td><td>ckp:InstanceManifest</td><td>iao:0000027 (DataItem)</td><td>base-instances</td></tr>
+  <tr><td><code>ckp:LedgerEntry</code></td><td>bfo:0000031 (GenDepCont)</td><td>-</td><td>base-instances</td></tr>
+  <tr><td><code>ckp:KernelOntology</code></td><td>bfo:0000020 (SpecDepCont)</td><td>iao:0000310 (Document)</td><td>core</td></tr>
+  <tr><td><code>ckp:KernelMetadata</code></td><td>bfo:0000031 (GenDepCont)</td><td>-</td><td>kernel-metadata</td></tr>
+  <tr><td><code>ckp:Action</code></td><td>bfo:0000015 (Process)</td><td>iao:0000104 (PlanSpec)</td><td>core</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:Reconciliation</code> <span class="alpha6-tag">a6</span></td><td>ckp:Action</td><td>iao:0000104 (PlanSpec)</td><td>core</td></tr>
+  <tr><td><code>ckp:GovernanceMode</code></td><td>bfo:0000016 (Disposition)</td><td>-</td><td>core</td></tr>
+  <tr><td><code>ckp:QueueContract</code></td><td>bfo:0000016 (Disposition)</td><td>iao:0000017 (DirectiveInfoEntity)</td><td>core</td></tr>
+  <tr><td><code>ckp:StorageContract</code></td><td>bfo:0000016 (Disposition)</td><td>-</td><td>core</td></tr>
+  <tr><td><code>ckp:NotificationContract</code></td><td>bfo:0000016 (Disposition)</td><td>-</td><td>core</td></tr>
+  <tr><td><code>ckp:ServingDisposition</code> <span class="alpha6-tag">a6</span></td><td>bfo:0000016 (Disposition)</td><td>cco:Specification</td><td>kernel-metadata</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:APIServing</code> <span class="alpha6-tag">a6</span></td><td>ckp:ServingDisposition</td><td>cco:Specification</td><td>kernel-metadata</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:WebServing</code> <span class="alpha6-tag">a6</span></td><td>ckp:ServingDisposition</td><td>cco:Specification</td><td>kernel-metadata</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:NATSListening</code> <span class="alpha6-tag">a6</span></td><td>ckp:ServingDisposition</td><td>cco:Specification</td><td>kernel-metadata</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:NATSBrowserClient</code> <span class="alpha6-tag">a6</span></td><td>ckp:ServingDisposition</td><td>cco:Specification</td><td>kernel-metadata</td></tr>
+  <tr><td><code>ckp:StorageMedium</code> <span class="alpha6-tag">a6</span></td><td>bfo:0000019 (Quality)</td><td>-</td><td>kernel-metadata</td></tr>
+  <tr><td><code>ckp:DeploymentMethod</code> <span class="alpha6-tag">a6</span></td><td>bfo:0000019 (Quality)</td><td>-</td><td>kernel-metadata</td></tr>
+  <tr><td><code>ckp:KernelType</code></td><td>bfo:0000019 (Quality)</td><td>-</td><td>core</td></tr>
+  <tr><td><code>ckp:Runtime</code></td><td>bfo:0000019 (Quality)</td><td>-</td><td>kernel-metadata</td></tr>
+  <tr><td><code>ckp:KernelStatus</code></td><td>bfo:0000019 (Quality)</td><td>-</td><td>kernel-metadata</td></tr>
+  <tr><td><code>ckp:Capability</code></td><td>bfo:0000016 (Disposition)</td><td>-</td><td>kernel-metadata</td></tr>
+  <tr><td><code>ckp:ProofRecord</code></td><td>bfo:0000031 (GenDepCont)</td><td>-</td><td>proof</td></tr>
+  <tr><td><code>ckp:ProofCheck</code></td><td>bfo:0000031 (GenDepCont)</td><td>-</td><td>proof</td></tr>
+  <tr><td><code>ckp:Agent</code></td><td>bfo:0000040 (MaterialEntity)</td><td>cco:Agent</td><td>rbac</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:UserAgent</code></td><td>ckp:Agent</td><td>cco:Agent</td><td>rbac</td></tr>
+  <tr><td>&nbsp;&nbsp;<code>ckp:ProcessAgent</code></td><td>ckp:Agent</td><td>cco:Agent</td><td>rbac</td></tr>
+  <tr><td><code>ckp:Role</code></td><td>bfo:0000023 (Role)</td><td>cco:Role</td><td>rbac</td></tr>
+  <tr><td><code>ckp:Permission</code></td><td>bfo:0000016 (Disposition)</td><td>-</td><td>rbac</td></tr>
+</table>
+
+<h2>v3.5 Additions (carried forward)</h2>
+<table>
+  <tr><th>Addition</th><th>Module</th><th>Description</th></tr>
+  <tr><td>Kernel-as-Datatype</td><td>base-instances.ttl</td><td>A kernel IS a datatype. <code>ontology.yaml</code> defines the type. Instances are typed individuals.</td></tr>
+  <tr><td>Materialised Proof</td><td>proof.ttl</td><td>SHA-256 hash verification per instance in <code>proof.json</code>. SPIFFE/SVID identity binding.</td></tr>
+  <tr><td>Base Instance Shapes</td><td>base-instances.ttl</td><td>InstanceManifest, SealedInstance, LedgerEntry — inherited by every kernel.</td></tr>
+  <tr><td>GovernanceMode</td><td>core.ttl</td><td><code>ckp:GovernanceMode</code> (BFO Disposition) with individuals STRICT, RELAXED, AUTONOMOUS.</td></tr>
+  <tr><td>Action Class</td><td>core.ttl</td><td><code>ckp:Action</code> (BFO Process) — every kernel exposes typed actions with access levels.</td></tr>
+  <tr><td>Edge Predicates</td><td>core.ttl</td><td>EXTENDS, COMPOSES, TRIGGERS — governance-loop relationship types for edges.</td></tr>
+  <tr><td>PROV-O Integration</td><td>base-instances.ttl</td><td>PROV-O aligned provenance: <code>wasGeneratedBy</code>, <code>wasAttributedTo</code>, <code>generatedAtTime</code>.</td></tr>
+  <tr><td>Namespace Convergence</td><td>all</td><td>Three legacy namespaces unified to <code>https://conceptkernel.org/ontology/v3.5/</code></td></tr>
+</table>
+
+<h2>Ontology Layering Strategy (Alpha-6)</h2>
+<table>
+  <tr><th>Layer</th><th>Ontology</th><th>Scope</th></tr>
+  <tr><td>0</td><td>BFO 2020 (ISO 21838-2)</td><td>Upper ontology: entity, continuant, occurrent</td></tr>
+  <tr><td>0.5</td><td>IAO + CCO + PROV-O + ValueFlows</td><td>Mid-level: information, agents, provenance, economics</td></tr>
+  <tr><td>1</td><td>CKP (conceptkernel.org/v3.5/)</td><td>Protocol: kernel, edge, instance, action</td></tr>
+  <tr><td>2</td><td>Per-kernel (ontology.yaml)</td><td>Domain-specific: SpawnInstance, TraceRecord, etc.</td></tr>
+</table>
+
+<h2>Supporting Files</h2>
+<table>
+  <tr><th>File</th><th>Format</th><th>Description</th></tr>
+  <tr><td><a href="kernel-entity-template.ttl">kernel-entity-template.ttl</a></td><td>Turtle</td><td>Template for per-kernel ontology.ttl generation</td></tr>
+  <tr><td><a href="schema.yaml">schema.yaml</a></td><td>LinkML</td><td>LinkML governance schema. Alpha-6 adds InlineKernel, StaticKernel, Project, Reconciliation, StorageMedium, DeploymentMethod, ServingDisposition.</td></tr>
+  <tr><td><a href="index.json">index.json</a></td><td>JSON</td><td>Machine-readable metadata with coverage scores</td></tr>
+</table>
+
+<h2>Namespaces</h2>
+<table>
+  <tr><th>Prefix</th><th>URI</th></tr>
+  <tr><td><code>ckp:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/</code></td></tr>
+  <tr><td><code>ckpp:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/process/</code></td></tr>
+  <tr><td><code>ckpr:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/relation/</code></td></tr>
+  <tr><td><code>ckpw:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/workflow/</code></td></tr>
+  <tr><td><code>ckpi:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/improvement/</code></td></tr>
+</table>
+
+<h2>PROV-O Integration</h2>
+<p><a href="base-instances.ttl">base-instances.ttl</a> imports the <code>prov:</code> namespace (<code>http://www.w3.org/ns/prov#</code>) and defines three PROV-O aligned sub-properties on <code>InstanceManifest</code>:</p>
+<table>
+  <tr><th>Property</th><th>PROV-O Alignment</th><th>Purpose</th></tr>
+  <tr><td><code>ckp:instanceWasGeneratedBy</code></td><td>sub-property of <code>prov:wasGeneratedBy</code></td><td>Links instance to the action/process that created it</td></tr>
+  <tr><td><code>ckp:instanceWasAttributedTo</code></td><td>sub-property of <code>prov:wasAttributedTo</code></td><td>Links instance to the kernel that produced it</td></tr>
+  <tr><td><code>ckp:instanceGeneratedAtTime</code></td><td>sub-property of <code>prov:generatedAtTime</code></td><td>ISO 8601 timestamp of instance creation</td></tr>
+</table>
+<p>This enables standard PROV-O tooling to query provenance chains across sealed instances.</p>
+
+<h2>Not Yet Implemented</h2>
+<p>The following items appear in the CKP v3.5 specification but are not yet present in the ontology Turtle files:</p>
+<table>
+  <tr><th>Item</th><th>Spec Reference</th><th>Status</th></tr>
+  <tr><td>SPIFFE signing at seal time</td><td>SPEC.CKP.v3.5.alpha-3 Section 3</td><td>ProofRecord carries <code>ckp:svid</code> field; runtime SPIFFE signing not yet wired</td></tr>
+  <tr><td>Ontology validation at seal time</td><td>SPEC.CKP.v3.5.alpha-3 Section 4.3</td><td>ManifestShape and SealedDataShape defined in spec, not yet in shapes.ttl</td></tr>
+  <tr><td>Session / ActionInstance classes</td><td>SPEC.CKP.v3.5.alpha-3</td><td>Mentioned in spec prose; no OWL classes defined</td></tr>
+  <tr><td>ValueFlows economic events</td><td>Alpha-6 layering strategy</td><td>Payment, Agreement, Commitment classes deferred to alpha-7</td></tr>
+  <tr><td>CCO Geospatial, Facility, Time</td><td>Alpha-6 layering strategy</td><td>Deliberately deferred (see ontology layering chapter)</td></tr>
+</table>
+
+<div class="footer">
+  <a href="https://conceptkernel.org">conceptkernel.org</a> · <a href="https://github.com/ConceptKernel">GitHub</a> · <a href="https://discord.gg/sTbfxV9xyU">Discord</a><br>
+  Copyright 2024-present ConceptKernel Contributors. MIT License.
+</div>
+
+</div>
+</body>
+</html>

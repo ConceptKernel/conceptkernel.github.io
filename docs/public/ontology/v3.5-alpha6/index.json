@@ -1,0 +1,440 @@
+{
+  "ontology": {
+    "name": "ConceptKernel BFO Ontology",
+    "version": "v3.5-alpha6",
+    "draft": "ALPHA-6",
+    "date": "2026-03-31",
+    "description": "Formal ontology mapping ConceptKernel architecture to Basic Formal Ontology (BFO). Alpha-6 adds InlineKernel, StaticKernel, Project, Reconciliation, StorageMedium, DeploymentMethod, ServingDisposition.",
+    "baseUri": "https://conceptkernel.org/ontology/v3.5/",
+    "bfoVersion": "2020",
+    "bfoUri": "http://purl.obolibrary.org/obo/bfo.owl",
+    "midLevelOntologies": [
+      "IAO (Information Artifact Ontology)",
+      "CCO Agent/Artifact/InformationEntity/Event",
+      "PROV-O",
+      "ValueFlows"
+    ]
+  },
+  "files": {
+    "core": {
+      "filename": "core.ttl",
+      "path": "ontology/v3.5-alpha6/core.ttl",
+      "format": "text/turtle",
+      "description": "Core BFO mappings for ConceptKernel continuants (Kernel, Edge, Instance, Ontology). Alpha-6 adds InlineKernel, StaticKernel, Project, Reconciliation.",
+      "coverage": {
+        "entities": [
+          "ckp:Kernel",
+          "ckp:HotKernel",
+          "ckp:ColdKernel",
+          "ckp:InlineKernel",
+          "ckp:StaticKernel",
+          "ckp:Edge",
+          "ckp:Instance",
+          "ckp:KernelOntology",
+          "ckp:Project",
+          "ckp:Action",
+          "ckp:Reconciliation",
+          "ckp:EdgeKernel",
+          "ckp:ConsensusKernel",
+          "ckp:WssHubKernel"
+        ],
+        "bfoClasses": [
+          "bfo:IndependentContinuant",
+          "bfo:MaterialEntity",
+          "bfo:GenericallyDependentContinuant",
+          "bfo:SpecificallyDependentContinuant",
+          "bfo:Quality",
+          "bfo:Disposition",
+          "bfo:Process"
+        ],
+        "iaoGrounding": {
+          "KernelOntology": "iao:0000310 (Document)",
+          "Instance": "iao:0000027 (DataItem)",
+          "Action": "iao:0000104 (PlanSpecification)",
+          "QueueContract": "iao:0000017 (DirectiveInformationEntity)"
+        },
+        "ccoGrounding": {
+          "Kernel": "cco:Agent",
+          "Edge": "cco:Artifact",
+          "Project": "cco:Organization",
+          "ServingDisposition": "cco:Specification"
+        }
+      }
+    },
+    "kernel-metadata": {
+      "filename": "kernel-metadata.ttl",
+      "path": "ontology/v3.5-alpha6/kernel-metadata.ttl",
+      "format": "text/turtle",
+      "description": "RDF schema for kernel metadata. Alpha-6 adds StorageMedium, DeploymentMethod, ServingDisposition.",
+      "coverage": {
+        "alpha6_additions": [
+          "ckp:StorageMedium (Quality, individuals: FILESYSTEM, DOCUMENT_STORE, CONFIGMAP)",
+          "ckp:DeploymentMethod (Quality, individuals: VOLUME, FILER, CONFIGMAP_DEPLOY, INLINE_DEPLOY)",
+          "ckp:ServingDisposition (Disposition, subclasses: APIServing, WebServing, NATSListening, NATSBrowserClient)"
+        ]
+      }
+    },
+    "kernel-entity-template": {
+      "filename": "kernel-entity-template.ttl",
+      "path": "ontology/v3.5-alpha6/kernel-entity-template.ttl",
+      "format": "text/turtle",
+      "description": "BFO-aligned template for defining individual kernel entities"
+    },
+    "processes": {
+      "filename": "processes.ttl",
+      "path": "ontology/v3.5-alpha6/processes.ttl",
+      "format": "text/turtle",
+      "description": "Occurrent (Process) definitions for ConceptKernel temporal events",
+      "coverage": {
+        "entities": [
+          "ckpp:InvocationProcess",
+          "ckpp:EdgeCommunicationProcess",
+          "ckpp:EdgeSubscriptionProcess",
+          "ckpp:ConsensusProcess",
+          "ckpp:BroadcastProcess",
+          "ckpp:TemporalPart",
+          "ckpp:ProcessBoundary",
+          "ckpp:StatusChangeEvent"
+        ],
+        "bfoClasses": [
+          "bfo:Process",
+          "bfo:ProcessBoundary",
+          "bfo:TemporalRegion"
+        ]
+      }
+    },
+    "relations": {
+      "filename": "relations.ttl",
+      "path": "ontology/v3.5-alpha6/relations.ttl",
+      "format": "text/turtle",
+      "description": "Relationships and inference rules. Alpha-6 adds project, storage, serving, and reconciliation relations.",
+      "coverage": {
+        "properties": [
+          "ckpr:connected_by",
+          "ckpr:depends_on",
+          "ckpr:participates_in",
+          "ckpr:mediates",
+          "ckpr:created_by_process",
+          "ckpr:can_reach",
+          "ckpr:upstream_of",
+          "ckpr:downstream_of",
+          "ckpr:sibling_of",
+          "ckpr:authorizes_edge",
+          "ckpr:requires_consensus",
+          "ckp:belongsToProject",
+          "ckp:hasKernel",
+          "ckp:hasStorageMedium",
+          "ckp:hasServingDisposition",
+          "ckp:hasDeploymentMethod",
+          "ckp:reconciles"
+        ],
+        "swrlRules": [
+          "InstanceProvenanceRule",
+          "EdgeCommunicationInferenceRule",
+          "SiblingKernelRule",
+          "WorkflowChainRule",
+          "AuthorizationRequirementRule",
+          "InstanceDependencyRule",
+          "ConsensusRequirementRule",
+          "CrossProjectEdgeRule"
+        ],
+        "propertyChains": [
+          "connected_by (hasOutgoingEdge o hasTarget)",
+          "creates (hasOutputInstance)",
+          "can_reach (transitive closure)"
+        ]
+      }
+    },
+    "shapes": {
+      "filename": "shapes.ttl",
+      "path": "ontology/v3.5-alpha6/shapes.ttl",
+      "format": "text/turtle",
+      "description": "SHACL shapes for triple validation constraints"
+    },
+    "rbac": {
+      "filename": "rbac.ttl",
+      "path": "ontology/v3.5-alpha6/rbac.ttl",
+      "format": "text/turtle",
+      "description": "Role-Based Access Control ontology for agents, roles, and permissions"
+    },
+    "workflow": {
+      "filename": "workflow.ttl",
+      "path": "ontology/v3.5-alpha6/workflow.ttl",
+      "format": "text/turtle",
+      "description": "CKDL formalization for declarative workflow orchestration"
+    },
+    "self-improvement": {
+      "filename": "self-improvement.ttl",
+      "path": "ontology/v3.5-alpha6/self-improvement.ttl",
+      "format": "text/turtle",
+      "description": "Autonomous self-improvement and ontology-driven validation processes"
+    },
+    "base-instances": {
+      "filename": "base-instances.ttl",
+      "path": "ontology/v3.5-alpha6/base-instances.ttl",
+      "format": "text/turtle",
+      "description": "Base instance shapes: InstanceManifest, SealedInstance, LedgerEntry (from SPEC.CKP.v3.5.alpha-3 Section 4.1)",
+      "new_in": "v3.5",
+      "coverage": {
+        "entities": [
+          "ckp:InstanceManifest",
+          "ckp:SealedInstance",
+          "ckp:LedgerEntry"
+        ],
+        "bfoClasses": [
+          "bfo:GenericallyDependentContinuant"
+        ],
+        "provOClasses": [
+          "prov:wasGeneratedBy",
+          "prov:wasAttributedTo",
+          "prov:generatedAtTime"
+        ]
+      }
+    },
+    "proof": {
+      "filename": "proof.ttl",
+      "path": "ontology/v3.5-alpha6/proof.ttl",
+      "format": "text/turtle",
+      "description": "Proof verification: ProofRecord, ProofCheck, ProofOutcome, CheckType",
+      "new_in": "v3.5",
+      "coverage": {
+        "entities": [
+          "ckp:ProofRecord",
+          "ckp:ProofCheck",
+          "ckp:ProofOutcome",
+          "ckp:CheckType"
+        ],
+        "individuals": [
+          "ckp:ProofOutcome-PASS",
+          "ckp:ProofOutcome-FAIL",
+          "ckp:ProofOutcome-PARTIAL",
+          "ckp:CheckType-SCHEMA",
+          "ckp:CheckType-SHACL",
+          "ckp:CheckType-PROVENANCE",
+          "ckp:CheckType-STRUCTURE",
+          "ckp:CheckType-INTEGRITY",
+          "ckp:CheckType-OPERATIONAL"
+        ]
+      }
+    },
+    "schema": {
+      "filename": "schema.yaml",
+      "path": "ontology/v3.5-alpha6/schema.yaml",
+      "format": "application/x-yaml",
+      "description": "LinkML schema governing Concept Kernel shape (drives scaffolding tool). Alpha-6 adds InlineKernel, StaticKernel, Project, Reconciliation, StorageMedium, DeploymentMethod, ServingDisposition."
+    }
+  },
+  "coverage": {
+    "overall": {
+      "score": 0.68,
+      "description": "Overall BFO alignment coverage: 68% (up from 65% in v3.5, with alpha-6 additions)"
+    },
+    "continuants": {
+      "score": 0.85,
+      "status": "WELL_IMPLEMENTED",
+      "entities": {
+        "Kernel": {
+          "score": 0.85,
+          "status": "WELL_IMPLEMENTED",
+          "grounding": "cco:Agent + bfo:0000040 (MaterialEntity)",
+          "gaps": [
+            "Process URN tracking missing",
+            "Temporal lifecycle events not tracked"
+          ]
+        },
+        "InlineKernel": {
+          "score": 0.50,
+          "status": "NEW_IN_ALPHA6",
+          "description": "Podless browser-side kernel with NATS WSS and JWT",
+          "grounding": "cco:Agent (subclass of Kernel)"
+        },
+        "StaticKernel": {
+          "score": 0.50,
+          "status": "NEW_IN_ALPHA6",
+          "description": "No process kernel, gateway serves web/ directly",
+          "grounding": "cco:Agent (subclass of Kernel)"
+        },
+        "Project": {
+          "score": 0.50,
+          "status": "NEW_IN_ALPHA6",
+          "description": ".ckproject declaration organizing kernels",
+          "grounding": "cco:Organization + bfo:0000031 (GenDepCont)"
+        },
+        "Edge": {
+          "score": 0.85,
+          "status": "WELL_IMPLEMENTED",
+          "grounding": "cco:Artifact + bfo:0000031",
+          "gaps": [
+            "Edge creation doesn't trigger consensus",
+            "SHACL validation stub only"
+          ]
+        },
+        "Instance": {
+          "score": 0.80,
+          "status": "WELL_IMPLEMENTED",
+          "grounding": "iao:0000027 (DataItem) + bfo:0000031",
+          "gaps": [
+            "No Process URN linkage",
+            "ckp:// URI not fully implemented"
+          ]
+        },
+        "InstanceManifest": {
+          "score": 1.0,
+          "status": "NEW_IN_V3.5",
+          "description": "Base instance shape with PROV-O provenance properties"
+        },
+        "SealedInstance": {
+          "score": 1.0,
+          "status": "NEW_IN_V3.5",
+          "description": "Finalized instance with data, tool_ref, ck_ref"
+        },
+        "LedgerEntry": {
+          "score": 1.0,
+          "status": "NEW_IN_V3.5",
+          "description": "Append-only action log entry"
+        },
+        "ProofRecord": {
+          "score": 1.0,
+          "status": "NEW_IN_V3.5",
+          "description": "Verification record with checks, hashes, and outcome"
+        },
+        "ProofCheck": {
+          "score": 1.0,
+          "status": "NEW_IN_V3.5",
+          "description": "Individual verification check (schema, shacl, provenance, etc.)"
+        },
+        "StorageMedium": {
+          "score": 0.60,
+          "status": "NEW_IN_ALPHA6",
+          "description": "Quality: FILESYSTEM, DOCUMENT_STORE, CONFIGMAP"
+        },
+        "DeploymentMethod": {
+          "score": 0.60,
+          "status": "NEW_IN_ALPHA6",
+          "description": "Quality: VOLUME, FILER, CONFIGMAP_DEPLOY, INLINE_DEPLOY"
+        },
+        "ServingDisposition": {
+          "score": 0.60,
+          "status": "NEW_IN_ALPHA6",
+          "description": "Disposition: APIServing, WebServing, NATSListening, NATSBrowserClient",
+          "grounding": "cco:Specification"
+        }
+      }
+    },
+    "occurrents": {
+      "score": 0.48,
+      "status": "PARTIAL",
+      "processes": {
+        "Invocation": {
+          "score": 0.60,
+          "status": "PARTIAL",
+          "gaps": [
+            "No Process URN generation",
+            "Temporal parts not tracked"
+          ]
+        },
+        "EdgeCommunication": {
+          "score": 0.65,
+          "status": "PARTIAL",
+          "gaps": [
+            "No Process URN generation",
+            "Temporal parts implicit only"
+          ]
+        },
+        "EdgeSubscription": {
+          "score": 0.00,
+          "status": "NOT_IMPLEMENTED",
+          "gaps": [
+            "Edge creation is manual (ck create-edge)",
+            "No consensus integration",
+            "No WssHub announcements"
+          ]
+        },
+        "Consensus": {
+          "score": 0.50,
+          "status": "PARTIAL",
+          "gaps": [
+            "No Process URN",
+            "Approved proposals don't auto-execute",
+            "No WssHub integration"
+          ]
+        },
+        "Broadcast": {
+          "score": 0.70,
+          "status": "PARTIAL",
+          "gaps": [
+            "No Process URN",
+            "No consensus event handling",
+            "No client filtering"
+          ]
+        },
+        "Reconciliation": {
+          "score": 0.50,
+          "status": "NEW_IN_ALPHA6",
+          "description": "Operator reconciliation cycle for desired vs actual state convergence"
+        }
+      }
+    },
+    "mediators": {
+      "EdgeKernel": {
+        "score": 0.85,
+        "status": "WELL_IMPLEMENTED",
+        "role": "Communication Mediator"
+      },
+      "ConsensusKernel": {
+        "score": 0.50,
+        "status": "PARTIAL",
+        "role": "Governance Mediator",
+        "criticalGap": "Not integrated with EdgeKernel"
+      },
+      "WssHubKernel": {
+        "score": 0.70,
+        "status": "WELL_IMPLEMENTED",
+        "role": "Broadcast Mediator",
+        "criticalGap": "No consensus announcements"
+      }
+    }
+  },
+  "changelog": {
+    "v3.5-alpha6": {
+      "date": "2026-03-31",
+      "changes": [
+        "NEW: ckp:InlineKernel — podless browser-side JS kernel (NATS WSS, JWT)",
+        "NEW: ckp:StaticKernel — no process, gateway serves web/ directly",
+        "NEW: ckp:Project — .ckproject declaration organizing kernels (bfo:0000031, grounded in cco:Organization)",
+        "NEW: ckp:Reconciliation — operator reconciliation cycle (subclass of Action)",
+        "NEW: ckp:StorageMedium — quality with individuals FILESYSTEM, DOCUMENT_STORE, CONFIGMAP",
+        "NEW: ckp:DeploymentMethod — quality with individuals VOLUME, FILER, CONFIGMAP_DEPLOY, INLINE_DEPLOY",
+        "NEW: ckp:ServingDisposition — disposition with subclasses APIServing, WebServing, NATSListening, NATSBrowserClient",
+        "NEW: ckp:belongsToProject / ckp:hasKernel — project-kernel inverse pair",
+        "NEW: ckp:hasStorageMedium — links StorageContract to StorageMedium",
+        "NEW: ckp:hasServingDisposition — links Kernel to ServingDisposition",
+        "NEW: ckp:hasDeploymentMethod — links Kernel to DeploymentMethod",
+        "NEW: ckp:reconciles — links Reconciliation to target Kernel",
+        "NEW: CrossProjectEdgeRule (SWRL) — detect edges crossing project boundaries",
+        "UPDATED: IAO/CCO grounding annotations on KernelOntology, Instance, Action, Edge, Kernel, Project, QueueContract, ServingDisposition",
+        "UPDATED: schema.yaml with InlineKernel, StaticKernel, Project, Reconciliation classes and StorageMedium, DeploymentMethod, ServingDisposition enums",
+        "UPDATED: Overall coverage score 65% -> 68%"
+      ]
+    },
+    "v3.5": {
+      "date": "2026-03-25",
+      "changes": [
+        "Unified all namespaces under https://conceptkernel.org/ontology/v3.5/ (was mixed http/https unversioned)",
+        "NEW: base-instances.ttl — InstanceManifest, SealedInstance, LedgerEntry (SPEC.CKP.v3.5.alpha-3 Section 4.1)",
+        "NEW: proof.ttl — ProofRecord, ProofCheck, ProofOutcome, CheckType for verifiable instance integrity",
+        "Updated schema.yaml with LinkML classes for InstanceManifest, SealedInstance, LedgerEntry, ProofRecord, ProofCheck",
+        "Added ProofOutcome and CheckType enums to schema.yaml",
+        "All sub-namespaces versioned: process/, relation/, workflow/, rbac/, improvement/"
+      ]
+    }
+  },
+  "references": {
+    "bfo": "http://purl.obolibrary.org/obo/bfo.owl",
+    "bfoSpecification": "https://basic-formal-ontology.org/",
+    "provO": "http://www.w3.org/ns/prov#",
+    "iao": "http://purl.obolibrary.org/obo/iao.owl",
+    "cco": "https://github.com/CommonCoreOntologies/CommonCoreOntologies",
+    "spec": "SPEC.CKP.v3.5.alpha-6.md"
+  }
+}

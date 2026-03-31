@@ -1,0 +1,493 @@
+# ConceptKernel Kernel Metadata Ontology
+# Version: v3.5-alpha6
+# Date: 2026-03-31
+# Purpose: RDF schema for kernel metadata (from kernel.yaml) for semantic registry
+# Enables SPARQL queries across kernels, capabilities, dependencies, and status
+# Alpha-6: Adds StorageMedium, DeploymentMethod, ServingDisposition
+
+@prefix : <https://conceptkernel.org/ontology/v3.5/> .
+@prefix ckp: <https://conceptkernel.org/ontology/v3.5/> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://conceptkernel.org/ontology/v3.5/kernel-metadata> a owl:Ontology ;
+    dc:title "ConceptKernel Kernel Metadata Ontology" ;
+    dc:description "Formal ontology for kernel metadata enabling semantic registry and SPARQL queries" ;
+    dcterms:created "2025-12-21"^^xsd:date ;
+    dcterms:modified "2026-03-31"^^xsd:date ;
+    owl:versionInfo "v3.5-alpha6" ;
+    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;    rdfs:comment "Defines metadata structure for kernels: runtime, ports, capabilities, dependencies, status. Alpha-6 adds StorageMedium, DeploymentMethod, ServingDisposition." ;
+    owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ,
+                <https://conceptkernel.org/ontology/v3.5/> .
+
+#################################################################
+#    Kernel Metadata Classes
+#################################################################
+
+### Kernel Metadata Entity
+### Source: kernel.yaml files in concepts/*/kernel.yaml
+
+ckp:KernelMetadata a owl:Class ;
+    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant (information entity)
+    rdfs:label "Kernel Metadata"@en ;
+    rdfs:comment "Metadata describing a kernel's identity, capabilities, dependencies, and operational characteristics"@en ;
+    dc:description "Loaded from kernel.yaml, stored as RDF in Jena for semantic queries" .
+
+### Runtime Environment Types
+
+ckp:Runtime a owl:Class ;
+    rdfs:subClassOf bfo:0000019 ;  # bfo:Quality
+    rdfs:label "Runtime"@en ;
+    rdfs:comment "The execution environment for a kernel (node, rust, python, etc.)"@en .
+
+ckp:NodeRuntime a owl:Class ;
+    rdfs:subClassOf ckp:Runtime ;
+    rdfs:label "Node.js Runtime"@en ;
+    rdfs:comment "JavaScript/Node.js execution environment"@en .
+
+ckp:RustRuntime a owl:Class ;
+    rdfs:subClassOf ckp:Runtime ;
+    rdfs:label "Rust Runtime"@en ;
+    rdfs:comment "Rust native execution environment"@en .
+
+ckp:PythonRuntime a owl:Class ;
+    rdfs:subClassOf ckp:Runtime ;
+    rdfs:label "Python Runtime"@en ;
+    rdfs:comment "Python execution environment"@en .
+
+### Capability
+
+ckp:Capability a owl:Class ;
+    rdfs:subClassOf bfo:0000016 ;  # bfo:Disposition
+    rdfs:label "Capability"@en ;
+    rdfs:comment "A capability that a kernel provides or requires"@en ;
+    dc:description "URN format: ckp://Capability#{CapabilityName}:{version}" .
+
+### Kernel Status (Quality)
+
+ckp:KernelStatus a owl:Class ;
+    rdfs:subClassOf bfo:0000019 ;  # bfo:Quality
+    rdfs:label "Kernel Status"@en ;
+    rdfs:comment "The operational status of a kernel (active, inactive, starting, stopping, error)"@en .
+
+#################################################################
+#    Alpha-6: StorageMedium (Quality)
+#    How kernel code/web assets are physically stored
+#################################################################
+
+ckp:StorageMedium a owl:Class ;
+    rdfs:subClassOf bfo:0000019 ;  # bfo:Quality
+    rdfs:label "Storage Medium"@en ;
+    rdfs:comment "The physical storage mechanism for kernel code and web assets. A quality describing how the kernel's files are persisted."@en ;
+    dc:description "Alpha-6 addition. Individuals: FILESYSTEM, DOCUMENT_STORE, CONFIGMAP." .
+
+### StorageMedium Individuals
+
+ckp:StorageMedium-FILESYSTEM a owl:NamedIndividual , ckp:StorageMedium ;
+    rdfs:label "FILESYSTEM"@en ;
+    rdfs:comment "Kernel code stored on a mounted filesystem (SeaweedFS volume, PVC, hostPath)"@en .
+
+ckp:StorageMedium-DOCUMENT_STORE a owl:NamedIndividual , ckp:StorageMedium ;
+    rdfs:label "DOCUMENT_STORE"@en ;
+    rdfs:comment "Kernel code stored in a document store (FerretDB, MongoDB, etc.)"@en .
+
+ckp:StorageMedium-CONFIGMAP a owl:NamedIndividual , ckp:StorageMedium ;
+    rdfs:label "CONFIGMAP"@en ;
+    rdfs:comment "Kernel code stored in Kubernetes ConfigMaps (size-limited, base64 encoded)"@en .
+
+#################################################################
+#    Alpha-6: DeploymentMethod (Quality)
+#    How kernel code is delivered to the running pod/browser
+#################################################################
+
+ckp:DeploymentMethod a owl:Class ;
+    rdfs:subClassOf bfo:0000019 ;  # bfo:Quality
+    rdfs:label "Deployment Method"@en ;
+    rdfs:comment "The delivery mechanism for getting kernel code to its execution environment. A quality describing how the kernel is deployed."@en ;
+    dc:description "Alpha-6 addition. Individuals: VOLUME, FILER, CONFIGMAP_DEPLOY, INLINE_DEPLOY." .
+
+### DeploymentMethod Individuals
+
+ckp:DeploymentMethod-VOLUME a owl:NamedIndividual , ckp:DeploymentMethod ;
+    rdfs:label "VOLUME"@en ;
+    rdfs:comment "Code mounted as a volume into the pod (SeaweedFS CSI, PVC)"@en .
+
+ckp:DeploymentMethod-FILER a owl:NamedIndividual , ckp:DeploymentMethod ;
+    rdfs:label "FILER"@en ;
+    rdfs:comment "Code synced via SeaweedFS filer HTTP API (tg.sh sync)"@en .
+
+ckp:DeploymentMethod-CONFIGMAP_DEPLOY a owl:NamedIndividual , ckp:DeploymentMethod ;
+    rdfs:label "CONFIGMAP_DEPLOY"@en ;
+    rdfs:comment "Code packaged as Kubernetes ConfigMaps and mounted into pods"@en .
+
+ckp:DeploymentMethod-INLINE_DEPLOY a owl:NamedIndividual , ckp:DeploymentMethod ;
+    rdfs:label "INLINE_DEPLOY"@en ;
+    rdfs:comment "Code delivered directly to browser as ES6 modules via gateway (no pod)"@en .
+
+#################################################################
+#    Alpha-6: ServingDisposition (Disposition)
+#    How a kernel serves its functionality to consumers
+#    Grounded in cco:Specification — describes service interface
+#################################################################
+
+ckp:ServingDisposition a owl:Class ;
+    rdfs:subClassOf bfo:0000016 ;  # bfo:Disposition
+    rdfs:label "Serving Disposition"@en ;
+    rdfs:comment "A disposition describing how a kernel serves its functionality to consumers. Grounded in cco:Specification — describes the service interface contract."@en ;
+    dc:description "Alpha-6 addition. Subclasses: APIServing, WebServing, NATSListening, NATSBrowserClient." .
+
+### ServingDisposition Subclasses
+
+ckp:APIServing a owl:Class ;
+    rdfs:subClassOf ckp:ServingDisposition ;
+    rdfs:label "API Serving"@en ;
+    rdfs:comment "Kernel serves an HTTP/REST API endpoint. Gateway routes requests to the kernel's pod."@en ;
+    dc:description "Typical for HotKernel with spec.port defined." .
+
+ckp:WebServing a owl:Class ;
+    rdfs:subClassOf ckp:ServingDisposition ;
+    rdfs:label "Web Serving"@en ;
+    rdfs:comment "Kernel serves static web assets (HTML, JS, CSS) from its web/ directory. Gateway serves files directly."@en ;
+    dc:description "Used by StaticKernel and any kernel with spec.web.serve=true." .
+
+ckp:NATSListening a owl:Class ;
+    rdfs:subClassOf ckp:ServingDisposition ;
+    rdfs:label "NATS Listening"@en ;
+    rdfs:comment "Kernel listens on NATS subjects for incoming action requests. Server-side NATS client."@en ;
+    dc:description "Typical for HotKernel and ColdKernel with spec.nats.input_topic." .
+
+ckp:NATSBrowserClient a owl:Class ;
+    rdfs:subClassOf ckp:ServingDisposition ;
+    rdfs:label "NATS Browser Client"@en ;
+    rdfs:comment "Kernel communicates via NATS WebSocket from the browser. No server-side process. Used by InlineKernel."@en ;
+    dc:description "Alpha-6 addition. Uses NATS WSS endpoint with JWT authentication." .
+
+#################################################################
+#    Kernel Metadata Properties
+#################################################################
+
+### Identity Properties (from metadata section)
+
+ckp:hasName a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string ;
+    rdfs:label "has name"@en ;
+    rdfs:comment "The human-readable name of the kernel (e.g., ConceptKernel.UI, System.Registry)"@en ;
+    dc:description "Source: kernel.yaml -> metadata.name" .
+
+ckp:hasDescription a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string ;
+    rdfs:label "has description"@en ;
+    rdfs:comment "Human-readable description of the kernel's purpose"@en ;
+    dc:description "Source: kernel.yaml -> metadata.description" .
+
+ckp:hasVersion a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string ;
+    rdfs:label "has version"@en ;
+    rdfs:comment "Semantic version of the kernel (e.g., v1.3.20)"@en ;
+    dc:description "Source: kernel.yaml -> metadata.version" .
+
+ckp:hasAuthor a owl:DatatypeProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string ;
+    rdfs:label "has author"@en ;
+    rdfs:comment "Author or organization that created the kernel"@en ;
+    dc:description "Source: kernel.yaml -> metadata.author" .
+
+ckp:hasTag a owl:DatatypeProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string ;
+    rdfs:label "has tag"@en ;
+    rdfs:comment "Tag for categorization and search (multi-valued)"@en ;
+    dc:description "Source: kernel.yaml -> metadata.tags[]" .
+
+### Specification Properties (from spec section)
+
+ckp:hasRuntimeType a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string ;
+    rdfs:label "has runtime type"@en ;
+    rdfs:comment "The runtime environment type (node, rust, python)"@en ;
+    dc:description "Source: kernel.yaml -> spec.runtime" .
+
+ckp:hasRuntime a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Runtime ;
+    rdfs:label "has runtime"@en ;
+    rdfs:comment "The runtime environment instance"@en .
+
+ckp:hasEntrypoint a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string ;
+    rdfs:label "has entrypoint"@en ;
+    rdfs:comment "The entrypoint file or binary for the kernel (e.g., server.js, main.rs)"@en ;
+    dc:description "Source: kernel.yaml -> spec.entrypoint" .
+
+ckp:hasPort a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:integer ;
+    rdfs:label "has port"@en ;
+    rdfs:comment "The TCP port the kernel listens on (for hot kernels)"@en ;
+    dc:description "Source: kernel.yaml -> spec.port" .
+
+### Capability Relationships
+
+ckp:providesCapability a owl:ObjectProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Capability ;
+    rdfs:label "provides capability"@en ;
+    rdfs:comment "A capability that this kernel provides"@en ;
+    dc:description "Source: kernel.yaml -> spec.capabilities[]" .
+
+ckp:requiresCapability a owl:ObjectProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Capability ;
+    rdfs:label "requires capability"@en ;
+    rdfs:comment "A capability that this kernel requires from other kernels"@en .
+
+### Dependency Relationships
+
+ckp:dependsOn a owl:ObjectProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel ;
+    rdfs:label "depends on"@en ;
+    rdfs:comment "This kernel depends on another kernel"@en ;
+    dc:description "Source: kernel.yaml -> spec.dependencies[]" .
+
+ckp:hasDependencyUrn a owl:DatatypeProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string ;
+    rdfs:label "has dependency URN"@en ;
+    rdfs:comment "URN of a kernel dependency (multi-valued)"@en ;
+    dc:description "Source: kernel.yaml -> spec.dependencies[]" .
+
+### Environment Properties
+
+ckp:hasEnvironmentVariable a owl:DatatypeProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string ;
+    rdfs:label "has environment variable"@en ;
+    rdfs:comment "Environment variable name=value pair"@en ;
+    dc:description "Source: kernel.yaml -> spec.environment.*" .
+
+### Status and Operational Properties
+
+ckp:hasStatus a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:KernelStatus ;
+    rdfs:label "has status"@en ;
+    rdfs:comment "Current operational status of the kernel"@en .
+
+ckp:statusValue a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string ;
+    rdfs:label "status value"@en ;
+    rdfs:comment "Status as string: active, inactive, starting, stopping, error"@en .
+
+ckp:startedAt a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "started at"@en ;
+    rdfs:comment "Timestamp when the kernel was started"@en .
+
+ckp:stoppedAt a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "stopped at"@en ;
+    rdfs:comment "Timestamp when the kernel was stopped"@en .
+
+ckp:registeredAt a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "registered at"@en ;
+    rdfs:comment "Timestamp when the kernel was registered in System.Registry"@en .
+
+ckp:lastHeartbeat a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "last heartbeat"@en ;
+    rdfs:comment "Timestamp of the last heartbeat/health check"@en .
+
+ckp:processId a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:integer ;
+    rdfs:label "process ID"@en ;
+    rdfs:comment "Operating system process ID (PID) of running kernel"@en .
+
+#################################################################
+#    Capability Properties
+#################################################################
+
+ckp:capabilityUrn a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Capability ;
+    rdfs:range xsd:string ;
+    rdfs:label "capability URN"@en ;
+    rdfs:comment "URN of the capability: ckp://Capability#{Name}:{version}"@en .
+
+ckp:capabilityName a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Capability ;
+    rdfs:range xsd:string ;
+    rdfs:label "capability name"@en ;
+    rdfs:comment "Human-readable name of the capability"@en .
+
+ckp:capabilityVersion a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Capability ;
+    rdfs:range xsd:string ;
+    rdfs:label "capability version"@en ;
+    rdfs:comment "Version of the capability"@en .
+
+#################################################################
+#    Kernel Classification Subclasses
+#################################################################
+
+### System Kernels
+ckp:SystemKernel a owl:Class ;
+    rdfs:subClassOf ckp:Kernel ;
+    rdfs:label "System Kernel"@en ;
+    rdfs:comment "Core system kernel (System.*) providing infrastructure services"@en ;
+    dc:description "Examples: System.Registry, System.Gateway, System.Consensus" .
+
+### Application Kernels
+ckp:ApplicationKernel a owl:Class ;
+    rdfs:subClassOf ckp:Kernel ;
+    rdfs:label "Application Kernel"@en ;
+    rdfs:comment "User-space application kernel providing domain logic"@en ;
+    dc:description "Examples: Bakery.OrderProcessor, Payment.Processor" .
+
+### UI Kernels
+ckp:UIKernel a owl:Class ;
+    rdfs:subClassOf ckp:Kernel ;
+    rdfs:label "UI Kernel"@en ;
+    rdfs:comment "User interface kernel providing web UI or visualization"@en ;
+    dc:description "Examples: ConceptKernel.UI, UI.Bakery" .
+
+### Template Kernels
+ckp:TemplateKernel a owl:Class ;
+    rdfs:subClassOf ckp:Kernel ;
+    rdfs:label "Template Kernel"@en ;
+    rdfs:comment "Template kernel for creating new kernels via forking"@en ;
+    dc:description "Examples: ConceptKernel.Template.Basic, ConceptKernel.Template.RestApi" .
+
+#################################################################
+#    Status Individuals
+#################################################################
+
+ckp:Status-Active a ckp:KernelStatus ;
+    rdfs:label "Active"@en ;
+    rdfs:comment "Kernel is running and healthy"@en .
+
+ckp:Status-Inactive a ckp:KernelStatus ;
+    rdfs:label "Inactive"@en ;
+    rdfs:comment "Kernel is stopped"@en .
+
+ckp:Status-Starting a ckp:KernelStatus ;
+    rdfs:label "Starting"@en ;
+    rdfs:comment "Kernel is in the process of starting up"@en .
+
+ckp:Status-Stopping a ckp:KernelStatus ;
+    rdfs:label "Stopping"@en ;
+    rdfs:comment "Kernel is in the process of shutting down"@en .
+
+ckp:Status-Error a ckp:KernelStatus ;
+    rdfs:label "Error"@en ;
+    rdfs:comment "Kernel encountered an error and is not operational"@en .
+
+#################################################################
+#    SPARQL Query Examples (as comments)
+#################################################################
+
+# Example 1: Find all active kernels
+# SELECT ?kernel ?name ?port WHERE {
+#   ?kernel rdf:type ckp:Kernel ;
+#           ckp:hasName ?name ;
+#           ckp:hasPort ?port ;
+#           ckp:statusValue "active" .
+# }
+
+# Example 2: Find kernels by capability
+# SELECT ?kernel ?name WHERE {
+#   ?kernel rdf:type ckp:Kernel ;
+#           ckp:hasName ?name ;
+#           ckp:providesCapability ?capability .
+#   ?capability ckp:capabilityUrn "ckp://Capability#WebUI:v1.3.20" .
+# }
+
+# Example 3: Find kernel dependencies
+# SELECT ?kernel ?name ?dependsOnName WHERE {
+#   ?kernel rdf:type ckp:Kernel ;
+#           ckp:hasName ?name ;
+#           ckp:dependsOn ?depKernel .
+#   ?depKernel ckp:hasName ?dependsOnName .
+# }
+
+# Example 4: Find kernels by runtime
+# SELECT ?kernel ?name ?runtime WHERE {
+#   ?kernel rdf:type ckp:Kernel ;
+#           ckp:hasName ?name ;
+#           ckp:hasRuntimeType ?runtime .
+#   FILTER(?runtime = "node")
+# }
+
+# Example 5: Find kernels started in last hour
+# SELECT ?kernel ?name ?startedAt WHERE {
+#   ?kernel rdf:type ckp:Kernel ;
+#           ckp:hasName ?name ;
+#           ckp:startedAt ?startedAt .
+#   FILTER(?startedAt >= NOW() - "PT1H"^^xsd:duration)
+# }
+
+# Example 6: Count kernels by status
+# SELECT ?status (COUNT(?kernel) AS ?count) WHERE {
+#   ?kernel rdf:type ckp:Kernel ;
+#           ckp:statusValue ?status .
+# }
+# GROUP BY ?status
+
+# Example 7: Find all kernels with their capabilities and dependencies
+# SELECT ?kernelName ?capabilityName ?dependencyName WHERE {
+#   ?kernel rdf:type ckp:Kernel ;
+#           ckp:hasName ?kernelName .
+#
+#   OPTIONAL {
+#     ?kernel ckp:providesCapability ?capability .
+#     ?capability ckp:capabilityName ?capabilityName .
+#   }
+#
+#   OPTIONAL {
+#     ?kernel ckp:dependsOn ?dependency .
+#     ?dependency ckp:hasName ?dependencyName .
+#   }
+# }
+
+# Example 8: Find kernels with specific tags
+# SELECT ?kernel ?name WHERE {
+#   ?kernel rdf:type ckp:Kernel ;
+#           ckp:hasName ?name ;
+#           ckp:hasTag "ui" .
+# }
+
+# Example 9 (Alpha-6): Find inline kernels with their serving disposition
+# SELECT ?kernel ?name WHERE {
+#   ?kernel rdf:type ckp:InlineKernel ;
+#           ckp:hasName ?name ;
+#           ckp:hasServingDisposition ?disp .
+#   ?disp rdf:type ckp:NATSBrowserClient .
+# }
+
+# Example 10 (Alpha-6): Find kernels by deployment method
+# SELECT ?kernel ?name ?method WHERE {
+#   ?kernel rdf:type ckp:Kernel ;
+#           ckp:hasName ?name ;
+#           ckp:hasDeploymentMethod ?method .
+# }
+
+#################################################################
+# End of ConceptKernel Kernel Metadata Ontology v3.5-alpha6
+#################################################################

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CKP Ontology Browser</title>
+
+    <!-- N3.js — Turtle/N3 parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/n3@1.16.3/browser/n3.min.js"></script>
+    <!-- rdflib.js — RDF/XML parsing -->
+    <script src="https://unpkg.com/rdflib@2.2.2/dist/rdflib.min.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-wrapper">
+        <!-- CKP Header Bar -->
+        <header class="ckp-header">
+            <div class="ckp-header-left">
+                <a href="https://conceptkernel.org" class="ckp-header-brand" target="_blank" rel="noopener">Concept Kernel</a>
+                <div class="ckp-header-separator"></div>
+                <span class="ckp-header-title">Ontology Browser</span>
+            </div>
+            <nav class="ckp-header-right">
+                <a href="https://conceptkernel.org/v3.5/" class="ckp-header-link" target="_blank" rel="noopener">Spec</a>
+                <a href="https://conceptkernel.org/ontology/v3.5-alpha6/" class="ckp-header-link" target="_blank" rel="noopener">TTL Files</a>
+                <a href="https://github.com/nicholascockman/conceptkernel" class="ckp-header-link" target="_blank" rel="noopener">GitHub</a>
+            </nav>
+        </header>
+
+        <!-- Main App Layout -->
+        <div class="app-container">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Ontology Loader -->
+                <div class="panel loader-panel">
+                    <h2>Load Ontologies</h2>
+                    <div id="dependencyCheck">Checking dependencies...</div>
+                    <textarea id="ontologyUrls" placeholder="Paste ontology URLs (one per line):&#10;https://www.w3.org/ns/prov-o.ttl&#10;https://www.w3.org/2002/07/owl.ttl"></textarea>
+                    <button id="loadOntologies" disabled>Load Ontologies</button>
+                    <div class="progress">
+                        <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                    </div>
+                    <div class="status" id="loadStatus">Checking dependencies...</div>
+                    <div id="loadLogs"></div>
+                </div>
+
+                <!-- Ontology Browser -->
+                <div class="panel ontology-browser">
+                    <h2>Loaded Entities</h2>
+                    <div class="search-controls">
+                        <input type="text" id="searchInput" placeholder="Search entities by label or URI...">
+                    </div>
+                    <div class="entity-filter">
+                        <button id="filterAll" class="active">All</button>
+                        <button id="filterClasses">Classes</button>
+                        <button id="filterProperties">Properties</button>
+                        <button id="filterIndividuals">Individuals</button>
+                    </div>
+                    <div class="ontology-tree" id="ontologyTree">
+                        <div class="canvas-placeholder">
+                            Load ontologies to browse their entities.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Placeholder -->
+                <div id="infoPlaceholder" style="display: flex;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18V7.875c0-.621.504-1.125 1.125-1.125H6.75" />
+                    </svg>
+                    Select an Entity
+                    <p style="font-size: 0.875rem; margin-top: 0.5rem; color: #9ca3af;">Click an entity in the sidebar to view its details.</p>
+                </div>
+
+                <!-- Info Panel (hidden by default) -->
+                <div id="infoPanel" style="display: none;">
+                    <div id="breadcrumbs"></div>
+                    <h1 id="infoLabel"></h1>
+                    <div id="infoUri"></div>
+
+                    <div id="detailsSection" class="info-section">
+                        <h3>Details</h3>
+                        <div id="detailsContent"></div>
+                    </div>
+
+                    <div id="outgoingSection" class="info-section">
+                        <h3>Outgoing Relationships</h3>
+                        <div id="outgoingContent"></div>
+                    </div>
+
+                    <div id="incomingSection" class="info-section">
+                        <h3>Incoming Relationships</h3>
+                        <div id="incomingContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script type="module" src="ontology-manager.js"></script>
+
+</body>
+</html>

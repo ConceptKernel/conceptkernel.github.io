@@ -10,6 +10,34 @@ body {
     margin: 0;
 }
 
+/* --- Top Loading Bar (YouTube-style) --- */
+.top-loading-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #3b82f6);
+    background-size: 200% 100%;
+    z-index: 9999;
+    transition: width 0.4s ease, opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+.top-loading-bar.active {
+    opacity: 1;
+    animation: loading-shimmer 1.5s linear infinite;
+}
+.top-loading-bar.done {
+    width: 100% !important;
+    opacity: 0;
+    transition: width 0.2s ease, opacity 0.5s ease 0.3s;
+}
+@keyframes loading-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
 /* --- CKP Header Bar --- */
 .ckp-header {
     display: flex;
@@ -118,14 +146,90 @@ body {
     margin-bottom: 1rem;
 }
 
+/* --- Module Toggle Bar --- */
+.module-toggle-bar {
+    background: white;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    flex-shrink: 0;
+}
+.module-toggle-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    margin-bottom: 8px;
+}
+.module-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.module-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s ease;
+    user-select: none;
+    color: #fff;
+}
+.module-pill.active {
+    opacity: 1;
+}
+.module-pill.inactive {
+    background: #e5e7eb !important;
+    color: #9ca3af !important;
+    border-color: transparent;
+}
+.module-pill.inactive:hover {
+    background: #d1d5db !important;
+    color: #6b7280 !important;
+}
+.module-pill.failed {
+    background: #fecaca !important;
+    color: #991b1b !important;
+    border-color: #f87171;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+.module-pill .pill-count {
+    margin-left: 5px;
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+/* --- Entity Heading with Count Badge --- */
+.entity-heading h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.entity-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #0D2137;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 24px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 99px;
+    line-height: 1;
+}
+
 /* --- Sidebar Panel Styling --- */
 .panel {
     background: white;
     padding: 20px;
     border-bottom: 1px solid #e5e7eb;
-}
-.loader-panel {
-    flex-shrink: 0;
 }
 .ontology-browser {
     flex: 1;
@@ -144,12 +248,61 @@ h2 {
     padding-bottom: 10px;
 }
 
+/* --- Advanced Loader (collapsible) --- */
+.advanced-loader {
+    flex-shrink: 0;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+}
+.advanced-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 16px;
+    background: none;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-align: left;
+    margin: 0;
+    transition: color 0.15s;
+}
+.advanced-toggle:hover {
+    color: #374151;
+    background: #f9fafb;
+}
+.advanced-toggle-icon {
+    font-size: 10px;
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+.advanced-toggle-icon.expanded {
+    transform: rotate(90deg);
+}
+.advanced-content {
+    display: none;
+    padding: 0 16px 16px 16px;
+}
+.advanced-content.expanded {
+    display: block;
+}
+
 #dependencyCheck { padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 12px; margin-bottom: 10px; background: #f9fafb; }
 textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-family: 'Monaco', 'Menlo', monospace; font-size: 12px; resize: vertical; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; }
 textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; width: 100%; margin-top: 10px; }
-button:hover { background: #2563eb; }
-button:disabled { background: #9ca3af; cursor: not-allowed; }
+
+/* Scoped button styles for advanced loader and load-external */
+.advanced-content button:not(.entity-filter button),
+.load-external-btn {
+    background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; width: 100%; margin-top: 10px;
+}
+.advanced-content button:not(.entity-filter button):hover { background: #2563eb; }
+.advanced-content button:not(.entity-filter button):disabled { background: #9ca3af; cursor: not-allowed; }
+
 .progress { width: 100%; height: 4px; background: #e5e7eb; border-radius: 2px; margin-top: 12px; overflow: hidden; }
 .progress-bar { height: 100%; background: #3b82f6; transition: width 0.3s ease; border-radius: 2px; }
 .status { font-size: 12px; color: #6b7280; margin-top: 8px; }
@@ -162,8 +315,9 @@ button:disabled { background: #9ca3af; cursor: not-allowed; }
 /* --- Ontology Browser List (Sidebar) --- */
 .search-controls input { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; margin-bottom: 10px; box-sizing: border-box; }
 .entity-filter { display: flex; gap: 5px; margin-bottom: 10px; }
-.entity-filter button { flex: 1; font-size: 12px; background: #f3f4f6; color: #4b5563; padding: 6px 10px; margin-top: 0; }
+.entity-filter button { flex: 1; font-size: 12px; background: #f3f4f6; color: #4b5563; padding: 6px 10px; margin-top: 0; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.2s; width: auto; }
 .entity-filter button.active { background: #0D2137; color: white; font-weight: 700; }
+.entity-filter button:hover:not(.active) { background: #e5e7eb; }
 .ontology-tree { flex: 1; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 5px; background: #fafafa; }
 .ontology-item { margin-bottom: 5px; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: #ffffff; }
 .ontology-header { background: #f8f9fb; padding: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; }
@@ -175,24 +329,49 @@ button:disabled { background: #9ca3af; cursor: not-allowed; }
 .entity-list { background: white; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
 .entity-list.expanded { max-height: 500px; overflow-y: auto; }
 
-/* Clickable Entity Item */
+/* Clickable Entity Item — label first, badge right */
 .entity-item {
     padding: 8px 10px;
     border-bottom: 1px solid #f0f0f0;
-    font-size: 12px;
+    font-size: 13px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
     cursor: pointer;
     background: none;
     border: none;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    border-bottom: 1px solid #f0f0f0;
     width: 100%;
     text-align: left;
     margin: 0;
+    border-radius: 0;
 }
 .entity-item:last-child { border-bottom: none; }
 .entity-item:hover { background: #f8fafc; }
-.entity-type { font-size: 10px; padding: 3px 8px; border-radius: 12px; font-weight: 700; min-width: 65px; text-align: center; white-space: nowrap; }
+
+.entity-label {
+    font-weight: 600;
+    color: #111827;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+
+.entity-type {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-align: center;
+}
 .entity-type.Class { background: #dbeafe; color: #1e40af; }
 .entity-type.Property { background: #d4edda; color: #166534; }
 .entity-type.Individual { background: #fef3c7; color: #92400e; }

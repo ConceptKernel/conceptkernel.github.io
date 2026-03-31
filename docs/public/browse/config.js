@@ -45,4 +45,31 @@ const COLOR_SCHEME = {
     ontologyBadgeText: '#6B21A8',
 };
 
-export { VERSION, CKP_ONTOLOGY_URLS, CKP_PREFIXES, COLOR_SCHEME };
+/**
+ * Module colors for the toggle pills in the sidebar.
+ * Keys correspond to the TTL filenames (sans extension).
+ */
+const MODULE_COLORS = {
+    'core':             '#3b82f6',  // blue
+    'kernel-metadata':  '#0d9488',  // teal
+    'processes':        '#d97706',  // amber
+    'relations':        '#7c3aed',  // purple
+    'base-instances':   '#16a34a',  // green
+    'proof':            '#dc2626',  // red
+    'rbac':             '#475569',  // slate
+};
+
+/**
+ * Friendly display labels for each module.
+ */
+const MODULE_LABELS = {
+    'core':             'Core',
+    'kernel-metadata':  'Metadata',
+    'processes':        'Processes',
+    'relations':        'Relations',
+    'base-instances':   'Instances',
+    'proof':            'Proof',
+    'rbac':             'RBAC',
+};
+
+export { VERSION, CKP_ONTOLOGY_URLS, CKP_PREFIXES, COLOR_SCHEME, MODULE_COLORS, MODULE_LABELS };

@@ -15,6 +15,9 @@
 </head>
 <body>
 
+    <!-- Top loading progress bar (YouTube-style) -->
+    <div class="top-loading-bar" id="topLoadingBar"></div>
+
     <div class="app-wrapper">
         <!-- CKP Header Bar -->
         <header class="ckp-header">
@@ -34,22 +37,19 @@
         <div class="app-container">
             <!-- Sidebar -->
             <div class="sidebar">
-                <!-- Ontology Loader -->
-                <div class="panel loader-panel">
-                    <h2>Load Ontologies</h2>
-                    <div id="dependencyCheck">Checking dependencies...</div>
-                    <textarea id="ontologyUrls" placeholder="Paste ontology URLs (one per line):&#10;https://www.w3.org/ns/prov-o.ttl&#10;https://www.w3.org/2002/07/owl.ttl"></textarea>
-                    <button id="loadOntologies" disabled>Load Ontologies</button>
-                    <div class="progress">
-                        <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                <!-- Module Toggle Bar -->
+                <div class="module-toggle-bar" id="moduleToggleBar">
+                    <div class="module-toggle-label">Modules</div>
+                    <div class="module-pills" id="modulePills">
+                        <!-- Pills are populated by JS after load -->
                     </div>
-                    <div class="status" id="loadStatus">Checking dependencies...</div>
-                    <div id="loadLogs"></div>
                 </div>
 
                 <!-- Ontology Browser -->
                 <div class="panel ontology-browser">
-                    <h2>Loaded Entities</h2>
+                    <div class="entity-heading">
+                        <h2>Loaded Entities <span class="entity-count-badge" id="entityCountBadge">0</span></h2>
+                    </div>
                     <div class="search-controls">
                         <input type="text" id="searchInput" placeholder="Search entities by label or URI...">
                     </div>
@@ -61,8 +61,26 @@
                     </div>
                     <div class="ontology-tree" id="ontologyTree">
                         <div class="canvas-placeholder">
-                            Load ontologies to browse their entities.
+                            Loading ontology modules...
                         </div>
+                    </div>
+                </div>
+
+                <!-- Advanced: Load External (collapsed) -->
+                <div class="advanced-loader" id="advancedLoader">
+                    <button class="advanced-toggle" id="advancedToggle" type="button">
+                        <span class="advanced-toggle-icon" id="advancedToggleIcon">&#9654;</span>
+                        Advanced: Load External
+                    </button>
+                    <div class="advanced-content" id="advancedContent">
+                        <div id="dependencyCheck">Checking dependencies...</div>
+                        <textarea id="ontologyUrls" placeholder="Paste ontology URLs (one per line):&#10;https://www.w3.org/ns/prov-o.ttl&#10;https://www.w3.org/2002/07/owl.ttl"></textarea>
+                        <button id="loadOntologies" disabled>Load Ontologies</button>
+                        <div class="progress">
+                            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                        </div>
+                        <div class="status" id="loadStatus">Checking dependencies...</div>
+                        <div id="loadLogs"></div>
                     </div>
                 </div>
             </div>

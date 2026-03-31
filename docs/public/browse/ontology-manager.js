@@ -6,7 +6,7 @@
  * entity extraction, filtering, search, and detail rendering.
  */
 
-import { CKP_ONTOLOGY_URLS, CKP_PREFIXES } from './config.js';
+import { CKP_ONTOLOGY_URLS, CKP_PREFIXES, MODULE_COLORS, MODULE_LABELS } from './config.js';
 
 class OntologyManager {
     constructor() {
@@ -19,6 +19,11 @@ class OntologyManager {
         this.n3Available = false;
         this.rdflibAvailable = false;
         this.currentFilter = 'all';
+
+        // Module toggle state: maps module key -> boolean (enabled/disabled)
+        this.moduleEnabled = {};
+        // Module key -> ontology URL mapping
+        this.moduleUrlMap = {};
 
         // Common prefixes for shortening URIs
         this.prefixes = {
@@ -34,15 +39,32 @@ class OntologyManager {
             ...CKP_PREFIXES,
         };
 
+        // Build module key -> URL mapping from CKP_ONTOLOGY_URLS
+        CKP_ONTOLOGY_URLS.forEach(url => {
+            const key = this.extractModuleKey(url);
+            this.moduleUrlMap[key] = url;
+            this.moduleEnabled[key] = true; // all enabled by default
+        });
+
         // Check dependencies right away
         this.checkDependencies().then(() => {
             // Initialize event listeners after check
             this.initEventListeners();
             // Pre-populate textarea with CKP ontology URLs
             this.populateOntologyUrls();
+            // Render initial module pills (loading state)
+            this.renderModulePills();
             // Auto-load CKP ontologies (URN resolution happens in updateOntologyTree)
             setTimeout(() => this.handleLoadOntologies(), 500);
         });
+    }
+
+    /**
+     * Extract module key from a URL, e.g. "/ontology/v3.5-alpha6/core.ttl" -> "core"
+     */
+    extractModuleKey(url) {
+        const filename = url.substring(url.lastIndexOf('/') + 1);
+        return filename.replace(/\.ttl$/, '').replace(/\.owl$/, '').replace(/\.rdf$/, '');
     }
 
     /**
@@ -58,10 +80,10 @@ class OntologyManager {
     /**
      * Resolve URL parameters to navigate to a specific entity.
      * Supports:
-     *   ?urn=ckp://Kernel#CK.Task:v1.0   → resolves CKP URN to entity URI
-     *   ?class=Kernel                      → finds class by local name
-     *   ?uri=https://...#Kernel            → direct URI lookup
-     *   #BroadcastProcess                  → hash fragment as local name
+     *   ?urn=ckp://Kernel#CK.Task:v1.0   -> resolves CKP URN to entity URI
+     *   ?class=Kernel                      -> finds class by local name
+     *   ?uri=https://...#Kernel            -> direct URI lookup
+     *   #BroadcastProcess                  -> hash fragment as local name
      */
     resolveUrlParams() {
         const params = new URLSearchParams(window.location.search);
@@ -123,6 +145,103 @@ class OntologyManager {
             this.showEntityDetailsByUri(targetUri);
             this.log(`Resolved URL param to: ${targetUri}`, 'success');
         }
+    }
+
+    // --- Top Loading Bar ---
+    showTopLoadingBar() {
+        const bar = document.getElementById('topLoadingBar');
+        if (!bar) return;
+        bar.style.width = '0%';
+        bar.classList.remove('done');
+        bar.classList.add('active');
+    }
+
+    updateTopLoadingBar(percent) {
+        const bar = document.getElementById('topLoadingBar');
+        if (!bar) return;
+        bar.style.width = `${Math.min(percent, 95)}%`;
+    }
+
+    hideTopLoadingBar() {
+        const bar = document.getElementById('topLoadingBar');
+        if (!bar) return;
+        bar.classList.remove('active');
+        bar.classList.add('done');
+        bar.style.width = '100%';
+        setTimeout(() => {
+            bar.classList.remove('done');
+            bar.style.width = '0%';
+        }, 800);
+    }
+
+    // --- Module Pills ---
+    renderModulePills() {
+        const container = document.getElementById('modulePills');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const moduleKeys = Object.keys(this.moduleUrlMap);
+        moduleKeys.forEach(key => {
+            const pill = document.createElement('button');
+            pill.type = 'button';
+            pill.className = 'module-pill';
+            pill.dataset.moduleKey = key;
+
+            const color = MODULE_COLORS[key] || '#6b7280';
+            const label = MODULE_LABELS[key] || key;
+
+            const url = this.moduleUrlMap[key];
+            const ontology = this.ontologies.get(url);
+            const isFailed = this.failedUrls.has(url);
+            const isEnabled = this.moduleEnabled[key];
+
+            if (isFailed) {
+                pill.classList.add('failed');
+                pill.title = `Failed to load: ${key}`;
+            } else if (isEnabled) {
+                pill.classList.add('active');
+                pill.style.background = color;
+                pill.style.borderColor = color;
+                pill.title = `${label}: click to hide`;
+            } else {
+                pill.classList.add('inactive');
+                pill.title = `${label}: click to show`;
+            }
+
+            let innerHTML = label;
+            if (ontology) {
+                innerHTML += `<span class="pill-count">${ontology.stats.total}</span>`;
+            }
+            pill.innerHTML = innerHTML;
+
+            // Toggle on click (unless failed)
+            if (!isFailed) {
+                pill.addEventListener('click', () => {
+                    this.moduleEnabled[key] = !this.moduleEnabled[key];
+                    this.renderModulePills();
+                    this.filterEntities();
+                    this.updateEntityCountBadge();
+                });
+            }
+
+            container.appendChild(pill);
+        });
+    }
+
+    // --- Entity Count Badge ---
+    updateEntityCountBadge() {
+        const badge = document.getElementById('entityCountBadge');
+        if (!badge) return;
+
+        let count = 0;
+        document.querySelectorAll('.ontology-item').forEach(ontologyItem => {
+            ontologyItem.querySelectorAll('.entity-item').forEach(entityItem => {
+                if (entityItem.style.display !== 'none') {
+                    count++;
+                }
+            });
+        });
+        badge.textContent = count;
     }
 
     // --- 1. Dependency Check and Initialization ---
@@ -200,11 +319,15 @@ class OntologyManager {
         loadButton.disabled = true;
         loadButton.textContent = 'Loading...';
 
+        // Show top loading bar
+        this.showTopLoadingBar();
+
         let loadedCount = 0;
         const promises = urls.map(async (url, index) => {
             const progress = ((index + 1) / urls.length) * 100;
             status.textContent = `Loading ${index + 1} of ${urls.length}: ${this.extractLocalName(url, true)}`;
             this.updateProgress(progress);
+            this.updateTopLoadingBar(progress);
 
             if (this.ontologies.has(url)) {
                 this.log(`Already loaded: ${url}`, 'warning');
@@ -237,12 +360,19 @@ class OntologyManager {
 
         await Promise.all(promises);
 
+        // Hide top loading bar
+        this.hideTopLoadingBar();
+
         status.textContent = `Finished. Loaded ${loadedCount} new ontology/ontologies.`;
         loadButton.disabled = false;
         loadButton.textContent = 'Load Ontologies';
 
+        // Refresh module pills with loaded/failed state
+        this.renderModulePills();
         // Refresh the display with all entities from the global store
         this.updateOntologyTree();
+        // Update count badge
+        this.updateEntityCountBadge();
     }
 
     async loadOntologyWithTimeout(fetchUrl, baseUri, timeoutMs) {
@@ -477,11 +607,12 @@ class OntologyManager {
 
         tree.innerHTML = '';
 
-        this.ontologies.forEach(ontology => {
-            const ontologyItem = this.createOntologyItem(ontology);
+        this.ontologies.forEach((ontology, url) => {
+            const ontologyItem = this.createOntologyItem(ontology, url);
             tree.appendChild(ontologyItem);
         });
         this.filterEntities();
+        this.updateEntityCountBadge();
         // Resolve URL params after entities are indexed (once)
         if (!this._urlResolved) {
             this._urlResolved = true;
@@ -489,9 +620,12 @@ class OntologyManager {
         }
     }
 
-    createOntologyItem(ontology) {
+    createOntologyItem(ontology, url) {
         const item = document.createElement('div');
         item.className = 'ontology-item';
+        // Tag with module key for filtering
+        const moduleKey = this.extractModuleKey(url);
+        item.dataset.moduleKey = moduleKey;
 
         const header = document.createElement('div');
         header.className = 'ontology-header';
@@ -522,9 +656,10 @@ class OntologyManager {
                     entityItem.dataset.ontologyEntityUri = ontology.ontologyUri;
                     entityItem.dataset.entityUri = entity.uri;
 
+                    // Label first (prominent), type badge right-aligned (secondary)
                     entityItem.innerHTML = `
-                        <span class="entity-type ${entity.type}">${entity.type}</span>
                         <span class="entity-label">${entity.label}</span>
+                        <span class="entity-type ${entity.type}">${entity.type}</span>
                     `;
 
                     entityItem.addEventListener('click', () => {
@@ -561,6 +696,15 @@ class OntologyManager {
         const query = document.getElementById('searchInput').value.toLowerCase();
 
         document.querySelectorAll('.ontology-item').forEach(ontologyItem => {
+            // Check module toggle visibility
+            const moduleKey = ontologyItem.dataset.moduleKey;
+            const moduleVisible = moduleKey ? (this.moduleEnabled[moduleKey] !== false) : true;
+
+            if (!moduleVisible) {
+                ontologyItem.style.display = 'none';
+                return;
+            }
+
             let visibleEntities = 0;
             ontologyItem.querySelectorAll('.entity-item').forEach(entityItem => {
                 const label = entityItem.querySelector('.entity-label').textContent.toLowerCase();
@@ -584,6 +728,8 @@ class OntologyManager {
 
             ontologyItem.style.display = (visibleEntities > 0 || matchesHeader) ? 'block' : 'none';
         });
+
+        this.updateEntityCountBadge();
     }
 
     // --- 4. Main Content Panel Logic ---
@@ -950,6 +1096,18 @@ class OntologyManager {
                 this.filterEntities();
             });
         });
+
+        // Advanced loader toggle
+        const advancedToggle = document.getElementById('advancedToggle');
+        const advancedContent = document.getElementById('advancedContent');
+        const advancedToggleIcon = document.getElementById('advancedToggleIcon');
+        if (advancedToggle && advancedContent) {
+            advancedToggle.addEventListener('click', () => {
+                const isExpanded = advancedContent.classList.contains('expanded');
+                advancedContent.classList.toggle('expanded');
+                advancedToggleIcon.classList.toggle('expanded');
+            });
+        }
     }
 }
 

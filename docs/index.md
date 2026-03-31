@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: Read the Spec
-      link: /v3.5/introduction
+      link: /v3.5-alpha6/introduction
     - theme: alt
       text: Browse Ontology
       link: /browse/
@@ -28,17 +28,17 @@ import OntologyGraph from './.vitepress/components/OntologyGraph.vue'
   <div class="link-section">
     <h3>Ontology</h3>
     <p>BFO 2020 → IAO + CCO → CKP — four-layer type system for every kernel.</p>
-    <a href="/v3.5/ontology-layering">Layering Strategy</a> · <a href="/v3.5/bfo-mapping">BFO Mapping</a> · <a href="/ontology/v3.5-alpha6/">TTL Files</a>
+    <a href="/v3.5-alpha6/ontology-layering">Layering Strategy</a> · <a href="/v3.5-alpha6/bfo-mapping">BFO Mapping</a> · <a href="/ontology/v3.5-alpha6/">TTL Files</a>
   </div>
   <div class="link-section">
     <h3>Three Loops</h3>
     <p>TBox (identity) · RBox (capability) · ABox (knowledge) — Description Logic boxes as volumes.</p>
-    <a href="/v3.5/three-loops">DL Box Mapping</a> · <a href="/v3.5/topology">Physical Topology</a>
+    <a href="/v3.5-alpha6/three-loops">DL Box Mapping</a> · <a href="/v3.5-alpha6/topology">Physical Topology</a>
   </div>
   <div class="link-section">
     <h3>Patterns</h3>
     <p>Proven implementation patterns from production CKP deployments.</p>
-    <a href="/v3.5/patterns">8 Patterns</a> · <a href="/v3.5/operator">CK.Operator</a> · <a href="https://github.com/ConceptKernel">GitHub</a>
+    <a href="/v3.5-alpha6/patterns">8 Patterns</a> · <a href="/v3.5-alpha6/operator">CK.Operator</a> · <a href="https://github.com/ConceptKernel">GitHub</a>
   </div>
 </div>
 

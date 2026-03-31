@@ -17,7 +17,7 @@ TOOL Loop → RBox (relational)       — how things RELATE
 DATA Loop → ABox (assertional)      — what DOES exist
 ```
 
-This is not a metaphor. Each box is an independently-versioned volume with different write authority and git semantics. [Read more →](/v3.5/three-loops)
+This is not a metaphor. Each box is an independently-versioned volume with different write authority and git semantics. [Read more →](/v3.5-alpha6/three-loops)
 
 ### Four-Layer Ontology Import Chain
 
@@ -30,7 +30,7 @@ CKP now grounds through established mid-level ontologies:
 | 1 | CKP | Protocol: kernel, edge, instance, action |
 | 2 | Per-kernel ontology.yaml | Domain-specific types |
 
-Key reclassifications: KernelOntology → iao:Document, Instance → iao:DataItem, Kernel → cco:Agent, Action → iao:PlanSpecification. [Read more →](/v3.5/ontology-layering)
+Key reclassifications: KernelOntology → iao:Document, Instance → iao:DataItem, Kernel → cco:Agent, Action → iao:PlanSpecification. [Read more →](/v3.5-alpha6/ontology-layering)
 
 ### Kernel-as-Datatype Rule
 
@@ -45,7 +45,7 @@ A kernel IS a datatype. `ontology.yaml` defines the type. `storage/instances/` h
 | INLINE | none (browser) | WSS + JWT | Browser-side JS with CK.Lib.Js |
 | STATIC | none | none | Gateway serves files directly |
 
-[Read more →](/v3.5/patterns#kernel-type-matrix)
+[Read more →](/v3.5-alpha6/patterns#kernel-type-matrix)
 
 ## New Ontology Classes (alpha-6)
 
@@ -66,26 +66,26 @@ A kernel IS a datatype. `ontology.yaml` defines the type. `storage/instances/` h
 - Explicit version directories (`storage/web/v1/`, `v2/`) — no weighted canary
 - Separation axiom enforced physically by volume `readOnly`
 
-[Read more →](/v3.5/topology)
+[Read more →](/v3.5-alpha6/topology)
 
 ## CK.Operator
 
 Replaces manual deployment tooling. A Kubernetes operator that reconciles `.ckproject` and `conceptkernel.yaml` into gateway resources. Watches cluster state, publishes events via NATS.
 
-[Read more →](/v3.5/operator)
+[Read more →](/v3.5-alpha6/operator)
 
 ## Implementation Patterns
 
 Eight patterns extracted from production CKP deployments:
 
-1. [Dual-Store](/v3.5/patterns#dual-store) — TBox in graph DB, ABox in document DB
-2. [Classification](/v3.5/patterns#classification) — typed pipeline stage
-3. [Quality Assessment](/v3.5/patterns#quality-assessment) — sosa:Observation
-4. [Composition](/v3.5/patterns#composition) — OWL property validation
-5. [Economic Event](/v3.5/patterns#economic-event) — ValueFlows for payments
-6. [Pipeline Stage](/v3.5/patterns#pipeline-stage) — PROV-O mandatory
-7. [Provenance Mandate](/v3.5/patterns#provenance) — every action traces
-8. [Kernel Type Matrix](/v3.5/patterns#kernel-type-matrix) — four deployment modes
+1. [Dual-Store](/v3.5-alpha6/patterns#dual-store) — TBox in graph DB, ABox in document DB
+2. [Classification](/v3.5-alpha6/patterns#classification) — typed pipeline stage
+3. [Quality Assessment](/v3.5-alpha6/patterns#quality-assessment) — sosa:Observation
+4. [Composition](/v3.5-alpha6/patterns#composition) — OWL property validation
+5. [Economic Event](/v3.5-alpha6/patterns#economic-event) — ValueFlows for payments
+6. [Pipeline Stage](/v3.5-alpha6/patterns#pipeline-stage) — PROV-O mandatory
+7. [Provenance Mandate](/v3.5-alpha6/patterns#provenance) — every action traces
+8. [Kernel Type Matrix](/v3.5-alpha6/patterns#kernel-type-matrix) — four deployment modes
 
 ## PROV-O Mandate
 
@@ -95,4 +95,4 @@ No longer optional. Every action that produces an instance MUST record `prov:was
 
 - CCO Geospatial, Facility, Time, Currency, Quality ontologies
 - ODRL, Hydra Core, SWRL
-- [See full list →](/v3.5/ontology-layering#deliberately-skipped-ontologies)
+- [See full list →](/v3.5-alpha6/ontology-layering#deliberately-skipped-ontologies)

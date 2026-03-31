@@ -11,7 +11,7 @@ CKP adopts a four-layer import chain grounded in established ontologies:
 graph TD
     L0["<b>Layer 0: BFO 2020</b><br/>ISO 21838-2<br/>entity, continuant, occurrent"]
     L05["<b>Layer 0.5: Mid-Level</b><br/>IAO + CCO + PROV-O + ValueFlows<br/>information, agents, provenance, economics"]
-    L1["<b>Layer 1: CKP</b><br/>conceptkernel.org/v3.5/<br/>kernel, edge, instance, action"]
+    L1["<b>Layer 1: CKP</b><br/>conceptkernel.org/v3.5-alpha6/<br/>kernel, edge, instance, action"]
     L2["<b>Layer 2: Per-Kernel</b><br/>ontology.yaml<br/>domain-specific classes"]
 
     L0 --> L05

@@ -3,11 +3,13 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix ckp: <https://conceptkernel.org/ontology/v3.5/> .
 @prefix ckpi: <https://conceptkernel.org/ontology/v3.5/improvement#> .
 
 # ============================================================================
-# Self-Improvement Ontology for ConceptKernel v3.5.0
+# Self-Improvement Ontology for ConceptKernel v3.5-alpha6
 # ============================================================================
 # Defines processes, roles, and functions for autonomous self-improvement
 # and ontology-driven validation with AI-powered recommendations
@@ -19,10 +21,10 @@
   owl:imports <https://conceptkernel.org/ontology/v3.5/process> ;
   rdfs:label "ConceptKernel Self-Improvement Ontology" ;
   rdfs:comment "Ontology for autonomous validation, improvement recommendations, and consensus-driven evolution" ;
-  owl:versionInfo "v3.5.0" .
-    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
-    rdfs:seeAlso <https://conceptkernel.org> ;
-    rdfs:seeAlso <https://github.com/ConceptKernel> ;
+  owl:versionInfo "v3.5-alpha6" ;
+  dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
+  rdfs:seeAlso <https://conceptkernel.org> ;
+  rdfs:seeAlso <https://github.com/ConceptKernel> .
 # ============================================================================
 # ROLES (BFO:Role) - Capabilities borne by kernels
 # ============================================================================
@@ -93,31 +95,31 @@ ckpi:ImprovementProcess
 
 ckpi:ValidationPhase
   rdf:type owl:Class ;
-  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
+  rdfs:subClassOf bfo:0000015 ;  # BFO:Process (temporal part of ImprovementProcess)
   rdfs:label "Validation Phase" ;
   rdfs:comment "Temporal part where kernel ontology is validated against canonical ontologies" .
 
 ckpi:AnalysisPhase
   rdf:type owl:Class ;
-  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
+  rdfs:subClassOf bfo:0000015 ;  # BFO:Process
   rdfs:label "Analysis Phase" ;
   rdfs:comment "Temporal part where AI agents analyze validation issues" .
 
 ckpi:RecommendationPhase
   rdf:type owl:Class ;
-  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
+  rdfs:subClassOf bfo:0000015 ;  # BFO:Process
   rdfs:label "Recommendation Phase" ;
   rdfs:comment "Temporal part where improvement recommendations are generated" .
 
 ckpi:ConsensusPhase
   rdf:type owl:Class ;
-  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
+  rdfs:subClassOf bfo:0000015 ;  # BFO:Process
   rdfs:label "Consensus Phase" ;
   rdfs:comment "Temporal part where recommendations are submitted for governance approval" .
 
 ckpi:ExecutionPhase
   rdf:type owl:Class ;
-  rdfs:subClassOf bfo:0000202 ;  # BFO:TemporalInterval
+  rdfs:subClassOf bfo:0000015 ;  # BFO:Process
   rdfs:label "Execution Phase" ;
   rdfs:comment "Temporal part where approved recommendations are applied" .
 

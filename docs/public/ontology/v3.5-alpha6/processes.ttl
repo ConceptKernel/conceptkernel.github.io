@@ -18,8 +18,8 @@
     dc:title "ConceptKernel Process Ontology" ;
     dc:description "Formal ontology defining Occurrents (processes that unfold over time) in ConceptKernel" ;
     dcterms:created "2025-11-23"^^xsd:date ;
-    dcterms:modified "2026-03-26"^^xsd:date ;
-    owl:versionInfo "v3.5.0" ;
+    dcterms:modified "2026-04-01"^^xsd:date ;
+    owl:versionInfo "v3.5-alpha6" ;
     dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
     rdfs:seeAlso <https://conceptkernel.org> ;
     rdfs:seeAlso <https://github.com/ConceptKernel> ;

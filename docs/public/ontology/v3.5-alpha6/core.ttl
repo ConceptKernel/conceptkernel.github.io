@@ -1,13 +1,17 @@
-# ConceptKernel Base BFO Ontology
+# ConceptKernel Core Ontology
 # Version: v3.5-alpha6
-# Date: 2026-03-31
-# Purpose: Core BFO mappings for ConceptKernel continuants
-# Alpha-6: Adds InlineKernel, StaticKernel, Project, Reconciliation
-#           IAO/CCO grounding annotations per ontology layering strategy
+# Date: 2026-04-01
+# Purpose: Core entity definitions with formal IAO/CCO mid-level grounding
+# Alpha-6: InlineKernel, StaticKernel, Project, Reconciliation
+#           Formal owl:imports for IAO, CCO, PROV-O (Option A grounding)
 
 @prefix : <https://conceptkernel.org/ontology/v3.5/> .
 @prefix ckp: <https://conceptkernel.org/ontology/v3.5/> .
 @prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix iao: <http://purl.obolibrary.org/obo/IAO_> .
+@prefix cco: <http://www.ontologyrepository.com/CommonCoreOntologies/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix vf: <https://w3id.org/valueflows#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -16,30 +20,32 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
 
 <https://conceptkernel.org/ontology/v3.5/> a owl:Ontology ;
-    dc:title "ConceptKernel BFO Base Ontology" ;
-    dc:description "Formal ontology mapping ConceptKernel entities to Basic Formal Ontology (BFO) classes" ;
+    dc:title "ConceptKernel Core Ontology" ;
+    dc:description "Core entity definitions for ConceptKernel with formal IAO/CCO mid-level grounding per CKP v3.5 ontology layering strategy" ;
     dcterms:created "2025-11-23"^^xsd:date ;
-    dcterms:modified "2026-03-31"^^xsd:date ;
+    dcterms:modified "2026-04-01"^^xsd:date ;
     owl:versionInfo "v3.5-alpha6" ;
     dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
     rdfs:seeAlso <https://conceptkernel.org> ;
     rdfs:seeAlso <https://github.com/ConceptKernel> ;
-    rdfs:comment "Core continuants and occurrents: Kernel, Edge, Instance, Ontology, Action, GovernanceMode. Alpha-6 adds InlineKernel, StaticKernel, Project, Reconciliation."@en ;
+    rdfs:comment "Core continuants and occurrents: Kernel, Edge, Instance, Ontology, Action, GovernanceMode. Alpha-6 adds InlineKernel, StaticKernel, Project, Reconciliation. Formal IAO/CCO grounding (Layer 0.5)."@en ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ,
-                <https://conceptkernel.org/ontology/v3.5/base-instances> ,
-                <https://conceptkernel.org/ontology/v3.5/proof> .
+                <http://purl.obolibrary.org/obo/iao.owl> ,
+                <http://www.ontologyrepository.com/CommonCoreOntologies/AgentOntology> ,
+                <http://www.ontologyrepository.com/CommonCoreOntologies/ArtifactOntology> ,
+                <http://www.w3.org/ns/prov#> .
 
 #################################################################
 #    Continuants - Entities that persist through time
 #################################################################
 
-### Kernel (Independent Continuant - Material Entity)
-### Grounded in cco:Agent — a kernel is both material entity AND agent
+### Kernel (Independent Continuant - Material Entity + Agent)
+### Formally grounded in cco:Agent — a kernel is both material entity AND agent
 
 ckp:Kernel a owl:Class ;
-    rdfs:subClassOf bfo:0000040 ;  # bfo:MaterialEntity
+    rdfs:subClassOf bfo:0000040 , cco:Agent ;  # bfo:MaterialEntity + cco:Agent
     rdfs:label "Concept Kernel"@en ;
-    rdfs:comment "A persistent computational entity that maintains identity across time. Kernels are the fundamental atomic units of computation in ConceptKernel architecture. Grounded in cco:Agent — a kernel acts autonomously."@en ;
+    rdfs:comment "A persistent computational entity that maintains identity across time. Kernels are the fundamental atomic units of computation in ConceptKernel architecture. Dual-grounded: bfo:MaterialEntity (physical persistence) + cco:Agent (autonomous action)."@en ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
     ckp:coverageScore "0.85"^^xsd:decimal .
 
@@ -111,9 +117,9 @@ ckp:hasType a owl:ObjectProperty , owl:FunctionalProperty ;
 ### Kernel Dispositions (Contract Capabilities)
 
 ckp:QueueContract a owl:Class ;
-    rdfs:subClassOf bfo:0000016 ;  # bfo:Disposition
+    rdfs:subClassOf iao:0000033 ;  # iao:DirectiveInformationEntity
     rdfs:label "Queue Contract"@en ;
-    rdfs:comment "Disposition defining what inputs a kernel can accept. Grounded in iao:0000017 (DirectiveInformationEntity) — a contract directs how to interact."@en ;
+    rdfs:comment "A directive information entity defining what inputs a kernel can accept. A contract directs how to interact — it specifies the expected input format and acceptable edge sources."@en ;
     dc:description "Defined in ontology.yaml: spec.queue_contract" .
 
 ckp:StorageContract a owl:Class ;
@@ -148,19 +154,18 @@ ckp:hasNotificationContract a owl:ObjectProperty ;
 #################################################################
 
 ckp:InformationEntity a owl:Class ;
-    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant
+    rdfs:subClassOf iao:0000030 ;  # iao:InformationContentEntity
     rdfs:label "Information Entity"@en ;
-    rdfs:comment "An abstract information-bearing entity that can be concretized in multiple bearers. Base class for Instance, Edge, and other information artifacts."@en .
+    rdfs:comment "An abstract information-bearing entity that can be concretized in multiple bearers. Base class for Instance, Edge, and other information artifacts. Formally grounded in iao:InformationContentEntity."@en .
 
 #################################################################
-#    Edge (Generically Dependent Continuant - Relational Entity)
-#    Grounded in cco:Artifact — an edge is a constructed artifact
+#    Edge (cco:Artifact — a constructed relational artifact)
 #################################################################
 
 ckp:Edge a owl:Class ;
-    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant
+    rdfs:subClassOf cco:Artifact ;  # cco:Artifact (constructed artifact)
     rdfs:label "Edge"@en ;
-    rdfs:comment "An abstract relationship between two kernels - the ONLY mechanism for inter-Kernel communication. Edges are information entities that depend on the kernels they connect. Grounded in cco:Artifact — an edge is a constructed artifact connecting kernels."@en ;
+    rdfs:comment "An abstract relationship between two kernels — the ONLY mechanism for inter-Kernel communication. Edges are constructed artifacts that define the connectivity graph. Formally grounded in cco:Artifact."@en ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
     ckp:coverageScore "0.85"^^xsd:decimal ;
     ckp:architecturalConstraint "NO direct Kernel-to-Kernel communication. ONLY through EdgeKernel-managed Edges."^^xsd:string .
@@ -255,14 +260,13 @@ ckp:isAuthorized a owl:DatatypeProperty ;
     rdfs:comment "Whether the target kernel explicitly authorizes this edge in its queue_contract.edges"@en .
 
 #################################################################
-#    Instance (Generically Dependent Continuant - Information Entity)
-#    Grounded in iao:0000027 (DataItem) — an instance is a data item
+#    Instance (iao:DataItem — a truthful data item)
 #################################################################
 
 ckp:Instance a owl:Class ;
-    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant (information entity)
+    rdfs:subClassOf iao:0000027 ;  # iao:DataItem
     rdfs:label "Instance"@en ;
-    rdfs:comment "A persistent information entity - the result of a Process. Instances are immutable artifacts stored in {kernel}/storage/instances/i-{identifier}/. Grounded in iao:0000027 (DataItem) — an instance is a truthful data item about something."@en ;
+    rdfs:comment "A persistent information entity — the result of a Process. Instances are immutable artifacts stored in {kernel}/storage/instances/i-{identifier}/. Formally grounded in iao:DataItem — an instance is a truthful data item about something."@en ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
     ckp:coverageScore "0.80"^^xsd:decimal .
 
@@ -302,15 +306,14 @@ ckp:producesInstance a owl:ObjectProperty ;
     owl:inverseOf ckp:createdByKernel .
 
 #################################################################
-#    Action (Occurrent - Process)
+#    Action (iao:PlanSpecification — a plan that gets realized as a process)
 #    v3.5: Actions are the executable operations a kernel exposes
-#    Grounded in iao:0000104 (PlanSpecification) — an action is a plan
 #################################################################
 
 ckp:Action a owl:Class ;
-    rdfs:subClassOf bfo:0000015 ;  # bfo:Process
+    rdfs:subClassOf iao:0000104 ;  # iao:PlanSpecification
     rdfs:label "Action"@en ;
-    rdfs:comment "An executable operation exposed by a kernel. Actions are processes that transform inputs into instances. Defined in conceptkernel.yaml under spec.actions. Grounded in iao:0000104 (PlanSpecification) — an action is a plan specification that gets realized as a process."@en .
+    rdfs:comment "An executable operation exposed by a kernel. Actions are plan specifications defined in conceptkernel.yaml under spec.actions. When executed, they are realized as ckpp:InvocationProcess instances. Formally grounded in iao:PlanSpecification."@en .
 
 ckp:hasAction a owl:ObjectProperty ;
     rdfs:domain ckp:Kernel ;
@@ -364,14 +367,13 @@ ckp:hasGovernanceMode a owl:ObjectProperty , owl:FunctionalProperty ;
     rdfs:comment "The governance disposition of this kernel"@en .
 
 #################################################################
-#    Ontology (Dependent Continuant - Universal)
-#    Grounded in iao:0000310 (Document) — an ontology is a document
+#    Ontology (iao:Document — the ontology file is a document)
 #################################################################
 
 ckp:KernelOntology a owl:Class ;
-    rdfs:subClassOf bfo:0000020 ;  # bfo:SpecificallyDependentContinuant
+    rdfs:subClassOf iao:0000310 ;  # iao:Document
     rdfs:label "Kernel Ontology"@en ;
-    rdfs:comment "Ontology defines the essential nature of a Kernel (its qualities and dispositions). Stored as ontology.yaml in each kernel directory. Grounded in iao:0000310 (Document) — an ontology is a document, not a quality of the kernel."@en ;
+    rdfs:comment "Ontology defines the essential nature of a Kernel (its qualities and dispositions). Stored as ontology.yaml in each kernel directory. Formally grounded in iao:Document — an ontology is a document, not a quality of the kernel."@en ;
     dc:description "Format: YAML conforming to apiVersion: conceptkernel/v1, kind: Ontology" ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
     ckp:coverageScore "0.70"^^xsd:decimal .
@@ -390,14 +392,13 @@ ckp:hasOntology a owl:ObjectProperty , owl:FunctionalProperty ;
     owl:inverseOf ckp:definesKernel .
 
 #################################################################
-#    Alpha-6: Project (Generically Dependent Continuant)
-#    Grounded in cco:Organization — a project organizes kernels
+#    Alpha-6: Project (cco:Organization — organizes kernels)
 #################################################################
 
 ckp:Project a owl:Class ;
-    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant
+    rdfs:subClassOf cco:Organization ;  # cco:Organization
     rdfs:label "Project"@en ;
-    rdfs:comment ".ckproject declaration, organizes kernels into a coherent unit. A project is the top-level container that groups related kernels, edges, and workflows. Grounded in cco:Organization — a project organizes kernels into a coherent unit."@en ;
+    rdfs:comment ".ckproject declaration, organizes kernels into a coherent unit. A project is the top-level container that groups related kernels, edges, and workflows. Formally grounded in cco:Organization."@en ;
     dc:description "Alpha-6 addition. Declared via .ckproject file at project root." ;
     ckp:implementationStatus "PARTIAL"^^xsd:string .
 

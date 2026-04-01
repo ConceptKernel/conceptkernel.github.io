@@ -1,12 +1,12 @@
 # ConceptKernel Base Instance Shapes Ontology
-# Version: v3.5
-# Date: 2026-03-25
+# Version: v3.5-alpha6
+# Date: 2026-04-01
 # Purpose: OWL classes for base instance shapes — InstanceManifest, SealedInstance, LedgerEntry
-# Source: SPEC.CKP.v3.5.alpha-3.md Section 4.1
 
 @prefix : <https://conceptkernel.org/ontology/v3.5/> .
 @prefix ckp: <https://conceptkernel.org/ontology/v3.5/> .
 @prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix iao: <http://purl.obolibrary.org/obo/IAO_> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -19,22 +19,22 @@
     dc:title "ConceptKernel Base Instance Shapes Ontology" ;
     dc:description "OWL classes defining the base instance shapes for InstanceManifest, SealedInstance, and LedgerEntry" ;
     dcterms:created "2026-03-25"^^xsd:date ;
-    owl:versionInfo "v3.5" ;
+    dcterms:modified "2026-04-01"^^xsd:date ;
+    owl:versionInfo "v3.5-alpha6" ;
     dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
     rdfs:seeAlso <https://conceptkernel.org> ;
     rdfs:seeAlso <https://github.com/ConceptKernel> ;
-    rdfs:comment "Defines the canonical instance structures from SPEC.CKP.v3.5.alpha-3 Section 4.1" ;
-    owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ,
-                <https://conceptkernel.org/ontology/v3.5/> .
+    rdfs:comment "Defines the canonical instance structures. InstanceManifest and LedgerEntry grounded in iao:DataItem." ;
+    owl:imports <https://conceptkernel.org/ontology/v3.5/> .
 
 #################################################################
 #    InstanceManifest — base class for all instances
 #################################################################
 
 ckp:InstanceManifest a owl:Class ;
-    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant (information entity)
+    rdfs:subClassOf iao:0000027 ;  # iao:DataItem (via ckp:Instance reclassification)
     rdfs:label "Instance Manifest"@en ;
-    rdfs:comment "The base shape for all CKP instances. An immutable information entity produced by a kernel action. Every instance directory contains a manifest.json conforming to this shape."@en ;
+    rdfs:comment "The base shape for all CKP instances. An immutable data item produced by a kernel action. Every instance directory contains a manifest.json conforming to this shape."@en ;
     dc:description "Stored at storage/instances/i-{identifier}/manifest.json" .
 
 ### InstanceManifest Properties
@@ -121,7 +121,7 @@ ckp:ck_ref a owl:DatatypeProperty , owl:FunctionalProperty ;
 #################################################################
 
 ckp:LedgerEntry a owl:Class ;
-    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant (information entity)
+    rdfs:subClassOf iao:0000027 ;  # iao:DataItem
     rdfs:label "Ledger Entry"@en ;
     rdfs:comment "An append-only log entry recording a state transition or action event. Stored in storage/ledger/ as JSONL files, one entry per line."@en ;
     dc:description "Stored at storage/ledger/actions-{date}.jsonl" .

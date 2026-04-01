@@ -214,13 +214,13 @@ ckpr:type_compatible_with a owl:ObjectProperty ;
     rdfs:range ckp:Edge ;
     dc:description "Validated during edge communication setup" .
 
-ckpr:accepts_type a owl:ObjectProperty ;
+ckpr:accepts_type a owl:DatatypeProperty ;
     rdfs:label "accepts type"@en ;
     rdfs:comment "Kernel accepts instances of this type (via queue_contract)"@en ;
     rdfs:domain ckp:Kernel ;
     rdfs:range xsd:string .  # URN of accepted type
 
-ckpr:produces_type a owl:ObjectProperty ;
+ckpr:produces_type a owl:DatatypeProperty ;
     rdfs:label "produces type"@en ;
     rdfs:comment "Kernel produces instances of this type (via storage_contract)"@en ;
     rdfs:domain ckp:Kernel ;
@@ -588,7 +588,7 @@ ckpr:upstream_of a owl:TransitiveProperty .
 ### Symmetry
 
 ckpr:sibling_of a owl:SymmetricProperty .
-ckpr:connected_by a owl:SymmetricProperty .  # Connection is bidirectional
+# ckpr:connected_by — NOT symmetric (edges are directed)
 
 ### Functionality (single-valued)
 

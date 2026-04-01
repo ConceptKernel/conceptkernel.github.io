@@ -18,8 +18,8 @@
     dc:title "ConceptKernel RBAC Ontology" ;
     dc:description "Role-Based Access Control framework for ConceptKernel - agents, roles, permissions, quorum" ;
     dcterms:created "2025-12-01"^^xsd:date ;
-    dcterms:modified "2026-03-26"^^xsd:date ;
-    owl:versionInfo "v3.5.0" ;
+    dcterms:modified "2026-04-01"^^xsd:date ;
+    owl:versionInfo "v3.5-alpha6" ;
     dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
     rdfs:seeAlso <https://conceptkernel.org> ;
     rdfs:seeAlso <https://github.com/ConceptKernel> ;
@@ -196,14 +196,11 @@ ckp:grantedBy a owl:ObjectProperty ;
 #    Actions - WHAT GETS DONE (Processes/Occurrents)
 #################################################################
 
-### Action (BFO Process - Occurrent)
+### Action — defined in core.ttl as iao:PlanSpecification
+### Here we only add the RBAC-specific annotation
 
-ckp:Action a owl:Class ;
-    rdfs:subClassOf bfo:0000015 ;  # bfo:Process
-    rdfs:label "Action"@en ;
-    rdfs:comment "A temporal process performed by an agent. Actions require permissions."@en ;
-    dc:description "Examples: StartKernelAction, CreateEdgeAction, VoteAction" ;
-    ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
+ckp:Action
+    dc:description "RBAC context: Actions require permissions. Examples: StartKernelAction, CreateEdgeAction, VoteAction" .
 
 ### Action-Permission Requirement
 
@@ -260,25 +257,21 @@ ckp:QuorumLevel a owl:Class ;
     rdfs:comment "Classification of consensus required for a permission"@en ;
     dc:description "Levels: none (0 votes), low (1 vote), high (51% of role holders)" .
 
-ckp:QuorumNone a owl:Class ;
-    rdfs:subClassOf ckp:QuorumLevel ;
+ckp:QuorumNone a owl:NamedIndividual , ckp:QuorumLevel ;
     rdfs:label "Quorum None"@en ;
-    rdfs:comment "No consensus required - permission check is sufficient"@en .
+    rdfs:comment "No consensus required — permission check is sufficient"@en .
 
-ckp:QuorumLow a owl:Class ;
-    rdfs:subClassOf ckp:QuorumLevel ;
+ckp:QuorumLow a owl:NamedIndividual , ckp:QuorumLevel ;
     rdfs:label "Quorum Low"@en ;
-    rdfs:comment "Low consensus required - 1 additional approval from role holders"@en .
+    rdfs:comment "Low consensus required — 1 additional approval from role holders"@en .
 
-ckp:QuorumHigh a owl:Class ;
-    rdfs:subClassOf ckp:QuorumLevel ;
+ckp:QuorumHigh a owl:NamedIndividual , ckp:QuorumLevel ;
     rdfs:label "Quorum High"@en ;
-    rdfs:comment "High consensus required - 51% of role holders must approve"@en .
+    rdfs:comment "High consensus required — 51% of role holders must approve"@en .
 
-ckp:QuorumMajority a owl:Class ;
-    rdfs:subClassOf ckp:QuorumLevel ;
+ckp:QuorumMajority a owl:NamedIndividual , ckp:QuorumLevel ;
     rdfs:label "Quorum Majority"@en ;
-    rdfs:comment "Majority consensus required - more than 50% of eligible voters must approve"@en .
+    rdfs:comment "Majority consensus required — more than 50% of eligible voters must approve"@en .
 
 ### Quorum-Permission Relationship
 

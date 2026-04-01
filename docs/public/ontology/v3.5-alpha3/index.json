@@ -5,7 +5,7 @@
     "draft": "ALPHA",
     "date": "2026-03-25",
     "description": "Formal ontology mapping ConceptKernel architecture to Basic Formal Ontology (BFO)",
-    "baseUri": "https://conceptkernel.org/ontology/v3.5-alpha3/",
+    "baseUri": "https://conceptkernel.org/ontology/v3.5/",
     "bfoVersion": "2020",
     "bfoUri": "http://purl.obolibrary.org/obo/bfo.owl"
   },
@@ -319,7 +319,7 @@
     "v3.5": {
       "date": "2026-03-25",
       "changes": [
-        "Unified all namespaces under https://conceptkernel.org/ontology/v3.5-alpha3/ (was mixed http/https unversioned)",
+        "Unified all namespaces under https://conceptkernel.org/ontology/v3.5/ (was mixed http/https unversioned)",
         "NEW: base-instances.ttl — InstanceManifest, SealedInstance, LedgerEntry (SPEC.CKP.v3.5.alpha-3 Section 4.1)",
         "NEW: proof.ttl — ProofRecord, ProofCheck, ProofOutcome, CheckType for verifiable instance integrity",
         "Updated schema.yaml with LinkML classes for InstanceManifest, SealedInstance, LedgerEntry, ProofRecord, ProofCheck",

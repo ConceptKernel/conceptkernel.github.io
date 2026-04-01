@@ -21,15 +21,13 @@ export default withMermaid(defineConfig({
     siteTitle: 'Concept Kernel',
 
     nav: [
-      { text: 'v3.5', link: '/v3.5-alpha6/' },
-      { text: 'v3.4', link: '/v3.4/introduction' },
       {
         text: 'Ontology',
         items: [
           { text: 'Browse Ontology', link: '/browse/' },
           { text: 'v3.5-alpha6 (TTL)', link: '/ontology/v3.5-alpha6/' },
-          { text: 'v3.5 alpha-3 (TTL)', link: '/ontology/v3.5-alpha6/' },
-          { text: 'v3.4 stable (TTL)', link: '/ontology/v3.4/' },
+          { text: 'v3.5-alpha3 (TTL)', link: '/ontology/v3.5-alpha3/' },
+          { text: 'v3.4 (TTL)', link: '/ontology/v3.4/' },
         ]
       },
       {

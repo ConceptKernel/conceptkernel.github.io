@@ -11,11 +11,11 @@ CKP v3.5 introduced base instance shapes (InstanceManifest, SealedInstance, Ledg
 Every kernel defines its data structure using [LinkML](https://linkml.io/). The schema lives in `ontology.yaml` at the root of the kernel directory. Here is a real example from a kernel that spawns agents:
 
 ```yaml
-id: https://conceptkernel.org/ontology/v3.5/concepts/LOCAL.ClaudeCode
+id: https://conceptkernel.org/ontology/v3.5-alpha3/concepts/LOCAL.ClaudeCode
 name: LOCAL.ClaudeCode
 description: "Agent spawning, context building, fleet awareness"
 prefixes:
-  ckp: https://conceptkernel.org/ontology/v3.5/
+  ckp: https://conceptkernel.org/ontology/v3.5-alpha3/
   bfo: http://purl.obolibrary.org/obo/
   prov: http://www.w3.org/ns/prov#
 
@@ -52,7 +52,7 @@ Beyond schema structure, each kernel enforces SHACL shapes that validate data at
 
 ```turtle
 @prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix ckp: <https://conceptkernel.org/ontology/v3.5/> .
+@prefix ckp: <https://conceptkernel.org/ontology/v3.5-alpha3/> .
 
 ckp:KernelShape a sh:NodeShape ;
     sh:targetClass ckp:Kernel ;
@@ -135,16 +135,16 @@ This alignment ensures interoperability with biomedical ontologies, industrial s
 All CKP ontology terms live under a versioned namespace:
 
 ```
-https://conceptkernel.org/ontology/v3.5/
+https://conceptkernel.org/ontology/v3.5-alpha3/
 ```
 
 Kernel-specific terms extend this with a concept path:
 
 ```
-https://conceptkernel.org/ontology/v3.5/concepts/LOCAL.ClaudeCode/
+https://conceptkernel.org/ontology/v3.5-alpha3/concepts/LOCAL.ClaudeCode/
 ```
 
-Static ontology files are published at `/ontology/v3.4/` and `/ontology/v3.5/` on conceptkernel.org. See the [Ontology Versions](/v3.5-alpha3/ontology/versions) page for links to individual `.ttl` files.
+Static ontology files are published at `/ontology/v3.4/` and `/ontology/v3.5-alpha3/` on conceptkernel.org. See the [Ontology Versions](/v3.5-alpha3/ontology/versions) page for links to individual `.ttl` files.
 
 ---
 

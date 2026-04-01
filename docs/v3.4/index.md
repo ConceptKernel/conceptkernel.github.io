@@ -115,7 +115,7 @@ onMounted(async () => {
   <div class="link-section">
     <h3>Ontology</h3>
     <p>BFO-aligned type definitions for every kernel.</p>
-    <a href="/ontology/v3.4/">v3.4 Stable</a> · <a href="/ontology/v3.5/">v3.5 Alpha</a>
+    <a href="/ontology/v3.4/">v3.4 Stable</a> · <a href="/ontology/v3.5-alpha3/">v3.5 Alpha</a>
   </div>
   <div class="link-section">
     <h3>Specification</h3>

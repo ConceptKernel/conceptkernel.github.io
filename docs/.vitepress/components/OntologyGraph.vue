@@ -1,301 +1,148 @@
 <template>
-  <div class="onto-wrap" ref="wrap">
-    <canvas ref="canvas" :width="W * dpr" :height="H * dpr"
-      :style="`width:${W}px;height:${H}px`"
-      @mousemove="onMouse" @mouseleave="hovered = null"></canvas>
-    <div v-if="loading" class="onto-loading">
-      loading ontology... {{ loadedCount }}/7
-    </div>
+  <div class="onto-wrap">
+    <svg ref="svg" viewBox="0 0 920 480" xmlns="http://www.w3.org/2000/svg">
+      <!-- Three DL Box columns -->
+      <g v-for="(col, ci) in columns" :key="ci">
+        <!-- Column header -->
+        <rect :x="col.x - 90" y="10" width="180" height="30" rx="6"
+          :fill="col.color" fill-opacity="0.12" :stroke="col.color" stroke-width="1"/>
+        <text :x="col.x" y="30" text-anchor="middle" :fill="col.color"
+          font-size="12" font-weight="700" font-family="system-ui">{{ col.label }}</text>
+
+        <!-- Nodes -->
+        <g v-for="(node, ni) in col.nodes" :key="ni" class="node-g">
+          <a :href="`/browse/?class=${node.name}`" class="node-link">
+            <!-- Edge line from parent -->
+            <line v-if="node.parent !== undefined"
+              :x1="col.x" :y1="56 + node.parent * 52 + 14"
+              :x2="node.ox" :y2="node.oy - 14"
+              :stroke="col.color" stroke-opacity="0.18" stroke-width="1" class="edge"/>
+            <!-- Dot -->
+            <circle :cx="node.ox" :cy="node.oy" r="5"
+              :fill="col.color" fill-opacity="0.7" class="dot"/>
+            <!-- Label -->
+            <text :x="node.ox + 10" :y="node.oy + 4"
+              fill="var(--vp-c-text-1)" font-size="12" font-family="system-ui"
+              font-weight="500" class="label">{{ node.name }}</text>
+            <!-- Sublabel -->
+            <text :x="node.ox + 10" :y="node.oy + 17"
+              fill="var(--vp-c-text-3)" font-size="8.5" font-family="system-ui"
+              class="sublabel">{{ node.sub }}</text>
+          </a>
+        </g>
+      </g>
+
+      <!-- Cross-column arcs -->
+      <path d="M 310,120 Q 460,85 610,120" fill="none" stroke="var(--vp-c-text-3)" stroke-width="0.5"
+        stroke-dasharray="4,4" opacity="0.2" class="arc"/>
+      <path d="M 310,225 Q 460,190 610,225" fill="none" stroke="var(--vp-c-text-3)" stroke-width="0.5"
+        stroke-dasharray="4,4" opacity="0.2" class="arc"/>
+    </svg>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onMounted, ref } from 'vue'
 
-const W = 920
-const H = 420
-const dpr = ref(1)
-const canvas = ref(null)
-const wrap = ref(null)
-const loading = ref(true)
-const loadedCount = ref(0)
-const hovered = ref(null)
+const svg = ref(null)
 
-// Graph state
-let graphNodes = []
-let graphEdges = []
-let animFrame = null
-let frame = 0
-
-const boxes = [
-  { label: 'TBox · Identity', cx: W * 0.18, color: '#0B6E2D', colorLight: 'rgba(11,110,45,0.08)' },
-  { label: 'RBox · Capability', cx: W * 0.5, color: '#B8860B', colorLight: 'rgba(184,134,11,0.08)' },
-  { label: 'ABox · Knowledge', cx: W * 0.82, color: '#6B21A8', colorLight: 'rgba(107,33,168,0.08)' },
+const columns = [
+  {
+    label: 'TBox · Identity',
+    x: 155,
+    color: '#0B6E2D',
+    nodes: [
+      { name: 'Kernel', sub: 'BFO:0000040 · cco:Agent', ox: 90, oy: 70 },
+      { name: 'HotKernel', sub: 'always-on process', ox: 70, oy: 122, parent: 0 },
+      { name: 'ColdKernel', sub: 'on-demand', ox: 170, oy: 122, parent: 0 },
+      { name: 'InlineKernel', sub: 'browser-side · WSS', ox: 60, oy: 174, parent: 0 },
+      { name: 'StaticKernel', sub: 'gateway serves files', ox: 180, oy: 174, parent: 0 },
+      { name: 'KernelOntology', sub: 'iao:Document', ox: 120, oy: 232 },
+      { name: 'GovernanceMode', sub: 'STRICT · RELAXED · AUTONOMOUS', ox: 80, oy: 290 },
+      { name: 'KernelType', sub: 'HOT · COLD · INLINE · STATIC', ox: 160, oy: 348 },
+    ]
+  },
+  {
+    label: 'RBox · Capability',
+    x: 460,
+    color: '#B8860B',
+    nodes: [
+      { name: 'Action', sub: 'iao:PlanSpecification', ox: 400, oy: 70 },
+      { name: 'Invocation', sub: 'tool / API call', ox: 380, oy: 122, parent: 0 },
+      { name: 'Reconciliation', sub: 'operator cycle', ox: 510, oy: 122, parent: 0 },
+      { name: 'Edge', sub: 'cco:Artifact · typed relationship', ox: 430, oy: 180 },
+      { name: 'AuthorizedEdge', sub: 'target approves', ox: 450, oy: 232, parent: 3 },
+      { name: 'ServingDisposition', sub: 'API · Web · NATS · WSS', ox: 400, oy: 290 },
+      { name: 'StorageContract', sub: 'iao:Directive', ox: 490, oy: 348 },
+      { name: 'QueueContract', sub: 'input contract', ox: 380, oy: 406 },
+    ]
+  },
+  {
+    label: 'ABox · Knowledge',
+    x: 760,
+    color: '#6B21A8',
+    nodes: [
+      { name: 'Instance', sub: 'iao:DataItem · sealed', ox: 700, oy: 70 },
+      { name: 'SealedInstance', sub: 'write-once', ox: 680, oy: 122, parent: 0 },
+      { name: 'InstanceManifest', sub: 'PROV-O metadata', ox: 810, oy: 122, parent: 0 },
+      { name: 'LedgerEntry', sub: 'append-only · PROV-O', ox: 720, oy: 180 },
+      { name: 'ProofRecord', sub: 'SHA-256 · SVID', ox: 800, oy: 232 },
+      { name: 'ProofCheck', sub: 'validation', ox: 720, oy: 290, parent: 4 },
+      { name: 'Project', sub: 'cco:Organization', ox: 780, oy: 348 },
+      { name: 'StorageMedium', sub: 'FILESYSTEM · DOCUMENT_STORE', ox: 700, oy: 406 },
+    ]
+  }
 ]
 
-const boxWidth = W * 0.28
-
-function onMouse(e) {
-  if (!canvas.value) return
-  const rect = canvas.value.getBoundingClientRect()
-  const mx = (e.clientX - rect.left)
-  const my = (e.clientY - rect.top)
-  let closest = null
-  let closestDist = 20
-  for (let i = 0; i < graphNodes.length; i++) {
-    const n = graphNodes[i]
-    const d = Math.hypot(n.x - mx, n.y - my)
-    if (d < closestDist) { closest = i; closestDist = d }
-  }
-  hovered.value = closest
-}
-
 onMounted(async () => {
-  if (typeof window === 'undefined') return
-  dpr.value = window.devicePixelRatio || 1
-
-  // Load N3.js
-  let N3
+  if (typeof window === 'undefined' || !svg.value) return
   try {
-    const script = document.createElement('script')
-    script.src = 'https://cdn.jsdelivr.net/npm/n3@1.16.3/browser/n3.min.js'
-    document.head.appendChild(script)
-    await new Promise((resolve, reject) => { script.onload = resolve; script.onerror = reject })
-    N3 = window.N3
-  } catch (e) { loading.value = false; buildFallback(); startDraw(); return }
+    const anime = (await import('animejs/lib/anime.es.js')).default
 
-  const store = new N3.Store()
-  const ttlFiles = [
-    '/ontology/v3.5-alpha6/core.ttl',
-    '/ontology/v3.5-alpha6/kernel-metadata.ttl',
-    '/ontology/v3.5-alpha6/processes.ttl',
-    '/ontology/v3.5-alpha6/relations.ttl',
-    '/ontology/v3.5-alpha6/base-instances.ttl',
-    '/ontology/v3.5-alpha6/proof.ttl',
-    '/ontology/v3.5-alpha6/rbac.ttl',
-  ]
-
-  for (const url of ttlFiles) {
-    try {
-      const resp = await fetch(url)
-      if (!resp.ok) continue
-      const parser = new N3.Parser({ baseIRI: 'https://conceptkernel.org/ontology/v3.5/' })
-      store.addQuads(parser.parse(await resp.text()))
-      loadedCount.value++
-    } catch (e) {}
-  }
-  loading.value = false
-
-  // Extract classes only (not all 507 entities)
-  const classes = new Map()
-  const subOf = []
-  for (const q of store.getQuads(null, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', null)) {
-    if (q.object.value.endsWith('#Class') || q.object.value.endsWith('Class')) {
-      const uri = q.subject.value
-      const name = uri.includes('#') ? uri.split('#').pop() : uri.split('/').pop()
-      if (name && name.length > 1 && !name.startsWith('_'))
-        classes.set(uri, { uri, label: name })
-    }
-  }
-  for (const q of store.getQuads(null, 'http://www.w3.org/2000/01/rdf-schema#subClassOf', null)) {
-    if (classes.has(q.subject.value) && classes.has(q.object.value))
-      subOf.push({ child: q.subject.value, parent: q.object.value })
-  }
-
-  // Assign to DL boxes based on known patterns
-  const assignBox = (label) => {
-    if (/Instance|Proof|Ledger|Project|Sealed|Manifest/.test(label)) return 2
-    if (/Contract|Serving|Edge|Action|Process|Invoc|Broad|Consen|Commun|Reconc|Workflow/.test(label)) return 1
-    return 0
-  }
-
-  // Build graph nodes with force layout positions
-  const nodeArr = []
-  classes.forEach((info) => {
-    const box = assignBox(info.label)
-    nodeArr.push({
-      ...info, box,
-      x: boxes[box].cx + (Math.random() - 0.5) * boxWidth * 0.6,
-      y: 60 + Math.random() * (H - 100),
-      vx: 0, vy: 0,
-      color: boxes[box].color,
+    anime({
+      targets: svg.value.querySelectorAll('.dot'),
+      opacity: [0, 0.7],
+      r: [0, 5],
+      delay: anime.stagger(50, { start: 300 }),
+      duration: 600,
+      easing: 'easeOutElastic(1, .6)'
     })
-  })
 
-  // Build edge list
-  const edgeArr = []
-  const uriToIdx = {}
-  nodeArr.forEach((n, i) => { uriToIdx[n.uri] = i })
-  subOf.forEach(({ child, parent }) => {
-    if (uriToIdx[child] !== undefined && uriToIdx[parent] !== undefined)
-      edgeArr.push({ from: uriToIdx[child], to: uriToIdx[parent] })
-  })
-
-  graphNodes = nodeArr
-  graphEdges = edgeArr
-
-  // Run force simulation for 200 iterations
-  for (let iter = 0; iter < 200; iter++) {
-    forceStep(0.3)
-  }
-
-  startDraw()
-})
-
-function forceStep(dt) {
-  const N = graphNodes.length
-  // Repulsion between nodes in same box
-  for (let i = 0; i < N; i++) {
-    for (let j = i + 1; j < N; j++) {
-      if (graphNodes[i].box !== graphNodes[j].box) continue
-      let dx = graphNodes[j].x - graphNodes[i].x
-      let dy = graphNodes[j].y - graphNodes[i].y
-      let d = Math.hypot(dx, dy) || 1
-      let force = 800 / (d * d)
-      graphNodes[i].vx -= (dx / d) * force * dt
-      graphNodes[i].vy -= (dy / d) * force * dt
-      graphNodes[j].vx += (dx / d) * force * dt
-      graphNodes[j].vy += (dy / d) * force * dt
-    }
-  }
-  // Attraction along edges
-  for (const e of graphEdges) {
-    const a = graphNodes[e.from], b = graphNodes[e.to]
-    let dx = b.x - a.x, dy = b.y - a.y
-    let d = Math.hypot(dx, dy) || 1
-    let force = (d - 50) * 0.02
-    a.vx += (dx / d) * force * dt
-    a.vy += (dy / d) * force * dt
-    b.vx -= (dx / d) * force * dt
-    b.vy -= (dy / d) * force * dt
-  }
-  // Gravity toward box center + boundary constraints
-  for (const n of graphNodes) {
-    const box = boxes[n.box]
-    n.vx += (box.cx - n.x) * 0.005 * dt
-    n.vy += ((H / 2) - n.y) * 0.002 * dt
-    n.vx *= 0.85
-    n.vy *= 0.85
-    n.x += n.vx
-    n.y += n.vy
-    // Keep in bounds
-    const left = box.cx - boxWidth / 2 + 10
-    const right = box.cx + boxWidth / 2 - 10
-    n.x = Math.max(left, Math.min(right, n.x))
-    n.y = Math.max(45, Math.min(H - 15, n.y))
-  }
-}
-
-function buildFallback() {
-  const fallback = [
-    { label: 'Kernel', box: 0 }, { label: 'HotKernel', box: 0 }, { label: 'ColdKernel', box: 0 },
-    { label: 'KernelOntology', box: 0 }, { label: 'GovernanceMode', box: 0 },
-    { label: 'Action', box: 1 }, { label: 'Edge', box: 1 }, { label: 'ServingDisposition', box: 1 },
-    { label: 'Instance', box: 2 }, { label: 'ProofRecord', box: 2 }, { label: 'LedgerEntry', box: 2 },
-  ]
-  fallback.forEach((item, i) => {
-    graphNodes.push({
-      ...item, uri: '', color: boxes[item.box].color,
-      x: boxes[item.box].cx + (Math.random() - 0.5) * 80,
-      y: 60 + (i % 4) * 80 + Math.random() * 20,
-      vx: 0, vy: 0,
+    anime({
+      targets: svg.value.querySelectorAll('.label, .sublabel'),
+      opacity: [0, 1],
+      translateX: [-6, 0],
+      delay: anime.stagger(50, { start: 500 }),
+      duration: 400,
+      easing: 'easeOutQuad'
     })
-  })
-  graphEdges = [{ from: 1, to: 0 }, { from: 2, to: 0 }, { from: 3, to: 0 }]
-  for (let i = 0; i < 100; i++) forceStep(0.3)
-}
 
-function startDraw() {
-  if (!canvas.value) return
-  const ctx = canvas.value.getContext('2d')
-  const d = dpr.value
+    anime({
+      targets: svg.value.querySelectorAll('.edge'),
+      strokeDashoffset: [anime.setDashoffset, 0],
+      delay: anime.stagger(40, { start: 200 }),
+      duration: 800,
+      easing: 'easeInOutQuad'
+    })
 
-  function draw() {
-    frame++
-    ctx.clearRect(0, 0, W * d, H * d)
-    ctx.save()
-    ctx.scale(d, d)
+    anime({
+      targets: svg.value.querySelectorAll('.dot'),
+      r: [5, 6.5, 5],
+      fillOpacity: [0.7, 0.9, 0.7],
+      duration: 4000,
+      loop: true,
+      easing: 'easeInOutSine',
+      delay: anime.stagger(150)
+    })
 
-    // Subtle drift
-    if (frame % 3 === 0) forceStep(0.05)
-
-    // Box backgrounds
-    for (const box of boxes) {
-      ctx.fillStyle = box.colorLight
-      ctx.beginPath()
-      ctx.roundRect(box.cx - boxWidth / 2, 5, boxWidth, H - 10, 8)
-      ctx.fill()
-      // Header
-      ctx.fillStyle = box.color
-      ctx.globalAlpha = 0.9
-      ctx.font = '600 11px system-ui'
-      ctx.textAlign = 'center'
-      ctx.fillText(box.label, box.cx, 25)
-      ctx.globalAlpha = 1
-    }
-
-    // Edges
-    for (const e of graphEdges) {
-      const a = graphNodes[e.from], b = graphNodes[e.to]
-      const pulse = 0.08 + Math.sin(frame * 0.02 + e.from) * 0.04
-      ctx.beginPath()
-      ctx.moveTo(a.x, a.y)
-      ctx.lineTo(b.x, b.y)
-      ctx.strokeStyle = a.color
-      ctx.globalAlpha = pulse
-      ctx.lineWidth = 1
-      ctx.stroke()
-      ctx.globalAlpha = 1
-    }
-
-    // Nodes
-    for (let i = 0; i < graphNodes.length; i++) {
-      const n = graphNodes[i]
-      const isHov = hovered.value === i
-      const breathe = Math.sin(frame * 0.015 + i * 0.5) * 0.3 + 0.7
-      const r = isHov ? 6 : 3.5 * (0.85 + breathe * 0.15)
-
-      // Glow
-      if (isHov) {
-        ctx.beginPath()
-        ctx.arc(n.x, n.y, 14, 0, Math.PI * 2)
-        ctx.fillStyle = n.color
-        ctx.globalAlpha = 0.1
-        ctx.fill()
-        ctx.globalAlpha = 1
-      }
-
-      // Dot
-      ctx.beginPath()
-      ctx.arc(n.x, n.y, r, 0, Math.PI * 2)
-      ctx.fillStyle = n.color
-      ctx.globalAlpha = isHov ? 1 : 0.5 + breathe * 0.3
-      ctx.fill()
-      ctx.globalAlpha = 1
-
-      // Label
-      ctx.font = isHov ? '600 12px system-ui' : '400 9px system-ui'
-      ctx.fillStyle = isHov ? n.color : 'rgba(180,180,200,0.6)'
-      ctx.textAlign = 'left'
-      ctx.fillText(n.label, n.x + r + 4, n.y + (isHov ? -1 : 3))
-
-      // Sub-label on hover
-      if (isHov) {
-        ctx.font = '400 8px system-ui'
-        ctx.fillStyle = 'rgba(150,150,170,0.7)'
-        ctx.fillText(n.box === 0 ? 'TBox' : n.box === 1 ? 'RBox' : 'ABox', n.x + r + 4, n.y + 12)
-      }
-    }
-
-    ctx.restore()
-    animFrame = requestAnimationFrame(draw)
-  }
-
-  draw()
-}
-
-onUnmounted(() => {
-  if (animFrame) cancelAnimationFrame(animFrame)
+    anime({
+      targets: svg.value.querySelectorAll('.arc'),
+      opacity: [0.1, 0.3, 0.1],
+      duration: 5000,
+      loop: true,
+      easing: 'easeInOutSine'
+    })
+  } catch (e) {}
 })
 </script>
 
@@ -303,24 +150,21 @@ onUnmounted(() => {
 .onto-wrap {
   max-width: 920px;
   margin: 0 auto 0.5rem;
-  position: relative;
+  padding: 0 0.5rem;
 }
-.onto-wrap canvas {
+.onto-wrap svg {
   width: 100%;
   height: auto;
-  display: block;
 }
-.onto-loading {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 10px;
-  color: var(--vp-c-text-3);
-  font-family: system-ui;
-}
+.node-link { text-decoration: none; }
+.node-g { cursor: pointer; }
+.node-g:hover .dot { r: 8; fill-opacity: 1; }
+.node-g:hover .label { font-weight: 700; fill: var(--vp-c-brand-1); }
+.node-g:hover .sublabel { fill: var(--vp-c-text-2); }
 
 @media (max-width: 640px) {
-  .onto-wrap canvas { height: 250px; }
+  .onto-wrap svg { height: 300px; }
+  .label { font-size: 9px !important; }
+  .sublabel { font-size: 7px !important; }
 }
 </style>

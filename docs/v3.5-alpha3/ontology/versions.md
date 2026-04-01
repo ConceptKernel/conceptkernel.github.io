@@ -16,25 +16,25 @@ v3.5 extends v3.4 with base instance shapes, the proof model, and action composi
 
 **Action composition** formalises the EXTENDS and COMPOSES edge predicates from the edge graph. EXTENDS maps to BFO's `is_a` relation (action inheritance). COMPOSES maps to BFO's `has_continuant_part` (action delegation).
 
-Namespace: `https://conceptkernel.org/ontology/v3.5/`
+Namespace: `https://conceptkernel.org/ontology/v3.5-alpha3/`
 
 ### Files
 
 | File | Description |
 |------|-------------|
-| [core.ttl](https://conceptkernel.org/ontology/v3.5/core.ttl) | BFO mappings for Kernel, Edge, Instance, Ontology |
-| [base-instances.ttl](https://conceptkernel.org/ontology/v3.5/base-instances.ttl) | InstanceManifest, SealedInstance, LedgerEntry |
-| [proof.ttl](https://conceptkernel.org/ontology/v3.5/proof.ttl) | ProofRecord, ProofCheck, ProofOutcome, CheckType |
-| [shapes.ttl](https://conceptkernel.org/ontology/v3.5/shapes.ttl) | SHACL validation shapes for kernels, edges, instances |
-| [relations.ttl](https://conceptkernel.org/ontology/v3.5/relations.ttl) | Edge predicates and inter-kernel relations |
-| [processes.ttl](https://conceptkernel.org/ontology/v3.5/processes.ttl) | Action execution processes (BFO Occurrents) |
-| [rbac.ttl](https://conceptkernel.org/ontology/v3.5/rbac.ttl) | Role-based access control classes |
-| [workflow.ttl](https://conceptkernel.org/ontology/v3.5/workflow.ttl) | Goal, Task, and governance workflow classes |
-| [kernel-metadata.ttl](https://conceptkernel.org/ontology/v3.5/kernel-metadata.ttl) | Kernel metadata properties |
-| [kernel-entity-template.ttl](https://conceptkernel.org/ontology/v3.5/kernel-entity-template.ttl) | Template for new kernel entity declarations |
-| [self-improvement.ttl](https://conceptkernel.org/ontology/v3.5/self-improvement.ttl) | Self-improvement and evolution classes |
-| [schema.yaml](https://conceptkernel.org/ontology/v3.5/schema.yaml) | LinkML schema for the core ontology |
-| [index.json](https://conceptkernel.org/ontology/v3.5/index.json) | Machine-readable index of all files in this version |
+| [core.ttl](https://conceptkernel.org/ontology/v3.5-alpha3/core.ttl) | BFO mappings for Kernel, Edge, Instance, Ontology |
+| [base-instances.ttl](https://conceptkernel.org/ontology/v3.5-alpha3/base-instances.ttl) | InstanceManifest, SealedInstance, LedgerEntry |
+| [proof.ttl](https://conceptkernel.org/ontology/v3.5-alpha3/proof.ttl) | ProofRecord, ProofCheck, ProofOutcome, CheckType |
+| [shapes.ttl](https://conceptkernel.org/ontology/v3.5-alpha3/shapes.ttl) | SHACL validation shapes for kernels, edges, instances |
+| [relations.ttl](https://conceptkernel.org/ontology/v3.5-alpha3/relations.ttl) | Edge predicates and inter-kernel relations |
+| [processes.ttl](https://conceptkernel.org/ontology/v3.5-alpha3/processes.ttl) | Action execution processes (BFO Occurrents) |
+| [rbac.ttl](https://conceptkernel.org/ontology/v3.5-alpha3/rbac.ttl) | Role-based access control classes |
+| [workflow.ttl](https://conceptkernel.org/ontology/v3.5-alpha3/workflow.ttl) | Goal, Task, and governance workflow classes |
+| [kernel-metadata.ttl](https://conceptkernel.org/ontology/v3.5-alpha3/kernel-metadata.ttl) | Kernel metadata properties |
+| [kernel-entity-template.ttl](https://conceptkernel.org/ontology/v3.5-alpha3/kernel-entity-template.ttl) | Template for new kernel entity declarations |
+| [self-improvement.ttl](https://conceptkernel.org/ontology/v3.5-alpha3/self-improvement.ttl) | Self-improvement and evolution classes |
+| [schema.yaml](https://conceptkernel.org/ontology/v3.5-alpha3/schema.yaml) | LinkML schema for the core ontology |
+| [index.json](https://conceptkernel.org/ontology/v3.5-alpha3/index.json) | Machine-readable index of all files in this version |
 
 ## v3.4 (current stable)
 

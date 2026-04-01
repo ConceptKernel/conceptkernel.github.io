@@ -36,7 +36,7 @@
 <body>
 <div class="header">
   <span class="title"><a href="https://conceptkernel.org">Concept Kernel Protocol</a></span>
-  <span><a href="https://conceptkernel.org/ontology/v3.5/">v3.5 (alpha-4)</a></span>
+  <span><a href="https://conceptkernel.org/ontology/v3.5-alpha3/">v3.5 (alpha-4)</a></span>
 </div>
 <div class="container">
 
@@ -46,9 +46,9 @@
   <dt>This version</dt>
   <dd><a href="https://conceptkernel.org/ontology/v3.5-alpha6/">https://conceptkernel.org/ontology/v3.5-alpha6/</a></dd>
   <dt>Previous version</dt>
-  <dd><a href="https://conceptkernel.org/ontology/v3.5/">https://conceptkernel.org/ontology/v3.5/</a> (alpha-4)</dd>
+  <dd><a href="https://conceptkernel.org/ontology/v3.5-alpha3/">https://conceptkernel.org/ontology/v3.5-alpha3/</a> (alpha-4)</dd>
   <dt>Namespace URI</dt>
-  <dd><code>https://conceptkernel.org/ontology/v3.5/</code></dd>
+  <dd><code>https://conceptkernel.org/ontology/v3.5-alpha3/</code></dd>
   <dt>Status</dt>
   <dd>Alpha-6 — extends v3.5 with InlineKernel, StaticKernel, Project, Reconciliation, StorageMedium, DeploymentMethod, ServingDisposition. IAO/CCO grounding annotations.</dd>
   <dt>Editors</dt>
@@ -57,7 +57,7 @@
   <dd><a href="https://github.com/ConceptKernel/conceptkernel.github.io">GitHub</a></dd>
 </dl>
 
-<div class="prefix-box">@prefix ckp: &lt;https://conceptkernel.org/ontology/v3.5/&gt; .</div>
+<div class="prefix-box">@prefix ckp: &lt;https://conceptkernel.org/ontology/v3.5-alpha3/&gt; .</div>
 
 <h2>Abstract</h2>
 <p class="abstract">v3.5-alpha6 extends the CKP ontology with four-layer import chain grounding (BFO 2020 + IAO + CCO + PROV-O + ValueFlows), new kernel types for podless and static deployments, project-level organization, operator reconciliation, and a complete serving/storage/deployment model. Every class is annotated with its IAO/CCO grounding where applicable.</p>
@@ -159,7 +159,7 @@
   <tr><td>Action Class</td><td>core.ttl</td><td><code>ckp:Action</code> (BFO Process) — every kernel exposes typed actions with access levels.</td></tr>
   <tr><td>Edge Predicates</td><td>core.ttl</td><td>EXTENDS, COMPOSES, TRIGGERS — governance-loop relationship types for edges.</td></tr>
   <tr><td>PROV-O Integration</td><td>base-instances.ttl</td><td>PROV-O aligned provenance: <code>wasGeneratedBy</code>, <code>wasAttributedTo</code>, <code>generatedAtTime</code>.</td></tr>
-  <tr><td>Namespace Convergence</td><td>all</td><td>Three legacy namespaces unified to <code>https://conceptkernel.org/ontology/v3.5/</code></td></tr>
+  <tr><td>Namespace Convergence</td><td>all</td><td>Three legacy namespaces unified to <code>https://conceptkernel.org/ontology/v3.5-alpha3/</code></td></tr>
 </table>
 
 <h2>Ontology Layering Strategy (Alpha-6)</h2>
@@ -182,11 +182,11 @@
 <h2>Namespaces</h2>
 <table>
   <tr><th>Prefix</th><th>URI</th></tr>
-  <tr><td><code>ckp:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/</code></td></tr>
-  <tr><td><code>ckpp:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/process/</code></td></tr>
-  <tr><td><code>ckpr:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/relation/</code></td></tr>
-  <tr><td><code>ckpw:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/workflow/</code></td></tr>
-  <tr><td><code>ckpi:</code></td><td><code>https://conceptkernel.org/ontology/v3.5/improvement/</code></td></tr>
+  <tr><td><code>ckp:</code></td><td><code>https://conceptkernel.org/ontology/v3.5-alpha3/</code></td></tr>
+  <tr><td><code>ckpp:</code></td><td><code>https://conceptkernel.org/ontology/v3.5-alpha3/process/</code></td></tr>
+  <tr><td><code>ckpr:</code></td><td><code>https://conceptkernel.org/ontology/v3.5-alpha3/relation/</code></td></tr>
+  <tr><td><code>ckpw:</code></td><td><code>https://conceptkernel.org/ontology/v3.5-alpha3/workflow/</code></td></tr>
+  <tr><td><code>ckpi:</code></td><td><code>https://conceptkernel.org/ontology/v3.5-alpha3/improvement/</code></td></tr>
 </table>
 
 <h2>PROV-O Integration</h2>

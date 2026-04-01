@@ -14,7 +14,7 @@ The Concept Kernel Protocol is an open project and we welcome contributions of a
 
 1. Join our [Discord](https://discord.gg/sTbfxV9xyU) and introduce yourself
 2. Browse the [GitHub org](https://github.com/ConceptKernel) for repositories
-3. Read the [ontology files](/ontology/v3.5/) to understand the type system
+3. Read the [ontology files](/ontology/v3.5-alpha3/) to understand the type system
 
 ::: warning Python SDK Coming Soon
 The CK.Lib Python package is under active development and not yet published to PyPI. Join Discord for early access.

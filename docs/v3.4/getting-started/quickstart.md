@@ -18,7 +18,7 @@ Explore the [Architecture](/v3.4/architecture) to understand the Three Loops mod
 
 The ontology files are already published and browsable:
 - [Ontology v3.4](/ontology/v3.4/) -- BFO-aligned Turtle files
-- [Ontology v3.5](/ontology/v3.5/) -- Alpha additions (base shapes, proof model)
+- [Ontology v3.5](/ontology/v3.5-alpha3/) -- Alpha additions (base shapes, proof model)
 
 ---
 

@@ -21,7 +21,10 @@
     dcterms:created "2025-11-23"^^xsd:date ;
     dcterms:modified "2026-03-31"^^xsd:date ;
     owl:versionInfo "v3.5-alpha6" ;
-    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;    rdfs:comment "Core continuants and occurrents: Kernel, Edge, Instance, Ontology, Action, GovernanceMode. Alpha-6 adds InlineKernel, StaticKernel, Project, Reconciliation."@en ;
+    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
+    rdfs:seeAlso <https://conceptkernel.org> ;
+    rdfs:seeAlso <https://github.com/ConceptKernel> ;
+    rdfs:comment "Core continuants and occurrents: Kernel, Edge, Instance, Ontology, Action, GovernanceMode. Alpha-6 adds InlineKernel, StaticKernel, Project, Reconciliation."@en ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ,
                 <https://conceptkernel.org/ontology/v3.5/base-instances> ,
                 <https://conceptkernel.org/ontology/v3.5/proof> .

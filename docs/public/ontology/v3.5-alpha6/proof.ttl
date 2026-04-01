@@ -19,7 +19,10 @@
     dc:description "OWL classes defining proof records, proof checks, outcomes, and check types for verifiable instance integrity" ;
     dcterms:created "2026-03-25"^^xsd:date ;
     owl:versionInfo "v3.5" ;
-    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;    rdfs:comment "Defines the proof verification structures: ProofRecord, ProofCheck, ProofOutcome, CheckType" ;
+    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
+    rdfs:seeAlso <https://conceptkernel.org> ;
+    rdfs:seeAlso <https://github.com/ConceptKernel> ;
+    rdfs:comment "Defines the proof verification structures: ProofRecord, ProofCheck, ProofOutcome, CheckType" ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ,
                 <https://conceptkernel.org/ontology/v3.5/> ,
                 <https://conceptkernel.org/ontology/v3.5/base-instances> .

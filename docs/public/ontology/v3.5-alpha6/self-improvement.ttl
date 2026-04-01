@@ -21,6 +21,8 @@
   rdfs:comment "Ontology for autonomous validation, improvement recommendations, and consensus-driven evolution" ;
   owl:versionInfo "v3.5.0" .
     dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
+    rdfs:seeAlso <https://conceptkernel.org> ;
+    rdfs:seeAlso <https://github.com/ConceptKernel> ;
 # ============================================================================
 # ROLES (BFO:Role) - Capabilities borne by kernels
 # ============================================================================

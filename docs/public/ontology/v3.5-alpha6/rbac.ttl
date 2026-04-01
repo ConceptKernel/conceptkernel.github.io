@@ -20,7 +20,10 @@
     dcterms:created "2025-12-01"^^xsd:date ;
     dcterms:modified "2026-03-26"^^xsd:date ;
     owl:versionInfo "v3.5.0" ;
-    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;    rdfs:comment "Defines WHO (agents), CAN DO WHAT (permissions), WHEN (quorum), and WHY (roles)" ;
+    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
+    rdfs:seeAlso <https://conceptkernel.org> ;
+    rdfs:seeAlso <https://github.com/ConceptKernel> ;
+    rdfs:comment "Defines WHO (agents), CAN DO WHAT (permissions), WHEN (quorum), and WHY (roles)" ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
     owl:imports <https://conceptkernel.org/ontology/v3.5/> .
 

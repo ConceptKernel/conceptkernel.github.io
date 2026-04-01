@@ -23,6 +23,8 @@
     rdfs:comment "BFO-aligned ontology for declarative workflow orchestration in ConceptKernel" ;
     owl:versionInfo "v3.5.0" .
     dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
+    rdfs:seeAlso <https://conceptkernel.org> ;
+    rdfs:seeAlso <https://github.com/ConceptKernel> ;
 # ==============================================================================
 # WORKFLOW PROCESSES (BFO Occurrents)
 # ==============================================================================

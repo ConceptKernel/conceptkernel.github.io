@@ -25,7 +25,10 @@
     dcterms:created "2025-11-23"^^xsd:date ;
     dcterms:modified "2026-03-31"^^xsd:date ;
     owl:versionInfo "v3.5-alpha6" ;
-    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;    rdfs:comment "Defines properties, property chains, and SWRL rules for inference. Alpha-6 adds project, storage, serving, and reconciliation relations." ;
+    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
+    rdfs:seeAlso <https://conceptkernel.org> ;
+    rdfs:seeAlso <https://github.com/ConceptKernel> ;
+    rdfs:comment "Defines properties, property chains, and SWRL rules for inference. Alpha-6 adds project, storage, serving, and reconciliation relations." ;
     owl:imports <https://conceptkernel.org/ontology/v3.5/> ,
                 <https://conceptkernel.org/ontology/v3.5/process> ,
                 <http://purl.obolibrary.org/obo/bfo.owl> .

@@ -20,7 +20,10 @@
     dcterms:created "2025-11-23"^^xsd:date ;
     dcterms:modified "2026-03-26"^^xsd:date ;
     owl:versionInfo "v3.5.0" ;
-    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;    rdfs:comment "Defines processes: Invocation, EdgeCommunication, Consensus, Broadcast, StatusChange" ;
+    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
+    rdfs:seeAlso <https://conceptkernel.org> ;
+    rdfs:seeAlso <https://github.com/ConceptKernel> ;
+    rdfs:comment "Defines processes: Invocation, EdgeCommunication, Consensus, Broadcast, StatusChange" ;
     owl:imports <https://conceptkernel.org/ontology/v3.5/> ,
                 <http://purl.obolibrary.org/obo/bfo.owl> .
 

@@ -20,7 +20,10 @@
     dc:description "OWL classes defining the base instance shapes for InstanceManifest, SealedInstance, and LedgerEntry" ;
     dcterms:created "2026-03-25"^^xsd:date ;
     owl:versionInfo "v3.5" ;
-    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;    rdfs:comment "Defines the canonical instance structures from SPEC.CKP.v3.5.alpha-3 Section 4.1" ;
+    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
+    rdfs:seeAlso <https://conceptkernel.org> ;
+    rdfs:seeAlso <https://github.com/ConceptKernel> ;
+    rdfs:comment "Defines the canonical instance structures from SPEC.CKP.v3.5.alpha-3 Section 4.1" ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ,
                 <https://conceptkernel.org/ontology/v3.5/> .
 

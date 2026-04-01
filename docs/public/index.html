@@ -25,21 +25,88 @@
 <meta name="twitter:description" content="Three loops. Three Description Logic boxes. One Material Entity. An open protocol for autonomous concept governance.">
 <meta name="twitter:image" content="https://conceptkernel.org/logo.svg">
 
-<!-- JSON-LD Structured Data -->
+<!-- JSON-LD: WebSite + SiteNavigationElement for Google sitelinks -->
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "Concept Kernel Protocol",
-  "url": "https://conceptkernel.org",
-  "description": "An open protocol for autonomous concept governance through boundary isolation and ontological enforcement.",
-  "publisher": {
-    "@type": "Organization",
-    "name": "ConceptKernel",
-    "url": "https://github.com/ConceptKernel"
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Concept Kernel Protocol",
+    "alternateName": "CKP",
+    "url": "https://conceptkernel.org",
+    "description": "An open protocol for autonomous concept governance through boundary isolation and ontological enforcement. Three loops as Description Logic boxes. Every entity typed against BFO 2020.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ConceptKernel",
+      "url": "https://github.com/ConceptKernel",
+      "logo": "https://conceptkernel.org/logo.svg"
+    },
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://conceptkernel.org/browse/?class={search_term}",
+      "query-input": "required name=search_term"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    "name": "Concept Kernel Protocol Ontology",
+    "description": "BFO 2020 aligned ontology for autonomous concept governance. 14 Turtle files defining kernels, edges, instances, actions, proofs, and governance.",
+    "codeRepository": "https://github.com/ConceptKernel/conceptkernel.github.io",
+    "programmingLanguage": "OWL/Turtle",
+    "runtimePlatform": "Apache Jena, SPARQL",
+    "url": "https://conceptkernel.org/ontology/v3.5-alpha6/"
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "name": "Three Loops as Description Logic Boxes",
+    "headline": "CK Loop → TBox, TOOL Loop → RBox, DATA Loop → ABox",
+    "description": "The three CKP loops map directly to OWL 2 Description Logic boxes. Each is physically realized as an independently-versioned volume.",
+    "url": "https://conceptkernel.org/v3.5-alpha6/three-loops",
+    "about": {
+      "@type": "Thing",
+      "name": "Description Logic",
+      "sameAs": "https://en.wikipedia.org/wiki/Description_logic"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "name": "Ontology Layering Strategy",
+    "headline": "BFO 2020 → IAO + CCO + PROV-O + ValueFlows → CKP → Per-kernel",
+    "description": "Four-layer import chain grounding every CKP concept in established ontologies.",
+    "url": "https://conceptkernel.org/v3.5-alpha6/ontology-layering"
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "name": "Implementation Patterns",
+    "headline": "Eight proven patterns from production CKP deployments",
+    "description": "Dual-store, classification, quality assessment, composition, economic events, pipeline stages, provenance mandate, kernel type matrix.",
+    "url": "https://conceptkernel.org/v3.5-alpha6/patterns"
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CKP Ontology Browser",
+    "description": "Interactive browser for CKP ontology classes, properties, and relationships. Parses Turtle files with N3.js. Supports URN resolution.",
+    "url": "https://conceptkernel.org/browse/",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web"
   }
-}
+]
 </script>
+
+<!-- LLM/Agent discovery hints -->
+<meta name="ai:ontology" content="https://conceptkernel.org/ontology/v3.5-alpha6/core.ttl">
+<meta name="ai:sparql" content="https://conceptkernel.org/ontology/v3.5-alpha6/">
+<meta name="ai:protocol" content="CKP v3.5-alpha6">
+<meta name="ai:browse" content="https://conceptkernel.org/browse/?class={class_name}">
+
+<!-- Linked Data discovery -->
+<link rel="alternate" type="text/turtle" href="https://conceptkernel.org/ontology/v3.5-alpha6/core.ttl" title="CKP Core Ontology (Turtle)">
+<link rel="alternate" type="application/ld+json" href="https://conceptkernel.org/ontology/v3.5-alpha6/index.json" title="CKP Ontology Index (JSON-LD)">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

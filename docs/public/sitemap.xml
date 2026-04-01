@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Root -->
+  <url><loc>https://conceptkernel.org/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
+
+  <!-- Spec: v3.5-alpha6 (latest) -->
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/introduction</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/three-loops</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/ontology-layering</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/ck-loop</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/tool-loop</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/data-loop</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/system</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/topology</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/spiffe</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/lifecycle</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/nats</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/urn</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/operator</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/bfo-mapping</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/ontology-browser</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/compliance</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/taxonomy</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/autonomous-ops</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/patterns</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/whats-new</loc><priority>0.7</priority></url>
+
+  <!-- Ontology Browser -->
+  <url><loc>https://conceptkernel.org/browse/</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://conceptkernel.org/browse/welcome.html</loc><priority>0.9</priority></url>
+
+  <!-- Ontology TTL Files -->
+  <url><loc>https://conceptkernel.org/ontology/v3.5-alpha6/</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.5-alpha3/</loc><priority>0.5</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.4/</loc><priority>0.5</priority></url>
+
+  <!-- Stable docs -->
+  <url><loc>https://conceptkernel.org/v3.4/introduction</loc><priority>0.5</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha3/</loc><priority>0.4</priority></url>
+
+</urlset>

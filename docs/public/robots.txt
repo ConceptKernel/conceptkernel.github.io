@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://conceptkernel.org/sitemap.xml
+
+# Ontology files — welcome crawlers
+Allow: /ontology/
+Allow: /browse/
+Allow: /v3.5-alpha6/
+Allow: /v3.5-alpha3/
+Allow: /v3.4/

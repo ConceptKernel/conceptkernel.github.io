@@ -174,7 +174,7 @@
       "path": "ontology/v3.5-alpha6/base-instances.ttl",
       "format": "text/turtle",
       "description": "Base instance shapes: InstanceManifest, SealedInstance, LedgerEntry (from SPEC.CKP.v3.5.alpha-3 Section 4.1)",
-      "new_in": "v3.5",
+      "new_in": "v3.5-alpha3",
       "coverage": {
         "entities": [
           "ckp:InstanceManifest",
@@ -196,7 +196,7 @@
       "path": "ontology/v3.5-alpha6/proof.ttl",
       "format": "text/turtle",
       "description": "Proof verification: ProofRecord, ProofCheck, ProofOutcome, CheckType",
-      "new_in": "v3.5",
+      "new_in": "v3.5-alpha3",
       "coverage": {
         "entities": [
           "ckp:ProofRecord",

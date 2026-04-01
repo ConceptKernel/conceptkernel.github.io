@@ -1,7 +1,7 @@
 {
   "ontology": {
     "name": "ConceptKernel BFO Ontology",
-    "version": "v3.5",
+    "version": "v3.5-alpha3",
     "draft": "ALPHA",
     "date": "2026-03-25",
     "description": "Formal ontology mapping ConceptKernel architecture to Basic Formal Ontology (BFO)",
@@ -136,7 +136,7 @@
       "path": "ontology/v3.5/base-instances.ttl",
       "format": "text/turtle",
       "description": "Base instance shapes: InstanceManifest, SealedInstance, LedgerEntry (from SPEC.CKP.v3.5.alpha-3 Section 4.1)",
-      "new_in": "v3.5",
+      "new_in": "v3.5-alpha3",
       "coverage": {
         "entities": [
           "ckp:InstanceManifest",
@@ -158,7 +158,7 @@
       "path": "ontology/v3.5/proof.ttl",
       "format": "text/turtle",
       "description": "Proof verification: ProofRecord, ProofCheck, ProofOutcome, CheckType",
-      "new_in": "v3.5",
+      "new_in": "v3.5-alpha3",
       "coverage": {
         "entities": [
           "ckp:ProofRecord",

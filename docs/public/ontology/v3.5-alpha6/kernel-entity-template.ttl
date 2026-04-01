@@ -24,7 +24,7 @@
   ckp:kernelType "{KERNEL_TYPE}" ;  # e.g., "rust:hot", "node:cold"
   ckp:version "{VERSION}" ;
   owl:versionInfo "{VERSION}" ;
-{PROVENANCE}
+    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;{PROVENANCE}
 
 # ============================================================================
 # ROLES - BFO Realizable Entities

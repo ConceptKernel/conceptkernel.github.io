@@ -302,3 +302,4 @@ ckp:KernelReferenceIntegrityShape
     ] .
 
 # EOF - ConceptKernel SHACL Shapes v1.3.20
+# Creator: Peter Styk <peter@conceptkernel.org>

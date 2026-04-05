@@ -766,7 +766,11 @@ class OntologyManager {
                 const type = entityItem.querySelector('.entity-type').textContent;
 
                 const matchesSearch = !query || label.includes(query) || uri.includes(query);
-                const matchesFilter = this.currentFilter === 'all' || type.toLowerCase() === this.currentFilter;
+                const typeLower = type.toLowerCase();
+                const matchesFilter = this.currentFilter === 'all' ||
+                    typeLower === this.currentFilter ||
+                    typeLower + 's' === this.currentFilter ||
+                    typeLower + 'es' === this.currentFilter;
 
                 const isVisible = matchesSearch && matchesFilter;
                 entityItem.style.display = isVisible ? 'flex' : 'none';

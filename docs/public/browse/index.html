@@ -87,18 +87,156 @@
 
             <!-- Main Content -->
             <div class="main-content">
-                <!-- Placeholder -->
-                <div id="infoPlaceholder" style="display: flex;">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18V7.875c0-.621.504-1.125 1.125-1.125H6.75" />
-                    </svg>
-                    Select an Entity
-                    <p style="font-size: 0.875rem; margin-top: 0.5rem; color: #9ca3af;">Click an entity in the sidebar to view its details.</p>
+                <!-- Welcome Panel (shown on initial load) -->
+                <div id="welcomePanel" class="welcome-panel">
+                    <!-- Hero -->
+                    <div class="welcome-hero">
+                        <div class="welcome-hero-badge" id="welcomeVersionBadge">v3.5-alpha6</div>
+                        <h1 class="welcome-hero-title">ConceptKernel BFO Ontology</h1>
+                        <p class="welcome-hero-tagline">Three loops. Three Description Logic boxes. One Material Entity.</p>
+                        <p class="welcome-hero-description">An open protocol for autonomous concept governance. Every entity typed against BFO 2020 (ISO 21838-2) with formal IAO/CCO/PROV-O mid-level grounding.</p>
+                    </div>
+
+                    <!-- Live Stats Bar -->
+                    <div class="welcome-stats" id="welcomeStats">
+                        <div class="welcome-stat">
+                            <span class="welcome-stat-value" id="statModules">7</span>
+                            <span class="welcome-stat-label">Modules</span>
+                        </div>
+                        <div class="welcome-stat">
+                            <span class="welcome-stat-value" id="statClasses">--</span>
+                            <span class="welcome-stat-label">Classes</span>
+                        </div>
+                        <div class="welcome-stat">
+                            <span class="welcome-stat-value" id="statProperties">--</span>
+                            <span class="welcome-stat-label">Properties</span>
+                        </div>
+                        <div class="welcome-stat">
+                            <span class="welcome-stat-value" id="statIndividuals">--</span>
+                            <span class="welcome-stat-label">Individuals</span>
+                        </div>
+                        <div class="welcome-stat">
+                            <span class="welcome-stat-value" id="statTotal">--</span>
+                            <span class="welcome-stat-label">Total Entities</span>
+                        </div>
+                    </div>
+
+                    <!-- Three Loops (DL Boxes) -->
+                    <div class="welcome-section">
+                        <h2 class="welcome-section-title">Three Loops as Description Logic Boxes</h2>
+                        <div class="welcome-loops">
+                            <div class="welcome-loop" style="border-left-color: #16a34a;">
+                                <div class="welcome-loop-header">
+                                    <span class="welcome-loop-badge" style="background: #16a34a;">TBox</span>
+                                    <strong>CK Loop</strong>
+                                </div>
+                                <p>Identity & type definitions. conceptkernel.yaml, ontology.yaml, rules.shacl</p>
+                            </div>
+                            <div class="welcome-loop" style="border-left-color: #d97706;">
+                                <div class="welcome-loop-header">
+                                    <span class="welcome-loop-badge" style="background: #d97706;">RBox</span>
+                                    <strong>TOOL Loop</strong>
+                                </div>
+                                <p>Capability & executable code. tool/processor, language runtime</p>
+                            </div>
+                            <div class="welcome-loop" style="border-left-color: #7c3aed;">
+                                <div class="welcome-loop-header">
+                                    <span class="welcome-loop-badge" style="background: #7c3aed;">ABox</span>
+                                    <strong>DATA Loop</strong>
+                                </div>
+                                <p>Asserted facts & instances. storage/instances, proof, ledger</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Module Overview Cards -->
+                    <div class="welcome-section">
+                        <h2 class="welcome-section-title">Ontology Modules</h2>
+                        <div class="welcome-modules" id="welcomeModules">
+                            <!-- Populated by JS after ontology load -->
+                        </div>
+                    </div>
+
+                    <!-- Featured Entities -->
+                    <div class="welcome-section">
+                        <h2 class="welcome-section-title">Key Concepts</h2>
+                        <div class="welcome-featured" id="welcomeFeatured">
+                            <!-- Populated by JS after ontology load -->
+                        </div>
+                    </div>
+
+                    <!-- Ontology Layering -->
+                    <div class="welcome-section">
+                        <h2 class="welcome-section-title">Ontology Layering Strategy</h2>
+                        <div class="welcome-layers">
+                            <div class="welcome-layer" data-layer="0">
+                                <div class="welcome-layer-label">Layer 0</div>
+                                <div class="welcome-layer-content">
+                                    <strong>BFO 2020</strong> <span class="welcome-layer-note">ISO 21838-2 — foundational categories</span>
+                                </div>
+                            </div>
+                            <div class="welcome-layer-arrow">&#x25BC;</div>
+                            <div class="welcome-layer" data-layer="0.5">
+                                <div class="welcome-layer-label">Layer 0.5</div>
+                                <div class="welcome-layer-content">
+                                    <strong>IAO + CCO + PROV-O + ValueFlows</strong> <span class="welcome-layer-note">Mid-level ontologies for agents, artifacts, provenance, economics</span>
+                                </div>
+                            </div>
+                            <div class="welcome-layer-arrow">&#x25BC;</div>
+                            <div class="welcome-layer" data-layer="1">
+                                <div class="welcome-layer-label">Layer 1</div>
+                                <div class="welcome-layer-content">
+                                    <strong>CKP v3.5-alpha6</strong> <span class="welcome-layer-note">7 modules — Kernel, Edge, Instance, Action, Process, Proof, RBAC</span>
+                                </div>
+                            </div>
+                            <div class="welcome-layer-arrow">&#x25BC;</div>
+                            <div class="welcome-layer" data-layer="2">
+                                <div class="welcome-layer-label">Layer 2</div>
+                                <div class="welcome-layer-content">
+                                    <strong>Per-Kernel Domain Schemas</strong> <span class="welcome-layer-note">ontology.yaml + rules.shacl per kernel</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="welcome-section">
+                        <h2 class="welcome-section-title">Quick Links</h2>
+                        <div class="welcome-links">
+                            <a href="https://conceptkernel.org/v3.5-alpha6/" target="_blank" rel="noopener" class="welcome-link">
+                                <strong>Specification</strong>
+                                <span>Full CKP v3.5-alpha6 spec</span>
+                            </a>
+                            <a href="https://conceptkernel.org/v3.5-alpha6/three-loops" target="_blank" rel="noopener" class="welcome-link">
+                                <strong>Three Loops</strong>
+                                <span>DL box mapping explained</span>
+                            </a>
+                            <a href="https://conceptkernel.org/v3.5-alpha6/ontology-layering" target="_blank" rel="noopener" class="welcome-link">
+                                <strong>Ontology Layering</strong>
+                                <span>BFO to per-kernel import chain</span>
+                            </a>
+                            <a href="https://conceptkernel.org/v3.5-alpha6/taxonomy" target="_blank" rel="noopener" class="welcome-link">
+                                <strong>System Kernels</strong>
+                                <span>14 kernel catalog & archetypes</span>
+                            </a>
+                            <a href="https://conceptkernel.org/v3.5-alpha6/compliance" target="_blank" rel="noopener" class="welcome-link">
+                                <strong>Compliance</strong>
+                                <span>13 BFO-grounded checks</span>
+                            </a>
+                            <a href="https://conceptkernel.org/v3.5-alpha6/patterns" target="_blank" rel="noopener" class="welcome-link">
+                                <strong>Patterns</strong>
+                                <span>8 implementation patterns</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Info Panel (hidden by default) -->
                 <div id="infoPanel" style="display: none;">
-                    <div id="breadcrumbs"></div>
+                    <div class="info-panel-nav">
+                        <button id="backToWelcome" class="back-to-welcome" type="button">&#8592; Overview</button>
+                        <div id="breadcrumbs"></div>
+                    </div>
                     <h1 id="infoLabel"></h1>
                     <div id="infoUri"></div>
 

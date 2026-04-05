@@ -6,7 +6,10 @@
  * entity extraction, filtering, search, and detail rendering.
  */
 
-import { CKP_ONTOLOGY_URLS, CKP_PREFIXES, MODULE_COLORS, MODULE_LABELS } from './config.js';
+import {
+    CKP_ONTOLOGY_URLS, CKP_PREFIXES, MODULE_COLORS, MODULE_LABELS,
+    MODULE_ORDER, MODULE_DESCRIPTIONS, FEATURED_ENTITIES, ONTOLOGY_META
+} from './config.js';
 
 class OntologyManager {
     constructor() {
@@ -607,12 +610,31 @@ class OntologyManager {
 
         tree.innerHTML = '';
 
-        this.ontologies.forEach((ontology, url) => {
+        // Use explicit MODULE_ORDER for deterministic, meaningful ordering
+        const orderedUrls = [];
+        MODULE_ORDER.forEach(key => {
+            const url = this.moduleUrlMap[key];
+            if (url && this.ontologies.has(url)) {
+                orderedUrls.push(url);
+            }
+        });
+        // Append any loaded ontologies not in MODULE_ORDER (external loads)
+        this.ontologies.forEach((_, url) => {
+            if (!orderedUrls.includes(url)) {
+                orderedUrls.push(url);
+            }
+        });
+
+        orderedUrls.forEach(url => {
+            const ontology = this.ontologies.get(url);
             const ontologyItem = this.createOntologyItem(ontology, url);
             tree.appendChild(ontologyItem);
         });
+
         this.filterEntities();
         this.updateEntityCountBadge();
+        // Populate welcome panel with live data
+        this.populateWelcomePanel();
         // Resolve URL params after entities are indexed (once)
         if (!this._urlResolved) {
             this._urlResolved = true;
@@ -627,12 +649,17 @@ class OntologyManager {
         const moduleKey = this.extractModuleKey(url);
         item.dataset.moduleKey = moduleKey;
 
+        const moduleColor = MODULE_COLORS[moduleKey] || '#6b7280';
+        const moduleLabel = MODULE_LABELS[moduleKey] || moduleKey;
+        const moduleDesc = MODULE_DESCRIPTIONS[moduleKey] || '';
+
         const header = document.createElement('div');
         header.className = 'ontology-header';
+        header.style.borderLeft = `4px solid ${moduleColor}`;
         header.innerHTML = `
-            <div>
-                <strong>${ontology.title}</strong>
-                <div class="ontology-header-uri" title="${ontology.uri}">${ontology.uri}</div>
+            <div style="flex: 1; min-width: 0;">
+                <strong>${moduleLabel}</strong>
+                ${moduleDesc ? `<div class="ontology-header-desc">${moduleDesc}</div>` : ''}
             </div>
             <div class="ontology-stats">
                 <span>C: ${ontology.stats.classes}</span>
@@ -645,43 +672,70 @@ class OntologyManager {
         entityList.className = 'entity-list';
 
         if (ontology.entities.length > 0) {
-            ontology.entities
-                .sort((a, b) => a.label.localeCompare(b.label))
-                .forEach(entity => {
-                    const entityItem = document.createElement('button');
-                    entityItem.className = 'entity-item';
-                    entityItem.title = entity.uri;
-                    entityItem.dataset.ontologyUri = ontology.uri;
-                    entityItem.dataset.ontologyTitle = ontology.title;
-                    entityItem.dataset.ontologyEntityUri = ontology.ontologyUri;
-                    entityItem.dataset.entityUri = entity.uri;
+            // Group entities by type for structured display
+            const typeOrder = ['Class', 'Property', 'Individual', 'Ontology'];
+            const typeColors = {
+                'Class': '#1e40af',
+                'Property': '#166534',
+                'Individual': '#92400e',
+                'Ontology': '#6B21A8',
+            };
+            const grouped = {};
+            ontology.entities.forEach(e => {
+                const t = e.type || 'Other';
+                if (!grouped[t]) grouped[t] = [];
+                grouped[t].push(e);
+            });
 
-                    // Label first (prominent), type badge right-aligned (secondary)
-                    entityItem.innerHTML = `
-                        <span class="entity-label">${entity.label}</span>
-                        <span class="entity-type ${entity.type}">${entity.type}</span>
-                    `;
+            typeOrder.forEach(type => {
+                const entities = grouped[type];
+                if (!entities || entities.length === 0) return;
 
-                    entityItem.addEventListener('click', () => {
-                        this.showEntityDetails(
-                            entity.uri,
-                            entity.label,
-                            entity.type,
-                            ontology.ontologyUri || ontology.uri,
-                            ontology.title
-                        );
+                // Type group header
+                const groupHeader = document.createElement('div');
+                groupHeader.className = 'entity-type-group-header';
+                groupHeader.innerHTML = `
+                    ${type === 'Class' ? 'Classes' : type === 'Property' ? 'Properties' : type === 'Individual' ? 'Individuals' : type === 'Ontology' ? 'Ontologies' : type}
+                    <span class="entity-type-group-count" style="background: ${typeColors[type] || '#6b7280'}">${entities.length}</span>
+                `;
+                entityList.appendChild(groupHeader);
+
+                // Sort entities alphabetically within each type group
+                entities.sort((a, b) => a.label.localeCompare(b.label))
+                    .forEach(entity => {
+                        const entityItem = document.createElement('button');
+                        entityItem.className = 'entity-item';
+                        entityItem.title = entity.uri;
+                        entityItem.dataset.ontologyUri = ontology.uri;
+                        entityItem.dataset.ontologyTitle = ontology.title;
+                        entityItem.dataset.ontologyEntityUri = ontology.ontologyUri;
+                        entityItem.dataset.entityUri = entity.uri;
+                        entityItem.dataset.entityType = entity.type;
+
+                        entityItem.innerHTML = `
+                            <span class="entity-label">${entity.label}</span>
+                            <span class="entity-type ${entity.type}">${entity.type}</span>
+                        `;
+
+                        entityItem.addEventListener('click', () => {
+                            this.showEntityDetails(
+                                entity.uri,
+                                entity.label,
+                                entity.type,
+                                ontology.ontologyUri || ontology.uri,
+                                ontology.title
+                            );
+                        });
+
+                        entityList.appendChild(entityItem);
                     });
-
-                    entityList.appendChild(entityItem);
-                });
+            });
         } else {
             entityList.innerHTML = `<div class="canvas-placeholder" style="font-size: 12px; padding: 10px;">No entities found.</div>`;
         }
 
-        // Expand the first loaded ontology by default
-        if (this.ontologies.size === 1) {
-            entityList.classList.add('expanded');
-        }
+        // Expand ALL sections by default for full navigation visibility
+        entityList.classList.add('expanded');
 
         header.addEventListener('click', () => {
             entityList.classList.toggle('expanded');
@@ -735,11 +789,11 @@ class OntologyManager {
     // --- 4. Main Content Panel Logic ---
 
     showEntityDetails(entityUri, entityLabel, entityType, ontologyUri, ontologyTitle) {
-        const placeholder = document.getElementById('infoPlaceholder');
+        const welcomePanel = document.getElementById('welcomePanel');
         const infoPanel = document.getElementById('infoPanel');
 
-        // Hide placeholder, show info
-        placeholder.style.display = 'none';
+        // Hide welcome panel, show info
+        if (welcomePanel) welcomePanel.style.display = 'none';
         infoPanel.style.display = 'block';
 
         // --- 1. Render Breadcrumbs ---
@@ -1081,7 +1135,103 @@ class OntologyManager {
     }
 
 
-    // --- 6. Event Listeners ---
+    // --- 6. Welcome Panel ---
+
+    populateWelcomePanel() {
+        // Aggregate stats across all loaded ontologies
+        let totalClasses = 0, totalProperties = 0, totalIndividuals = 0, totalEntities = 0;
+        this.ontologies.forEach(ont => {
+            totalClasses += ont.stats.classes;
+            totalProperties += ont.stats.properties;
+            totalIndividuals += ont.stats.individuals;
+            totalEntities += ont.stats.total;
+        });
+
+        const setTextIfExists = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+        setTextIfExists('statClasses', totalClasses);
+        setTextIfExists('statProperties', totalProperties);
+        setTextIfExists('statIndividuals', totalIndividuals);
+        setTextIfExists('statTotal', totalEntities);
+
+        // Module overview cards
+        const modulesContainer = document.getElementById('welcomeModules');
+        if (modulesContainer) {
+            modulesContainer.innerHTML = '';
+            MODULE_ORDER.forEach(key => {
+                const url = this.moduleUrlMap[key];
+                const ont = url ? this.ontologies.get(url) : null;
+                const color = MODULE_COLORS[key] || '#6b7280';
+                const label = MODULE_LABELS[key] || key;
+                const desc = MODULE_DESCRIPTIONS[key] || '';
+                const count = ont ? ont.stats.total : 0;
+
+                const card = document.createElement('div');
+                card.className = 'welcome-module-card';
+                card.style.borderLeftColor = color;
+                card.innerHTML = `
+                    <div class="welcome-module-header">
+                        <span class="welcome-module-name">${label}</span>
+                        <span class="welcome-module-count" style="background: ${color}">${count}</span>
+                    </div>
+                    <p class="welcome-module-desc">${desc}</p>
+                `;
+                // Click to scroll to module in sidebar
+                card.addEventListener('click', () => {
+                    const sidebarItem = document.querySelector(`.ontology-item[data-module-key="${key}"]`);
+                    if (sidebarItem) {
+                        sidebarItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        // Flash highlight
+                        sidebarItem.style.transition = 'background 0.3s';
+                        sidebarItem.style.background = '#eff6ff';
+                        setTimeout(() => { sidebarItem.style.background = ''; }, 1500);
+                    }
+                });
+                modulesContainer.appendChild(card);
+            });
+        }
+
+        // Featured entities
+        const featuredContainer = document.getElementById('welcomeFeatured');
+        if (featuredContainer) {
+            featuredContainer.innerHTML = '';
+            FEATURED_ENTITIES.forEach(fe => {
+                // Try to find the actual entity in loaded ontologies
+                let foundUri = null;
+                for (const [, ont] of this.ontologies) {
+                    const entity = ont.entities.find(e =>
+                        e.label === fe.label || e.uri.endsWith('#' + fe.label) || e.uri.endsWith('/' + fe.label)
+                    );
+                    if (entity) { foundUri = entity.uri; break; }
+                }
+
+                const card = document.createElement('div');
+                card.className = 'welcome-entity-card';
+                card.innerHTML = `
+                    <span class="welcome-entity-type-badge ${fe.type}">${fe.type}</span>
+                    <div class="welcome-entity-name">${fe.label}</div>
+                    <p class="welcome-entity-desc">${fe.description}</p>
+                `;
+                if (foundUri) {
+                    card.addEventListener('click', () => {
+                        this.showEntityDetailsByUri(foundUri, fe.type);
+                    });
+                }
+                featuredContainer.appendChild(card);
+            });
+        }
+    }
+
+    showWelcomePanel() {
+        const welcomePanel = document.getElementById('welcomePanel');
+        const infoPanel = document.getElementById('infoPanel');
+        if (welcomePanel) welcomePanel.style.display = 'block';
+        if (infoPanel) infoPanel.style.display = 'none';
+    }
+
+    // --- 7. Event Listeners ---
     initEventListeners() {
         document.getElementById('loadOntologies').addEventListener('click', () => this.handleLoadOntologies());
         document.getElementById('searchInput').addEventListener('input', () => this.filterEntities());
@@ -1096,6 +1246,12 @@ class OntologyManager {
                 this.filterEntities();
             });
         });
+
+        // Back to welcome panel button
+        const backBtn = document.getElementById('backToWelcome');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => this.showWelcomePanel());
+        }
 
         // Advanced loader toggle
         const advancedToggle = document.getElementById('advancedToggle');

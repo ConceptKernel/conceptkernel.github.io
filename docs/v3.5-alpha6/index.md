@@ -9,8 +9,8 @@ hero:
       text: Introduction
       link: /v3.5-alpha6/introduction
     - theme: alt
-      text: Three Loops
-      link: /v3.5-alpha6/three-loops
+      text: v3.6 (Latest)
+      link: /v3.6/introduction
     - theme: alt
       text: Join Discord
       link: https://discord.gg/sTbfxV9xyU

@@ -5,9 +5,10 @@ import { useRoute } from 'vitepress'
 const route = useRoute()
 
 const versions = [
-  { label: 'v3.5-alpha6', prefix: '/v3.5-alpha6/', badge: 'latest', color: '#3b82f6' },
+  { label: 'v3.6', prefix: '/v3.6/', badge: 'latest', color: '#3b82f6' },
+  { label: 'v3.5-alpha6', prefix: '/v3.5-alpha6/', badge: 'stable', color: '#22c55e' },
   { label: 'v3.5-alpha3', prefix: '/v3.5-alpha3/', badge: 'alpha', color: '#eab308' },
-  { label: 'v3.4', prefix: '/v3.4/', badge: 'stable', color: '#22c55e' },
+  { label: 'v3.4', prefix: '/v3.4/', badge: 'legacy', color: '#6b7280' },
 ]
 
 const current = computed(() => {
@@ -21,14 +22,10 @@ const switcher = ref(null)
 function switchTo(version) {
   isOpen.value = false
   if (typeof window === 'undefined') return
-  const currentPath = route.path
-  const cur = versions.find(v => currentPath.startsWith(v.prefix))
-  if (cur && cur.prefix !== version.prefix) {
-    const relativePath = currentPath.replace(cur.prefix, '')
-    window.location.href = version.prefix + relativePath
-  } else {
-    window.location.href = version.prefix
-  }
+  // Always navigate to the version's introduction page to avoid 404s.
+  // Different versions have different page structures, so trying to map
+  // the current page path into a different version causes SPA 404 errors.
+  window.location.href = version.prefix + 'introduction'
 }
 
 function handleClickOutside(e) {

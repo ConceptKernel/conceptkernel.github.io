@@ -40,6 +40,65 @@ export default withMermaid(defineConfig({
     ],
 
     sidebar: {
+      '/v3.6/': [
+        {
+          text: 'Overview',
+          items: [
+            { text: 'Introduction', link: '/v3.6/introduction' },
+          ]
+        },
+        {
+          text: 'Auth & Web',
+          items: [
+            { text: 'Authentication', link: '/v3.6/auth' },
+            { text: 'Web Shell', link: '/v3.6/web-shell' },
+          ]
+        },
+        {
+          text: 'Claude Integration',
+          items: [
+            { text: 'CK as Subagent', link: '/v3.6/subagent' },
+            { text: 'Streaming via NATS', link: '/v3.6/streaming' },
+            { text: 'EXTENDS + CK.Claude', link: '/v3.6/extends' },
+          ]
+        },
+        {
+          text: 'Governance',
+          items: [
+            { text: 'Consensus Loop', link: '/v3.6/consensus' },
+          ]
+        },
+        {
+          text: 'Changelog',
+          collapsed: true,
+          items: [
+            { text: 'v3.5.3 -- v3.5.12', link: '/v3.6/changelog' },
+          ]
+        },
+        {
+          text: 'Ontology Files',
+          items: [
+            { text: 'v3.5-alpha6 (Turtle)', link: '/ontology/v3.5-alpha6/' },
+            { text: 'v3.4 (Turtle)', link: '/ontology/v3.4/' },
+          ]
+        },
+        {
+          text: 'Previous Versions',
+          collapsed: true,
+          items: [
+            { text: 'v3.5-alpha6', link: '/v3.5-alpha6/introduction' },
+            { text: 'v3.5-alpha3', link: '/v3.5-alpha3/introduction' },
+            { text: 'v3.4', link: '/v3.4/introduction' },
+          ]
+        },
+        {
+          text: 'Community',
+          items: [
+            { text: 'Discord', link: 'https://discord.gg/sTbfxV9xyU' },
+            { text: 'GitHub', link: 'https://github.com/ConceptKernel' },
+          ]
+        }
+      ],
       '/v3.4/': [
         {
           text: 'Introduction',

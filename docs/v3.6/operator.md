@@ -81,7 +81,7 @@ For the full step-by-step breakdown, see [Reconciliation Lifecycle](./reconcilia
 ## Version Materialisation (v3.6.1)
 
 ::: info v3.6.1 -- serving-multiversion-unpack
-This section documents the version materialisation model introduced in v3.6.1, implemented in CK.Operator v1.3.0. See [Versioning](./versioning) for the full git model.
+This section documents the version materialisation model introduced in v3.6.1, implemented in CK.Operator v1.3.0. See [Versioning](./versioning) for the full storage layout and runc constraint analysis.
 :::
 
 ### serving.json Is Retired
@@ -96,110 +96,202 @@ v3.6.1 dissolves all three problems by moving version state from the filesystem 
 
 ### Version State in CK.Project CR
 
-Version declarations live in the CK.Project custom resource:
+Version declarations live in the CK.Project custom resource. Each version specifies per-kernel git refs for both CK and TOOL loops:
 
 ```yaml
+apiVersion: ck.tech.games/v1
+kind: CKProject
+metadata:
+  name: hello
 spec:
-  repo: https://github.com/ConceptKernel/kernels.git
+  hostname: hello.tech.games
   versions:
-    - name: live
-      ref: abc123f
+    - name: v1.3.2
       route: /
-    - name: staging
-      ref: def4567
-      route: /staging
-    - name: review-pr-42
-      ref: 789feda
-      route: /review/pr-42
+      data: isolated
+      kernels:
+        - name: Hello.Greeter
+          ck_ref: abc123f
+          tool_ref: aaa111
+        - name: CK.Lib.Py
+          ck_ref: eee555
+          tool_ref: fff666
+    - name: v1.3.19
+      route: /next
+      data: isolated
+      kernels:
+        - name: Hello.Greeter
+          ck_ref: def4567
+          tool_ref: bbb222
+        - name: CK.Lib.Py
+          ck_ref: eee555              # same as v1.3.2
+          tool_ref: fff666            # same as v1.3.2
 ```
 
-The operator reads `spec.versions`, materialises each version from the git repository, and creates per-version PVs and HTTPRoute rules. A version promotion is a CK.Project resource update -- `kubectl patch`, NATS command, or operator API. Standard Kubernetes-native workflow with etcd history.
+The operator reads `spec.versions`, materialises each version from per-kernel bare repositories on the SeaweedFS filer, and creates per-version deployments, PVs, and HTTPRoute rules. A version promotion is a CK.Project resource update -- `kubectl patch`, NATS command, or operator API. Standard Kubernetes-native workflow with etcd history.
+
+### Per-Version Deployments
+
+Each declared version gets its own Deployment. Pods in one version's deployment mount that version's PVs only. Multiple versions of the same project run simultaneously, each serving its designated route:
+
+```
+hello-v1.3.2-proc    → mounts v1.3.2 PVs, serves /
+hello-v1.3.19-proc   → mounts v1.3.19 PVs, serves /next
+```
+
+This model supports safe canary testing: deploy a new version at `/next`, verify it, then promote by swapping routes in the CK.Project CR.
+
+### Three PVs Per Kernel Per Version
+
+Each kernel in each version gets three independent PVs:
+
+```
+ck-{project}-{kernel}-{version}-ck       → /ck/{kernel}/{version}/ck/         ReadOnlyMany
+ck-{project}-{kernel}-{version}-tool     → /ck/{kernel}/{version}/tool/       ReadOnlyMany
+ck-{project}-{kernel}-{version}-data     → /ck-data/{hostname}/{kernel}/{version}/  ReadWriteMany
+```
+
+Inside the pod, these mount as three sibling directories under the kernel name:
+
+```
+/ck/{kernel}/ck/      ← CK PV (ReadOnly)
+/ck/{kernel}/tool/    ← TOOL PV (ReadOnly)
+/ck/{kernel}/data/    ← DATA PV (ReadWrite)
+```
+
+The kernel name directory is not a volume -- it is a plain directory created by the kubelet. See [Versioning -- Three Sibling Dirs](./versioning#in-container-mount-layout-three-sibling-dirs-option-a) for the runc constraint that drives this design.
+
+### CKProject CRD
+
+v3.6.1 introduces the `CKProject` Custom Resource Definition at `ck.tech.games/v1`:
+
+```bash
+kubectl get ckp -A
+```
+
+```
+NAMESPACE     NAME          PHASE     VERSIONS   CHECKS   AGE
+ck-hello      hello         Running   1          15       1d
+ck-delvinator delvinator    Running   1          15       2d
+```
+
+The CKProject CRD provides:
+
+- **`spec.versions`** -- array of named versions with per-kernel `ck_ref`/`tool_ref`
+- **`spec.hostname`** -- project hostname for HTTPRoute generation
+- **`.status.phase`** -- Running, Degraded, or Failed (patched by operator after reconcile)
+- **`.status.versions`** -- per-version status with materialisation state
+- **`.status.proof`** -- aggregate proof from reconciliation checks
+
+#### CKProject .status Patching
+
+After each reconciliation, the operator patches the CKProject `.status` with the reconciliation result:
+
+```yaml
+status:
+  phase: Running
+  versions:
+    - name: v1.0.0
+      materialised: true
+      deploymentReady: true
+      routeAccepted: true
+  proof:
+    totalChecks: 15
+    totalPassed: 15
+    lastReconciled: "2026-04-06T14:00:00Z"
+```
+
+This means `kubectl get ckp` always reflects the actual cluster state. If materialisation fails or a deployment is unhealthy, the status shows it.
+
+### Dual Control Plane: kopf + NATS
+
+CK.Operator uses both kopf (Kubernetes watch) and NATS messaging as entry points. Both trigger the same `reconcile()` function:
+
+```
+kopf watch CKProject CR change  ──→ reconcile()
+NATS input.CK.Operator message  ──→ reconcile()
+```
+
+This provides two equivalent paths to the same outcome:
+
+| Path | Use Case |
+|------|----------|
+| `kubectl apply -f ckproject.yaml` | GitOps, CI/CD pipelines, manual ops |
+| `nats pub input.CK.Operator '{"action":"project.deploy",...}'` | Web shell, inter-kernel communication, browser |
+
+Both paths produce identical results. The reconcile function is idempotent -- running it twice with the same input produces no changes.
 
 ### Materialisation Pipeline
 
 The reconciliation lifecycle gains a new step, `deploy.materialise`, inserted between `deploy.namespace` and `deploy.storage`:
 
 ```
-Reconciliation lifecycle (v3.6.1):
+Reconciliation lifecycle (v3.6.1 -- versioned):
 
   1. deploy.namespace
-  2. deploy.materialise          -- NEW: git archive -> filer
+  2. deploy.materialise          -- NEW: git archive -> filer (per-version, per-kernel)
   3. deploy.storage.ck
-  4. deploy.storage.data
-  5. deploy.processors
-  6. deploy.web
-  7. deploy.routing
-  8. deploy.conceptkernels
-  9. deploy.auth
-  10. deploy.graph
-  11. deploy.endpoint
+  4. deploy.storage.tool         -- NEW: separate TOOL PVs
+  5. deploy.storage.data
+  6. deploy.processors
+  7. deploy.web
+  8. deploy.routing
+  9. deploy.conceptkernels
+  10. deploy.auth
+  11. deploy.graph
+  12. deploy.endpoint
 ```
+
+This is 12 steps (11 + the new materialise step). The flat (non-versioned) lifecycle remains 10 steps for backward compatibility.
 
 For each version in `spec.versions`, the materialise step:
 
-1. Checks if `/ck/v/{tag}/{kernel}/.git-ref` exists on filer
-2. If it exists and contains the same ref -- skip (already current)
+1. For each kernel, checks if `/ck/{kernel}/{version}/ck/.git-ref` and `/ck/{kernel}/{version}/tool/.git-ref` exist on filer
+2. If they exist and contain the matching refs -- skip (already current)
 3. If missing or different ref:
-   - Runs `git archive {ref}:{kernel}/` from the bare repo
-   - Uploads the archive to filer at `/ck/v/{tag}/{kernel}/`
-   - Writes the commit hash to `/ck/v/{tag}/{kernel}/.git-ref`
-4. Ensures PV `ck-{project}-{kernel}-{tag}` exists pointing to `/ck/v/{tag}/{kernel}`
-5. Ensures PVC is bound
+   - CK loop: `git -C /ck/{kernel} archive {ck_ref} | upload to /ck/{kernel}/{version}/ck/`
+   - TOOL loop: `git -C /ck/{kernel} archive {tool_ref} | upload to /ck/{kernel}/{version}/tool/`
+   - Writes commit hashes to `.git-ref` in each loop directory
+4. Ensures three PVs per kernel per version exist
+5. Ensures PVCs are bound
 
-### Per-Version PVs and HTTPRoutes
+### Per-Version HTTPRoutes
 
-Each declared version gets its own PersistentVolume and routing rule:
-
-```yaml
-# Per-version CK volume
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: ck-delvinator-core-live
-spec:
-  accessModes: [ReadOnlyMany]
-  capacity:
-    storage: 50Gi
-  csi:
-    driver: seaweedfs-csi-driver
-    volumeHandle: ck-delvinator-core-live
-    volumeAttributes:
-      path: "/ck/v/live/Delvinator.Core"
-```
-
-HTTPRoute rules are ordered longest-prefix first, so `/staging` matches before `/`:
+HTTPRoute rules are ordered longest-prefix first:
 
 ```yaml
 spec:
-  hostnames: [delvinator.tech.games]
+  hostnames: [hello.tech.games]
   rules:
     - matches:
-        - path: { type: PathPrefix, value: /staging }
+        - path: { type: PathPrefix, value: /next }
       backendRefs:
-        - name: delvinator-staging
+        - name: hello-v1.3.19
+          port: 80
     - matches:
         - path: { type: PathPrefix, value: / }
       backendRefs:
-        - name: delvinator-live
+        - name: hello-v1.3.2
+          port: 80
 ```
 
-When a tag's ref changes, the PV is not recreated -- the filer path is stable (keyed by tag name). Content changes when the operator re-materialises. Pods pick up new content on rolling restart.
+When a version's ref changes, the PV is not recreated -- the filer path is stable (keyed by version name). Content changes when the operator re-materialises. Pods pick up new content on rolling restart.
 
 ### Version Lifecycle via CR
 
 | CR Change | Operator Action |
 |-----------|-----------------|
-| Add version | Materialise, create deployment + PV/PVC + route rule |
-| Change version ref | Re-materialise, roll pods |
-| Remove version | Delete deployment, PV/PVC, route rule, GC filer path |
+| Add version | Materialise CK + TOOL, create deployment + 3 PVs/PVCs per kernel + route rule |
+| Change version ck_ref or tool_ref | Re-materialise affected loop, roll pods |
+| Remove version | Delete deployment, PVs/PVCs, route rule, GC filer paths |
 
 ### Garbage Collection
 
-After reconciliation, the operator scans `/ck/v/` on the filer and deletes directories not referenced by any active version in any CK.Project resource. GC logs every deletion and never removes directories referenced by other projects.
+After reconciliation, the operator scans version directories under each kernel on the filer and deletes those not referenced by any active version in any CK.Project resource. GC deletes both `ck/` and `tool/` subdirectories together. GC MUST NOT delete git internals (`HEAD`, `objects/`, `refs/`). GC logs every deletion and never removes directories referenced by other projects.
 
 ### Shared Kernel Optimisation
 
-When two versions reference the same git tree hash for a kernel (e.g., the CK loop has not changed between live and staging), the operator reuses one filer copy. The PV for the second version points to the first version's filer path -- no duplicate storage.
+When two versions reference the same commit for a kernel's loop, the operator does not extract twice. It checks `.git-ref` in the existing version directory. If the hash matches, the new version's PV points to the existing path -- no duplicate storage.
 
 ### Backward Compatibility
 

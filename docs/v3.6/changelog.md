@@ -45,52 +45,70 @@ v3.5-alpha6 was the last deployed incremental release. v3.6 adds:
 
 **Date:** 2026-04-06 | **Implements:** CK.Operator v1.3.0
 
-Version materialisation moves from `serving.json` on disk to the CK.Project custom resource. The CK volume becomes purely immutable -- no write-through exceptions.
+Version materialisation moves from `serving.json` on disk to the CK.Project custom resource. The CK volume becomes purely immutable -- no write-through exceptions. Storage uses per-kernel bare repositories and three sibling directories per kernel version (Option A).
 
 ### What Changes
 
 - **serving.json retired** -- no longer exists on disk. The three problems it created (write-through hack, inert file, decorative git refs) are dissolved.
-- **CK.Project `spec.versions`** -- named versions with git commit ref and URL route prefix. Version state is in etcd, not the filesystem.
-- **`spec.repo`** -- upstream git URL. The operator clones to scratch space and runs `git archive` locally (FUSE mounts cannot host bare repos).
-- **`deploy.materialise` step** -- new reconciliation step between `deploy.namespace` and `deploy.storage`. Streams `git archive` output to filer at `/ck/v/{tag}/{kernel}/`.
-- **`.git-ref` stamp** -- each materialised directory contains the exact commit hash. Implements `prov:wasGeneratedBy` from Git2PROV.
-- **Per-version PVs** -- `ck-{project}-{kernel}-{tag}`, each pointing to `/ck/v/{tag}/{kernel}`. When a tag's ref changes, content updates without PV recreation.
+- **Option A: Three sibling dirs** -- in-container mount layout uses `/ck/{kernel}/ck/`, `/ck/{kernel}/tool/`, `/ck/{kernel}/data/` as three sibling PVs under a kubelet-created namespace directory. No nested volume mounts. Driven by the runc constraint: `mkdirat` fails with EROFS in ReadOnly parent overlays before CSI volume content is visible.
+- **Per-kernel bare repos** -- each kernel has its own isolated bare git repository at `/ck/{kernel}/` on the SeaweedFS filer. No monorepo. No `spec.repo`. CK and TOOL loops extract from the same bare repo to sibling `ck/` and `tool/` directories.
+- **CKProject CRD** -- `ck.tech.games/v1` kind `CKProject` with `spec.versions` containing per-kernel `ck_ref` and `tool_ref`. `kubectl get ckp -A` shows Phase, Versions, and Checks.
+- **kopf + NATS dual control plane** -- both kopf CRD watch and NATS message listener trigger the same `reconcile()` function. `kubectl apply` and `nats pub` produce identical results.
+- **CKProject .status patching** -- operator patches `.status` after each reconcile with phase, per-version materialisation state, and aggregate proof.
+- **`deploy.materialise` step** -- new reconciliation step between `deploy.namespace` and `deploy.storage`. Extracts CK loop to `/ck/{kernel}/{version}/ck/` and TOOL loop to `/ck/{kernel}/{version}/tool/` via `git archive` from per-kernel bare repos.
+- **Three PVs per kernel per version** -- `ck-{project}-{kernel}-{version}-ck`, `ck-{project}-{kernel}-{version}-tool`, `ck-{project}-{kernel}-{version}-data`. CK and TOOL ReadOnlyMany, DATA ReadWriteMany.
+- **Per-version deployments** -- each declared version gets its own Deployment and service. Multiple versions run simultaneously at different route prefixes.
 - **Per-version HTTPRoutes** -- longest-prefix-first routing. Each version gets its own deployment and route rule.
-- **Garbage collection** -- filer paths under `/ck/v/` not referenced by any CK.Project version are deleted after reconciliation.
-- **Shared kernel optimisation** -- identical tree hashes across versions share one filer copy.
+- **`.git-ref` stamp** -- each materialised loop directory (`ck/` and `tool/`) contains the exact commit hash. Implements `prov:wasGeneratedBy` from Git2PROV.
+- **Quick setup mode** -- no git required for bootstrapping. Omit `ck_ref`/`tool_ref` and upload files directly to the filer. Transition to git-managed later without changing PVs or mounts.
+- **Garbage collection** -- version directories under `/ck/{kernel}/` not referenced by any CK.Project are deleted. Git internals (`HEAD`, `objects/`, `refs/`) are never GC'd.
+- **Shared kernel optimisation** -- identical refs across versions share one filer copy, PVs point to existing path.
 - **Backward compatible** -- no `spec.versions` means flat layout, existing projects unchanged.
+- **Proven on live cluster** -- `hello-v1-0-0-proc` Running with three sibling PVs on AKS + SeaweedFS 3.93.
 
-### Git Model (D9)
+### Reconciliation Lifecycle (Versioned -- 12 Steps)
 
-- One repo per project. CK + TOOL in same repo, DATA never in git.
-- Tag prefix convention: `ck/{kernel}/vX.Y.Z`, `tool/{kernel}/vX.Y.Z` for independent loop versioning.
-- Per-loop overrides: `ck_ref` and `tool_ref` in version declarations for split CK/TOOL tags.
-- Ontological grounding: DOAP for repo metadata, Git2PROV (PROV-O) for commit provenance.
+```
+  1. deploy.namespace
+  2. deploy.materialise          -- NEW
+  3. deploy.storage.ck
+  4. deploy.storage.tool         -- NEW (separate TOOL PVs)
+  5. deploy.storage.data
+  6. deploy.processors
+  7. deploy.web
+  8. deploy.routing
+  9. deploy.conceptkernels
+  10. deploy.auth
+  11. deploy.graph
+  12. deploy.endpoint
+```
 
 ### Deficiencies Resolved
 
 | Deficiency | Resolution |
 |-----------|-----------|
-| D1: No version materialisation | `git archive` from bare repo, commit-pinned |
-| D3: No serving.json write-through | serving.json retired, version state in CR |
-| D6: No git integration on filer | Bare repo on scratch, `.git-ref` traceability |
+| D1: No version materialisation | `git archive` from per-kernel bare repos, commit-pinned via `ck_ref`/`tool_ref` |
+| D2: Per-kernel volume isolation | Resolved by three-PV model (ck, tool, data per kernel per version) |
+| D3: No serving.json write-through | serving.json retired, version state in CK.Project CR |
+| D6: No git integration on filer | Per-kernel bare repos on filer, `.git-ref` traceability |
 
 ### New CK.Project CRD Fields
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `spec.repo` | string | MUST (if versions declared) | Upstream git URL |
 | `spec.versions` | array | SHOULD | Version declarations |
-| `spec.versions[].name` | string | MUST | Tag name (used in PV names, filer paths, routes) |
-| `spec.versions[].ref` | string | MUST | Git commit hash to materialise |
-| `spec.versions[].route` | string | MUST | URL path prefix |
-| `spec.versions[].ck_ref` | string | MAY | CK loop tag override |
-| `spec.versions[].tool_ref` | string | MAY | TOOL loop tag override |
+| `spec.versions[].name` | string | MUST | Version tag (used in PV names, filer paths, routes) |
+| `spec.versions[].route` | string | MUST | URL path prefix on project hostname |
+| `spec.versions[].data` | string | SHOULD | "isolated" or "shared" -- DATA directory scoping |
+| `spec.versions[].kernels` | array | MUST | Per-kernel declarations |
+| `spec.versions[].kernels[].name` | string | MUST | Concept kernel name |
+| `spec.versions[].kernels[].ck_ref` | string | MAY | Git commit hash for CK loop extraction |
+| `spec.versions[].kernels[].tool_ref` | string | MAY | Git commit hash for TOOL loop extraction |
 
 ### New Ontology Classes
 
-- `VersionDeclaration` -- named version pinned to a git commit, mapped to a URL route
-- `GitRepoConfig` -- upstream git repository location
+- `VersionDeclaration` -- named version with per-kernel refs, mapped to a URL route
+- `KernelVersionRef` -- per-kernel git refs for a specific version deployment
 
 ---
 

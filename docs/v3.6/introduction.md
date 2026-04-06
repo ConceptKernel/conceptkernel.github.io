@@ -175,10 +175,15 @@ v3.5.16 Agent Teams                                              PLANNED
 ---------------------------------------------------------------------
 v3.6    Full release -- sum of all above
 
-v3.6.1  serving-multiversion-unpack (CK.Operator v1.3.0)       SPEC
-        Version materialisation via CK.Project CR
-        serving.json retired, git archive -> filer pipeline
-        Per-version PVs, HTTPRoutes, garbage collection
+v3.6.1  serving-multiversion-unpack (CK.Operator v1.3.0)       PROVEN
+        Option A: three sibling dirs (runc constraint discovery)
+        Per-kernel bare repos (no monorepo, no /ck-tool/ root)
+        CKProject CRD with per-kernel ck_ref/tool_ref
+        kopf + NATS dual control plane
+        Per-version deployments, 3 PVs per kernel per version
+        Quick setup mode (no git required)
+        serving.json retired, version state in CK.Project CR
+        Proven: hello-v1-0-0-proc Running with three sibling PVs
 ```
 
 ### Why This Model

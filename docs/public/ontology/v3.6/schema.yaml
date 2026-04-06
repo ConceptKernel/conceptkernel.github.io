@@ -1,0 +1,471 @@
+id: https://conceptkernel.org/ontology/v3.6/schema
+name: conceptkernel-org-v3.6
+title: ConceptKernel Governance Schema v3.6
+description: >
+  LinkML schema governing Concept Kernel shape. Drives scaffolding tool —
+  the tool reads this schema to create CK folders and enforce structure.
+  Aligned with BFO2020 + PROV-O. v3.6 adds AgentKernel, PersonaTemplate,
+  TaskInstance, ConversationInstance, ModelConfiguration, edge predicates,
+  consensus, and 20 check types.
+
+prefixes:
+  ck: https://conceptkernel.org/ontology/v3.6/
+  bfo: http://purl.obolibrary.org/obo/BFO_
+  prov: http://www.w3.org/ns/prov#
+  linkml: https://w3id.org/linkml/
+
+default_range: string
+
+classes:
+
+  Kernel:
+    class_uri: bfo:0000040
+    description: >
+      A sovereign concept kernel — one capability, one identity, one tool.
+      BFO Material Entity. Grounded in cco:Agent. Folder prefix: CK.{Name}
+    attributes:
+      apiVersion: { required: true, ifabsent: "conceptkernel/v1" }
+      kind: { required: true, ifabsent: "Kernel" }
+      metadata: { range: KernelMetadata, required: true }
+      spec: { range: KernelSpec, required: true }
+
+  InlineKernel:
+    is_a: Kernel
+    description: >
+      Podless kernel: browser-side JS, NATS WSS, JWT.
+      No server-side process — runs entirely in the client browser.
+    attributes:
+      nats_wss_endpoint: { required: true, description: "NATS WebSocket endpoint URL" }
+      jwt_issuer: { description: "JWT issuer for browser authentication" }
+
+  StaticKernel:
+    is_a: Kernel
+    description: >
+      No process: gateway serves storage/web/ directly.
+    attributes:
+      web_root: { ifabsent: "web/", description: "Root directory for static assets" }
+
+  # --- v3.6: AgentKernel ---
+  AgentKernel:
+    is_a: Kernel
+    description: >
+      LLM-capable kernel supporting long-running conversational sessions,
+      streaming via stream.{kernel}, multi-turn sessions, and persona
+      templates from storage/personas/. CK.Claude is the canonical AgentKernel.
+    attributes:
+      default_model: { description: "Default LLM model (sonnet, opus, haiku)" }
+      default_effort: { description: "Default effort level (low, medium, high, max)" }
+      personas:
+        range: PersonaTemplate
+        multivalued: true
+        description: "Persona templates served by this agent kernel"
+
+  Project:
+    class_uri: bfo:0000031
+    description: >
+      .ckproject declaration, organizes kernels into a coherent unit.
+      Grounded in cco:Organization. v3.6: CK.Project declares existence,
+      scope, AuthConfig, and storage configuration.
+    attributes:
+      name:
+        required: true
+        description: "Project name (PascalCase)"
+      kernels:
+        range: Kernel
+        multivalued: true
+        description: "Kernels belonging to this project"
+      description: { description: "Human-readable project description" }
+
+  # --- v3.6: PersonaTemplate ---
+  PersonaTemplate:
+    description: >
+      Reusable system prompt template stored in an AgentKernel's DATA loop
+      at storage/personas/{name}.yaml. Defines LLM behaviour that other
+      kernels mount via the EXTENDS edge predicate.
+    attributes:
+      name: { required: true, description: "Persona identifier matching config.persona" }
+      system_prompt: { required: true, description: "System prompt injected into LLM context" }
+      tools:
+        range: string
+        multivalued: true
+        description: "Tool allowlist for the LLM session"
+      output_format: { description: "structured or freeform" }
+      temperature: { range: float, description: "LLM temperature parameter" }
+      model: { description: "Default LLM model for this persona" }
+
+  # --- v3.6: ModelConfiguration ---
+  ModelConfiguration:
+    description: >
+      LLM model selection quality. Three-level precedence:
+      CK.Claude default < persona template < EXTENDS edge config.
+    attributes:
+      model: { description: "LLM model: haiku, sonnet, opus, or full model name" }
+      effort: { description: "Effort level: low, medium, high, max" }
+      max_tokens: { range: integer, description: "Maximum output tokens" }
+
+  KernelMetadata:
+    attributes:
+      name:
+        required: true
+        pattern: "^[A-Z][a-zA-Z]+\\.[A-Z][a-zA-Z]+$"
+        description: "{Domain}.{Name} PascalCase"
+      urn:
+        required: true
+        pattern: "^ckp://Kernel#.+:v\\d+\\.\\d+$"
+      version: { required: true }
+      created_at: { range: datetime }
+
+  KernelSpec:
+    attributes:
+      type: { range: KernelType, required: true }
+      description: { required: true }
+      nats: { range: NATSConfig, required: true }
+      tool: { range: ToolSpec, required: true }
+      web: { range: WebConfig }
+      resources: { range: ResourceSpec }
+      edges: { range: EdgeSpec }
+      lifecycle: { range: LifecycleConfig }
+      workspace: { range: WorkspaceConfig }
+      governance_mode: { range: GovernanceMode, required: true }
+      storage_medium: { range: StorageMedium, description: "How kernel code is stored" }
+      deployment_method: { range: DeploymentMethod, description: "How kernel code is deployed" }
+      serving_dispositions:
+        range: ServingDisposition
+        multivalued: true
+        description: "How the kernel serves functionality"
+
+  NATSConfig:
+    attributes:
+      input_topic: { required: true }
+      result_topic: { required: true }
+      event_topic: { required: true }
+      conversation: { range: ConversationConfig }
+
+  ConversationConfig:
+    description: >
+      When enabled, kernel accepts conversation over NATS WSS
+      and streams responses back to result topic.
+    attributes:
+      enabled: { range: boolean, required: true }
+      stream_responses: { range: boolean }
+
+  ToolSpec:
+    attributes:
+      language: { required: true }
+      entrypoint: { required: true, ifabsent: "tool/processor.py" }
+      runtime: { required: true }
+
+  WebConfig:
+    attributes:
+      serve: { range: boolean }
+      subdomain: {}
+
+  ResourceSpec:
+    attributes:
+      requests: { range: ResourceLimits }
+      limits: { range: ResourceLimits }
+
+  ResourceLimits:
+    attributes:
+      cpu: {}
+      memory: {}
+
+  EdgeSpec:
+    attributes:
+      outbound:
+        range: Edge
+        multivalued: true
+      inbound:
+        range: Edge
+        multivalued: true
+        description: "v3.6: Inbound edge declarations"
+
+  Edge:
+    class_uri: bfo:0000031
+    description: >
+      First-class BFO GenericallyDependentContinuant (information entity)
+      mediating K-to-K communication. Grounded in cco:Artifact.
+    attributes:
+      target_kernel: { required: true }
+      predicate: { range: EdgePredicate, required: true }
+      nats_subject: { required: true }
+      requires_consensus: { range: boolean }
+      requires_target_auth: { range: boolean }
+      config:
+        range: EdgeConfig
+        description: "v3.6: Configuration for EXTENDS edges (persona, actions, constraints)"
+
+  # --- v3.6: EdgeConfig for EXTENDS ---
+  EdgeConfig:
+    description: >
+      Configuration block for EXTENDS edges. Defines persona, mode,
+      actions to mount, and constraints.
+    attributes:
+      persona: { description: "Persona template name from target's storage/personas/" }
+      mode: { description: "Invocation mode: batch or streaming" }
+      actions:
+        range: EdgeAction
+        multivalued: true
+        description: "New actions to mount on the source kernel"
+      constraints:
+        range: ModelConfiguration
+        description: "Model and token constraints"
+
+  EdgeAction:
+    description: "An action definition in an EXTENDS edge config"
+    attributes:
+      name: { required: true }
+      description: { required: true }
+      access: { description: "Access level: anon, auth, admin" }
+
+  LifecycleConfig:
+    description: For temporal CKs (sites spawned for limited duration)
+    attributes:
+      temporal: { range: boolean }
+      duration: { description: "ISO 8601 duration (e.g. P30D)" }
+      created_by: { description: "URN of the factory kernel that created this CK" }
+
+  WorkspaceConfig:
+    attributes:
+      runner: { ifabsent: "split" }
+      bar: { ifabsent: "standard" }
+      gap: { range: integer, ifabsent: "0" }
+      padding: { ifabsent: "52,0,0,0" }
+      zoom: { range: integer, ifabsent: "0" }
+      cmd: {}
+
+  Instance:
+    class_uri: bfo:0000031
+    description: >
+      Immutable result artifact (BFO GenericallyDependentContinuant).
+      Grounded in iao:0000027 (DataItem).
+    attributes:
+      id: { required: true }
+      created_at: { range: datetime, required: true }
+      status: { range: InstanceStatus, required: true }
+      kernel_urn: { required: true }
+
+  InstanceManifest:
+    class_uri: bfo:0000031
+    description: >
+      Base shape for all CKP instances.
+    attributes:
+      instance_id:
+        required: true
+        pattern: "^i-.+-\\d+$"
+      kernel_class: { required: true }
+      kernel_id: { required: true }
+      created_at: { range: datetime, required: true }
+      wasGeneratedBy: {}
+      wasAttributedTo: {}
+      generatedAtTime: { range: datetime }
+
+  SealedInstance:
+    is_a: InstanceManifest
+    description: >
+      A finalized, immutable instance sealed with data, tool reference,
+      and CK reference.
+    attributes:
+      data: { required: true }
+      tool_ref: {}
+      ck_ref: {}
+
+  LedgerEntry:
+    class_uri: bfo:0000031
+    description: >
+      Append-only log entry recording a state transition or action event.
+    attributes:
+      timestamp: { range: datetime, required: true }
+      event: { required: true }
+      before: {}
+      after: {}
+
+  # --- v3.6: TaskInstance ---
+  TaskInstance:
+    is_a: InstanceManifest
+    description: >
+      Instance shape for consensus-generated tasks. Tasks are concrete
+      work items with instruction, target file, constraints, executor,
+      and version pin. Generated by CK.Consensus approve action.
+    attributes:
+      task_id: { required: true, description: "Unique task identifier T-{uuid}" }
+      decision_id: { required: true, description: "Parent consensus decision ID" }
+      target_file: { required: true, description: "File path to modify" }
+      instruction: { required: true, description: "What to do" }
+      constraints:
+        range: string
+        multivalued: true
+        description: "Validation constraints for the task output"
+      executor: { description: "headless-claude-code, manual, automated" }
+      status: { range: TaskStatus, required: true }
+      version_pin: { description: "Git commit hash this task targets" }
+
+  # --- v3.6: ConversationInstance ---
+  ConversationInstance:
+    is_a: InstanceManifest
+    description: >
+      Instance shape for multi-turn LLM conversation sessions. Records
+      conversation context, stream events, and final result.
+    attributes:
+      trace_id: { required: true, description: "Trace identifier for conversation" }
+      persona: { description: "Persona template used" }
+      model: { description: "LLM model used (sonnet, opus, haiku)" }
+      turn_count: { range: integer, description: "Number of assistant turns" }
+
+  ProofRecord:
+    class_uri: bfo:0000031
+    description: >
+      Verification record for sealed instance integrity.
+    attributes:
+      proof_id: { required: true }
+      instance_id: { required: true }
+      data_hash: { required: true }
+      manifest_hash: { required: true }
+      checks:
+        range: ProofCheck
+        multivalued: true
+      outcome: { range: ProofOutcome, required: true }
+      checked_by_kernel: {}
+      checked_by_identity: {}
+      checked_at: { range: datetime, required: true }
+      svid: { required: true }
+
+  ProofCheck:
+    class_uri: bfo:0000031
+    attributes:
+      check_name: { required: true }
+      check_type: { range: CheckType, required: true }
+      expected: {}
+      actual: {}
+      passed: { range: boolean, required: true }
+
+  Reconciliation:
+    is_a: Action
+    class_uri: bfo:0000015
+    description: >
+      Operator reconciliation cycle.
+    attributes:
+      target_kernel: { required: true }
+      desired_state: {}
+      actual_state: {}
+      drift_detected: { range: boolean }
+
+  Action:
+    class_uri: bfo:0000015
+    description: >
+      An executable operation exposed by a kernel.
+    attributes:
+      name: { required: true }
+      access_level: {}
+
+  FolderStructure:
+    description: >
+      Three Loops directory structure for every CK.
+    attributes:
+      ck_loop_files:
+        range: string
+        multivalued: true
+        ifabsent: '["conceptkernel.yaml", ".ck-guid", "README.md", "CLAUDE.md", "SKILL.md", "CHANGELOG.md", "ontology.yaml", "rules.shacl", "serving.json"]'
+      tool_dir: { ifabsent: "tool/" }
+      storage_dir: { ifabsent: "storage/" }
+      storage_subdirs:
+        range: string
+        multivalued: true
+        ifabsent: '["instances/", "ledger/", "proof/", "index/", "llm/", "web/", "memory/", "tasks/", "personas/"]'
+        description: "v3.6: Added memory/, tasks/, personas/ subdirectories"
+      instance_prefix: { ifabsent: "i-" }
+
+enums:
+
+  KernelType:
+    permissible_values:
+      node:cold: { description: "Always running, low latency" }
+      node:hot: { description: "Scales to zero, on-demand" }
+      service: { description: "Stateful service" }
+      agent: { description: "v3.6: LLM-capable kernel with streaming, sessions, personas" }
+      inline: { description: "Browser-side JS kernel, no pod" }
+      static: { description: "No process, gateway serves web/ directly" }
+
+  GovernanceMode:
+    permissible_values:
+      STRICT: { description: "All CK loop changes require consensus" }
+      RELAXED: { description: "Structural changes require consensus; docs may be direct" }
+      AUTONOMOUS: { description: "May bypass consensus; should record provenance" }
+
+  EdgePredicate:
+    permissible_values:
+      COMPOSES: { description: "v3.6: Hub-spoke module composition" }
+      TRIGGERS: { description: "v3.6: Sequential activation post-completion" }
+      PRODUCES: { description: "v3.6: Event broadcasting, no request/reply" }
+      EXTENDS: { description: "v3.6: Capability mounting, new actions on source" }
+      LOOPS_WITH: { description: "v3.6: Bidirectional cooperation with circular guard" }
+      REQUIRES: {}
+      VALIDATES: {}
+      TRANSFORMS: {}
+
+  InstanceStatus:
+    permissible_values:
+      pending: {}
+      active: {}
+      completed: {}
+      failed: {}
+      archived: {}
+
+  # --- v3.6: TaskStatus ---
+  TaskStatus:
+    description: "Lifecycle status of a consensus-generated task"
+    permissible_values:
+      pending: { description: "Generated by consensus, awaiting execution" }
+      executing: { description: "Headless Claude Code is working on it" }
+      completed: { description: "Output validated, changes committed" }
+      failed: { description: "Validation failed or execution error" }
+
+  ProofOutcome:
+    permissible_values:
+      PASS: { description: "All proof checks passed" }
+      FAIL: { description: "One or more critical checks failed" }
+      PARTIAL: { description: "Some passed, some non-critical failed" }
+
+  CheckType:
+    description: "v3.6: Expanded to 20 check types per spec"
+    permissible_values:
+      SCHEMA: { description: "JSON Schema validation" }
+      SHACL: { description: "SHACL shape validation" }
+      PROVENANCE: { description: "PROV-O provenance chain validation" }
+      STRUCTURE: { description: "File/folder structure validation" }
+      INTEGRITY: { description: "SHA-256 hash verification" }
+      OPERATIONAL: { description: "Tool execution correctness" }
+      IDENTITY: { description: "v3.6: apiVersion, identity fields, namespace" }
+      AWAKENING: { description: "v3.6: All 8 awakening files present" }
+      TYPES: { description: "v3.6: qualities.type, governance_mode validation" }
+      EDGES: { description: "v3.6: Target exists, predicate valid, no duplicates" }
+      TOOL: { description: "v3.6: processor.py exists, valid syntax" }
+      WEB: { description: "v3.6: index.html present if serve=true" }
+      GRANTS: { description: "v3.6: Grants block with identity levels" }
+      LLM: { description: "v3.6: CLAUDE.md and SKILL.md validation" }
+      ONTOLOGY_TYPES: { description: "v3.6: ontology.yaml classes validation" }
+      INSTANCE_TYPING: { description: "v3.6: Instances conform to ontology.yaml" }
+      THREE_LOOP_ISOLATION: { description: "v3.6: tool/ doesn't write CK loop" }
+      EDGE_MATERIALISATION: { description: "v3.6: Edge targets exist, NATS resolves" }
+      SHACL_VALIDITY: { description: "v3.6: rules.shacl is syntactically valid" }
+      CONSENSUS_PROVENANCE: { description: "v3.6: AUTONOMOUS kernels have PROV-O" }
+
+  StorageMedium:
+    permissible_values:
+      FILESYSTEM: { description: "Mounted filesystem" }
+      DOCUMENT_STORE: { description: "Document store (FerretDB, MongoDB)" }
+      CONFIGMAP: { description: "Kubernetes ConfigMaps" }
+
+  DeploymentMethod:
+    permissible_values:
+      VOLUME: { description: "Code mounted as volume" }
+      FILER: { description: "Code synced via filer HTTP API" }
+      CONFIGMAP_DEPLOY: { description: "Code as ConfigMaps" }
+      INLINE_DEPLOY: { description: "Code delivered to browser" }
+
+  ServingDisposition:
+    permissible_values:
+      API_SERVING: { description: "HTTP/REST API endpoint" }
+      WEB_SERVING: { description: "Static web assets" }
+      NATS_LISTENING: { description: "Server-side NATS listener" }
+      NATS_BROWSER_CLIENT: { description: "Browser NATS WSS client" }

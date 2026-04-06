@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CKP Ontology v3.6 — Concept Kernel Protocol</title>
+  <style>
+    body { font-family: 'Noto Sans', 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background: #fff; color: #333; line-height: 1.6; }
+    .header { background: #005a9c; color: #fff; padding: 0.8rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .header a { color: #fff; text-decoration: none; font-size: 0.95rem; }
+    .header .title { font-weight: 600; }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    .meta { background: #f8f9fa; border-left: 4px solid #059669; padding: 1rem 1.5rem; margin-bottom: 2rem; font-size: 0.88rem; }
+    .meta dt { font-weight: 600; color: #005a9c; }
+    .meta dd { margin: 0 0 0.4rem 0; }
+    .meta a { color: #005a9c; }
+    h1 { color: #005a9c; font-size: 1.6rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.15rem; color: #005a9c; border-bottom: 1px solid #ddd; padding-bottom: 0.3rem; margin-top: 2rem; }
+    .status { display: inline-block; padding: 2px 10px; border-radius: 3px; font-size: 0.75rem; font-weight: 600; }
+    .status-release { background: #d1fae5; color: #059669; }
+    .new-tag { display: inline-block; background: #d1fae5; color: #059669; font-size: 0.7rem; padding: 1px 6px; border-radius: 3px; font-weight: 600; margin-left: 0.3rem; vertical-align: middle; }
+    .prefix-box { background: #f0f4f8; border: 1px solid #d0dae4; padding: 0.7rem 1rem; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.88rem; margin: 1rem 0; }
+    table { border-collapse: collapse; width: 100%; margin: 0.8rem 0; }
+    th { text-align: left; background: #f0f0f0; padding: 0.45rem 0.7rem; border: 1px solid #ddd; font-size: 0.8rem; color: #555; }
+    td { padding: 0.45rem 0.7rem; border: 1px solid #ddd; font-size: 0.88rem; }
+    td a { color: #005a9c; text-decoration: none; }
+    td a:hover { text-decoration: underline; }
+    code { background: #f4f4f4; padding: 0.1em 0.35em; border-radius: 2px; font-size: 0.82rem; font-family: 'Consolas', monospace; }
+    .bfo { font-family: monospace; font-size: 0.82rem; color: #666; }
+    .footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #ddd; color: #999; font-size: 0.78rem; }
+    .footer a { color: #005a9c; }
+    p.abstract { font-size: 0.92rem; max-width: 720px; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <span class="title"><a href="https://conceptkernel.org">Concept Kernel Protocol</a></span>
+  <span><a href="https://conceptkernel.org/ontology/v3.5-alpha6/">v3.5-alpha6</a></span>
+</div>
+<div class="container">
+
+<h1>CKP Ontology v3.6 <span class="status status-release">v3.6</span></h1>
+
+<dl class="meta">
+  <dt>This version</dt>
+  <dd><a href="https://conceptkernel.org/ontology/v3.6/">https://conceptkernel.org/ontology/v3.6/</a></dd>
+  <dt>Previous version</dt>
+  <dd><a href="https://conceptkernel.org/ontology/v3.5-alpha6/">https://conceptkernel.org/ontology/v3.5-alpha6/</a> (v3.5-alpha6)</dd>
+  <dt>Namespace URI</dt>
+  <dd><code>https://conceptkernel.org/ontology/v3.6/</code></dd>
+  <dt>Status</dt>
+  <dd>v3.6 -- AgentKernel, five edge predicates, 20 check types, CK.Consensus governance, task execution, dynamic spawning, multi-user sessions, agent teams.</dd>
+  <dt>Editors</dt>
+  <dd>Peter Styk, ConceptKernel</dd>
+  <dt>Source</dt>
+  <dd><a href="https://github.com/ConceptKernel/conceptkernel.github.io">GitHub</a></dd>
+</dl>
+
+<div class="prefix-box">@prefix ckp: &lt;https://conceptkernel.org/ontology/v3.6/&gt; .</div>
+
+<h2>Abstract</h2>
+<p class="abstract">v3.6 extends the CKP ontology with the agent kernel type (CK.Claude), five formal edge predicates (COMPOSES, TRIGGERS, PRODUCES, EXTENDS, LOOPS_WITH), 20 compliance check types, a four-layer consensus governance engine, task execution via headless Claude Code, dynamic kernel spawning, multi-user NATS sessions, and persona-based LLM capability mounting. All classes maintain BFO 2020 grounding through the four-layer import chain.</p>
+
+<h2>Ontology Modules</h2>
+<table>
+  <tr><th>Module</th><th>File</th><th>Description</th><th>BFO</th></tr>
+  <tr><td>Core</td><td><a href="core.ttl">core.ttl</a></td><td>Kernel, Edge, Instance, HotKernel, ColdKernel, InlineKernel, StaticKernel, <strong>AgentKernel</strong> <span class="new-tag">v3.6</span>, <strong>PersonaTemplate</strong> <span class="new-tag">v3.6</span>, <strong>ModelConfiguration</strong> <span class="new-tag">v3.6</span>, Project, GovernanceMode, Action, Reconciliation, <strong>LOOPS_WITH</strong> <span class="new-tag">v3.6</span></td><td class="bfo">0000040, 0000031, 0000015, 0000016, 0000019</td></tr>
+  <tr><td>Base Instances</td><td><a href="base-instances.ttl">base-instances.ttl</a></td><td>InstanceManifest, SealedInstance, LedgerEntry, <strong>TaskInstance</strong> <span class="new-tag">v3.6</span>, <strong>ConversationInstance</strong> <span class="new-tag">v3.6</span></td><td class="bfo">0000031</td></tr>
+  <tr><td>Proof</td><td><a href="proof.ttl">proof.ttl</a></td><td>ProofRecord, ProofCheck, CheckType (<strong>20 types</strong> <span class="new-tag">v3.6</span>), ProofOutcome</td><td class="bfo">0000031</td></tr>
+  <tr><td>Edges</td><td><a href="edges.ttl">edges.ttl</a> <span class="new-tag">v3.6</span></td><td>EdgePredicate class with 5 individuals: COMPOSES, TRIGGERS, PRODUCES, EXTENDS, LOOPS_WITH</td><td class="bfo">0000019</td></tr>
+  <tr><td>Consensus</td><td><a href="consensus.ttl">consensus.ttl</a> <span class="new-tag">v3.6</span></td><td>ConsensusProposal, ConsensusVote, ValidationLayer (4 layers), ConsensusDecision (PROV-O)</td><td class="bfo">0000019, 0000030</td></tr>
+  <tr><td>Kernel Metadata</td><td><a href="kernel-metadata.ttl">kernel-metadata.ttl</a></td><td>Runtime, Capability, KernelStatus, StorageMedium, DeploymentMethod, ServingDisposition. <strong>hasPersona, defaultModel, modelEffort</strong> <span class="new-tag">v3.6</span></td><td class="bfo">0000031, 0000019, 0000016</td></tr>
+  <tr><td>Processes</td><td><a href="processes.ttl">processes.ttl</a></td><td>Invocation, EdgeCommunication, Consensus, Broadcast, <strong>TaskExecution</strong> <span class="new-tag">v3.6</span>, <strong>Spawning</strong> <span class="new-tag">v3.6</span>, <strong>Session</strong> <span class="new-tag">v3.6</span>, <strong>ConsensusEvaluation</strong> <span class="new-tag">v3.6</span></td><td class="bfo">0000015</td></tr>
+  <tr><td>Relations</td><td><a href="relations.ttl">relations.ttl</a></td><td>Properties, chains, SWRL rules. <strong>extends_with, loops_with, spawned_by, composes, triggers, produces</strong> <span class="new-tag">v3.6</span></td><td></td></tr>
+  <tr><td>RBAC</td><td><a href="rbac.ttl">rbac.ttl</a></td><td>Agents, roles, permissions, quorum. <strong>TeamCoordinator</strong> <span class="new-tag">v3.6</span>, <strong>GovernanceLevel</strong> <span class="new-tag">v3.6</span></td><td class="bfo">0000040, 0000023, 0000016</td></tr>
+  <tr><td>Workflow</td><td><a href="workflow.ttl">workflow.ttl</a></td><td>CKDL workflow orchestration</td><td class="bfo">0000015</td></tr>
+  <tr><td>Self-Improvement</td><td><a href="self-improvement.ttl">self-improvement.ttl</a></td><td>Validation issues, recommendations, improvement processes</td><td class="bfo">0000023, 0000034, 0000015</td></tr>
+  <tr><td>Shapes</td><td><a href="shapes.ttl">shapes.ttl</a></td><td>SHACL validation for protocol conformance</td><td></td></tr>
+</table>
+
+<h2>v3.6 Additions</h2>
+<table>
+  <tr><th>Addition</th><th>Module</th><th>BFO Type</th><th>Description</th></tr>
+  <tr><td><code>ckp:AgentKernel</code></td><td>core.ttl</td><td>subClassOf Kernel</td><td>LLM-capable kernel with streaming, sessions, personas</td></tr>
+  <tr><td><code>ckp:PersonaTemplate</code></td><td>core.ttl</td><td>iao:InformationContentEntity</td><td>Reusable system prompt templates for EXTENDS mounting</td></tr>
+  <tr><td><code>ckp:ModelConfiguration</code></td><td>core.ttl</td><td>bfo:Quality</td><td>LLM model selection with three-level precedence</td></tr>
+  <tr><td><code>ckp:LOOPS_WITH</code></td><td>core.ttl</td><td>ckp:RelationshipType</td><td>Bidirectional cooperation edge predicate</td></tr>
+  <tr><td><code>edges.ttl</code></td><td>NEW MODULE</td><td>bfo:Quality</td><td>5 edge predicates with composition semantics</td></tr>
+  <tr><td><code>consensus.ttl</code></td><td>NEW MODULE</td><td>prov:Activity</td><td>Proposals, votes, 4 validation layers, decisions</td></tr>
+  <tr><td><code>ckpp:TaskExecutionProcess</code></td><td>processes.ttl</td><td>bfo:Process</td><td>Headless Claude Code task execution</td></tr>
+  <tr><td><code>ckpp:SpawningProcess</code></td><td>processes.ttl</td><td>bfo:Process</td><td>Dynamic kernel creation from discovered concepts</td></tr>
+  <tr><td><code>ckpp:SessionProcess</code></td><td>processes.ttl</td><td>bfo:Process</td><td>Multi-user NATS collaborative sessions</td></tr>
+  <tr><td><code>ckpp:ConsensusEvaluationProcess</code></td><td>processes.ttl</td><td>bfo:Process</td><td>Four-layer consensus evaluation</td></tr>
+  <tr><td><code>ckp:TaskInstance</code></td><td>base-instances.ttl</td><td>InstanceManifest</td><td>Consensus-generated task instance shape</td></tr>
+  <tr><td><code>ckp:ConversationInstance</code></td><td>base-instances.ttl</td><td>InstanceManifest</td><td>Multi-turn LLM conversation recording</td></tr>
+  <tr><td>14 new CheckType individuals</td><td>proof.ttl</td><td>bfo:Quality</td><td>Total 20 check types per SPEC.CKP.v3.6</td></tr>
+  <tr><td><code>ckp:TeamCoordinator</code></td><td>rbac.ttl</td><td>bfo:Role</td><td>Multi-kernel Agent Teams coordinator role</td></tr>
+  <tr><td><code>ckp:GovernanceLevel</code></td><td>rbac.ttl</td><td>bfo:Quality</td><td>STRICT/RELAXED/AUTONOMOUS as formal individuals</td></tr>
+  <tr><td>6 new relation properties</td><td>relations.ttl</td><td>ObjectProperty</td><td>extends_with, loops_with, spawned_by, composes, triggers, produces</td></tr>
+  <tr><td>3 new metadata properties</td><td>kernel-metadata.ttl</td><td>ObjectProperty/DatatypeProperty</td><td>hasPersona, defaultModel, modelEffort</td></tr>
+</table>
+
+<h2>Namespaces</h2>
+<table>
+  <tr><th>Prefix</th><th>URI</th></tr>
+  <tr><td><code>ckp:</code></td><td><code>https://conceptkernel.org/ontology/v3.6/</code></td></tr>
+  <tr><td><code>ckpp:</code></td><td><code>https://conceptkernel.org/ontology/v3.6/process#</code></td></tr>
+  <tr><td><code>ckpr:</code></td><td><code>https://conceptkernel.org/ontology/v3.6/relation#</code></td></tr>
+  <tr><td><code>ckpw:</code></td><td><code>https://conceptkernel.org/ontology/v3.6/workflow#</code></td></tr>
+  <tr><td><code>ckpi:</code></td><td><code>https://conceptkernel.org/ontology/v3.6/improvement#</code></td></tr>
+  <tr><td><code>ckpe:</code></td><td><code>https://conceptkernel.org/ontology/v3.6/edge#</code></td></tr>
+  <tr><td><code>ckpc:</code></td><td><code>https://conceptkernel.org/ontology/v3.6/consensus#</code></td></tr>
+</table>
+
+<h2>Supporting Files</h2>
+<table>
+  <tr><th>File</th><th>Format</th><th>Description</th></tr>
+  <tr><td><a href="kernel-entity-template.ttl">kernel-entity-template.ttl</a></td><td>Turtle</td><td>Template for per-kernel ontology.ttl generation</td></tr>
+  <tr><td><a href="schema.yaml">schema.yaml</a></td><td>LinkML</td><td>LinkML governance schema. v3.6 adds AgentKernel, PersonaTemplate, TaskInstance, ConversationInstance, edge predicates, 20 check types.</td></tr>
+  <tr><td><a href="index.json">index.json</a></td><td>JSON</td><td>Machine-readable metadata with coverage scores</td></tr>
+</table>
+
+<h2>Ontology Layering Strategy</h2>
+<table>
+  <tr><th>Layer</th><th>Ontology</th><th>Scope</th></tr>
+  <tr><td>0</td><td>BFO 2020 (ISO 21838-2)</td><td>Upper ontology: entity, continuant, occurrent</td></tr>
+  <tr><td>0.5</td><td>IAO + CCO + PROV-O + ValueFlows</td><td>Mid-level: information, agents, provenance, economics</td></tr>
+  <tr><td>1</td><td>CKP (conceptkernel.org/v3.6/)</td><td>Protocol: kernel, edge, instance, action</td></tr>
+  <tr><td>2</td><td>Per-kernel (ontology.yaml)</td><td>Domain-specific: SpawnInstance, TraceRecord, etc.</td></tr>
+</table>
+
+<div class="footer">
+  <a href="https://conceptkernel.org">conceptkernel.org</a> &middot; <a href="https://github.com/ConceptKernel">GitHub</a> &middot; <a href="https://discord.gg/sTbfxV9xyU">Discord</a><br>
+  Copyright 2024-present ConceptKernel Contributors. MIT License.
+</div>
+
+</div>
+</body>
+</html>

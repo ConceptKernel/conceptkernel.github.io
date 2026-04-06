@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test';
 const SITE = 'https://conceptkernel.org';
 const BROWSE_URL = `${SITE}/browse/index.html`;
 
-const MODULE_LABELS = ['Core', 'Metadata', 'Processes', 'Relations', 'Instances', 'Proof', 'RBAC'];
+const MODULE_LABELS = ['Core', 'Metadata', 'Processes', 'Relations', 'Instances', 'Proof', 'RBAC', 'Edges', 'Consensus'];
 
 // Helper: wait for ontologies to finish loading
 async function waitForLoad(page) {
@@ -114,10 +114,10 @@ test.describe('Welcome Panel', () => {
         await expect(loops.nth(2)).toContainText('ABox');
     });
 
-    test('module cards are rendered for all 7 modules', async ({ page }) => {
+    test('module cards are rendered for all modules', async ({ page }) => {
         await waitForLoad(page);
         const cards = page.locator('.welcome-module-card');
-        await expect(cards).toHaveCount(7);
+        await expect(cards).toHaveCount(MODULE_LABELS.length);
     });
 
     test('each module card shows a non-zero entity count', async ({ page }) => {
@@ -172,7 +172,7 @@ test.describe('Module Pills', () => {
     test('all pills start in active state', async ({ page }) => {
         await waitForLoad(page);
         const pills = page.locator('.module-pill.active');
-        await expect(pills).toHaveCount(7);
+        await expect(pills).toHaveCount(MODULE_LABELS.length);
     });
 
     test('clicking a pill toggles it to inactive and hides its module', async ({ page }) => {
@@ -227,7 +227,7 @@ test.describe('Sidebar Navigation', () => {
     test('7 ontology items are rendered in the tree', async ({ page }) => {
         await waitForLoad(page);
         const items = page.locator('#ontologyTree .ontology-item');
-        await expect(items).toHaveCount(7);
+        await expect(items).toHaveCount(MODULE_LABELS.length);
     });
 
     test('modules are in correct order: Core first, RBAC last', async ({ page }) => {

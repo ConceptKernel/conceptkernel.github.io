@@ -16,17 +16,19 @@ const CKP_ONTOLOGY_URLS = [
     `${BASE}base-instances.ttl`,
     `${BASE}proof.ttl`,
     `${BASE}rbac.ttl`,
+    `${BASE}edges.ttl`,
+    `${BASE}consensus.ttl`,
 ];
 
 const CKP_PREFIXES = {
-    'ckp': 'https://conceptkernel.org/ontology/v3.5/',
-    'ckpp': 'https://conceptkernel.org/ontology/v3.5/process/',
-    'ckpr': 'https://conceptkernel.org/ontology/v3.5/relation/',
-    'ckpw': 'https://conceptkernel.org/ontology/v3.5/workflow/',
-    'ckpi': 'https://conceptkernel.org/ontology/v3.5/improvement/',
+    'ckp': 'https://conceptkernel.org/ontology/v3.6/',
+    'ckpp': 'https://conceptkernel.org/ontology/v3.6/process/',
+    'ckpr': 'https://conceptkernel.org/ontology/v3.6/relation/',
+    'ckpw': 'https://conceptkernel.org/ontology/v3.6/workflow/',
+    'ckpi': 'https://conceptkernel.org/ontology/v3.6/improvement/',
     'bfo': 'http://purl.obolibrary.org/obo/BFO_',
     'iao': 'http://purl.obolibrary.org/obo/IAO_',
-    'cco': 'http://www.ontologydesignpatterns.org/ont/cco/',
+    'cco': 'http://www.ontologyrepository.com/CommonCoreOntologies/',
     'vf': 'https://w3id.org/valueflows#',
 };
 
@@ -57,6 +59,8 @@ const MODULE_COLORS = {
     'base-instances':   '#16a34a',  // green
     'proof':            '#dc2626',  // red
     'rbac':             '#475569',  // slate
+    'edges':            '#ec4899',  // pink
+    'consensus':        '#f59e0b',  // gold
 };
 
 /**
@@ -70,6 +74,8 @@ const MODULE_LABELS = {
     'base-instances':   'Instances',
     'proof':            'Proof',
     'rbac':             'RBAC',
+    'edges':            'Edges',
+    'consensus':        'Consensus',
 };
 
 /**
@@ -84,19 +90,23 @@ const MODULE_ORDER = [
     'base-instances',
     'proof',
     'rbac',
+    'edges',
+    'consensus',
 ];
 
 /**
  * Rich module descriptions for the welcome panel and sidebar headers.
  */
 const MODULE_DESCRIPTIONS = {
-    'core': 'Core BFO continuants: Kernel, Edge, Instance, Action, Project. The fundamental building blocks of CKP architecture, dual-grounded in BFO 2020 and mid-level ontologies (IAO, CCO, PROV-O).',
-    'kernel-metadata': 'Storage, deployment, and serving qualities. Alpha-6 adds StorageMedium, DeploymentMethod, and ServingDisposition for the four kernel types.',
-    'processes': 'BFO occurrents: Invocation, EdgeCommunication, Consensus, and Broadcast processes. Temporal parts and process boundaries for lifecycle tracking.',
-    'relations': 'Object properties and SWRL inference rules: connected_by, depends_on, can_reach, upstream_of, downstream_of, sibling_of. Property chains for transitive closure.',
-    'base-instances': 'Instance shapes with PROV-O integration: InstanceManifest, SealedInstance, LedgerEntry. Write-once immutability and append-only audit logs.',
-    'proof': 'Proof verification: ProofRecord, ProofCheck, ProofOutcome. SHA-256 hashing, SHACL/SCHEMA/PROVENANCE checks, SPIFFE/SVID trust binding.',
-    'rbac': 'Role-Based Access Control: Agent, UserAgent, ProcessAgent, Role, Permission, Quorum. Governance modes (STRICT, RELAXED, AUTONOMOUS).',
+    'core': 'Core BFO continuants: Kernel (4 types + AgentKernel), Edge, Instance, Action, Project. Dual-grounded in BFO 2020 and mid-level ontologies (IAO, CCO, PROV-O).',
+    'kernel-metadata': 'Storage, deployment, and serving qualities. StorageMedium, DeploymentMethod, ServingDisposition, PersonaTemplate, and ModelConfiguration.',
+    'processes': 'BFO occurrents: Invocation, EdgeCommunication, Consensus, Broadcast, TaskExecution, Spawning, and Session processes.',
+    'relations': 'Object properties and SWRL inference rules: connected_by, depends_on, can_reach, extends_with, loops_with, spawned_by. Property chains for transitive closure.',
+    'base-instances': 'Instance shapes with PROV-O integration: InstanceManifest, SealedInstance, LedgerEntry, TaskInstance, ConversationInstance.',
+    'proof': 'Proof verification with 20 CheckType individuals. ProofRecord, ProofCheck, ProofOutcome. SHA-256 hashing, SPIFFE/SVID trust binding.',
+    'rbac': 'Role-Based Access Control: Agent, UserAgent, ProcessAgent, Role, Permission, Quorum, TeamCoordinator. GovernanceLevel (STRICT, RELAXED, AUTONOMOUS).',
+    'edges': 'Edge predicate ontology: COMPOSES, TRIGGERS, PRODUCES, EXTENDS, LOOPS_WITH. Composition semantics, instance ownership, and activation models.',
+    'consensus': 'CK.Consensus formal ontology: ConsensusProposal lifecycle, ConsensusVote, ValidationLayer (ontological, constraint, topology, compliance).',
 };
 
 /**
@@ -104,16 +114,16 @@ const MODULE_DESCRIPTIONS = {
  */
 const FEATURED_ENTITIES = [
     { label: 'Kernel', type: 'Class', module: 'core', description: 'Persistent computational entity. Dual-grounded: BFO MaterialEntity + CCO Agent.' },
+    { label: 'AgentKernel', type: 'Class', module: 'core', description: 'LLM-capable kernel with streaming, personas, and multi-turn sessions.' },
     { label: 'HotKernel', type: 'Class', module: 'core', description: 'Always-on service kernel with NATS listener and /action/* API.' },
-    { label: 'ColdKernel', type: 'Class', module: 'core', description: 'On-demand kernel triggered by filesystem events.' },
-    { label: 'InlineKernel', type: 'Class', module: 'core', description: 'Podless browser-side JS kernel — NATS WSS, JWT auth.' },
-    { label: 'StaticKernel', type: 'Class', module: 'core', description: 'No process — gateway serves storage/web/ directly.' },
     { label: 'Edge', type: 'Class', module: 'core', description: 'Inter-kernel connection with predicate, NATS subject, and consensus flag.' },
     { label: 'Instance', type: 'Class', module: 'core', description: 'BFO GenDepCont grounded in IAO DataItem. Versioned data artifacts.' },
     { label: 'Action', type: 'Class', module: 'core', description: 'BFO Process grounded in IAO PlanSpecification. Named kernel operations.' },
-    { label: 'Project', type: 'Class', module: 'core', description: 'Federated namespace root grounded in CCO Organization.' },
+    { label: 'PersonaTemplate', type: 'Class', module: 'core', description: 'Reusable system prompt template for EXTENDS persona mounting.' },
+    { label: 'EdgePredicate', type: 'Class', module: 'edges', description: 'Five predicates: COMPOSES, TRIGGERS, PRODUCES, EXTENDS, LOOPS_WITH.' },
+    { label: 'ConsensusProposal', type: 'Class', module: 'consensus', description: 'Formal proposal for CK loop evolution with 4 validation layers.' },
     { label: 'InvocationProcess', type: 'Class', module: 'processes', description: 'Complete lifecycle of a kernel action invocation.' },
-    { label: 'ProofRecord', type: 'Class', module: 'proof', description: 'SHA-256 manifest verification with SPIFFE identity binding.' },
+    { label: 'ProofRecord', type: 'Class', module: 'proof', description: 'SHA-256 manifest verification with 20 check types.' },
     { label: 'Agent', type: 'Class', module: 'rbac', description: 'Autonomous entity with roles, permissions, and governance authority.' },
 ];
 

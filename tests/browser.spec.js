@@ -15,7 +15,7 @@ import { test, expect } from '@playwright/test';
 const BROWSE_URL = '/browse/index.html';
 
 // Module labels that should appear as pills in the sidebar
-const MODULE_LABELS = ['Core', 'Metadata', 'Processes', 'Relations', 'Instances', 'Proof', 'RBAC'];
+const MODULE_LABELS = ['Core', 'Metadata', 'Processes', 'Relations', 'Instances', 'Proof', 'RBAC', 'Edges', 'Consensus'];
 
 test.describe('Ontology Browser', () => {
 

@@ -22,6 +22,15 @@ export default withMermaid(defineConfig({
 
     nav: [
       {
+        text: 'Docs',
+        items: [
+          { text: 'v3.6 (Current)', link: '/v3.6/introduction' },
+          { text: 'v3.5-alpha6', link: '/v3.5-alpha6/introduction' },
+          { text: 'v3.5-alpha3', link: '/v3.5-alpha3/introduction' },
+          { text: 'v3.4', link: '/v3.4/introduction' },
+        ]
+      },
+      {
         text: 'Ontology',
         items: [
           { text: 'Browse Ontology', link: '/browse/' },
@@ -48,8 +57,9 @@ export default withMermaid(defineConfig({
           ]
         },
         {
-          text: 'Auth & Web',
+          text: 'Infrastructure',
           items: [
+            { text: 'CK.Operator', link: '/v3.6/operator' },
             { text: 'Authentication', link: '/v3.6/auth' },
             { text: 'Web Shell', link: '/v3.6/web-shell' },
           ]
@@ -58,28 +68,31 @@ export default withMermaid(defineConfig({
           text: 'Claude Integration',
           items: [
             { text: 'CK as Subagent', link: '/v3.6/subagent' },
-            { text: 'Streaming via NATS', link: '/v3.6/streaming' },
+            { text: 'Streaming', link: '/v3.6/streaming' },
             { text: 'EXTENDS + CK.Claude', link: '/v3.6/extends' },
           ]
         },
         {
-          text: 'Governance',
+          text: 'Governance & Knowledge',
           items: [
-            { text: 'Consensus Loop', link: '/v3.6/consensus' },
+            { text: 'CK.Consensus', link: '/v3.6/consensus' },
+            { text: 'Ontological Graph', link: '/v3.6/graph' },
+          ]
+        },
+        {
+          text: 'Planned Features',
+          collapsed: true,
+          items: [
+            { text: 'Multi-User Sessions', link: '/v3.6/sessions' },
+            { text: 'Task Execution Engine', link: '/v3.6/task-engine' },
+            { text: 'Agent Teams', link: '/v3.6/agent-teams' },
           ]
         },
         {
           text: 'Changelog',
           collapsed: true,
           items: [
-            { text: 'v3.5.3 -- v3.5.12', link: '/v3.6/changelog' },
-          ]
-        },
-        {
-          text: 'Ontology Files',
-          items: [
-            { text: 'v3.5-alpha6 (Turtle)', link: '/ontology/v3.5-alpha6/' },
-            { text: 'v3.4 (Turtle)', link: '/ontology/v3.4/' },
+            { text: 'Full Changelog', link: '/v3.6/changelog' },
           ]
         },
         {
@@ -89,6 +102,13 @@ export default withMermaid(defineConfig({
             { text: 'v3.5-alpha6', link: '/v3.5-alpha6/introduction' },
             { text: 'v3.5-alpha3', link: '/v3.5-alpha3/introduction' },
             { text: 'v3.4', link: '/v3.4/introduction' },
+          ]
+        },
+        {
+          text: 'Ontology Files',
+          items: [
+            { text: 'Browse Ontology', link: '/browse/' },
+            { text: 'v3.5-alpha6 (Turtle)', link: '/ontology/v3.5-alpha6/' },
           ]
         },
         {

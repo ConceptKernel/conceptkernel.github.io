@@ -3,37 +3,37 @@ layout: home
 hero:
   name: Concept Kernel
   text: Protocol v3.6
-  tagline: "Talk to concept kernels from Claude Code, evolve them through ontological consensus, deploy the results to a live cluster."
+  tagline: "Auth. Web shell. Claude integration. Consensus. Graph. The runtime that makes concept kernels operational."
   actions:
     - theme: brand
       text: Introduction
       link: /v3.6/introduction
     - theme: alt
-      text: What's New
-      link: /v3.6/changelog
+      text: Operator
+      link: /v3.6/operator
     - theme: alt
       text: Join Discord
       link: https://discord.gg/sTbfxV9xyU
 
 features:
   - icon: "\U0001F510"
-    title: Auth + Web Shell
-    details: "OIDC via Keycloak, three-panel console UI, kernel lifecycle from the browser. Login, dispatch actions, watch results."
+    title: AuthConfig Ontology
+    details: "OIDC identity provider declaration in the CK.Project ontology. Reuse existing Keycloak realms or birth new ones -- the operator provisions identity as infrastructure."
+  - icon: "\U0001F4BB"
+    title: Web Shell
+    details: "Three-panel kernel-driven UI. Action sidebar, parameter form, results panel. The operator generates it; the kernels populate it."
   - icon: "\U0001F916"
-    title: CK as Claude Code Subagent
-    details: "Every kernel is a Claude Code subagent. /ck Operator loads the CK loop as agent context. Three-loop discipline enforced."
+    title: Claude as Subagent
+    details: "/ck Operator spawns a Claude Code subagent loaded with the kernel's CK loop -- identity, actions, ontology, memory. Three-loop discipline enforced."
   - icon: "\U0001F4E1"
-    title: Claude Streaming via NATS
-    details: "stream.{kernel} topic carries per-token output. Browser renders progressive chat bubbles. Same SDK locally and in cluster."
+    title: NATS Streaming
+    details: "stream.{kernel} topic carries per-token Claude output. Same SDK events, same rendering, local or cluster."
   - icon: "\U0001F9E9"
     title: EXTENDS Predicate
-    details: "Mount Claude capability onto any kernel via an edge. Personas, constraints, and ontology-shaped output. The action is yours, the capability is Claude's."
-  - icon: "\U0001F91D"
-    title: Consensus Loop
-    details: "Ontological governance for kernel evolution. Propose, evaluate, approve through conversation. Tasks executed by headless Claude Code."
-  - icon: "\U0001F9EC"
-    title: Three Loops Foundation
-    details: "CK (TBox), TOOL (RBox), DATA (ABox) -- three DL boxes with independent versioning, write authority, and physical volume isolation."
+    details: "Mount Claude capability onto any kernel. Persona templates shape behavior. The action is yours; the intelligence is mounted."
+  - icon: "\U0001F3DB\uFE0F"
+    title: Consensus + Graph
+    details: "CK.Consensus governs kernel evolution. Jena Fuseki stores the fleet as SPARQL-queryable BFO:0000040 nodes."
 ---
 
 <style>

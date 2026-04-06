@@ -1,25 +1,41 @@
 ---
-title: EXTENDS Predicate
-description: Mount Claude capability onto any kernel via the EXTENDS edge predicate and CK.Claude.
+title: EXTENDS Predicate and CK.Claude
+description: How the EXTENDS edge predicate mounts Claude capability onto any kernel through persona templates, and why this is architecturally different from COMPOSES and TRIGGERS.
 ---
 
-# EXTENDS Predicate + CK.Claude
+# EXTENDS Predicate and CK.Claude
 
-## Motivation
+## The Design Problem: Claude Is Not Built-In
 
-Claude is not a built-in capability of every kernel. It is a **concept kernel** (`LOCAL.ClaudeCode` or a deployed `CK.Claude`) that other kernels can reference via an edge. When a kernel declares an `EXTENDS` edge to a Claude kernel, the Claude kernel's behaviors (personas, reasoning modes, streaming) become available as **new actions on the requesting kernel** -- not on the Claude kernel itself.
+A naive approach to adding LLM capability to concept kernels would be to embed Claude calls in every kernel's processor. This is wrong for three reasons:
 
-This means:
-- `Delvinator.Core` EXTENDS `CK.Claude` -- Core gains `message`, `analyze`, `summarize` actions
-- `Hello.Greeter` EXTENDS `CK.Claude` with persona `friendly-assistant` -- Greeter gains `chat` action with that personality
-- A kernel that does NOT extend Claude has no LLM capability -- it is purely algorithmic
+1. **Not every kernel needs Claude.** A kernel that calculates checksums or routes NATS messages has no use for an LLM. Embedding Claude would add unnecessary dependencies.
+2. **Different kernels need different Claude behaviors.** An analytical reviewer and a friendly assistant use the same model but with different prompts, tool permissions, and output formats.
+3. **Claude capability should be composable.** If Kernel A can analyze data with Claude, and Kernel B composes Kernel A, then Kernel B should inherit the analysis capability -- without B knowing that Claude exists.
 
-Claude behavior is **mounted**, not inherited. Different kernels mount different personalities, tool permissions, and reasoning constraints.
+The v3.6 answer is to make Claude a **concept kernel** (`CK.Claude`) that other kernels reference via the `EXTENDS` edge predicate. The capability is mounted, not inherited.
 
-## The EXTENDS Predicate
+## EXTENDS vs COMPOSES vs TRIGGERS
+
+v3.6 introduces EXTENDS as the fifth edge predicate. Understanding it requires contrasting it with the existing predicates:
+
+| Predicate | What Happens | Actions Appear On | Example |
+|-----------|-------------|-------------------|---------|
+| **COMPOSES** | Source inherits target's existing actions | Source kernel | Core COMPOSES ComplianceCheck -- Core gets `check.all` |
+| **TRIGGERS** | Source can invoke target's actions remotely | Target kernel | ExchangeParser TRIGGERS IntentMapper -- parser calls `classify` on mapper |
+| **PRODUCES** | Source generates output for target's input | Neither (data flow) | ThreadScout PRODUCES ExchangeParser -- output feeds input |
+| **CONSUMES** | Source reads target's output | Neither (data flow) | Core CONSUMES TaxonomySynthesis -- reads synthesized data |
+| **EXTENDS** | Source gains NEW actions backed by target's capability | **Source kernel** | Core EXTENDS CK.Claude -- Core gains `analyze` |
+
+The critical distinction between COMPOSES and EXTENDS:
+
+- **COMPOSES** exposes the target's EXISTING actions on the source. `check.all` already exists on CK.ComplianceCheck; COMPOSES makes it available on Core.
+- **EXTENDS** creates ENTIRELY NEW actions on the source, backed by the target's capability. `analyze` does NOT exist on CK.Claude; EXTENDS creates it on Core, using Claude as the execution engine.
+
+## Edge Declaration
 
 ```yaml
-# In conceptkernel.yaml of the requesting kernel
+# In conceptkernel.yaml of the source kernel
 spec:
   edges:
     outbound:
@@ -40,34 +56,33 @@ spec:
             model: sonnet
 ```
 
-## Action Formation
+The `actions` list defines what NEW actions the source kernel gains. The `persona` field references which personality template Claude uses. The `constraints` field bounds the Claude invocation.
 
-The `EXTENDS` edge creates **new actions on the source kernel**, not on the Claude kernel. This is the key distinction from COMPOSES:
+## CK.Claude Kernel
 
-| Predicate | Actions appear on | Example |
-|-----------|-------------------|---------|
-| COMPOSES | Source kernel inherits target's existing actions | Core COMPOSES ComplianceCheck -- Core gets `check.all` |
-| TRIGGERS | Source kernel can invoke target's actions | ExchangeParser TRIGGERS IntentMapper -- ExchangeParser calls `classify` |
-| **EXTENDS** | **Source kernel gains NEW actions backed by target's capability** | Core EXTENDS CK.Claude -- Core gains `analyze` (new, doesn't exist on CK.Claude) |
+CK.Claude is an `agent`-type system kernel. Its purpose is not to be invoked directly -- it is to provide Claude capability to other kernels via EXTENDS.
 
-The action `analyze` lives on `Delvinator.Core`, is listed in Core's action sidebar, and is dispatched to `input.Delvinator.Core`. Core's processor routes it to the Claude kernel for execution, but the user sees it as a Core action.
-
-## Persona Mounting
-
-The `config.persona` field references a persona template on the Claude kernel:
+CK.Claude's DATA loop contains persona templates:
 
 ```
-/ck/CK.Claude/storage/personas/{persona}.yaml
+CK.Claude/
+  conceptkernel.yaml    # CK loop -- identity
+  CLAUDE.md             # behavioral instructions
+  SKILL.md              # actions: message, analyze, summarize
+  ontology.yaml         # defines persona, constraint types
+  storage/
+    personas/
+      analytical-reviewer.yaml
+      friendly-assistant.yaml
+      strict-auditor.yaml
 ```
 
-A persona defines:
-- **System prompt** -- behavioral instructions, tone, constraints
-- **Tool permissions** -- which Claude Code tools the persona can use
-- **Knowledge scope** -- which kernel contexts to load
-- **Output format** -- structured JSON, markdown, chat
+### Persona Templates
+
+A persona defines the behavioral shape of a Claude invocation:
 
 ```yaml
-# /ck/CK.Claude/storage/personas/analytical-reviewer.yaml
+# storage/personas/analytical-reviewer.yaml
 name: analytical-reviewer
 system_prompt: |
   You are a precise analytical reviewer. You examine data structures,
@@ -78,51 +93,163 @@ output_format: structured
 temperature: 0.1
 ```
 
+```yaml
+# storage/personas/friendly-assistant.yaml
+name: friendly-assistant
+system_prompt: |
+  You are a helpful, conversational assistant. You explain concepts
+  clearly, ask clarifying questions, and maintain a warm tone.
+tools: [Read, Grep, Glob, Bash]
+output_format: markdown
+temperature: 0.7
+```
+
+```yaml
+# storage/personas/strict-auditor.yaml
+name: strict-auditor
+system_prompt: |
+  You are a strict auditor. You evaluate proposals against ontological
+  rules and produce pass/fail verdicts with evidence citations.
+  No suggestions, no alternatives -- only verdicts.
+tools: [Read, Grep]
+output_format: structured
+temperature: 0.0
+```
+
 Different kernels mount different personas:
-- `Delvinator.Core` -- `analytical-reviewer` (structured analysis)
-- `Hello.Greeter` -- `friendly-assistant` (conversational)
-- `CK.ComplianceCheck` -- `strict-auditor` (pass/fail only)
+
+| Kernel | Persona | Use Case |
+|--------|---------|----------|
+| Delvinator.Core | `analytical-reviewer` | Structured data analysis |
+| Hello.Greeter | `friendly-assistant` | Conversational interactions |
+| CK.Consensus | `strict-auditor` | Proposal evaluation |
+
+## get_effective_actions() -- Action Resolution
+
+When the operator or web shell needs a kernel's full action list, it calls `get_effective_actions()` in `cklib/actions.py`. This function resolves all edge types:
+
+1. Start with the kernel's own `spec.actions.common` and `spec.actions.unique`
+2. For each COMPOSES edge: inherit target's existing actions
+3. For each EXTENDS edge: create new actions from edge config with persona + constraints metadata
+
+The resolved action list is what appears in:
+- The web shell action sidebar
+- The ConceptKernel CRD `.spec.actions`
+- The `status` response when a kernel is queried
+
+### Implementation in cklib/actions.py
+
+```python
+def resolve_composed_actions(kernel_yaml, concepts_dir):
+    """COMPOSES: inherit target's existing actions."""
+    actions = []
+    for edge in kernel_yaml['spec']['edges']['outbound']:
+        if edge['predicate'] == 'COMPOSES':
+            target = load_kernel(edge['target_kernel'], concepts_dir)
+            actions.extend(target['spec']['actions']['unique'])
+    return actions
+
+def get_effective_actions(kernel_yaml, concepts_dir):
+    """Full action list: own + COMPOSES + EXTENDS."""
+    actions = kernel_yaml['spec']['actions']['common'] + \
+              kernel_yaml['spec']['actions']['unique']
+    actions += resolve_composed_actions(kernel_yaml, concepts_dir)
+
+    for edge in kernel_yaml['spec']['edges']['outbound']:
+        if edge['predicate'] == 'EXTENDS':
+            config = edge['config']
+            for action in config['actions']:
+                action['_extends'] = {
+                    'target': edge['target_kernel'],
+                    'persona': config.get('persona'),
+                    'constraints': config.get('constraints', {})
+                }
+                actions.append(action)
+    return actions
+```
 
 ## Runtime Dispatch
 
 When `input.Delvinator.Core` receives `{action: "analyze", data: {...}}`:
 
-1. Core's processor sees `analyze` is an EXTENDS action
-2. Loads the Claude kernel's persona template (`analytical-reviewer`)
-3. Builds prompt: persona system prompt + Core's ontology context + user data
-4. Invokes Claude via `claude_agent_sdk` (streaming) or `claude -p` (batch)
-5. Streams results to `stream.Delvinator.Core` (not `stream.CK.Claude`)
-6. Seals result as instance in Core's DATA loop (not Claude's)
+```mermaid
+graph TD
+    A["input.Delvinator.Core<br/>{action: analyze, data: {...}}"] --> B["Core processor<br/>sees 'analyze' is EXTENDS action"]
+    B --> C["Load persona template<br/>CK.Claude/storage/personas/analytical-reviewer.yaml"]
+    C --> D["Build prompt:<br/>persona system_prompt + Core ontology context + user data"]
+    D --> E{"Streaming?"}
+    E -->|Yes| F["claude_agent_sdk.query()<br/>async generator"]
+    E -->|No| G["claude -p<br/>batch subprocess"]
+    F --> H["Publish to stream.Delvinator.Core<br/>(not stream.CK.Claude)"]
+    G --> I["Capture full output"]
+    H --> J["Seal result in Core's DATA loop<br/>(not CK.Claude's DATA loop)"]
+    I --> J
+    J --> K["Publish to result.Delvinator.Core"]
+```
 
-The action is Core's. The capability is Claude's. The persona is mounted.
+Key design decisions in this flow:
+
+1. **Stream to source kernel's topic.** The user subscribed to `stream.Delvinator.Core`. If events went to `stream.CK.Claude`, the user would need to know about the EXTENDS relationship to find the output.
+2. **Seal in source kernel's DATA loop.** The analysis result is Core's instance, shaped by Core's ontology. CK.Claude's DATA loop is for CK.Claude's own data -- not for every kernel that extends it.
+3. **Persona loaded from target's storage.** The persona template lives in CK.Claude's DATA loop, not Core's. Core does not own the persona -- it references it via the edge.
 
 ## Why Not Just Call Claude Directly?
 
-Because:
-- **Ontological grounding** -- the action is typed in Core's ontology, produces Core-shaped instances
-- **Access control** -- Core's grants govern who can invoke `analyze`, not Claude's
-- **Provenance** -- the instance traces to Core's action, not a generic Claude call
-- **Personality** -- the persona is chosen per-kernel, not global
-- **Composability** -- `analyze` can be further composed by kernels that COMPOSE Core
-- **No Claude in cluster** -- LOCAL.ClaudeCode runs locally, EXTENDS works via NATS relay
+Six architectural reasons:
 
-## Edge Predicate Registry
+| Concern | Direct Claude Call | EXTENDS CK.Claude |
+|---------|-------------------|-------------------|
+| **Ontological grounding** | Ad-hoc, untyped output | Typed in source kernel's ontology |
+| **Access control** | No governance | Source kernel's grants govern who can invoke |
+| **Provenance** | No trace | Instance traces to source kernel's action |
+| **Personality** | Global or ad-hoc | Per-kernel persona selection |
+| **Composability** | Not composable | `analyze` can be further composed by kernels that COMPOSE Core |
+| **Location independence** | Requires Claude locally | EXTENDS works via NATS relay -- Claude can be local or remote |
 
-Updated table with EXTENDS:
+The EXTENDS predicate makes Claude capability an **ontological edge**, not a runtime dependency. A kernel that does not EXTEND CK.Claude has no LLM capability -- it is purely algorithmic. A kernel that does EXTEND it gains specific, persona-shaped, access-controlled LLM actions that are indistinguishable from its native actions.
+
+## Edge Predicate Registry (Updated)
 
 | Predicate | Semantics | Action Behavior |
 |-----------|-----------|-----------------|
-| COMPOSES | A includes B's actions | B's actions appear on A |
-| TRIGGERS | A invokes B | A calls B's actions remotely |
-| PRODUCES | A generates input for B | A's output feeds B's input |
-| CONSUMES | A reads output from B | A subscribes to B's results |
-| **EXTENDS** | **A gains new actions backed by B's capability** | **New actions on A, executed by B, shaped by A's ontology** |
+| COMPOSES | A includes B's capabilities | B's existing actions appear on A |
+| TRIGGERS | A invokes B remotely | A calls B's actions, results stay on B |
+| PRODUCES | A generates input for B | Data flow, no action exposure |
+| CONSUMES | A reads output from B | Data flow, no action exposure |
+| **EXTENDS** | **A gains new actions backed by B** | **New actions on A, executed by B, shaped by A's ontology** |
 
-## Conformance
+## Architectural Consistency Check
+
+::: details Logical Analysis: EXTENDS Design
+
+**Question:** If CK.Claude is a concept kernel, does it have its own three loops?
+
+**Answer:** Yes. CK.Claude has:
+- CK loop: conceptkernel.yaml, CLAUDE.md, SKILL.md, ontology.yaml (defines Persona, Constraint types)
+- TOOL loop: tool/processor.py (handles message/analyze/summarize actions via Claude)
+- DATA loop: storage/personas/ (persona templates), storage/instances/ (its own results when invoked directly)
+
+CK.Claude CAN be invoked directly (via TRIGGERS or NATS publish). But its primary use is as an EXTENDS target.
+
+**Question:** What prevents a circular EXTENDS (A EXTENDS B EXTENDS A)?
+
+**Answer:** Nothing in the current implementation. The `get_effective_actions()` function does not detect cycles. A circular EXTENDS would create an infinite loop in action resolution. This is a gap -- the compliance check (`check.edges`) should detect and reject circular EXTENDS paths.
+
+**Question:** Can a kernel EXTENDS multiple targets?
+
+**Answer:** Yes. A kernel could EXTENDS CK.Claude for LLM capability AND EXTENDS some future CK.Search for search capability. Each EXTENDS edge adds its own actions. There is no conflict as long as action names are unique.
+
+**Contradiction check:** The spec says EXTENDS creates "new actions on the source kernel backed by target's capability." But the persona template lives in the target's DATA loop. This means the source kernel depends on the target's DATA loop content at runtime -- a cross-loop read. Is this a separation axiom violation?
+
+**Resolution:** No. The separation axiom prohibits a kernel from WRITING to another kernel's loops. READING another kernel's DATA loop is permitted through declared access (grants). The EXTENDS edge declaration IS the grant. CK.Claude's persona templates are read-only shared assets, analogous to how COMPOSES reads another kernel's action catalog.
+:::
+
+## Conformance Requirements
 
 - EXTENDS MUST create new actions on the source kernel, not expose the target's actions
 - The `config.persona` field MUST reference a valid persona template on the target kernel
 - Actions created by EXTENDS MUST be listed in the source kernel's action sidebar
 - Instances produced by EXTENDS actions MUST be sealed in the source kernel's DATA loop
-- Provenance MUST trace to the source kernel's action, with `prov:used` linking to the Claude kernel
+- Provenance MUST trace to the source kernel's action, with `prov:used` linking to CK.Claude
 - The EXTENDS target MUST be a kernel with LLM capability (type `agent` or with `claude_agent_sdk`)
+- Stream events from EXTENDS actions MUST be published to `stream.{source_kernel}`, not `stream.{target_kernel}`

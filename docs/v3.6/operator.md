@@ -78,6 +78,133 @@ The `project.deploy` action follows a deterministic 10-step sequence. Each step 
 
 For the full step-by-step breakdown, see [Reconciliation Lifecycle](./reconciliation).
 
+## Version Materialisation (v3.6.1)
+
+::: info v3.6.1 -- serving-multiversion-unpack
+This section documents the version materialisation model introduced in v3.6.1, implemented in CK.Operator v1.3.0. See [Versioning](./versioning) for the full git model.
+:::
+
+### serving.json Is Retired
+
+Prior to v3.6.1, `serving.json` was the sole exception to the CK loop's read-only policy. It declared which version was active via `ck_ref` and `tool_ref` fields. This created three problems that could not be cleanly solved:
+
+1. **Write-through hack** -- the CK volume had to be writable for one file, breaking the separation axiom.
+2. **Inert file** -- `serving.json` existed on disk but was not enforced by the runtime, making it decorative.
+3. **Decorative refs** -- the git branch names in `serving.json` had no mechanism to resolve to actual commit hashes.
+
+v3.6.1 dissolves all three problems by moving version state from the filesystem to the Kubernetes control plane. `serving.json` no longer exists on disk. The CK volume is purely ReadOnlyMany with no exceptions.
+
+### Version State in CK.Project CR
+
+Version declarations live in the CK.Project custom resource:
+
+```yaml
+spec:
+  repo: https://github.com/ConceptKernel/kernels.git
+  versions:
+    - name: live
+      ref: abc123f
+      route: /
+    - name: staging
+      ref: def4567
+      route: /staging
+    - name: review-pr-42
+      ref: 789feda
+      route: /review/pr-42
+```
+
+The operator reads `spec.versions`, materialises each version from the git repository, and creates per-version PVs and HTTPRoute rules. A version promotion is a CK.Project resource update -- `kubectl patch`, NATS command, or operator API. Standard Kubernetes-native workflow with etcd history.
+
+### Materialisation Pipeline
+
+The reconciliation lifecycle gains a new step, `deploy.materialise`, inserted between `deploy.namespace` and `deploy.storage`:
+
+```
+Reconciliation lifecycle (v3.6.1):
+
+  1. deploy.namespace
+  2. deploy.materialise          -- NEW: git archive -> filer
+  3. deploy.storage.ck
+  4. deploy.storage.data
+  5. deploy.processors
+  6. deploy.web
+  7. deploy.routing
+  8. deploy.conceptkernels
+  9. deploy.auth
+  10. deploy.graph
+  11. deploy.endpoint
+```
+
+For each version in `spec.versions`, the materialise step:
+
+1. Checks if `/ck/v/{tag}/{kernel}/.git-ref` exists on filer
+2. If it exists and contains the same ref -- skip (already current)
+3. If missing or different ref:
+   - Runs `git archive {ref}:{kernel}/` from the bare repo
+   - Uploads the archive to filer at `/ck/v/{tag}/{kernel}/`
+   - Writes the commit hash to `/ck/v/{tag}/{kernel}/.git-ref`
+4. Ensures PV `ck-{project}-{kernel}-{tag}` exists pointing to `/ck/v/{tag}/{kernel}`
+5. Ensures PVC is bound
+
+### Per-Version PVs and HTTPRoutes
+
+Each declared version gets its own PersistentVolume and routing rule:
+
+```yaml
+# Per-version CK volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ck-delvinator-core-live
+spec:
+  accessModes: [ReadOnlyMany]
+  capacity:
+    storage: 50Gi
+  csi:
+    driver: seaweedfs-csi-driver
+    volumeHandle: ck-delvinator-core-live
+    volumeAttributes:
+      path: "/ck/v/live/Delvinator.Core"
+```
+
+HTTPRoute rules are ordered longest-prefix first, so `/staging` matches before `/`:
+
+```yaml
+spec:
+  hostnames: [delvinator.tech.games]
+  rules:
+    - matches:
+        - path: { type: PathPrefix, value: /staging }
+      backendRefs:
+        - name: delvinator-staging
+    - matches:
+        - path: { type: PathPrefix, value: / }
+      backendRefs:
+        - name: delvinator-live
+```
+
+When a tag's ref changes, the PV is not recreated -- the filer path is stable (keyed by tag name). Content changes when the operator re-materialises. Pods pick up new content on rolling restart.
+
+### Version Lifecycle via CR
+
+| CR Change | Operator Action |
+|-----------|-----------------|
+| Add version | Materialise, create deployment + PV/PVC + route rule |
+| Change version ref | Re-materialise, roll pods |
+| Remove version | Delete deployment, PV/PVC, route rule, GC filer path |
+
+### Garbage Collection
+
+After reconciliation, the operator scans `/ck/v/` on the filer and deletes directories not referenced by any active version in any CK.Project resource. GC logs every deletion and never removes directories referenced by other projects.
+
+### Shared Kernel Optimisation
+
+When two versions reference the same git tree hash for a kernel (e.g., the CK loop has not changed between live and staging), the operator reuses one filer copy. The PV for the second version points to the first version's filer path -- no duplicate storage.
+
+### Backward Compatibility
+
+If `spec.versions` is absent from a CK.Project resource, the operator falls back to the current flat layout (`/ck/{KernelName}/`). Existing projects deployed without version declarations continue to work unchanged.
+
 ### What Each Step Creates
 
 **deploy.namespace**: Namespace `ck-{subdomain}`, ServiceAccount `ckp-runtime`, NetworkPolicies (default-deny, allow-nats, allow-dns, allow-gateway).
@@ -361,7 +488,7 @@ The v3.5.7 `patch` addition was necessary for idempotent updates. Without it, `k
 
 **Contradiction identified:** The v3.5.2 delta spec says "13 checks" for the initial deployment, but the v3.5.5 changelog says "13 infra + 2 auth" totaling 15. The v3.5.2 deployment output shows 13/13 checks passing (before auth existed). After v3.5.5, the count became 15/15. The documentation is consistent -- the count increased when auth was added. Not a contradiction, but worth noting for readers comparing version outputs.
 
-**Gap identified:** The operator does not currently support canary deployments. `serving.json` defines stable/canary/develop versions with weights, but the operator does not create weighted route rules. This is documented in the v3.5-alpha6 operator roadmap as a future version.
+**Gap resolved (v3.6.1):** The operator now supports multi-version deployments via `spec.versions` in the CK.Project CR. `serving.json` has been retired. Each named version gets its own deployment, PV, and HTTPRoute rule. Weighted canary routing is not yet supported -- versions are routed by URL path prefix, not traffic weight.
 :::
 
 ## Conformance Requirements

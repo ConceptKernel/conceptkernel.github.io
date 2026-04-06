@@ -73,7 +73,7 @@ All inter-kernel communication MUST use NATS messaging. HTTP is for static web s
 
 ### 4. Version-Pinned
 
-Containers SHALL see only the versions declared in `serving.json`. No arbitrary version access. This prevents version drift and ensures reproducible behaviour across the fleet.
+Containers SHALL see only the versions declared in the CK.Project CR (`spec.versions`). No arbitrary version access. This prevents version drift and ensures reproducible behaviour across the fleet. Version state lives in the Kubernetes control plane, not on the filesystem.
 
 ### 5. Provenance-Mandatory
 
@@ -174,6 +174,11 @@ v3.5.15 Task execution engine                                    PLANNED
 v3.5.16 Agent Teams                                              PLANNED
 ---------------------------------------------------------------------
 v3.6    Full release -- sum of all above
+
+v3.6.1  serving-multiversion-unpack (CK.Operator v1.3.0)       SPEC
+        Version materialisation via CK.Project CR
+        serving.json retired, git archive -> filer pipeline
+        Per-version PVs, HTTPRoutes, garbage collection
 ```
 
 ### Why This Model
@@ -282,6 +287,7 @@ The v3.6 docs are organized by capability, not by version number. Each page expl
 | [Sessions](/v3.6/sessions) | Multi-user NATS sessions (v3.5.14, planned) |
 | [Task Engine](/v3.6/task-engine) | Consensus-driven headless execution (v3.5.15, planned) |
 | [Agent Teams](/v3.6/agent-teams) | Multi-kernel coordination (v3.5.16, planned) |
+| [Versioning](/v3.6/versioning) | Git model, tag prefixes, .git-ref provenance (v3.6.1) |
 | [Changelog](/v3.6/changelog) | Full version-by-version changelog |
 
 ::: info Logical Analysis Note

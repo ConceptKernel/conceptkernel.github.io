@@ -41,6 +41,59 @@ v3.5-alpha6 was the last deployed incremental release. v3.6 adds:
 
 ---
 
+## v3.6.1 -- serving-multiversion-unpack <Badge type="info" text="SPEC" />
+
+**Date:** 2026-04-06 | **Implements:** CK.Operator v1.3.0
+
+Version materialisation moves from `serving.json` on disk to the CK.Project custom resource. The CK volume becomes purely immutable -- no write-through exceptions.
+
+### What Changes
+
+- **serving.json retired** -- no longer exists on disk. The three problems it created (write-through hack, inert file, decorative git refs) are dissolved.
+- **CK.Project `spec.versions`** -- named versions with git commit ref and URL route prefix. Version state is in etcd, not the filesystem.
+- **`spec.repo`** -- upstream git URL. The operator clones to scratch space and runs `git archive` locally (FUSE mounts cannot host bare repos).
+- **`deploy.materialise` step** -- new reconciliation step between `deploy.namespace` and `deploy.storage`. Streams `git archive` output to filer at `/ck/v/{tag}/{kernel}/`.
+- **`.git-ref` stamp** -- each materialised directory contains the exact commit hash. Implements `prov:wasGeneratedBy` from Git2PROV.
+- **Per-version PVs** -- `ck-{project}-{kernel}-{tag}`, each pointing to `/ck/v/{tag}/{kernel}`. When a tag's ref changes, content updates without PV recreation.
+- **Per-version HTTPRoutes** -- longest-prefix-first routing. Each version gets its own deployment and route rule.
+- **Garbage collection** -- filer paths under `/ck/v/` not referenced by any CK.Project version are deleted after reconciliation.
+- **Shared kernel optimisation** -- identical tree hashes across versions share one filer copy.
+- **Backward compatible** -- no `spec.versions` means flat layout, existing projects unchanged.
+
+### Git Model (D9)
+
+- One repo per project. CK + TOOL in same repo, DATA never in git.
+- Tag prefix convention: `ck/{kernel}/vX.Y.Z`, `tool/{kernel}/vX.Y.Z` for independent loop versioning.
+- Per-loop overrides: `ck_ref` and `tool_ref` in version declarations for split CK/TOOL tags.
+- Ontological grounding: DOAP for repo metadata, Git2PROV (PROV-O) for commit provenance.
+
+### Deficiencies Resolved
+
+| Deficiency | Resolution |
+|-----------|-----------|
+| D1: No version materialisation | `git archive` from bare repo, commit-pinned |
+| D3: No serving.json write-through | serving.json retired, version state in CR |
+| D6: No git integration on filer | Bare repo on scratch, `.git-ref` traceability |
+
+### New CK.Project CRD Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `spec.repo` | string | MUST (if versions declared) | Upstream git URL |
+| `spec.versions` | array | SHOULD | Version declarations |
+| `spec.versions[].name` | string | MUST | Tag name (used in PV names, filer paths, routes) |
+| `spec.versions[].ref` | string | MUST | Git commit hash to materialise |
+| `spec.versions[].route` | string | MUST | URL path prefix |
+| `spec.versions[].ck_ref` | string | MAY | CK loop tag override |
+| `spec.versions[].tool_ref` | string | MAY | TOOL loop tag override |
+
+### New Ontology Classes
+
+- `VersionDeclaration` -- named version pinned to a git commit, mapped to a URL route
+- `GitRepoConfig` -- upstream git repository location
+
+---
+
 ## Incremental Versions (v3.5.x)
 
 All notable changes in the development increments that compose v3.6. Each version was an independently shippable increment. Versions marked DEPLOYED have running proof on the reference cluster.

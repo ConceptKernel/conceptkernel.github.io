@@ -112,6 +112,7 @@ export default withMermaid(defineConfig({
             { text: 'ConceptKernel CRD', link: '/v3.6/crd' },
             { text: 'Evidence-Based Proof', link: '/v3.6/proof' },
             { text: 'Reconciliation & Logging', link: '/v3.6/reconciliation' },
+            { text: 'Versioning', link: '/v3.6/versioning' },
           ]
         },
         {

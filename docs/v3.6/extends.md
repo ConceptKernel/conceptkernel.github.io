@@ -58,9 +58,43 @@ spec:
 
 The `actions` list defines what NEW actions the source kernel gains. The `persona` field references which personality template Claude uses. The `constraints` field bounds the Claude invocation.
 
-## CK.Claude Kernel
+## CK.Claude Identity
 
 CK.Claude is an `agent`-type system kernel. Its purpose is not to be invoked directly -- it is to provide Claude capability to other kernels via EXTENDS.
+
+```yaml
+kernel_class:      CK.Claude
+namespace_prefix:  CK
+type:              agent
+governance:        AUTONOMOUS
+```
+
+CK.Claude is a first-class system kernel. When deployed to a cluster, it operates as a `node:hot` persistent subscriber. In local development, it operates as a `LOCAL.CK.Claude` kernel without SPIFFE.
+
+### Agent Kernel Type
+
+The `agent` type is a kernel type that supports long-running conversational sessions with LLM inference. Agent kernels differ from other types in three ways:
+
+| Characteristic | Agent | node:hot | node:cold |
+|----------------|-------|----------|-----------|
+| NATS pattern | Persistent subscriber | Persistent subscriber | Started on message |
+| Streaming | MUST publish to `stream.{kernel}` | MAY publish to `stream.{kernel}` | MAY publish |
+| Session support | MUST support multi-turn sessions | OPTIONAL | NOT APPLICABLE |
+| Persona templates | MUST serve from `storage/personas/` | NOT APPLICABLE | NOT APPLICABLE |
+| Context window | Maintains conversation context | Stateless per message | Stateless per message |
+
+### Direct Actions
+
+CK.Claude itself declares minimal actions. Its primary value is delivered through EXTENDS edges, not through direct invocation.
+
+| Action | Type | Description |
+|--------|------|-------------|
+| `status` | inspect | Return kernel status and available personas |
+| `personas.list` | query | List available persona templates |
+| `personas.get` | inspect | Return a specific persona template |
+| `chat` | operate | Direct LLM conversation (no persona mounting) |
+
+### File Structure
 
 CK.Claude's DATA loop contains persona templates:
 
@@ -73,11 +107,17 @@ CK.Claude/
   storage/
     personas/
       analytical-reviewer.yaml
-      friendly-assistant.yaml
       strict-auditor.yaml
+      creative-explorer.yaml
+      code-implementer.yaml
+      documentation-writer.yaml
 ```
 
-### Persona Templates
+## Persona Template Registry
+
+CK.Claude maintains persona templates in `storage/personas/`. Each template defines a specialised LLM behaviour that other kernels can mount via EXTENDS. Persona templates are versioned via the DATA loop's git history. A kernel that EXTENDS CK.Claude with a specific persona receives the current version of the template at invocation time.
+
+### 5 Standard Personas
 
 A persona defines the behavioral shape of a Claude invocation:
 
@@ -94,17 +134,6 @@ temperature: 0.1
 ```
 
 ```yaml
-# storage/personas/friendly-assistant.yaml
-name: friendly-assistant
-system_prompt: |
-  You are a helpful, conversational assistant. You explain concepts
-  clearly, ask clarifying questions, and maintain a warm tone.
-tools: [Read, Grep, Glob, Bash]
-output_format: markdown
-temperature: 0.7
-```
-
-```yaml
 # storage/personas/strict-auditor.yaml
 name: strict-auditor
 system_prompt: |
@@ -116,13 +145,56 @@ output_format: structured
 temperature: 0.0
 ```
 
+```yaml
+# storage/personas/creative-explorer.yaml
+name: creative-explorer
+system_prompt: |
+  You are a creative explorer. You generate novel approaches,
+  brainstorm alternatives, and find unexpected connections.
+tools: [Read, Grep, Glob, Bash]
+output_format: markdown
+temperature: 0.8
+```
+
+```yaml
+# storage/personas/code-implementer.yaml
+name: code-implementer
+system_prompt: |
+  You are a precise code implementer. You write clean, tested,
+  well-documented code that follows the project's conventions.
+tools: [Read, Grep, Glob, Bash, Edit, Write]
+output_format: code
+temperature: 0.2
+```
+
+```yaml
+# storage/personas/documentation-writer.yaml
+name: documentation-writer
+system_prompt: |
+  You are a documentation writer. You produce clear, accurate,
+  well-structured documentation from code and specifications.
+tools: [Read, Grep, Glob]
+output_format: markdown
+temperature: 0.4
+```
+
+### Persona Template Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | REQUIRED | Persona identifier matching `config.persona` |
+| `system_prompt` | string | REQUIRED | System prompt injected into the LLM context |
+| `tools` | list[string] | OPTIONAL | Tool allowlist for the LLM session |
+| `output_format` | string | OPTIONAL | `structured`, `markdown`, `code`, or `freeform` |
+| `temperature` | float | OPTIONAL | LLM temperature parameter |
+
 Different kernels mount different personas:
 
 | Kernel | Persona | Use Case |
 |--------|---------|----------|
 | Delvinator.Core | `analytical-reviewer` | Structured data analysis |
-| Hello.Greeter | `friendly-assistant` | Conversational interactions |
 | CK.Consensus | `strict-auditor` | Proposal evaluation |
+| CK.Operator | `code-implementer` | Kernel scaffolding |
 
 ## get_effective_actions() -- Action Resolution
 
@@ -208,15 +280,91 @@ Six architectural reasons:
 
 The EXTENDS predicate makes Claude capability an **ontological edge**, not a runtime dependency. A kernel that does not EXTEND CK.Claude has no LLM capability -- it is purely algorithmic. A kernel that does EXTEND it gains specific, persona-shaped, access-controlled LLM actions that are indistinguishable from its native actions.
 
-## Edge Predicate Registry (Updated)
+## 7 Action Types
 
-| Predicate | Semantics | Action Behavior |
-|-----------|-----------|-----------------|
-| COMPOSES | A includes B's capabilities | B's existing actions appear on A |
-| TRIGGERS | A invokes B remotely | A calls B's actions, results stay on B |
-| PRODUCES | A generates input for B | Data flow, no action exposure |
-| CONSUMES | A reads output from B | Data flow, no action exposure |
-| **EXTENDS** | **A gains new actions backed by B** | **New actions on A, executed by B, shaped by A's ontology** |
+CKP classifies all actions into seven types that determine context assembly, output format, and instance recording. These are a closed set -- conformant implementations MUST support all entries and MUST NOT define additional types without specification amendment.
+
+| Type | Verbs / Pattern | Context Loaded | Instance Record | BFO (execution) |
+|------|----------------|----------------|-----------------|-----------------|
+| `inspect` | `status`, `show`, `list`, `version` | Target identity only | None (stateless) | -- |
+| `check` | `check.*`, `validate`, `probe.*` | Target + rules + schema | `proof.json` | BFO:0000015 |
+| `mutate` | `create`, `update`, `complete`, `assign` | Target + grants + pre-state | `ledger.json` (before/after) | BFO:0000015 |
+| `operate` | `execute`, `render`, `run`, `spawn`, `chat` | Full workspace | Sealed instance + `conversation/` | BFO:0000015 |
+| `query` | `fleet.*`, `catalog`, `search` | Fleet-wide scan | None (stateless) | -- |
+| `deploy` | `deploy.*`, `apply`, `route.*` | Target + manifests + cluster state | Deployment record | BFO:0000015 |
+| `transfer` | `export.*`, `import.*`, `sync`, `regenerate` | Source + destination + mapping | Transfer receipt | BFO:0000015 |
+
+### Action Type Resolution
+
+Action type is resolved by suffix/prefix matching against the action name. The matching order is: exact match, prefix match, suffix match. First match wins.
+
+| Action Name | Match Rule | Resolved Type |
+|-------------|-----------|---------------|
+| `task.create` | suffix `create` | `mutate` |
+| `check.identity` | prefix `check.*` | `check` |
+| `fleet.catalog` | suffix `catalog` | `query` |
+| `spawn` | exact `spawn` | `operate` |
+| `deploy.inline` | prefix `deploy.*` | `deploy` |
+| `export.backup` | prefix `export.*` | `transfer` |
+| `status` | exact `status` | `inspect` |
+| `chat` | exact `chat` | `operate` |
+
+### Stateful vs Stateless
+
+| Category | Types | Instance Record | Audit Requirement |
+|----------|-------|-----------------|-------------------|
+| Stateless | `inspect`, `query` | None | OPTIONAL (if `audit: true` in grants) |
+| Stateful | `check`, `mutate`, `operate`, `deploy`, `transfer` | REQUIRED | REQUIRED (always) |
+
+Stateful action types MUST produce an instance record with PROV-O provenance fields linking the instance to the action that created it, the operator who authorised it, and the kernel that produced it.
+
+## Edge Predicate Registry
+
+For a deep dive into all five edge predicates, see [Edge Predicates and Action Composition](./edges).
+
+| Predicate | Source Role | Target Role | NATS Materialisation | Instance Ownership |
+|-----------|-----------|-------------|----------------------|--------------------|
+| `COMPOSES` | Hub (parent) | Spoke (child) | Subscribe `result.{spoke}` ; publish `input.{spoke}` | Each writes its own |
+| `TRIGGERS` | Trigger source | Triggered target | Subscribe `event.{source}` with action filter | Each writes its own |
+| `PRODUCES` | Event producer | Event consumer | Subscribe `event.{source}` | Each writes its own |
+| `EXTENDS` | Capability consumer | Capability provider | Subscribe `result.{provider}` | Consumer writes all |
+| `LOOPS_WITH` | Peer A | Peer B | Both subscribe `event.{peer}` | Each writes its own |
+
+### Edge Subscription Materialisation
+
+Edge predicates materialise as NATS subscriptions at kernel startup. No edge subscription code is written in the processor -- the `NatsKernelLoop` derives subscriptions from the `conceptkernel.yaml` edges block.
+
+| Edge Predicate | NATS Subscription Created | Activation Trigger |
+|----------------|---------------------------|--------------------|
+| `PRODUCES` | Target subscribes to `event.{source}` | Target auto-invokes default action |
+| `TRIGGERS` | Target subscribes to `event.{source}` with `trigger_action` | Target invokes the specified action |
+| `COMPOSES` | Hub subscribes to `result.{spoke}`, publishes to `input.{spoke}` | Hub dispatches, receives results |
+| `EXTENDS` | Source subscribes to `result.{target}`, dispatches via persona | Source forwards EXTENDS actions to target |
+| `LOOPS_WITH` | Both subscribe to each other's `event.*` topics | Bidirectional invocation with circular guard |
+
+### Ontological Graph Materialisation
+
+After successful deployment, [CK.Operator](./operator) SHOULD publish kernel metadata and edges as RDF triples to a SPARQL endpoint (reference implementation: Jena Fuseki `/ckp` dataset). Each kernel becomes a `ckp:Kernel` individual typed as `bfo:0000040` (Material Entity). Edges become RDF object properties using CKP predicates.
+
+```turtle
+<ckp://Kernel#Delvinator.Core:v1.0> a ckp:Kernel, bfo:0000040 ;
+    rdfs:label "Delvinator.Core" ;
+    ckp:hasType "node:cold" ;
+    ckp:belongsToProject <ckp://Project#delvinator.tech.games> .
+
+<ckp://Kernel#Delvinator.Core:v1.0> ckp:composes
+    <ckp://Kernel#CK.ComplianceCheck:v1.0> .
+```
+
+Named graphs per project (`urn:ckp:fleet:{hostname}`) enable per-project SPARQL queries. Graph materialisation is best-effort; deploy MUST succeed even if SPARQL endpoint is unreachable.
+
+### Compliance Validation
+
+[CK.ComplianceCheck](./compliance) validates edges and actions using the registries:
+
+- **`check.edges`:** Every edge target MUST exist. Every predicate MUST be in the registry. No duplicate edges. EXTENDS edges MUST define `config.actions`.
+- **`check.nats`:** Every kernel MUST declare `spec.nats` with input/result/event topics. Edge subscriptions MUST be derivable from declared edges.
+- **`check.edge_materialisation`:** Edge targets exist and NATS topics resolve.
 
 ## Architectural Consistency Check
 

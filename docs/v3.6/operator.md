@@ -5,26 +5,78 @@ description: How CK.Operator reconciles ontological declarations into cluster re
 
 # CK.Operator
 
+## Identity
+
+| Property | Value |
+|----------|-------|
+| URN | `ckp://Kernel#CK.Operator:v1.0` |
+| kernel_id | `c995bbf7-241d-448d-af8c-38187e02d1c5` |
+| Type | `node:hot` |
+| Governance | `AUTONOMOUS` |
+| Archetype | Materialiser |
+| Entrypoint | `tool/processor.py` |
+| NATS Topics | `input.CK.Operator`, `result.CK.Operator`, `event.CK.Operator` |
+
 ## The Operator Principle
 
 CK.Operator enforces a single rule: **if it is not in the ontology, it does not exist in the cluster.** The operator reads `conceptkernel.yaml` (CK loop, TBox) and materialises the cluster state. It never reads `tool/processor.py` or `storage/` -- those are TOOL loop and DATA loop concerns.
 
 This matters because it closes the gap between declaration and reality. A developer declares a kernel in `conceptkernel.yaml`. The operator creates the namespace, volumes, deployment, routes, auth, and CRD. If the declaration changes, the operator reconciles. If the kernel is removed from the declaration, the operator deletes the compute resources (but retains data -- identity outlives compute).
 
+## Dual Entry Architecture
+
+CK.Operator accepts actions through two equivalent entry points. Both invoke the same `reconcile()` function to guarantee identical behaviour regardless of how the action was initiated.
+
+| Entry Point | Mechanism | Invocation |
+|-------------|-----------|------------|
+| **NATS listener** | `KernelProcessor` with `@on` handlers | `python processor.py --listen` |
+| **kopf CRD** | kopf operator watching `CKProject` CR | `kopf run processor.py` |
+| **Dual mode** | Both simultaneously (production) | `python processor.py --dual` |
+| **CLI direct** | Argparse, no NATS/kopf | `python processor.py --action project.deploy --data '{...}'` |
+
+The rationale for dual entry is operational flexibility: NATS provides real-time browser and inter-kernel communication, while kopf provides Kubernetes-native GitOps integration via `kubectl apply`.
+
+## Action Catalog (11 Actions)
+
+| Action | Type | Access | Description |
+|--------|------|--------|-------------|
+| `project.deploy` | deploy | auth | Materialise a CKProject into Kubernetes resources |
+| `project.teardown` | deploy | auth | Remove compute resources; retain PVs and namespace |
+| `project.status` | inspect | anon | Return pod status for a deployed project |
+| `project.list` | inspect | anon | List all managed CKProject instances |
+| `project.create` | mutate | auth | Scaffold a new project with kernel files and filer structure |
+| `kernel.create` | mutate | auth | Create awakening files for a new kernel |
+| `kernel.start` | operate | auth | Scale deployment to replicas=1 |
+| `kernel.stop` | operate | auth | Scale deployment to replicas=0 |
+| `kernel.spawn` | mutate | auth | Dynamically create a new concept kernel from a template |
+| `status` | inspect | anon | Built-in kernel status |
+| `ontology` | inspect | anon | Return kernel ontology |
+
+::: tip Grants
+| Identity | Permitted Actions |
+|----------|-------------------|
+| `anon` | `status`, `ontology`, `project.list`, `project.status` |
+| `auth` | `project.deploy`, `project.teardown`, `project.create`, `kernel.create`, `kernel.start`, `kernel.stop`, `kernel.spawn` |
+:::
+
 ## Reconciliation Lifecycle
 
-The operator follows a strict step sequence. Each step has verification checks. If any check fails, the step halts and subsequent steps do not execute.
+The `project.deploy` action follows a deterministic 10-step sequence. Each step produces an occurrent with [proof verification](./proof). If any check fails, the step halts and subsequent steps do not execute.
 
 ```
-deploy.namespace        -- create/verify project namespace + security resources
-deploy.storage.ck       -- create CK loop PV (ReadOnlyMany)
-deploy.storage.data     -- create DATA loop PV (ReadWriteMany)
-deploy.processors       -- create Deployments + Services for HOT kernels
-deploy.web              -- create web server Deployment
-deploy.routing          -- create HTTPRoute with action/cklib/web subpaths
-deploy.auth             -- provision Keycloak realm, inject OIDC config
-deploy.endpoint         -- verify external endpoint HTTP 200
+1. deploy.namespace     -- Create namespace ck-{subdomain}
+2. deploy.security      -- ServiceAccount, NetworkPolicies
+3. deploy.storage       -- PV/PVC per three-loop spec
+4. deploy.processors    -- ConfigMap (boot.py) + Deployment
+5. deploy.web           -- index.html generation + web Deployment + Service
+6. deploy.routing       -- HTTPRoute with Gateway API parentRef
+7. deploy.ck_resources  -- ConceptKernel CRs per kernel
+8. deploy.auth          -- Keycloak realm creation/reuse
+9. deploy.graph         -- RDF materialisation to Jena Fuseki
+10. deploy.endpoint     -- External endpoint verification
 ```
+
+For the full step-by-step breakdown, see [Reconciliation Lifecycle](./reconciliation).
 
 ### What Each Step Creates
 
@@ -49,6 +101,66 @@ deploy.endpoint         -- verify external endpoint HTTP 200
 **deploy.auth**: See [Auth](/v3.6/auth) for full details.
 
 **deploy.endpoint**: `curl -sI https://{hostname}/` expecting HTTP 200.
+
+## 17 Kubernetes Resources Generated
+
+For each `project.deploy`, CK.Operator creates up to 17 Kubernetes resources:
+
+| # | Kind | Name Pattern | Purpose |
+|---|------|-------------|---------|
+| 1 | Namespace | `ck-{subdomain}` | Per-project isolation boundary |
+| 2 | ServiceAccount | `ckp-runtime` | Pod identity (`automountServiceAccountToken: false`) |
+| 3 | NetworkPolicy | `ckp-default-deny` | Deny all ingress/egress by default |
+| 4 | NetworkPolicy | `ckp-allow-nats` | Allow egress to NATS (port 4222) |
+| 5 | NetworkPolicy | `ckp-allow-dns` | Allow egress to kube-dns |
+| 6 | NetworkPolicy | `ckp-allow-gateway` | Allow ingress from gateway namespace |
+| 7 | PersistentVolume | `ck-{sub}-ck` | SeaweedFS CSI volume for CK+TOOL loops (ReadOnlyMany) |
+| 8 | PersistentVolume | `ck-{sub}-data` | SeaweedFS CSI volume for DATA loop (ReadWriteMany) |
+| 9 | PersistentVolumeClaim | `ck` | Binds to CK PV |
+| 10 | PersistentVolumeClaim | `data` | Binds to DATA PV |
+| 11 | ConfigMap | `boot` | Python boot script for processor pods |
+| 12 | Deployment | `processors` | Runs all kernel processors via boot.py |
+| 13 | ConfigMap | `index` | Generated index.html (web shell) |
+| 14 | Deployment | `web` | nginx serving web shell + CK.Lib.Js |
+| 15 | Service | `web` | ClusterIP service for web deployment |
+| 16 | HTTPRoute | `{subdomain}` | Gateway API route to web service |
+| 17 | ConceptKernel | `{kernel-lower}` | Per-kernel CRD with proof in `.status` |
+
+## Materialisation per Deployment Method
+
+Different deployment methods produce different resource sets. The deployment method is declared in the project's storage configuration.
+
+| Method | PV/PVC | Deployment | ConfigMap | HTTPRoute Backend |
+|--------|--------|------------|-----------|-------------------|
+| `VOLUME` | SeaweedFS CSI | Yes (runtime image) | Startup script | Pod service |
+| `FILER` | None | None (static) | None | SeaweedFS filer service |
+| `CONFIGMAP_DEPLOY` | None | Yes (nginx:alpine) | Code + web | Pod service |
+| `INLINE_DEPLOY` | None | None | Optional JS | Direct response / filer |
+
+## Edge Composition
+
+CK.Operator declares outbound [edges](./edges) to other system kernels:
+
+| Target Kernel | Predicate | Semantics |
+|---------------|-----------|-----------|
+| `CK.ComplianceCheck` | `TRIGGERS` | After deploy, trigger fleet compliance validation |
+| `CK.Project` | `COMPOSES` | Inherit project declaration actions |
+
+## Lifecycle Events
+
+CK.Operator emits lifecycle events to `event.CK.Operator` at each phase transition, enabling real-time monitoring from the [web shell](./web-shell) and triggering downstream kernels via edges.
+
+| Event | When | Payload |
+|-------|------|---------|
+| `deploy.accepted` | Deploy starts | `{ hostname, namespace }` |
+| `deploy.scanning` | Scanning kernels | `{ hostname, kernels, kernel_names }` |
+| `deploy.materialising` | Resources being applied | `{ hostname, resources }` |
+| `deploy.ready` | All resources healthy | `{ hostname, url, kernels, resources }` |
+| `deploy.failed` | Failure at any step | `{ hostname, error }` |
+| `teardown.accepted` | Teardown starts | `{ hostname }` |
+| `teardown.complete` | Compute removed | `{ hostname, retained }` |
+| `reconcile.drift` | Desired != actual state | `{ hostname, drift }` |
+| `reconcile.converged` | Drift corrected | `{ hostname }` |
 
 ## Evidence-Based Proof: 15 Checks
 

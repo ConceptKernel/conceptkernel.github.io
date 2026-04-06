@@ -14,9 +14,9 @@ The difference matters because:
 - **Files** are local. **Graphs** are networked. A SPARQL endpoint can be queried by any kernel, any tool, any browser.
 - **Files** are snapshots. **Graphs** can be updated. When a new kernel deploys, its metadata becomes triples. The graph reflects the live fleet, not just the spec.
 
-## The /ckp Dataset
+## Jena Fuseki /ckp Dataset
 
-v3.5.12 loaded the CKP ontology into Jena Fuseki as the `/ckp` dataset:
+CK.Operator publishes to a Jena Fuseki dataset at `/ckp`. Each project's fleet is stored in a named graph: `urn:ckp:fleet:{hostname}`.
 
 | Fact | Value |
 |------|-------|
@@ -58,9 +58,37 @@ Seven modules declared in the spec are not yet published as Turtle:
 `kernel-entity-template.ttl` was skipped due to a parse error (HTTP 400 from Fuseki). The template file contains placeholder syntax that is not valid Turtle. This needs to be either fixed or excluded from the Turtle publication set.
 :::
 
+## Published Triples
+
+The graph materialises three levels of information from `conceptkernel.yaml` files:
+
+### Per Project
+
+```turtle
+<ckp://Project#delvinator.tech.games> a ckp:Project ;
+    rdfs:label "delvinator.tech.games" ;
+    ckp:hasNamespace "ck-delvinator" .
+```
+
+### Per Kernel
+
+```turtle
+<ckp://Kernel#Delvinator.Core:v1.0> a ckp:Kernel, bfo:0000040 ;
+    rdfs:label "Delvinator.Core" ;
+    ckp:hasType "node:cold" ;
+    ckp:belongsToProject <ckp://Project#delvinator.tech.games> .
+```
+
+### Per Edge
+
+```turtle
+<ckp://Kernel#Delvinator.Core:v1.0> ckp:composes <ckp://Kernel#CK.ComplianceCheck:v1.0> .
+<ckp://Kernel#Delvinator.Core:v1.0> ckp:produces <ckp://Kernel#Delvinator.TaxonomySynthesis:v1.0> .
+```
+
 ## Fleet Graph Materialisation
 
-v3.5.13 (planned) adds a `deploy.graph` step to the CK.Operator reconciliation lifecycle. After successful deployment, the operator publishes kernel metadata and edges as RDF triples to the `/ckp` dataset.
+The `deploy.graph` step in the CK.Operator reconciliation lifecycle publishes kernel metadata and edges as RDF triples to the `/ckp` dataset after successful deployment.
 
 ### Kernel as BFO:0000040 Node
 
@@ -108,23 +136,42 @@ Named graphs enable per-project SPARQL queries. You can ask "show me all kernels
 ### All Kernels in a Project
 
 ```sparql
-SELECT ?kernel ?type ?governance WHERE {
+SELECT ?kernel ?type WHERE {
   GRAPH <urn:ckp:fleet:delvinator-tech-games> {
-    ?kernel a ckp:Kernel ;
-            ckp:hasType ?type ;
-            ckp:hasGovernance ?governance .
+    ?kernel a ckp:Kernel ; ckp:hasType ?type .
   }
 }
 ```
 
-### All Edges Across the Fleet
+### All Edges Across the Entire Fleet
 
 ```sparql
 SELECT ?source ?predicate ?target WHERE {
+  ?source ?predicate ?target .
   ?source a ckp:Kernel .
   ?target a ckp:Kernel .
-  ?source ?predicate ?target .
-  FILTER(?predicate IN (ckp:composes, ckp:triggers, ckp:produces, ckp:consumes, ckp:extends))
+}
+```
+
+### Find All Instances Produced by a Kernel
+
+```sparql
+SELECT ?instance ?time WHERE {
+  ?instance prov:wasAttributedTo ?kernel ;
+            prov:generatedAtTime ?time .
+  ?kernel ckp:hasUrn "ckp://Kernel#Delvinator.Core:v1.0" .
+}
+```
+
+This query leverages [PROV-O provenance](./provenance) triples to find all instances attributed to a specific kernel.
+
+### Trace Provenance Chain for an Instance
+
+```sparql
+SELECT ?action ?agent ?time WHERE {
+  ?instance prov:wasGeneratedBy ?action .
+  ?action prov:wasAssociatedWith ?agent ;
+          prov:startedAtTime ?time .
 }
 ```
 

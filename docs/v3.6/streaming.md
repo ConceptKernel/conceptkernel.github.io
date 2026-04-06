@@ -49,16 +49,16 @@ Each token/event published to `stream.{kernel}` in real-time. The browser subscr
 - Any action backed by EXTENDS to CK.Claude
 - Long-running Claude responses where feedback matters
 
-## The stream.{kernel} Topic
+## Stream Topic Separation
 
-v3.5.9 adds a new NATS topic to the kernel topic convention:
+Each kernel has a stream topic: `stream.{kernel}`. This is separate from `result.{kernel}` because streaming events are transient fragments, while results are complete, sealed responses.
 
-| Topic | Direction | Content | Introduced |
-|-------|-----------|---------|------------|
-| `input.{kernel}` | Publish | User request (action + data) | v3.5 |
-| `result.{kernel}` | Subscribe | Final sealed result | v3.5 |
-| `event.{kernel}` | Subscribe | Lifecycle events | v3.5 |
-| `stream.{kernel}` | Subscribe | Per-token streaming events | **v3.5.9** |
+| Topic | Content | Persistence | Consumer |
+|---|---|---|---|
+| `input.{kernel}` | Action requests | Transient | Kernel processor |
+| `result.{kernel}` | Complete action results | Sealed as instance | [Web shell](./web-shell), other kernels |
+| `event.{kernel}` | Lifecycle events | Logged | Web shell, edge subscribers |
+| `stream.{kernel}` | Token-by-token LLM output | Transient (not stored) | Web shell only |
 
 ### Why a Separate Topic
 
@@ -71,19 +71,22 @@ The stream topic is separate from `result.{kernel}` because:
 
 ## Event Type Mapping
 
-Claude Agent SDK events map to NATS stream payloads:
+CK.Lib.Py maps `claude_agent_sdk` events to NATS stream messages. The full mapping covers 7 event types plus suppressed control events:
 
-| SDK Event | NATS `type` | Content | Browser Rendering |
-|-----------|-------------|---------|-------------------|
-| `content_block_delta` + `text_delta` | `content_block_delta` | Cumulative text + incremental delta | Growing text bubble |
-| `content_block_start` + `tool_use` | `tool_use` | Tool name + input JSON | Collapsible tool block |
-| `AssistantMessage` | `AssistantMessage` | Full text from content blocks | Final bubble (removes streaming indicator) |
-| `ResultMessage` | `ResultMessage` | Final answer | Closes stream |
-| `message_start`, `message_stop`, `ping` | (suppressed) | -- | Not rendered |
+| claude_agent_sdk Event | NATS `type` Field | Description | Browser Rendering |
+|---|---|---|---|
+| `content_block_start` | `content_block_start` | New content block beginning | Creates new bubble |
+| `content_block_delta` | `content_block_delta` | Incremental text token | Growing text bubble |
+| `content_block_stop` | `content_block_stop` | Content block complete | Finalizes block |
+| `tool_use` | `tool_use` | Tool invocation (Read, Edit, Bash, etc.) | Collapsible tool block |
+| `tool_result` | `tool_result` | Tool execution result | Result inside tool block |
+| `AssistantMessage` | `AssistantMessage` | Complete assistant turn | Final bubble (removes streaming indicator) |
+| `ResultMessage` | `ResultMessage` | Final result with usage stats | Closes stream |
+| `message_start`, `message_stop`, `ping` | (suppressed) | Control events | Not rendered |
 
-### Stream Event Payload
+### Stream Message Structure
 
-Every stream event carries:
+Every stream message carries five required fields:
 
 ```json
 {
@@ -91,9 +94,10 @@ Every stream event carries:
   "trace_id": "tx-a8f3c1",
   "kernel_urn": "ckp://Kernel#Delvinator.Core:v1.0",
   "data": {
-    "text": "The analysis shows three patterns...",
-    "delta": "three patterns..."
-  }
+    "text": "Based on my analysis of the fleet topology, "
+  },
+  "seq": 42,
+  "timestamp": "2026-04-05T16:37:25.123Z"
 }
 ```
 
@@ -103,19 +107,60 @@ Every stream event carries:
 | `trace_id` | MUST | Correlation ID linking all events from one action invocation |
 | `kernel_urn` | MUST | Source kernel -- which kernel's stream this is |
 | `data` | MUST | Event-specific payload |
+| `seq` | MUST | Sequence number for ordering within a trace |
+| `timestamp` | SHOULD | ISO 8601 timestamp of event emission |
 
 The `trace_id` is critical for the web shell: it groups stream events into a single response bubble. Without it, events from concurrent actions on the same kernel would interleave in the UI.
 
-## Handler Signature Change
+The `seq` field provides ordering guarantees within a trace. The web shell renders tokens in sequence order, handling out-of-order delivery.
 
-v3.5.9 extends the `NatsKernelLoop` handler signature:
+## Batch vs. Streaming Decision
+
+CKP supports two LLM invocation modes, selectable per action via the [EXTENDS](./extends) edge config:
+
+| Mode | CLI | Use Case | NATS Behaviour |
+|---|---|---|---|
+| **Batch** | `claude -p "prompt" --tools "" --no-session-persistence` | Simple analysis, schema generation | Single `result.{kernel}` message |
+| **Streaming** | `claude_agent_sdk` | Multi-turn reasoning, tool use, human-in-loop | Progressive `stream.{kernel}` events + final `result.{kernel}` |
+
+The EXTENDS edge config declares the preferred mode:
+
+```yaml
+edges:
+  outbound:
+    - target_kernel: CK.Claude
+      predicate: EXTENDS
+      config:
+        mode: streaming          # batch | streaming
+        persona: analytical-reviewer
+```
+
+::: tip When to Use Each Mode
+Use **batch** for actions that produce structured data (compliance checks, status queries) or where streaming overhead is not worth it. Use **streaming** for interactive conversation actions, multi-turn reasoning, and any action where progressive feedback matters.
+:::
+
+## Stream Callback Pattern
+
+Handlers that stream responses receive a `stream` callback:
 
 ```python
-# Before v3.5.9
-async def handle_action(body, nc=None, trace_id=None):
-    ...
+@on("analyze")
+async def handle_analyze(self, data, stream=None):
+    # stream is a callable: await stream(type, payload)
+    await stream("content_block_delta", {"text": "Analyzing..."})
+    # ... do work ...
+    await stream("content_block_delta", {"text": " found 3 issues."})
+    return emit("AnalysisCompleted", result=analysis)
+```
 
-# After v3.5.9
+The `stream` callback publishes to `stream.{kernel}` on NATS. The final `return emit(...)` publishes to `result.{kernel}`.
+
+## Handler Signature
+
+The `NatsKernelLoop` handler signature includes the stream parameter:
+
+```python
+# Handler with streaming support
 async def handle_action(body, nc=None, trace_id=None, stream=None):
     if stream:
         await stream("content_block_delta", {"text": "Processing..."})

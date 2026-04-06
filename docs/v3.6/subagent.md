@@ -19,7 +19,11 @@ Every Concept Kernel already carries the exact files a Claude Code subagent need
 
 There is no translation layer. The files that define the kernel's identity in the three-loop model are the same files that define the agent's prompt. This is why `/ck Operator` can spawn a subagent that IS the CK.Operator kernel -- not a simulation of it, but the same identity loaded into a different runtime.
 
-## How /ck Works
+## The /ck Command
+
+The `/ck` command loads a named kernel's CK loop into the current Claude Code session. This is not a plugin architecture -- it is subagent spawning, where the parent Claude Code session creates a child agent whose context is the kernel's CK loop.
+
+The rationale for subagent integration rather than a separate CLI is **locality of reasoning**: the developer's conversation already has project context, file awareness, and memory. Loading a kernel's CK loop into that conversation adds domain-specific knowledge without losing the ambient context.
 
 From the Claude Code CLI:
 
@@ -42,6 +46,26 @@ The `/ck` command triggers the `ck-agent` skill, which:
 4. **Spawns** a Claude Code `Agent` subprocess with the prompt
 5. **Captures** the agent's output, including any memory updates
 6. **Persists** memory updates to `storage/memory/MEMORY.md`
+
+### 8-File Loading Order
+
+The loading order is deterministic and specified. Each file serves a distinct purpose in the subagent context:
+
+```
+/ck Delvinator.Core
+
+Loading order:
+  1. conceptkernel.yaml     -- identity, URN, type, governance, actions, edges
+  2. CLAUDE.md              -- behavioural instructions (how to think)
+  3. SKILL.md               -- action catalog (what to do)
+  4. ontology.yaml          -- data schema (what things are)
+  5. rules.shacl            -- validation constraints (what's allowed)
+  6. storage/memory/MEMORY.md -- persistent memory (what's been learned)
+  7. storage/tasks/          -- pending tasks (what needs doing)
+  8. changelog              -- recent changes (what's happened)
+```
+
+After loading, the agent responds within the kernel's identity: it uses the kernel's terminology, respects its governance mode, and constrains its outputs to the kernel's ontology.
 
 ### Kernel Resolution
 
@@ -120,13 +144,15 @@ The solution is a clean separation of powers: the subagent can PROPOSE changes (
 
 ## Memory Persistence
 
+Each kernel has persistent memory at `storage/memory/MEMORY.md`. This file survives across Claude Code sessions, providing continuity. The agent SHOULD read memory at session start and SHOULD update it with significant learnings at session end.
+
 After the subagent completes, the parent agent:
 
 1. Checks output for a `MEMORY_UPDATE` section
 2. Appends it to `{kernel}/storage/memory/MEMORY.md` (DATA loop -- writable)
 3. Next invocation of `/ck {kernel}` includes the accumulated memory
 
-Memory follows the three-loop model: memory is DATA, not CK. The kernel remembers what it learned without modifying its identity.
+Memory is part of the **DATA loop** (writable), not the CK loop (read-only). This is intentional: memory accumulates knowledge, which is a data concern. Identity (CK loop) changes only through [governed evolution](./evolution).
 
 This means:
 - Memory accumulates across sessions -- each `/ck Operator` call gets all previous memories
@@ -201,12 +227,29 @@ Multi-root search covers:
 **Gap identified:** The subagent does not currently validate instances against `rules.shacl` before writing to storage. In the deployed runtime, the processor validates via SHACL before sealing. The subagent skips this step. This means subagent-produced instances may not conform to the kernel's constraints.
 :::
 
+## Subagent Context Building
+
+When spawning a subagent, the parent session calls `build_context()` from CK.Lib.Py, which assembles the complete CK loop into a structured payload:
+
+```python
+context = build_context(
+    ck_dir="/path/to/concepts/Delvinator.Core",
+    context_items=["identity", "claude_md", "skill_md", "ontology", "memory", "tasks", "edges"]
+)
+# Returns: { identity, claude_md, skill_md, ontology, memory_md, tasks, edges, loop }
+# loop: maps each item to its filesystem path
+```
+
+The `context_items` parameter controls what gets loaded, allowing lightweight context for simple queries vs. full context for complex operations. For a quick status check, loading only `identity` and `skill_md` may suffice. For a governance proposal, the full context including `ontology`, `memory`, and `edges` is needed.
+
 ## Conformance Requirements
 
-- Every Concept Kernel MUST have CLAUDE.md and SKILL.md in its CK loop
-- The subagent MUST load identity files in awakening sequence order
-- The subagent MUST NOT modify CK loop files
-- The subagent MAY write to the DATA loop (storage/)
-- Memory updates MUST be written to `storage/memory/MEMORY.md`, not to `CLAUDE.md`
-- CK loop evolution MUST go through git (version controlled, auditable)
-- The parent agent MAY modify CK loop files with human approval
+| Criterion | Level |
+|---|---|
+| `/ck` MUST load the kernel's CK loop in the specified 8-file order | REQUIRED |
+| Agents MUST NOT modify CK loop files during normal operation | REQUIRED |
+| Memory MUST persist in the DATA loop at `storage/memory/MEMORY.md` | REQUIRED |
+| Context building MUST use `build_context()` or equivalent | REQUIRED |
+| Agents MUST respect the kernel's governance mode | REQUIRED |
+| Every Concept Kernel MUST have CLAUDE.md and SKILL.md in its CK loop | REQUIRED |
+| The parent agent MAY modify CK loop files with human approval | PERMITTED |

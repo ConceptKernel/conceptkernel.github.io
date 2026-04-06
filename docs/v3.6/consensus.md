@@ -64,33 +64,33 @@ CK.Consensus is a system kernel (`node:hot`, STRICT governance) with five action
 
 CK.Consensus declares three outbound edges:
 
-| Edge | Predicate | Purpose |
-|------|-----------|---------|
-| CK.ComplianceCheck | TRIGGERS | Validate proposals against the 13-check compliance suite |
-| CK.Operator | TRIGGERS | Reconcile cluster state after approved CK loop changes |
-| CK.Claude | EXTENDS | AI-powered review via the `strict-auditor` persona |
+| Target | Predicate | Rationale |
+|---|---|---|
+| `CK.ComplianceCheck` | `TRIGGERS` | Validate proposals against CKP compliance (20 check types) |
+| `CK.Operator` | `TRIGGERS` | Reconcile changes after tasks complete |
+| `CK.Claude` | `EXTENDS` | AI review of proposals via `strict-auditor` persona |
 
-The EXTENDS edge to CK.Claude means CK.Consensus gains a `review` action that uses Claude with the `strict-auditor` persona -- zero speculation, evidence-only verdicts.
+The EXTENDS edge to CK.Claude means CK.Consensus gains a `review` action that uses Claude with the `strict-auditor` persona -- zero speculation, evidence-only verdicts. The TRIGGERS edges create the governance pipeline: proposals are validated by ComplianceCheck and, once approved and executed, reconciled by the Operator.
 
 ## Propose
 
-Any change to a kernel's CK loop goes through a proposal:
+Any change to a kernel's CK loop goes through a formal proposal. The proposal declares what to change, where, and why:
 
-```json
-{
-  "action": "propose",
-  "target_kernel": "Delvinator.Core",
-  "change_type": "action_add",
-  "proposal": {
-    "action_name": "quality.score",
-    "description": "Compute quality metrics for instances",
-    "access": "auth",
-    "params": "instance_id: str",
-    "ontology_class": "QualityScore",
-    "shacl_constraints": ["score >= 0", "score <= 100"]
-  }
-}
+```yaml
+proposal_id: "P-a1b2c3d4"
+proposer: "ckp://Actor#developer.peter"
+target_kernel: "Delvinator.Core"
+change_type: "action_add"
+specification:
+  action_name: "quality.score"
+  action_type: "inspect"
+  access: "auth"
+  description: "Compute quality score for an entity"
+rationale: "Exchange analysis reveals recurring quality assessment patterns
+  that should be formalised as an action"
 ```
+
+The `rationale` field is important -- it records the **why** behind the change. This becomes part of the [provenance](./provenance) chain, enabling future auditors to understand the reasoning behind every evolution.
 
 ### Change Types
 
@@ -106,27 +106,28 @@ Any change to a kernel's CK loop goes through a proposal:
 
 ## Evaluate
 
-The proposal is evaluated against four dimensions:
+The evaluation phase subjects the proposal to **four validation layers**. All four must pass for the proposal to be approved:
 
-### 1. Target Kernel's Ontology (Structural Validity)
+### 1. Ontological Validity
 
-Does the proposed change fit the kernel's data model? If the proposal adds a `quality.score` action that produces `QualityScore` instances, does `ontology.yaml` define `QualityScore`? If not, the ontology must be updated as part of the proposal.
+Does the proposed change conform to the target kernel's `ontology.yaml`? An action that references undefined classes is rejected. If the proposal adds a `quality.score` action that produces `QualityScore` instances, does `ontology.yaml` define `QualityScore`? If not, the ontology must be updated as part of the proposal.
 
-### 2. Target Kernel's SHACL Rules (Constraint Compliance)
+### 2. Constraint Compliance
 
-Does the proposed change satisfy existing constraints? If `rules.shacl` requires all instances to have `prov:wasGeneratedBy`, does the proposal include provenance generation?
+Does the change satisfy `rules.shacl`? A new edge to a non-existent kernel violates structural constraints. If `rules.shacl` requires all instances to have `prov:wasGeneratedBy`, does the proposal include provenance generation?
 
-### 3. Fleet Topology (Edge Consistency)
+### 3. Fleet Topology
 
-Does the proposed change create orphan references? If the proposal adds an edge to `CK.Auth`, does `CK.Auth` exist in the fleet? Are there circular dependencies?
+Does the change create orphan references, circular dependencies, or broken edge targets? If the proposal adds an edge to `CK.Auth`, does `CK.Auth` exist in the fleet? Topology validation prevents changes that would make the fleet inconsistent.
 
-### 4. CK.ComplianceCheck (20 Check Types)
+### 4. CKP Compliance (20 Check Types)
 
-The proposal is validated against the full compliance suite via the TRIGGERS edge to CK.ComplianceCheck. This catches issues that static analysis misses:
+The proposal is validated against the full compliance suite via the TRIGGERS edge to CK.ComplianceCheck. This catches issues that the first three layers miss:
 - Missing awakening files
 - Invalid NATS topic declarations
 - Version conflicts
 - Governance mode violations
+- [Provenance](./provenance) field completeness
 
 ### Verdict
 
@@ -138,35 +139,28 @@ The proposal is validated against the full compliance suite via the TRIGGERS edg
 
 ## Approve
 
-Approved proposals generate tasks. Each task is a scoped instruction for modifying the TOOL loop:
+Approved proposals generate tasks. Each task is a concrete work item with an instruction, a target file, constraints, and an executor:
 
 ```yaml
-task:
-  id: T001-add-quality-scoring
-  source: consensus
-  consensus_record: "ckp://Instance#CK.Consensus/decision-2026-04-06T20:00:00Z"
-  target: tool/processor.py
-  instruction: |
-    Add @on('quality.score') handler that computes quality metrics
-    per ontology.yaml QualityScore class
-  constraints:
-    - "Output MUST validate against ontology.yaml QualityScore schema"
-    - "MUST produce prov:wasGeneratedBy linking to this task"
-    - "MUST emit event to event.{kernel}"
-  executor: headless-claude-code
-  status: pending
+decision_id: "D-e5f6g7h8"
+proposal_id: "P-a1b2c3d4"
+verdict: "pass"
+tasks_generated:
+  - task_id: "T-i9j0k1l2"
+    target_file: "concepts/Delvinator.Core/tool/processor.py"
+    instruction: "Add @on('quality.score') handler that computes quality
+      score per ontology.yaml QualityScore schema"
+    constraints:
+      - "Output MUST validate against ontology.yaml QualityScore class"
+      - "MUST produce prov:wasGeneratedBy linking to this task"
+    executor: "headless-claude-code"
+    version_pin: "abc123"         # git commit hash
+prov:wasGeneratedBy: "ckp://Action#CK.Consensus/evaluate-{ts}"
+prov:wasAttributedTo: "ckp://Actor#developer.peter"
+prov:generatedAtTime: "2026-04-05T10:00:00Z"
 ```
 
-### Task Lifecycle
-
-Tasks are versioned, branchable, and mergeable:
-
-- **Evolved** -- refined through further consensus (e.g., "add input validation to the quality.score task")
-- **Branched** -- split into subtasks for parallel work (e.g., "scoring engine" + "NATS handler")
-- **Merged** -- combined when multiple tasks converge
-- **Version-fixed** -- each task targets a specific kernel version (git commit hash)
-
-Version-fixing means a task applies to the kernel at a specific commit. If the kernel evolves, the task must be re-evaluated against the new version. This prevents tasks from silently becoming incompatible with their target.
+Tasks flow to the [Task Execution Engine](./task-engine) for automated execution via headless Claude Code. See the task engine documentation for the full lifecycle (pending, executing, completed, failed), task operations (split, evolve, merge), and version pinning details.
 
 ## Provenance: Every Decision Is a prov:Activity
 
@@ -213,13 +207,15 @@ The ontology is not documentation. It is the schema. The tool is its executor. C
 
 Consensus behavior depends on the target kernel's governance mode:
 
-| Mode | Consensus Requirement | Rationale |
-|------|----------------------|-----------|
-| **STRICT** | All CK loop changes MUST go through consensus | Full governance -- every change is evaluated and recorded |
-| **RELAXED** | Consensus recommended but not required | Development convenience -- can bypass for rapid iteration |
-| **AUTONOMOUS** | Kernel may self-govern within ontological bounds | The kernel manages its own evolution -- consensus is optional |
+| Kernel Governance | Consensus Requirement |
+|---|---|
+| **STRICT** | All CK loop changes MUST go through consensus |
+| **RELAXED** | Structural changes (actions, edges, ontology) MUST go through consensus; documentation changes (SKILL.md, CLAUDE.md) MAY be direct |
+| **AUTONOMOUS** | MAY bypass consensus; SHOULD still produce [PROV-O](./provenance) records |
 
-This means CK.ComplianceCheck (STRICT governance) requires consensus for every change, while a development kernel with RELAXED governance can iterate faster. The governance mode is declared in `conceptkernel.yaml` -- the developer sets the rules, consensus enforces them.
+This means CK.ComplianceCheck (STRICT governance) requires consensus for every change, while a development kernel with RELAXED governance can iterate faster on documentation without governance overhead. Even AUTONOMOUS kernels should record provenance -- the audit trail matters even when governance is relaxed.
+
+The governance mode is declared in `conceptkernel.yaml` -- the developer sets the rules, consensus enforces them. See [CK Loop Evolution](./evolution) for the full workflow including change types and governance levels.
 
 ## Architectural Consistency Check
 

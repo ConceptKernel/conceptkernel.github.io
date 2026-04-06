@@ -1,13 +1,51 @@
 ---
 title: Changelog
-description: Full version-by-version changelog for CKP v3.6, covering every increment from v3.5.1 through v3.5.16.
+description: Full changelog for CKP v3.6 -- the complete 10-part, 48-chapter specification covering identity, ontology, runtime, infrastructure, Claude integration, and governance.
 ---
 
 # Changelog
 
-All notable changes in the CKP v3.6 release train. Each version is an independently shippable increment. Versions marked DEPLOYED have running proof on the reference cluster.
+## v3.6 -- Full Specification Release
 
-## v3.5.12 -- Jena Fuseki /ckp Dataset <Badge type="tip" text="DEPLOYED" />
+**Date:** 2026-04-06
+
+CKP v3.6 is the consolidation of the entire protocol into a single normative specification: **SPEC.CKP.v3.6.full.md** -- 10 parts, 48 chapters, covering every aspect of concept kernel design, deployment, and governance.
+
+### What Is New vs v3.5-alpha6
+
+v3.5-alpha6 was the last deployed incremental release. v3.6 adds:
+
+| Area | v3.5-alpha6 | v3.6 |
+|---|---|---|
+| Specification | 8 delta specs across multiple files | Single unified 48-chapter spec |
+| Claude integration | Subagent + streaming implemented | Full Part IX: EXTENDS runtime, CK loop evolution, multi-model config |
+| Governance | CK.Consensus kernel deployed | Full Part X: task engine, sessions, agent teams, spawning, PROV-O |
+| Compliance checks | 13 checks | 20 checks (added provenance, edge, topology, governance checks) |
+| Ontological graph | 10 Turtle modules loaded | Published triples per project/kernel/edge, SPARQL query catalog |
+| Provenance | Instance-level prov fields | Full PROV-O model with three-factor audit chain |
+
+### Specification Scope -- All 10 Parts
+
+| Part | Chapters | Title | Key Content |
+|---|---|---|---|
+| I | 1-4 | Foundations | CKP purpose, BFO 2020 grounding, three-loop separation, 8 awakening files |
+| II | 5-10 | Ontology | URN scheme, 5 edge predicates, governance modes, ontology.yaml, rules.shacl |
+| III | 11-16 | Runtime Semantics | Action lifecycle, instance sealing, NATS messaging, event types, proof records |
+| IV | 17-22 | Compliance and Proof | CK.ComplianceCheck, 20 check types, proof verification, compliance scoring |
+| V | 23-27 | System Kernels | CK.Operator, CK.Project, CK.Filer, CK.ComplianceCheck, CK.Consensus |
+| VI | 28-30 | Infrastructure | Kubernetes CRD, volume layout, namespace isolation, ConceptKernel CR |
+| VII | 31-35 | Libraries and Tools | CK.Lib.Py, CK.Lib.Js, web shell, AuthConfig, deploy pipeline |
+| VIII | 36-38 | Claude Integration (Runtime) | Subagent, streaming, EXTENDS predicate, CK.Claude |
+| IX | 39-40 | Claude Integration (Evolution) | CK loop evolution workflow, multi-model configuration |
+| X | 41-48 | Governance and Coordination | Consensus, task engine, graph, sessions, agent teams, spawning, provenance |
+
+---
+
+## Incremental Versions (v3.5.x)
+
+All notable changes in the development increments that compose v3.6. Each version was an independently shippable increment. Versions marked DEPLOYED have running proof on the reference cluster.
+
+### v3.5.12 -- Jena Fuseki /ckp Dataset <Badge type="tip" text="DEPLOYED" />
 
 **Date:** 2026-04-06
 
@@ -15,9 +53,9 @@ All notable changes in the CKP v3.6 release train. Each version is an independen
 - 2,797 triples across core, proof, base-instances, kernel-metadata, processes, rbac, relations, self-improvement, shapes, workflow modules
 - SPARQL endpoint live at `jena-fuseki.jena.svc:3030/ckp/sparql`
 - `kernel-entity-template.ttl` skipped (parse error, HTTP 400)
-- 7 of 10 spec-declared modules not yet published as Turtle (instance, action, identity, governance, lifecycle, economic, topology)
+- 7 of 17 spec-declared modules not yet published as Turtle (instance, action, identity, governance, lifecycle, economic, topology)
 
-## v3.5.11 -- CK.Consensus Kernel <Badge type="tip" text="DEPLOYED" />
+### v3.5.11 -- CK.Consensus Kernel <Badge type="tip" text="DEPLOYED" />
 
 **Date:** 2026-04-06
 
@@ -29,7 +67,7 @@ All notable changes in the CKP v3.6 release train. Each version is an independen
 - Every decision is a `prov:Activity` with full audit chain
 - `spec-parts/consensus-loop.md`: normative definition
 
-## v3.5.10 -- EXTENDS Predicate + CK.Claude <Badge type="tip" text="DEPLOYED" />
+### v3.5.10 -- EXTENDS Predicate + CK.Claude <Badge type="tip" text="DEPLOYED" />
 
 **Date:** 2026-04-06
 
@@ -41,7 +79,7 @@ All notable changes in the CKP v3.6 release train. Each version is an independen
 - `resolve_composed_actions()`: COMPOSES inherits target actions; EXTENDS creates new from edge config
 - `spec-parts/extends-predicate.md`: full normative definition
 
-## v3.5.9 -- Claude Streaming via NATS <Badge type="tip" text="DEPLOYED" />
+### v3.5.9 -- Claude Streaming via NATS <Badge type="tip" text="DEPLOYED" />
 
 **Date:** 2026-04-06
 
@@ -52,7 +90,7 @@ All notable changes in the CKP v3.6 release train. Each version is an independen
 - `_log()` method for spec-compliant JSON output (ts, level, kernel, event)
 - `spec-parts/structured-logging.md`: stream topic definition + conformance
 
-## v3.5.8 -- CK as Claude Code Subagent <Badge type="tip" text="DEPLOYED" />
+### v3.5.8 -- CK as Claude Code Subagent <Badge type="tip" text="DEPLOYED" />
 
 **Date:** 2026-04-06
 
@@ -65,7 +103,7 @@ All notable changes in the CKP v3.6 release train. Each version is an independen
 - NATS bridge: optional dispatch to live kernel via `nats pub`
 - `storage/memory/` directories created for all kernels
 
-## v3.5.7 -- Hello.Greeter Kernel <Badge type="tip" text="DEPLOYED" />
+### v3.5.7 -- Hello.Greeter Kernel <Badge type="tip" text="DEPLOYED" />
 
 **Date:** 2026-04-05
 
@@ -79,7 +117,7 @@ All notable changes in the CKP v3.6 release train. Each version is an independen
 - RBAC fix: patch verb for namespaces, PVs, PVCs, keycloakrealmimports
 - SeaweedFS filer upload: `?mode=0644` for world-readable permissions
 
-## v3.5.6.1 -- Console Config Fix <Badge type="info" text="PATCH" />
+### v3.5.6.1 -- Console Config Fix <Badge type="info" text="PATCH" />
 
 **Date:** 2026-04-06
 
@@ -91,7 +129,7 @@ All notable changes in the CKP v3.6 release train. Each version is an independen
 - No inline HTML -- all DOM via `el()` helper
 - Material Icons for kernel types (`admin_panel_settings` for operator, `memory` for domain)
 
-## v3.5.6 -- Web Shell <Badge type="tip" text="DEPLOYED" />
+### v3.5.6 -- Web Shell <Badge type="tip" text="DEPLOYED" />
 
 **Date:** 2026-04-05
 
@@ -103,7 +141,7 @@ All notable changes in the CKP v3.6 release train. Each version is an independen
 - SeaweedFS filer upload permissions: `?mode=0644` for world-readable files
 - `spec-parts/part-iv-vii.md`: Section 32.8 Web Console reference, Section 33 CK.Lib.Js note
 
-## v3.5.5 -- AuthConfig + deploy.auth <Badge type="tip" text="DEPLOYED" />
+### v3.5.5 -- AuthConfig + deploy.auth <Badge type="tip" text="DEPLOYED" />
 
 **Date:** 2026-04-05
 
@@ -118,21 +156,21 @@ All notable changes in the CKP v3.6 release train. Each version is an independen
 - RBAC fix: added patch verb to configmaps, deployments, services, httproutes
 - `spec-parts/auth-config.md` implemented
 
-## v3.5.4 -- CK-as-Subagent Delta Spec <Badge type="info" text="SPEC" />
+### v3.5.4 -- CK-as-Subagent Delta Spec <Badge type="info" text="SPEC" />
 
 **Date:** 2026-04-05
 
 - `SPEC.CKP.v3.5.4.delta.md`: CK-as-subagent (D1-D4), Claude streaming (D5), LOCAL.ClaudeCode bridge (D6), Consensus loop (D7), EXTENDS predicate (D8)
 - Consensus services integration: `PLAN.v002.md`, updated CLAUDE.md + README.md in `ref-consensus-services/`
 
-## v3.5.3 -- Auth/Web Shell Delta Spec <Badge type="info" text="SPEC" />
+### v3.5.3 -- Auth/Web Shell Delta Spec <Badge type="info" text="SPEC" />
 
 **Date:** 2026-04-05
 
 - `SPEC.CKP.v3.5.3.delta.md`: AuthConfig (D1), deploy.auth (D2), Web shell (D3), kernel.create via web (D4)
 - `spec-parts/auth-config.md`, `spec-parts/web-shell.md`
 
-## v3.5.2 -- CRD + Proof + Namespace Isolation <Badge type="tip" text="DEPLOYED" />
+### v3.5.2 -- CRD + Proof + Namespace Isolation <Badge type="tip" text="DEPLOYED" />
 
 **Date:** 2026-04-05
 
@@ -147,7 +185,7 @@ All notable changes in the CKP v3.6 release train. Each version is an independen
 - Cleaned stale `ontosys.io` CRDs + resources (146d old)
 - Removed all "enterprise" terminology from spec-parts (replaced with "fleet", "economic", "protocol")
 
-## v3.5.1 -- Full Specification <Badge type="info" text="SPEC" />
+### v3.5.1 -- Full Specification <Badge type="info" text="SPEC" />
 
 **Date:** 2026-04-05
 
@@ -155,15 +193,3 @@ All notable changes in the CKP v3.6 release train. Each version is an independen
 - `SPEC.CKP.v3.5.implementation.md` (technology-specific companion)
 - `spec-parts/` directory (8 files: skeleton, part-i-iii, part-iv-vii, part-viii-x, chapters-30-32-33, ontology-reference, roast-findings, logic-findings)
 - `spec-parts/proof-verification-model.md`
-
----
-
-## Upcoming
-
-| Version | Feature | Status |
-|---------|---------|--------|
-| v3.5.13 | Ontological graph materialisation (deploy.graph step) | Planned |
-| v3.5.14 | Multi-user NATS sessions | Planned |
-| v3.5.15 | Task execution engine (headless Claude) | Planned |
-| v3.5.16 | Agent Teams (multi-kernel coordination) | Planned |
-| **v3.6** | **Full release -- sum of v3.5.5 through v3.5.16** | **Target** |

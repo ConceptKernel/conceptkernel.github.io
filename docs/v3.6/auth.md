@@ -1,6 +1,6 @@
 ---
 title: Authentication -- AuthConfig Ontology and Keycloak Integration
-description: How CKP v3.6 provisions OIDC identity as infrastructure through the AuthConfig ontology class, deploy.auth reconciliation step, and Keycloak realm management.
+description: How CKP v3.6 provisions OIDC identity as infrastructure through the AuthConfig ontology class, deploy.auth reconciliation step, Keycloak realm management, three-level authentication model, SPIFFE JWT-SVID integration, and anonymous-to-authenticated escalation.
 ---
 
 # Authentication
@@ -10,6 +10,124 @@ description: How CKP v3.6 provisions OIDC identity as infrastructure through the
 v3.5 kernels had no concept of user identity. Every NATS message was anonymous. The web shell (when it arrived) had no way to distinguish users or restrict actions. This created a fundamental gap: the `access: auth` field on actions had no enforcement mechanism.
 
 The v3.6 answer is not to bolt on auth as middleware. It is to make authentication a **first-class ontological concept** -- declared in the same `ontology.yaml` that declares kernel types, actions, and edges. If auth is not in the ontology, it does not exist in the cluster.
+
+## Three Authentication Levels
+
+CKP supports three authentication levels over NATS: anonymous (`anon`), authenticated (`auth`), and owner (`owner`). A single authentication model works identically for browsers (WSS) and server-side kernels (TCP), eliminating the class of bugs where "it works in dev but not in production" because the auth path differs.
+
+| Access Level | NATS Mechanism | CKP Mapping | Typical Use |
+|-------------|----------------|-------------|-------------|
+| `anon` | No auth required on NATS connection | `grants.identity: anon` actions | Status checks, public queries, read-only browsing |
+| `auth` | JWT token in NATS connection credentials or message headers | `grants.identity: auth` actions | Data input, tool invocation, session participation |
+| `owner` | JWT with kernel-owner claim | `grants.identity: owner` actions | Configuration, teardown, grant management |
+
+The three-level model maps directly to the grants block in `conceptkernel.yaml`, creating a single source of truth for access control. See [Namespace Security -- Grants Block](./namespace-security#grants-block----access-control) for the full grants schema.
+
+### Topic ACL Rules per Auth Level
+
+Access level determines which NATS topics a client can publish to and subscribe to. These ACLs are enforced by the NATS server configuration, not by kernel code.
+
+| Level | Can Publish To | Can Subscribe To |
+|-------|---------------|-----------------|
+| `anon` | `input.{Kernel}` | `result.{Kernel}`, `event.{Kernel}` |
+| `auth` | `input.{Kernel}`, `admin.{Kernel}` | `result.{Kernel}`, `event.{Kernel}`, `metrics.{Kernel}`, `stream.{Kernel}` |
+| `owner` | All kernel topics | All kernel topics |
+
+:::tip Why Anon Can Publish to Input
+Anonymous users must be able to invoke actions that the kernel has explicitly granted to `anon` (e.g., `status`). The grants block controls which actions are permitted, not the transport layer. Allowing `anon` to publish to `input` while restricting the action set via grants provides the right separation of concerns.
+:::
+
+### Kernel Type Authentication Requirements
+
+| Kernel Type | Connection Auth | Message Auth | Notes |
+|-------------|----------------|-------------|-------|
+| `node:hot` | SPIFFE JWT-SVID | SPIFFE JWT-SVID | Always connected, always authenticated |
+| `node:cold` | SPIFFE JWT-SVID | SPIFFE JWT-SVID | Authenticated on startup, connection held for session |
+| `agent` | SPIFFE JWT-SVID | SPIFFE JWT-SVID | Long-lived connection with streaming |
+| `inline` | WSS (anon or Keycloak) | Keycloak JWT in headers | Browser client, per-message auth |
+| `static` | None | None | No NATS connection |
+
+## SPIFFE JWT-SVID Integration
+
+Server-side kernel-to-kernel communication uses SPIFFE JWT-SVIDs as NATS connection credentials. Every Concept Kernel is a SPIFFE workload with a stable identity assigned at mint time.
+
+```python
+# Caller obtains JWT-SVID from SPIRE agent:
+spiffe_jwt = spire_agent.fetch_jwt_svid(audience='nats.{domain}')
+
+# NATS connection:
+nats.connect('nats://nats.{domain}:4222',
+             user=f'spiffe://{domain}/ck/{class}/{guid}',
+             password=spiffe_jwt)
+```
+
+Subject-level ACLs are derived from the grants block:
+- **publish:** `ck.{own-guid}.*` is always allowed (own topics).
+- **subscribe:** `ck.{other-guid}.*` is allowed only if a grant exists and the requested action matches.
+
+### SPIRE Certificate Lifecycle
+
+SPIRE handles the entire certificate lifecycle automatically:
+
+1. SVID issued at kernel startup from local SPIRE agent.
+2. SVID valid for 1 hour (configurable TTL).
+3. SPIRE rotates SVID automatically before expiry.
+4. No kernel code manages certificates.
+
+:::info Why This Matters
+SPIFFE provides workload identity without shared secrets. Each kernel gets a cryptographically verifiable identity at mint time. SPIRE manages the full lifecycle -- issuance, rotation, revocation -- so kernel code never touches certificates. The SPIFFE ID (`spiffe://{domain}/ck/{class}/{guid}`) maps directly to the grants block, creating a unified identity model from Kubernetes namespace to NATS topic ACL.
+:::
+
+## Anonymous-to-Authenticated Escalation
+
+Browser clients MAY connect anonymously and escalate to authenticated mid-session without NATS reconnection. This is a critical UX feature: a user can browse public kernel status anonymously, then log in to invoke authenticated actions without losing their NATS connection.
+
+```mermaid
+sequenceDiagram
+    participant B as Browser Client
+    participant N as NATS WSS
+    participant K as NatsKernelLoop
+    participant KC as Keycloak
+
+    B->>N: Connect (anonymous)
+    B->>N: Publish input.{Kernel}<br/>{action: "status"} [anon]
+    N->>K: Deliver message
+    K->>K: Check grants: "status" in anon? Yes
+    K->>N: Publish result.{Kernel}
+    N->>B: Deliver result
+
+    Note over B,KC: User clicks "Log in"
+    B->>KC: OIDC auth flow
+    KC->>B: JWT token
+
+    B->>N: Publish input.{Kernel}<br/>{action: "invoke-tool"}<br/>Authorization: Bearer {jwt}
+    N->>K: Deliver message
+    K->>K: Verify JWT, extract user_id
+    K->>K: Check grants: "invoke-tool" in auth? Yes
+    K->>N: Publish result.{Kernel}
+    N->>B: Deliver result
+```
+
+The escalation flow:
+
+1. Client connects to NATS WSS without credentials (anonymous).
+2. Client publishes to `input.{Kernel}` -- only `anon`-granted actions are permitted by the grants block.
+3. Client authenticates via Keycloak (or equivalent OIDC provider) and obtains a JWT.
+4. Client includes `Authorization: Bearer {jwt}` in subsequent NATS message headers.
+5. `NatsKernelLoop` verifies the JWT and grants `auth`-level access for that message.
+
+Token refresh occurs transparently. The client refreshes via the identity provider and includes the new token in the next message's headers. No NATS reconnection is required because authentication is per-message (via headers), not per-connection.
+
+### JWT Claims Used by CKP
+
+| Claim | Usage |
+|-------|-------|
+| `preferred_username` | Mapped to `X-User-ID` for audit and identity |
+| `sub` | Unique subject identifier |
+| `aud` | Audience -- MUST match the kernel's `auth.client_id` |
+| `exp` | Expiration timestamp -- MUST be checked |
+| `realm_access.roles` | Used for `owner` level determination |
+| `azp` | Authorised party -- the client_id that obtained the token |
 
 ## AuthConfig Schema
 
@@ -73,19 +191,19 @@ deploy.auth         -- provision auth (THIS STEP)
 deploy.endpoint     -- verify external endpoint HTTP 200
 ```
 
-### Step Logic
+### Step-by-Step Execution
 
-1. Read `auth` block from project declaration
-2. If `provider: none` or auth block missing -- skip, no verification
-3. If `create_realm: true`:
-   a. Generate `KeycloakRealmImport` CR with EdDSA key provider, audience mapper, public client
-   b. Apply to Keycloak operator namespace (skip if already exists)
-   c. Wait for realm readiness
-4. Inject environment variables into processor Deployment:
-   - `KEYCLOAK_ISSUER={issuer_url}`
-   - `KEYCLOAK_CLIENT_ID={client_id}`
-5. Inject auth config into web ConfigMap so `ck-client.js` knows the OIDC endpoint
-6. Run verification checks
+The `deploy.auth` step is idempotent -- running it multiple times on the same project produces the same result.
+
+| Step | Action | Failure Mode |
+|------|--------|-------------|
+| 1 | Read auth block from project declaration | If missing or `provider: none`: skip remaining steps |
+| 2 | If `create_realm: true`: create `KeycloakRealmImport` CR | Skip if CR already exists (idempotent) |
+| 3 | Inject `KEYCLOAK_ISSUER` env var into processor deployments | Deployment update |
+| 4 | Inject `KEYCLOAK_CLIENT_ID` env var into processor deployments | Deployment update |
+| 5 | Inject auth config into web `index.html` ConfigMap | ConfigMap update |
+| 6 | Verify: OIDC discovery endpoint returns HTTP 200 | Deploy blocks until reachable |
+| 7 | Verify: JWKS endpoint returns HTTP 200 with keys | Deploy blocks until reachable |
 
 ### KeycloakRealmImport Generation
 
@@ -140,14 +258,16 @@ Key design decisions:
 
 ## Verification
 
-Auth verification adds two checks to the proof chain:
+Auth verification adds checks to the proof chain. All checks must pass before the deploy is marked ready.
 
 | Check | Method | Expected |
 |-------|--------|----------|
 | `oidc_discovery` | `curl {issuer_url}/.well-known/openid-configuration` | HTTP 200 |
-| `jwks_reachable` | `curl {issuer_url}/protocol/openid-connect/certs` | HTTP 200 + keys present |
+| `jwks_reachable` | `curl {issuer_url}/protocol/openid-connect/certs` | HTTP 200 + `keys` array present |
+| `env_injected` | Inspect processor deployment env vars | `KEYCLOAK_ISSUER` and `KEYCLOAK_CLIENT_ID` present |
+| `web_config_injected` | Inspect web ConfigMap | Auth config present in `window.__CK_CONFIG` |
 
-These two checks bring the total from 13 (v3.5.2) to 15 (v3.5.5+). Both checks must pass before the deploy is marked ready.
+The first two checks (`oidc_discovery` and `jwks_reachable`) bring the total from 13 (v3.5.2) to 15 (v3.5.5+). The latter two are internal consistency checks.
 
 ::: warning Verification Order Matters
 `oidc_discovery` runs before `jwks_reachable`. If OIDC discovery fails, the JWKS check is skipped -- there is no point validating keys if the issuer endpoint is unreachable. This is the same halt-on-failure principle used throughout the proof chain.
@@ -155,16 +275,19 @@ These two checks bring the total from 13 (v3.5.2) to 15 (v3.5.5+). Both checks m
 
 ## Teardown Semantics
 
-Auth resources follow a clear lifecycle rule: **identity outlives compute**.
+Auth resources follow a clear lifecycle rule: **identity outlives compute**. Users who authenticated against a realm retain their identity even after all kernel compute is removed.
 
-| Resource | On Teardown | Why |
-|----------|-------------|-----|
-| KeycloakRealmImport | **Retained** | User accounts survive project deletion |
-| Keycloak instance | **Untouched** | Shared across projects |
-| PVs | **Retained** | Data preservation |
-| Namespace | **Retained** | Anchors PVCs and realm |
-| Deployments, Services, HTTPRoute | **Deleted** | Compute is ephemeral |
+| Resource Type | Teardown Action | Rationale |
+|---------------|----------------|-----------|
+| Deployments | **Deleted** | Compute is ephemeral |
+| Services | **Deleted** | Routing follows compute |
+| ConfigMaps | **Deleted** | Configuration follows compute |
+| HTTPRoutes | **Deleted** | Routing follows compute |
 | ConceptKernel CRs | **Deleted** | Logical representation of running kernels |
+| PersistentVolumes | **Retained** | Data is the kernel's accumulated knowledge |
+| KeycloakRealmImport | **Retained** | Identity outlives compute |
+| Keycloak instance | **Untouched** | Shared across projects |
+| Namespace | **Retained** | Anchors PVCs and realm |
 
 All operator-created resources carry a `conceptkernel.org/project` label, enabling cross-namespace inventory:
 
@@ -172,9 +295,9 @@ All operator-created resources carry a `conceptkernel.org/project` label, enabli
 kubectl get pv,keycloakrealmimport -A -l conceptkernel.org/project=hello.tech.games
 ```
 
-## RBAC
+## RBAC for Realm Creation
 
-CK.Operator requires additional RBAC for create_realm mode:
+CK.Operator requires additional RBAC for `create_realm: true` mode:
 
 ```yaml
 - apiGroups: [k8s.keycloak.org]
@@ -183,6 +306,10 @@ CK.Operator requires additional RBAC for create_realm mode:
 ```
 
 Note the deliberate absence of `patch`, `update`, and `delete`. The operator can birth realms but MUST NOT modify or destroy existing ones. This is enforced at the Kubernetes RBAC level -- not by convention.
+
+:::warning Why No Update or Delete
+Granting `update` or `delete` on realms would allow the operator to destroy user accounts or change security settings. The protocol deliberately limits the operator to `create` -- it can bring identity into existence but cannot alter it after creation. This matches the broader CKP principle that compute is ephemeral but identity persists. Manual Keycloak administration is required for realm modification or deletion.
+:::
 
 ## Multi-Project Auth: The Hello.Greeter Test
 
@@ -219,9 +346,29 @@ However, JWTs themselves are **DATA loop** artifacts. A JWT is an instance: it h
 
 ## Conformance Requirements
 
-- CK.Operator MUST inject auth env vars into processor and web deployments when auth is declared
-- CK.Operator MUST verify OIDC discovery endpoint before marking deploy as ready
-- CK.Operator MUST NOT modify existing Keycloak realms -- only create new ones
-- CK.Operator MUST label all created resources with `conceptkernel.org/project`
-- If `create_realm: true`, `redirect_uris` MUST contain at least one entry
-- Auth config (issuer, realm, client_id) MUST be injected by the operator, not hardcoded in kernel code
+### NATS Authentication (Chapter 17)
+
+| Criterion | Level |
+|-----------|-------|
+| Server-side kernels MUST use SPIFFE JWT-SVID for NATS auth | REQUIRED |
+| Browser clients MUST connect via WSS | REQUIRED |
+| Anonymous-to-authenticated escalation MUST be supported without reconnection | REQUIRED |
+| JWT MUST be verified server-side before handler dispatch | REQUIRED |
+| Token refresh MUST NOT require NATS reconnection | REQUIRED |
+| NATS topic ACLs MUST be enforced by the NATS server | REQUIRED |
+
+### AuthConfig and Provisioning (Chapter 18)
+
+| Criterion | Level |
+|-----------|-------|
+| CK.Operator MUST inject auth env vars when auth is declared | REQUIRED |
+| CK.Operator MUST verify OIDC discovery endpoint before marking deploy ready | REQUIRED |
+| CK.Operator MUST verify JWKS endpoint before marking deploy ready | REQUIRED |
+| CK.Operator MUST NOT modify existing Keycloak realms | REQUIRED |
+| CK.Operator MUST NOT delete KeycloakRealmImport on teardown | REQUIRED |
+| CK.Operator MUST label all auth resources with `conceptkernel.org/project` | REQUIRED |
+| If `auth.provider` is `keycloak`, `realm`, `client_id`, `issuer_url` MUST be present | REQUIRED |
+| If `create_realm: true`, `redirect_uris` MUST contain at least one entry | REQUIRED |
+| Auth config (issuer, realm, client_id) MUST be injected by the operator, not hardcoded in kernel code | REQUIRED |
+
+See also: [Namespace Security](./namespace-security) for grants enforcement and ODRL projection, [Loop Isolation](./isolation) for volume-level security, [NATS Messaging](./nats) for topic conventions and transport details, [Message Envelope](./message-envelope) for JWT verification in the NatsKernelLoop processing cycle.

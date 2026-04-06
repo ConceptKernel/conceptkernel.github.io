@@ -1,13 +1,13 @@
 /**
  * CKP Ontology Browser — Configuration
- * Concept Kernel Protocol v3.5-alpha6
+ * Concept Kernel Protocol v3.6
  */
 
-const VERSION = 'v3.5-alpha6';
+const VERSION = 'v3.6';
 
 // Use relative URLs when served from same origin (conceptkernel.org or localhost)
 // Falls back to absolute URLs with CORS proxy for cross-origin
-const BASE = '/ontology/v3.5-alpha6/';
+const BASE = '/ontology/v3.6/';
 const CKP_ONTOLOGY_URLS = [
     `${BASE}core.ttl`,
     `${BASE}kernel-metadata.ttl`,

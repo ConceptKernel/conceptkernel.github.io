@@ -34,6 +34,7 @@ export default withMermaid(defineConfig({
         text: 'Ontology',
         items: [
           { text: 'Browse Ontology', link: '/browse/' },
+          { text: 'v3.6 (TTL)', link: '/ontology/v3.6/' },
           { text: 'v3.5-alpha6 (TTL)', link: '/ontology/v3.5-alpha6/' },
           { text: 'v3.5-alpha3 (TTL)', link: '/ontology/v3.5-alpha3/' },
           { text: 'v3.4 (TTL)', link: '/ontology/v3.4/' },
@@ -51,48 +52,102 @@ export default withMermaid(defineConfig({
     sidebar: {
       '/v3.6/': [
         {
-          text: 'Overview',
+          text: 'Part I: Foundations',
           items: [
             { text: 'Introduction', link: '/v3.6/introduction' },
+            { text: 'Conformance & Terminology', link: '/v3.6/conformance' },
+            { text: 'Namespaces', link: '/v3.6/namespaces' },
           ]
         },
         {
-          text: 'Infrastructure',
+          text: 'Part II: The Three Loops',
           items: [
-            { text: 'CK.Operator', link: '/v3.6/operator' },
+            { text: 'CK Loop: Identity', link: '/v3.6/ck-loop' },
+            { text: 'TOOL Loop: Capability', link: '/v3.6/tool-loop' },
+            { text: 'DATA Loop: Knowledge', link: '/v3.6/data-loop' },
+            { text: 'Three Loops as One System', link: '/v3.6/three-loops' },
+          ]
+        },
+        {
+          text: 'Part III: Ontology',
+          items: [
+            { text: 'BFO 2020 Grounding', link: '/v3.6/bfo-grounding' },
+            { text: 'Four-Layer Ontology Model', link: '/v3.6/ontology-model' },
+          ]
+        },
+        {
+          text: 'Part IV: Messaging',
+          items: [
+            { text: 'NATS Transport & Topics', link: '/v3.6/nats' },
+            { text: 'Message Envelope & Processing', link: '/v3.6/message-envelope' },
+          ]
+        },
+        {
+          text: 'Part V: Security',
+          items: [
+            { text: 'Loop Isolation', link: '/v3.6/isolation' },
             { text: 'Authentication', link: '/v3.6/auth' },
-            { text: 'Web Shell', link: '/v3.6/web-shell' },
+            { text: 'Namespace Security', link: '/v3.6/namespace-security' },
           ]
         },
         {
-          text: 'Claude Integration',
+          text: 'Part VI: Edges & Composition',
           items: [
-            { text: 'CK as Subagent', link: '/v3.6/subagent' },
-            { text: 'Streaming', link: '/v3.6/streaming' },
+            { text: 'Edge Predicates', link: '/v3.6/edges' },
             { text: 'EXTENDS + CK.Claude', link: '/v3.6/extends' },
           ]
         },
         {
-          text: 'Governance & Knowledge',
+          text: 'Part VII: System Kernels',
+          items: [
+            { text: 'Taxonomy & Archetypes', link: '/v3.6/taxonomy' },
+            { text: 'CK.ComplianceCheck', link: '/v3.6/compliance' },
+            { text: 'CK.Operator', link: '/v3.6/operator' },
+            { text: 'CK.Project & Libraries', link: '/v3.6/project' },
+          ]
+        },
+        {
+          text: 'Part VIII: Infrastructure',
+          items: [
+            { text: 'ConceptKernel CRD', link: '/v3.6/crd' },
+            { text: 'Evidence-Based Proof', link: '/v3.6/proof' },
+            { text: 'Reconciliation & Logging', link: '/v3.6/reconciliation' },
+          ]
+        },
+        {
+          text: 'Part IX: Claude Integration',
+          items: [
+            { text: 'CK as Subagent', link: '/v3.6/subagent' },
+            { text: 'Streaming', link: '/v3.6/streaming' },
+            { text: 'Web Shell', link: '/v3.6/web-shell' },
+            { text: 'CK Loop Evolution', link: '/v3.6/evolution' },
+          ]
+        },
+        {
+          text: 'Part X: Governance',
           items: [
             { text: 'CK.Consensus', link: '/v3.6/consensus' },
+            { text: 'Task Engine', link: '/v3.6/task-engine' },
             { text: 'Ontological Graph', link: '/v3.6/graph' },
-          ]
-        },
-        {
-          text: 'Planned Features',
-          collapsed: true,
-          items: [
-            { text: 'Multi-User Sessions', link: '/v3.6/sessions' },
-            { text: 'Task Execution Engine', link: '/v3.6/task-engine' },
+            { text: 'Sessions & Agent Teams', link: '/v3.6/sessions' },
             { text: 'Agent Teams', link: '/v3.6/agent-teams' },
+            { text: 'Dynamic Spawning', link: '/v3.6/spawning' },
+            { text: 'PROV-O Provenance', link: '/v3.6/provenance' },
           ]
         },
         {
-          text: 'Changelog',
+          text: 'Reference',
           collapsed: true,
           items: [
             { text: 'Full Changelog', link: '/v3.6/changelog' },
+          ]
+        },
+        {
+          text: 'Ontology Files',
+          items: [
+            { text: 'Browse Ontology', link: '/browse/' },
+            { text: 'v3.6 (Turtle)', link: '/ontology/v3.6/' },
+            { text: 'v3.5-alpha6 (Turtle)', link: '/ontology/v3.5-alpha6/' },
           ]
         },
         {
@@ -102,13 +157,6 @@ export default withMermaid(defineConfig({
             { text: 'v3.5-alpha6', link: '/v3.5-alpha6/introduction' },
             { text: 'v3.5-alpha3', link: '/v3.5-alpha3/introduction' },
             { text: 'v3.4', link: '/v3.4/introduction' },
-          ]
-        },
-        {
-          text: 'Ontology Files',
-          items: [
-            { text: 'Browse Ontology', link: '/browse/' },
-            { text: 'v3.5-alpha6 (Turtle)', link: '/ontology/v3.5-alpha6/' },
           ]
         },
         {

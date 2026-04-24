@@ -94,7 +94,7 @@ The capability organ. Holds `tool/processor.py` and executable code. ReadOnly at
 
 ### DATA Loop (ABox)
 
-The memory organ. Holds `storage/instances/`, `proof/`, `ledger/`. ReadWrite at runtime. The only loop that grows during execution.
+The memory organ. Holds `data/instances/`, `proof/`, `ledger/`. ReadWrite at runtime. The only loop that grows during execution.
 
 ### Awakening Sequence
 

@@ -19,7 +19,7 @@ description: How CK.Operator reconciles ontological declarations into cluster re
 
 ## The Operator Principle
 
-CK.Operator enforces a single rule: **if it is not in the ontology, it does not exist in the cluster.** The operator reads `conceptkernel.yaml` (CK loop, TBox) and materialises the cluster state. It never reads `tool/processor.py` or `storage/` -- those are TOOL loop and DATA loop concerns.
+CK.Operator enforces a single rule: **if it is not in the ontology, it does not exist in the cluster.** The operator reads `conceptkernel.yaml` (CK loop, TBox) and materialises the cluster state. It never reads `tool/processor.py` or `data/` -- those are TOOL loop and DATA loop concerns.
 
 This matters because it closes the gap between declaration and reality. A developer declares a kernel in `conceptkernel.yaml`. The operator creates the namespace, volumes, deployment, routes, auth, and CRD. If the declaration changes, the operator reconciles. If the kernel is removed from the declaration, the operator deletes the compute resources (but retains data -- identity outlives compute).
 
@@ -307,14 +307,14 @@ If `spec.versions` is absent from a CK.Project resource, the operator falls back
 
 **deploy.processors**: For each `node:hot` kernel, a Deployment with the processor container, volume mounts for CK (ReadOnly), TOOL (ReadOnly), and DATA (ReadWrite), and a Service for internal communication.
 
-**deploy.web**: A Deployment serving static files from the DATA loop's `storage/web/` directory.
+**deploy.web**: A Deployment serving static files from the DATA loop's `data/web/` directory.
 
 **deploy.routing**: An HTTPRoute with subpath rules:
 ```
 /action/*   -> processor (TOOL loop)
-/cklib/*    -> filer (CK.Lib edge storage/web/)
+/cklib/*    -> filer (CK.Lib edge data/web/)
 /v{N}/*     -> filer (versioned DATA loop)
-/*          -> filer (current DATA loop storage/web/)
+/*          -> filer (current DATA loop data/web/)
 ```
 
 **deploy.auth**: See [Auth](/v3.6/auth) for full details.
@@ -568,7 +568,7 @@ The v3.5.7 `patch` addition was necessary for idempotent updates. Without it, `k
 
 **Question:** Why is the operator a kernel (CK.Operator) and not a standalone controller?
 
-**Answer:** Because it benefits from the same three-loop model. CK.Operator has its own `conceptkernel.yaml` (CK loop), `tool/processor.py` (TOOL loop), and `storage/` (DATA loop). Its reconciliation records are sealed instances in the DATA loop. Its proof records have provenance. It is observable through the same NATS topics as any other kernel. Making the operator a kernel means it is self-describing and self-verifiable.
+**Answer:** Because it benefits from the same three-loop model. CK.Operator has its own `conceptkernel.yaml` (CK loop), `tool/processor.py` (TOOL loop), and `data/` (DATA loop). Its reconciliation records are sealed instances in the DATA loop. Its proof records have provenance. It is observable through the same NATS topics as any other kernel. Making the operator a kernel means it is self-describing and self-verifiable.
 
 **Question:** 15 checks feels like a lot. Why not just check "is the pod running"?
 

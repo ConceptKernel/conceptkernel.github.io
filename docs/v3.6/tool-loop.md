@@ -44,7 +44,7 @@ The tool form is not declared in `conceptkernel.yaml` -- the platform discovers 
 
 ## The Tool-to-Storage Contract
 
-The tool's only obligation toward the [DATA loop](./data-loop) is to write a conforming instance into `storage/` when it produces an output. The instance MUST conform to the kernel's `rules.shacl` before the write is accepted. Everything else -- proof generation, ledger entry, index update -- is handled by the platform after the tool writes `data.json`.
+The tool's only obligation toward the [DATA loop](./data-loop) is to write a conforming instance into `data/` when it produces an output. The instance MUST conform to the kernel's `rules.shacl` before the write is accepted. Everything else -- proof generation, ledger entry, index update -- is handled by the platform after the tool writes `data.json`.
 
 ```json
 {
@@ -69,8 +69,8 @@ The platform MUST execute the following steps after the tool writes `data.json`:
 |------|--------|-----------|
 | 1 | Validate `data.json` against `rules.shacl` | SHACL gate -- rejection blocks write |
 | 2 | Generate `proof.json` in the instance directory | Proof record with hashes |
-| 3 | Append a ledger entry to `storage/ledger/audit.jsonl` | Append-only audit trail |
-| 4 | Update index files in `storage/index/` | Queryable instance registry |
+| 3 | Append a ledger entry to `data/ledger/audit.jsonl` | Append-only audit trail |
+| 4 | Update index files in `data/index/` | Queryable instance registry |
 | 5 | Commit to the DATA loop git repository | Version history preserved |
 | 6 | Publish `ck.{guid}.data.written` to NATS | JetStream `at_least_once` guarantee |
 

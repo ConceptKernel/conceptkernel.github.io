@@ -169,7 +169,7 @@ grants:
 | `identity` | string | REQUIRED | SPIFFE ID, `anon`, `auth`, or `owner` |
 | `actions` | list[string] | REQUIRED | Permitted action names from the CKP action vocabulary |
 | `expires` | string | REQUIRED | ISO 8601 timestamp or `never` |
-| `audit` | boolean | OPTIONAL | If `true`, every access MUST be written to `storage/ledger/` |
+| `audit` | boolean | OPTIONAL | If `true`, every access MUST be written to `data/ledger/` |
 
 ## ODRL Projection
 
@@ -196,11 +196,11 @@ CKP uses implicit deny: if an action is not listed in the grants block for a giv
 | `read-identity` | inspect | `conceptkernel.yaml`, `README.md`, `CLAUDE.md`, `ontology.yaml` | CK |
 | `read-skill` | inspect | `SKILL.md` only | CK |
 | `read-tool-ref` | inspect | `serving.json` -- current version info | CK |
-| `read-storage` | inspect | `storage/instance-*/data.json`, `proof/` | DATA |
-| `read-index` | inspect | `storage/index/*` | DATA |
-| `read-ledger` | inspect | `storage/ledger/audit.jsonl` | DATA |
-| `read-llm` | inspect | `storage/llm/` | DATA |
-| `read-web` | inspect | `storage/web/` | DATA |
+| `read-storage` | inspect | `data/instance-*/data.json`, `proof/` | DATA |
+| `read-index` | inspect | `data/index/*` | DATA |
+| `read-ledger` | inspect | `data/ledger/audit.jsonl` | DATA |
+| `read-llm` | inspect | `data/llm/` | DATA |
+| `read-web` | inspect | `data/web/` | DATA |
 | `invoke-tool` | operate | Create CKI triggering tool execution | TOOL |
 
 :::danger
@@ -252,7 +252,7 @@ These resources are verified as part of the deployment proof:
 | `automountServiceAccountToken` MUST be `false` on `ckp-runtime` | REQUIRED |
 | Grants block MUST be the sole access control source | REQUIRED |
 | `write-*` actions MUST NOT be grantable to external identities | REQUIRED |
-| All audited access attempts MUST be logged to `storage/ledger/` | REQUIRED |
+| All audited access attempts MUST be logged to `data/ledger/` | REQUIRED |
 | JWT verification MUST occur before handler dispatch on NATS | REQUIRED |
 | Grant expiration MUST be enforced at verification time | REQUIRED |
 

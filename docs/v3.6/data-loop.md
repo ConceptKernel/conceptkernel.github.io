@@ -20,10 +20,12 @@ In Description Logic terms, the DATA loop is the **ABox**. Its contents are indi
 Every tool execution that produces an output creates one instance folder. CKP distinguishes two instance kinds: **sealed instances** (write-once from first write) and **task instances** (lifecycle state tracked in `ledger.json` via NATS; `data.json` sealed at completion).
 
 ```
-storage/
+data/                              # DATA loop root (v3.6.1: renamed from data/)
+                                   # Mounted at /ck/{kernel}/data/ in pod
+                                   # Sourced from /ck-data/{hostname}/{kernel}/{version}/
 
-# -- SEALED INSTANCE (all non-task CKs) --
-|- instance-<short-tx>/
+# -- TYPED INSTANCES (direct children of the kernel) --
+|- instance-<short-tx>/            # sealed instance — the kernel's typed output
 |   |- manifest.json              # who, what, when, bindings
 |   |- data.json                  # write-once output sealed on first write
 |   |- proof.json                 # validation result (check-type actions)
@@ -39,20 +41,28 @@ storage/
 |       |- c-{conv_id_1}.jsonl    #   first session
 |       +- c-{conv_id_2}.jsonl    #   resumed session
 
-# -- SHARED STORAGE --
-|- proof/
-|- ledger/
+# -- PROJECT-INSTANCE DATA (per-project, per-version) --
+|- proof/                          # verification evidence
+|- ledger/                         # audit trail
 |   +- audit.jsonl
-|- index/
+|- index/                          # derived search indices
 |   |- by_timestamp.json
 |   |- by_task_id.json
 |   +- by_confidence.json
-|- llm/
+|- llm/                            # LLM interaction logs
 |   |- context.jsonl
 |   |- memory.json
 |   +- embeddings/
-+- web/
++- web/                            # runtime web data (uploads, generated pages)
 ```
+
+::: tip Instances vs Project Data (v3.6.1)
+**Instances** (`instance-<tx>/`, `i-task-{guid}/`) are the kernel's typed output — they ARE the data type defined in `ontology.yaml`. They are direct children of the DATA loop root.
+
+**Project data** (`proof/`, `ledger/`, `index/`, `llm/`, `web/`) is operational state specific to this project deployment. It supports the kernel's operation but is not the kernel's typed output.
+
+Both live in the DATA loop at `/ck-data/{hostname}/{kernel}/{version}/`, mounted at `/ck/{kernel}/data/` in the pod.
+:::
 
 ### Sealed Instances vs Task Instances
 
@@ -105,12 +115,12 @@ Conformant implementations MUST publish the following NATS topics for DATA loop 
 
 | Topic | When Published |
 |-------|---------------|
-| `ck.{guid}.data.written` | New instance written to `storage/` |
+| `ck.{guid}.data.written` | New instance written to `data/` |
 | `ck.{guid}.data.indexed` | Index files updated |
 | `ck.{guid}.data.proof-generated` | `proof/` entry created |
 | `ck.{guid}.data.ledger-entry` | `audit.jsonl` appended |
-| `ck.{guid}.data.accessed` | `storage/` read by another kernel (audit) |
-| `ck.{guid}.data.exported` | Dataset derived from `storage/` for consumers |
+| `ck.{guid}.data.accessed` | `data/` read by another kernel (audit) |
+| `ck.{guid}.data.exported` | Dataset derived from `data/` for consumers |
 | `ck.{guid}.data.amended` | Instance amendment committed and proof rebuilt |
 | `ck.{guid}.data.shacl-rejected` | SHACL validation failed on write attempt |
 | `ck.{guid}.data.nats-degraded` | Kernel entered degraded state due to NATS unavailability |
@@ -164,7 +174,7 @@ stateDiagram-v2
 
 ## Instance Versioning and Mutation Policy
 
-Git on the `storage/` volume makes instances natively versioned. The kernel's `ontology.yaml` declares the mutability policy for all instances it produces:
+Git on the `data/` volume makes instances natively versioned. The kernel's `ontology.yaml` declares the mutability policy for all instances it produces:
 
 ```yaml
 # ontology.yaml -- instance mutability declaration
@@ -189,7 +199,7 @@ Task lifecycle NATS messages MUST use JetStream with `at_least_once` delivery gu
 
 | Rule | Behaviour |
 |------|-----------|
-| 1 | Task state transitions queue locally in `storage/ledger/pending_events.jsonl` |
+| 1 | Task state transitions queue locally in `data/ledger/pending_events.jsonl` |
 | 2 | On NATS reconnection, pending events replay in order |
 | 3 | If the local queue exceeds **1,000 events**, the kernel enters `degraded` state and publishes `ck.{guid}.data.nats-degraded` on reconnection |
 | 4 | `data.json` MUST NOT be written without NATS confirmation of the `task.complete` event |

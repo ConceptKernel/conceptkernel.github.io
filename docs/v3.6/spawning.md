@@ -54,7 +54,7 @@ The spawn action MUST create a CKP-compliant kernel directory with all **eight a
 | 4 | `ontology.yaml` | Data schema defining the occurrence instance type |
 | 5 | `rules.shacl` | Validation constraints for instances |
 | 6 | `tool/processor.py` | Action handler implementation |
-| 7 | `storage/memory/MEMORY.md` | Empty initial memory (DATA loop) |
+| 7 | `data/memory/MEMORY.md` | Empty initial memory (DATA loop) |
 | 8 | `serving.json` | Version tracking with initial commit reference |
 
 ### Spawned Kernel Properties

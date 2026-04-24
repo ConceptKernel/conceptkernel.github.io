@@ -204,11 +204,11 @@ This is a security decision. By never using `innerHTML`, the shell is immune to 
 
 ## Kernel Subfolder Mounting
 
-Each COMPOSES edge with `web.serve: true` gets an HTTPRoute subpath rule. The composed kernel's `storage/web/` is served at `/{edge_slug}/`:
+Each COMPOSES edge with `web.serve: true` gets an HTTPRoute subpath rule. The composed kernel's `data/web/` is served at `/{edge_slug}/`:
 
 ```
 https://delvinator.tech.games/              -> CK.Operator index.html
-https://delvinator.tech.games/cklib/        -> CK.Lib.Js storage/web/
+https://delvinator.tech.games/cklib/        -> CK.Lib.Js data/web/
 https://delvinator.tech.games/cklib/console.html -> full web shell
 ```
 
@@ -224,7 +224,7 @@ The gateway handles this routing. The web shell itself does not know about subfo
 
 **Question:** Is console.js part of the CK loop or the TOOL loop?
 
-**Answer:** It is part of CK.Lib.Js's **DATA loop** -- specifically `storage/web/`. CK.Lib.Js is a system kernel whose purpose is to produce shared web assets. The JavaScript files are DATA (produced output), not TOOL (executable code). This is correct: the browser downloads and executes them, but from the kernel's perspective they are static assets stored in `storage/web/`.
+**Answer:** It is part of CK.Lib.Js's **DATA loop** -- specifically `data/web/`. CK.Lib.Js is a system kernel whose purpose is to produce shared web assets. The JavaScript files are DATA (produced output), not TOOL (executable code). This is correct: the browser downloads and executes them, but from the kernel's perspective they are static assets stored in `data/web/`.
 
 **Question:** Why not use a framework (React, Vue)?
 

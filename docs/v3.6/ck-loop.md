@@ -1,6 +1,6 @@
 ---
 title: CK Loop -- Identity and Awakening
-description: The CK loop is the identity organ of every Concept Kernel. It holds the awakening sequence, conceptkernel.yaml, serving.json, and defines what the kernel IS.
+description: The CK loop is the identity organ of every Concept Kernel. It holds the awakening sequence, conceptkernel.yaml, and defines what the kernel IS.
 ---
 
 # CK Loop -- Identity and Awakening
@@ -29,7 +29,7 @@ When a Concept Kernel wakes, it MUST read its identity files in **strict order**
 | 5a | **SPIRE agent** | Am I cryptographically who I claim? | **Fatal** for non-LOCAL kernels; skip for `LOCAL.*` prefix |
 | 6 | `ontology.yaml` | How is my world shaped? | **Fatal** -- kernel has no data schema |
 | 7 | `rules.shacl` | What constraints bind me? | Warning -- permissive stub mode (all writes accepted) |
-| 8 | `serving.json` | Which version am I? | **Fatal** -- kernel cannot determine active version |
+| 8 | ~~`serving.json`~~ | ~~Which version am I?~~ | **Retired (v3.6.1)** -- version state in CK.Project CR |
 | 8a | `.ck-guid` | What is my canonical SPID? | Warning -- fallback to `kernel_id` from YAML |
 
 ::: danger Fatal Failure Points
@@ -46,7 +46,7 @@ graph TD
     S5a["5a. SPIRE Agent<br/><em>Am I who I claim?</em>"]
     S6["6. ontology.yaml<br/><em>How is my world shaped?</em>"]
     S7["7. rules.shacl<br/><em>What constraints bind me?</em>"]
-    S8["8. serving.json<br/><em>Which version am I?</em>"]
+    S8["8. (retired v3.6.1)<br/><em>serving.json removed</em>"]
     S8a["8a. .ck-guid<br/><em>Canonical SPID</em>"]
     FAIL["HALT -- Kernel does not start"]
     READY["Kernel READY"]
@@ -62,9 +62,7 @@ graph TD
     S5a -->|FAIL non-LOCAL| FAIL
     S6 -->|OK| S7
     S6 -->|FAIL| FAIL
-    S7 -->|OK or WARN| S8
-    S8 -->|OK| S8a
-    S8 -->|FAIL| FAIL
+    S7 -->|OK or WARN| S8a
     S8a -->|OK or WARN| READY
 
     style FAIL fill:#cc3333,color:#fff
@@ -148,49 +146,27 @@ ckp://Kernel#{namespace_prefix}.{kernel_class}:v{major}.{minor}
 
 Example: `ckp://Kernel#ACME.Finance.Employee:v1.0`
 
-## serving.json -- Active Version Routing
+## Version Materialisation (v3.6.1)
 
-`serving.json` declares which version of the CK loop (and by extension which `tool/` commit) is currently active. It supports two schema modes.
-
-### Mode 1: Canary Routing
-
-Traffic splitting across versions using `ck_ref`, `tool_ref`, and `weight` fields:
-
-```json
-{
-  "kernel_class": "Finance.Employee",
-  "versions": [
-    { "name": "stable",  "ck_ref":   "refs/heads/stable",
-                           "tool_ref": "refs/heads/stable",  "weight": 95 },
-    { "name": "canary",  "ck_ref":   "refs/heads/canary",
-                           "tool_ref": "refs/heads/canary",  "weight":  5 },
-    { "name": "develop", "ck_ref":   "refs/heads/develop",
-                           "tool_ref": "refs/heads/develop",  "weight":  0 }
-  ],
-  "routing": {
-    "default": "stable",
-    "by_header_X-Kernel-Version": { "canary": "canary", "dev": "develop" }
-  }
-}
-```
-
-### Mode 2: Explicit Version
-
-Version directory management using `active`, `current`, and `deprecated_at` fields:
-
-```json
-{
-  "versions": [
-    { "name": "v1", "active": true },
-    { "name": "v2", "active": true, "current": true },
-    { "name": "v3", "active": false, "deprecated_at": "2026-04-01" }
-  ]
-}
-```
-
-::: warning Platform Write Exception
-`serving.json` is the **sole exception** to CK loop read-only policy. The platform holds write authority to this file via a volume sub-path mount or sidecar mechanism. The CK loop volume remains ReadOnlyMany for all other files. CK.Operator implementations MUST document the write-through mechanism used for `serving.json`.
+::: info serving.json Retired
+`serving.json` was retired in v3.6.1. Version state now lives entirely in the **CK.Project custom resource** (`spec.versions`). The CK loop volume is purely ReadOnlyMany with **no exceptions**. No write-through hack, no sidecar mechanism. See [Version Materialisation](./versioning) for the full model.
 :::
+
+Version declarations are part of the CK.Project custom resource. Each version specifies per-kernel git commit hashes for CK and TOOL loops independently:
+
+```yaml
+spec:
+  versions:
+    - name: v1.3.2
+      route: /
+      data: isolated
+      kernels:
+        - name: Hello.Greeter
+          ck_ref: abc123f      # commit hash from CK repo
+          tool_ref: def4567    # commit hash from TOOL repo
+```
+
+The operator materialises each version by streaming `git archive` from per-kernel bare repositories to the filer. Each loop has its own bare repo — full-tree archive produces the loop content directly. No subtree filtering.
 
 ## CK Loop NATS Topics
 
@@ -220,4 +196,4 @@ Cross-project access from `LOCAL.*` to non-`LOCAL.*` still REQUIRES SPIFFE. Loca
 | L-2 | Kernel MUST NOT proceed past a failed fatal awakening step | Core |
 | L-3 | SPIFFE verification MUST occur at position 5a in the awakening sequence | Core |
 | L-4 | `conceptkernel.yaml` MUST pass the five validation rules | Core |
-| L-5 | `serving.json` is the sole CK loop file with platform write authority | Core |
+| L-5 | CK loop volume is purely ReadOnlyMany — no writable exceptions (v3.6.1: `serving.json` retired) | Core |

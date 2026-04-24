@@ -28,7 +28,7 @@ Although NATS is the primary transport, the messaging interface MUST remain tran
 
 This principle is enforced by the `NatsKernelLoop` abstraction in CK.Lib.Py (see [Message Processing Cycle](./message-envelope#natskerneloop-processing-cycle)). Handlers are decorated functions (`@on("action.name")`) that receive parsed JSON and return dicts. The loop manages connection, subscription, dispatch, instance writing, and result publication.
 
-**Filesystem symlinks as transport.** In local development, the filesystem itself serves as a degenerate transport. A kernel's `storage/` directory is a shared volume; another kernel can read its instances directly via filesystem symlinks. This coexists with NATS -- the symlink provides read access to sealed instances, while NATS provides the event notification that a new instance exists.
+**Filesystem symlinks as transport.** In local development, the filesystem itself serves as a degenerate transport. A kernel's `data/` directory is a shared volume; another kernel can read its instances directly via filesystem symlinks. This coexists with NATS -- the symlink provides read access to sealed instances, while NATS provides the event notification that a new instance exists.
 
 | Concern | Handled By | NOT Handled By |
 |---------|-----------|----------------|
@@ -166,12 +166,12 @@ Every loop emits structured events over NATS. These topics form the complete eve
 
 | Topic | Description |
 |-------|-------------|
-| `ck.{guid}.data.written` | New instance written to `storage/` |
+| `ck.{guid}.data.written` | New instance written to `data/` |
 | `ck.{guid}.data.indexed` | Index files updated |
 | `ck.{guid}.data.proof-generated` | `proof/` entry created |
 | `ck.{guid}.data.ledger-entry` | `audit.jsonl` appended |
-| `ck.{guid}.data.accessed` | `storage/` read by another kernel (audit) |
-| `ck.{guid}.data.exported` | Dataset derived from `storage/` for consumers |
+| `ck.{guid}.data.accessed` | `data/` read by another kernel (audit) |
+| `ck.{guid}.data.exported` | Dataset derived from `data/` for consumers |
 | `ck.{guid}.data.amended` | Instance amendment committed and proof rebuilt |
 | `ck.{guid}.data.shacl-rejected` | SHACL validation rejected a write |
 | `ck.{guid}.data.nats-degraded` | NATS reconnection after local queue overflow |
@@ -188,7 +188,7 @@ input.CK.Task  { action: "task.complete", output: {...}  }  # seals data.json
 
 Task lifecycle NATS messages MUST use JetStream with `at_least_once` delivery guarantee. If NATS is unavailable:
 
-1. Task state transitions queue locally in `storage/ledger/pending_events.jsonl`.
+1. Task state transitions queue locally in `data/ledger/pending_events.jsonl`.
 2. On NATS reconnection, pending events replay in order.
 3. If the local queue exceeds 1000 events, the kernel enters `degraded` state and publishes `ck.{guid}.data.nats-degraded` on reconnection.
 4. `data.json` MUST NOT be written without NATS confirmation of the `task.complete` event.

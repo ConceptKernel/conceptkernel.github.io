@@ -91,7 +91,7 @@ Creates Gateway API HTTPRoutes from kernel ontology declarations.
 | `ckp:NATSListening` | No gateway resource | NATS-only, no HTTP |
 | `ckp:NATSBrowserClient` | HTTPRoute for CK.Lib.Js + index | Inline kernel |
 
-Edge subpath rules: each `COMPOSES` edge with `web.serve: true` on the target produces an HTTPRoute rule `/{edge_slug}/*` -> target's `storage/web/`.
+Edge subpath rules: each `COMPOSES` edge with `web.serve: true` on the target produces an HTTPRoute rule `/{edge_slug}/*` -> target's `data/web/`.
 
 ### 7. deploy.ck_resources
 

@@ -60,7 +60,7 @@ Every row in the table below represents a class of bugs or security vulnerabilit
 | TOOL -> CK loop | Tool execution writing to any CK root file (`conceptkernel.yaml`, `ontology.yaml`, `rules.shacl`, etc.) | CK identity is operator-governed. A tool that can rewrite its own identity violates sovereignty. |
 | DATA -> CK loop | Storage writes causing commits to identity or schema files | Schema is a design-time artifact. Runtime data accumulation must not alter the kernel's definition. |
 | DATA -> TOOL | Instance data modifying tool source code | Tools are versioned independently via git. Data should inform future tool versions through the consensus loop, not by direct mutation. |
-| CK -> DATA direct | CK loop commit writing an instance to `storage/` | Instances require the full tool-to-storage contract: execution, proof generation, ledger entry. A CK commit bypasses all of this. |
+| CK -> DATA direct | CK loop commit writing an instance to `data/` | Instances require the full tool-to-storage contract: execution, proof generation, ledger entry. A CK commit bypasses all of this. |
 | CK(B) -> CK(A) writes | Any kernel writing to another kernel's CK or TOOL volume | Volumes are sovereign. Each kernel's identity boundary is absolute. Cross-kernel influence is through NATS messages and edges, never through filesystem writes. |
 
 :::warning No Exceptions

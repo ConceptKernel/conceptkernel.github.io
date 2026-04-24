@@ -218,7 +218,7 @@ The **body** and **envelope** view modes ignore stream events -- they only rende
 
 **Question:** Should stream events be stored in the DATA loop?
 
-**Answer:** No. Stream events are ephemeral rendering artifacts. The sealed instance (published to `result.{kernel}`) IS the DATA loop artifact. Storing individual tokens would be like storing every keystroke of a document -- the document itself is the meaningful unit. If audit of the full token stream is needed, kernel logs (which are in the DATA loop at `storage/logs/`) already capture the stream events.
+**Answer:** No. Stream events are ephemeral rendering artifacts. The sealed instance (published to `result.{kernel}`) IS the DATA loop artifact. Storing individual tokens would be like storing every keystroke of a document -- the document itself is the meaningful unit. If audit of the full token stream is needed, kernel logs (which are in the DATA loop at `data/logs/`) already capture the stream events.
 
 **Question:** What happens if the browser disconnects mid-stream?
 

@@ -65,7 +65,7 @@ Not all changes require the same governance overhead. The change type determines
 | `ontology_update` | `ontology.yaml` | **STRICT** -- requires consensus |
 | `skill_update` | `SKILL.md` | **RELAXED** -- direct edit allowed |
 | `claude_md_update` | `CLAUDE.md` | **RELAXED** -- direct edit allowed |
-| `memory_update` | `storage/memory/MEMORY.md` | **AUTONOMOUS** -- agent writes freely |
+| `memory_update` | `data/memory/MEMORY.md` | **AUTONOMOUS** -- agent writes freely |
 
 ::: info Governance Hierarchy
 Files that define kernel identity (actions, edges, ontology) require consensus. Files that refine behavior (skills, instructions) allow direct editing. Files that accumulate knowledge (memory) are freely writable. This hierarchy reflects the severity of change: identity changes have fleet-wide consequences; memory changes are local.
@@ -97,7 +97,7 @@ Model selection follows a strict precedence chain, with each level overriding th
 | Level | Source | Example |
 |---|---|---|
 | **1. CK.Claude default** | `conceptkernel.yaml` qualities | `default_model: sonnet`, `default_effort: medium` |
-| **2. Persona template** | `storage/personas/{name}.yaml` | `model: sonnet`, `effort: high` |
+| **2. Persona template** | `data/personas/{name}.yaml` | `model: sonnet`, `effort: high` |
 | **3. EXTENDS edge config** | Source kernel's `conceptkernel.yaml` | `constraints.model: opus`, `constraints.effort: max` |
 
 Edge-level constraints always win. This means the source kernel (the domain kernel that owns the action) has final say over which model executes its actions.
@@ -108,7 +108,7 @@ qualities:
   default_model: sonnet
   default_effort: medium
 
-# Level 2: Persona template (storage/personas/strict-auditor.yaml)
+# Level 2: Persona template (data/personas/strict-auditor.yaml)
 model: sonnet
 effort: high
 
@@ -165,7 +165,7 @@ CKP never stores, rotates, or manages API keys. The Claude Code CLI handles auth
 
 ## Persona Template Library
 
-CK.Claude maintains a library of persona templates in `storage/personas/`. Each persona shapes how Claude behaves when a kernel EXTENDS CK.Claude:
+CK.Claude maintains a library of persona templates in `data/personas/`. Each persona shapes how Claude behaves when a kernel EXTENDS CK.Claude:
 
 | Persona | System Prompt Summary | Model | Temperature |
 |---|---|---|---|

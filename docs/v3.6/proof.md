@@ -253,7 +253,7 @@ prov:wasAssociatedWith: "ckp://Kernel#CK.Operator:v1.0"
 
 ### Storage
 
-Action proofs MUST be stored in the kernel's `storage/proof/` directory as `proof-{action}-{timestamp}.json`. They are sealed instances and MUST NOT be modified after creation.
+Action proofs MUST be stored in the kernel's `data/proof/` directory as `proof-{action}-{timestamp}.json`. They are sealed instances and MUST NOT be modified after creation.
 
 ## Ontology Grounding
 
@@ -278,7 +278,7 @@ Action proofs MUST be stored in the kernel's `storage/proof/` directory as `proo
 | Instances MUST NOT be sealed if proof contains any failure | REQUIRED |
 | Every action that creates or modifies instances MUST produce a hash-chained proof | REQUIRED |
 | Proofs MUST include PROV-O fields | REQUIRED |
-| Proofs MUST be stored in `storage/proof/` | REQUIRED |
+| Proofs MUST be stored in `data/proof/` | REQUIRED |
 | Each substep MUST include actual evidence, not just pass/fail | REQUIRED |
 | Sealed proofs MUST NOT be modified after creation | REQUIRED |
 | Implementations SHOULD support rollback on verification failure | RECOMMENDED |

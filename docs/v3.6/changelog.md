@@ -168,11 +168,11 @@ All notable changes in the development increments that compose v3.6. Each versio
 - Updated ck-agent skill (`~/.claude/skills/ck-agent/SKILL.md`) for CKP v3.5 layout
 - CLAUDE.md at root (not llm/), SKILL.md loading, ontology.yaml summary
 - Three-loop discipline enforced: CK read-only, TOOL read-only, DATA writable
-- Memory persistence: `storage/memory/MEMORY.md` (DATA loop)
+- Memory persistence: `data/memory/MEMORY.md` (DATA loop)
 - Multi-root search: `$CK_CONCEPTS_DIR`, `./concepts/`, `~/git/delve_workspace/concepts/`
 - Fuzzy kernel resolution: `CK.*`, `Delvinator.*`, `CS.*`, `Hello.*`
 - NATS bridge: optional dispatch to live kernel via `nats pub`
-- `storage/memory/` directories created for all kernels
+- `data/memory/` directories created for all kernels
 
 ### v3.5.7 -- Hello.Greeter Kernel <Badge type="tip" text="DEPLOYED" />
 

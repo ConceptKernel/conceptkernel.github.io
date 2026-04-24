@@ -80,7 +80,7 @@ The `agent` type is a kernel type that supports long-running conversational sess
 | NATS pattern | Persistent subscriber | Persistent subscriber | Started on message |
 | Streaming | MUST publish to `stream.{kernel}` | MAY publish to `stream.{kernel}` | MAY publish |
 | Session support | MUST support multi-turn sessions | OPTIONAL | NOT APPLICABLE |
-| Persona templates | MUST serve from `storage/personas/` | NOT APPLICABLE | NOT APPLICABLE |
+| Persona templates | MUST serve from `data/personas/` | NOT APPLICABLE | NOT APPLICABLE |
 | Context window | Maintains conversation context | Stateless per message | Stateless per message |
 
 ### Direct Actions
@@ -104,7 +104,7 @@ CK.Claude/
   CLAUDE.md             # behavioral instructions
   SKILL.md              # actions: message, analyze, summarize
   ontology.yaml         # defines persona, constraint types
-  storage/
+  data/
     personas/
       analytical-reviewer.yaml
       strict-auditor.yaml
@@ -115,14 +115,14 @@ CK.Claude/
 
 ## Persona Template Registry
 
-CK.Claude maintains persona templates in `storage/personas/`. Each template defines a specialised LLM behaviour that other kernels can mount via EXTENDS. Persona templates are versioned via the DATA loop's git history. A kernel that EXTENDS CK.Claude with a specific persona receives the current version of the template at invocation time.
+CK.Claude maintains persona templates in `data/personas/`. Each template defines a specialised LLM behaviour that other kernels can mount via EXTENDS. Persona templates are versioned via the DATA loop's git history. A kernel that EXTENDS CK.Claude with a specific persona receives the current version of the template at invocation time.
 
 ### 5 Standard Personas
 
 A persona defines the behavioral shape of a Claude invocation:
 
 ```yaml
-# storage/personas/analytical-reviewer.yaml
+# data/personas/analytical-reviewer.yaml
 name: analytical-reviewer
 system_prompt: |
   You are a precise analytical reviewer. You examine data structures,
@@ -134,7 +134,7 @@ temperature: 0.1
 ```
 
 ```yaml
-# storage/personas/strict-auditor.yaml
+# data/personas/strict-auditor.yaml
 name: strict-auditor
 system_prompt: |
   You are a strict auditor. You evaluate proposals against ontological
@@ -146,7 +146,7 @@ temperature: 0.0
 ```
 
 ```yaml
-# storage/personas/creative-explorer.yaml
+# data/personas/creative-explorer.yaml
 name: creative-explorer
 system_prompt: |
   You are a creative explorer. You generate novel approaches,
@@ -157,7 +157,7 @@ temperature: 0.8
 ```
 
 ```yaml
-# storage/personas/code-implementer.yaml
+# data/personas/code-implementer.yaml
 name: code-implementer
 system_prompt: |
   You are a precise code implementer. You write clean, tested,
@@ -168,7 +168,7 @@ temperature: 0.2
 ```
 
 ```yaml
-# storage/personas/documentation-writer.yaml
+# data/personas/documentation-writer.yaml
 name: documentation-writer
 system_prompt: |
   You are a documentation writer. You produce clear, accurate,
@@ -247,7 +247,7 @@ When `input.Delvinator.Core` receives `{action: "analyze", data: {...}}`:
 ```mermaid
 graph TD
     A["input.Delvinator.Core<br/>{action: analyze, data: {...}}"] --> B["Core processor<br/>sees 'analyze' is EXTENDS action"]
-    B --> C["Load persona template<br/>CK.Claude/storage/personas/analytical-reviewer.yaml"]
+    B --> C["Load persona template<br/>CK.Claude/data/personas/analytical-reviewer.yaml"]
     C --> D["Build prompt:<br/>persona system_prompt + Core ontology context + user data"]
     D --> E{"Streaming?"}
     E -->|Yes| F["claude_agent_sdk.query()<br/>async generator"]
@@ -375,7 +375,7 @@ Named graphs per project (`urn:ckp:fleet:{hostname}`) enable per-project SPARQL 
 **Answer:** Yes. CK.Claude has:
 - CK loop: conceptkernel.yaml, CLAUDE.md, SKILL.md, ontology.yaml (defines Persona, Constraint types)
 - TOOL loop: tool/processor.py (handles message/analyze/summarize actions via Claude)
-- DATA loop: storage/personas/ (persona templates), storage/instances/ (its own results when invoked directly)
+- DATA loop: data/personas/ (persona templates), data/instances/ (its own results when invoked directly)
 
 CK.Claude CAN be invoked directly (via TRIGGERS or NATS publish). But its primary use is as an EXTENDS target.
 

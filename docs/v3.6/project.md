@@ -22,7 +22,7 @@ CK.Project is a `static` kernel because it holds only declarations; it has no pr
 
 ### Project Instance Structure
 
-Each project is an instance stored at `CK.Project/storage/instances/{hostname}/data.yaml`. The hostname is the project's identity -- it determines DNS routing, namespace naming, and filer path prefixes.
+Each project is an instance stored at `CK.Project/data/instances/{hostname}/data.yaml`. The hostname is the project's identity -- it determines DNS routing, namespace naming, and filer path prefixes.
 
 ```yaml
 # CK.Project instance: delvinator.tech.games
@@ -130,7 +130,7 @@ CK.Lib.Py (`conceptkernel` on PyPI) is the canonical Python runtime library for 
 
 ### Architecture
 
-CK.Lib.Py implements the server-side CKP runtime. It runs on cluster nodes or local machines, connects to NATS via `nats-py` (native TCP or WSS), has filesystem access to `storage/`, and writes instances, proofs, and ledger entries.
+CK.Lib.Py implements the server-side CKP runtime. It runs on cluster nodes or local machines, connects to NATS via `nats-py` (native TCP or WSS), has filesystem access to `data/`, and writes instances, proofs, and ledger entries.
 
 ```
 CLUSTER / LOCAL MACHINE (Python, nats-py)
@@ -192,7 +192,7 @@ The NATS processing cycle enforces three-loop separation at the message level:
    - Verify JWT if `Authorization: Bearer` present; fallback to anonymous
    - RBAC grants check via `check_access()`
    - Dispatch to `handler_fn(body)` (supports sync and async handlers)
-   - Write instance record to `storage/instances/i-{trace}-{ts}/message.json`
+   - Write instance record to `data/instances/i-{trace}-{ts}/message.json`
    - Publish result to `result.{KernelName}` with headers
    - Publish event to `event.{KernelName}`
 
@@ -219,7 +219,7 @@ if __name__ == "__main__":
 | Criterion | Level |
 |-----------|-------|
 | CK.Lib.Py MUST enforce three-loop separation | REQUIRED |
-| Handlers MUST NOT write to `storage/` directly | REQUIRED |
+| Handlers MUST NOT write to `data/` directly | REQUIRED |
 | JWT verification MUST occur before handler dispatch | REQUIRED |
 | PROV-O provenance MUST be generated for every instance | REQUIRED |
 | Edge composition MUST derive from `conceptkernel.yaml` declarations | REQUIRED |

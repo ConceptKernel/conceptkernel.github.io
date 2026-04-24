@@ -31,7 +31,7 @@ Core checks validate the fundamental structural and identity requirements of eve
 |---|------------|-----------|-------------------|
 | 1 | `check.identity` | BFO:0000040 | `apiVersion: conceptkernel/v3`, identity fields, namespace, domain, project |
 | 2 | `check.awakening` | CKP | All 8 awakening files present and non-empty |
-| 3 | `check.structure` | BFO:0000040 | Directory layout: `llm/`, `tool/`, `web/`, `storage/` |
+| 3 | `check.structure` | BFO:0000040 | Directory layout: `llm/`, `tool/`, `web/`, `data/` |
 | 4 | `check.types` | BFO:0000019 | `qualities.type`, `governance_mode`, `deployment_state` declared and valid |
 | 5 | `check.edges` | BFO:0000015 | Target kernel exists, predicate is valid, no duplicate edges |
 | 6 | `check.tool` | BFO:0000015 | `processor.py` exists, valid Python syntax, entrypoint declared |
@@ -50,7 +50,7 @@ Full checks extend core validation with ontological, runtime, and provenance-lev
 | 12 | `check.nats` | BFO:0000015 | `spec.nats` with input/result/event topics declared |
 | 13 | `check.mutation_frequency` | BFO:0000144 | Git commit count per file matches expected governance band |
 | 14 | `check.ontology_types` | BFO:0000017 | `ontology.yaml` has non-empty `classes:` with `is_a:` and `attributes:` |
-| 15 | `check.instance_typing` | BFO:0000040 | Instances in `storage/` conform to `ontology.yaml` class definitions |
+| 15 | `check.instance_typing` | BFO:0000040 | Instances in `data/` conform to `ontology.yaml` class definitions |
 | 16 | `check.three_loop_isolation` | CKP | Static analysis: `tool/` code does not write to CK loop files |
 | 17 | `check.edge_materialisation` | BFO:0000015 | Edge targets exist in fleet, NATS topics resolve correctly |
 | 18 | `check.shacl_validity` | BFO:0000017 | `rules.shacl` is syntactically valid SHACL |

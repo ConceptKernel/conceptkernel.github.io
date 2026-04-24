@@ -92,7 +92,7 @@ Additional fields MAY be present. The `trace`, `action`, `user`, `endpoint`, and
 Structured JSON logging enables log aggregation via standard Kubernetes tooling (Loki, Fluentd, Elasticsearch) without configuration. Every log line is machine-parseable. The `kernel` and `event` fields allow filtering by kernel class and lifecycle phase without regular expressions.
 :::
 
-**Persistent Storage.** Logs MAY be written to `storage/logs/` (DATA loop) with daily rotation. This enables post-pod log analysis for kernels that accumulate operational history.
+**Persistent Storage.** Logs MAY be written to `data/logs/` (DATA loop) with daily rotation. This enables post-pod log analysis for kernels that accumulate operational history.
 
 ## Stream Topics for Real-Time Events
 
@@ -137,7 +137,7 @@ CK.Lib.Py and CK.Lib.Js MUST produce and consume identical message formats.
 `NatsKernelLoop` is the runtime loop that bridges the NATS transport and the kernel processor. It is implemented in CK.Lib.Py (`nats_loop.py`) and is the sole entry point for message-driven kernel execution.
 
 :::info Why This Matters
-Centralising NATS connection management, JWT verification, grants checking, instance writing, and result publication in a single loop enforces the three-loop separation axiom. Handler functions (TOOL loop) receive parsed data and return dicts. They never touch `storage/` directly, never manage NATS connections, and never verify credentials. This separation is not advisory -- it is structural.
+Centralising NATS connection management, JWT verification, grants checking, instance writing, and result publication in a single loop enforces the three-loop separation axiom. Handler functions (TOOL loop) receive parsed data and return dicts. They never touch `data/` directly, never manage NATS connections, and never verify credentials. This separation is not advisory -- it is structural.
 :::
 
 ### Startup Sequence
@@ -210,7 +210,7 @@ flowchart TD
 3. **Check grants** -- Resolve user access level (`anon` / `auth` / `owner` / `spiffe`). Look up requested action in the grants block. On failure: reject with 403, log to audit.
 4. **Parse body as JSON** -- Validate `{ action, data }` envelope. On failure: reject with 400, log error.
 5. **Dispatch to handler** -- Look up `@on(action)` handler in processor. If not found, check effective actions from edges. If `EXTENDS` action, load persona and invoke target. Execute handler with parsed data.
-6. **Write instance** (if stateful action type) -- Create `storage/instances/i-{trace}-{ts}/`, write `manifest.json`, `data.json` (handler return value), generate `proof.json`, append `ledger.json`, commit to git on DATA volume.
+6. **Write instance** (if stateful action type) -- Create `data/instances/i-{trace}-{ts}/`, write `manifest.json`, `data.json` (handler return value), generate `proof.json`, append `ledger.json`, commit to git on DATA volume.
 7. **Publish result** -- Publish to `result.{KernelName}`, publish to `event.{KernelName}`, and if session active, publish to `session.{project}.{id}`.
 8. **Log completion** -- Structured JSON: `{"ts":..., "level":"info", "kernel":..., "event":"tx.complete"}`.
 
@@ -249,7 +249,7 @@ Task lifecycle NATS messages MUST use JetStream. If NATS becomes unavailable dur
 | Condition | Kernel Behaviour |
 |-----------|-----------------|
 | NATS unreachable at startup | Retry with exponential backoff; do not enter `ready` state |
-| NATS connection lost during operation | Queue events locally in `storage/ledger/pending_events.jsonl` |
+| NATS connection lost during operation | Queue events locally in `data/ledger/pending_events.jsonl` |
 | Local queue exceeds 1000 events | Enter `degraded` state |
 | NATS reconnects | Replay pending events in order; publish `ck.{guid}.data.nats-degraded` if degraded |
 | `task.complete` without NATS confirmation | Block -- `data.json` MUST NOT be written |
@@ -280,7 +280,7 @@ Different kernel types use NATS differently:
 | `NatsKernelLoop` MUST be the sole message dispatch entry point | REQUIRED |
 | JWT verification MUST occur before handler dispatch | REQUIRED |
 | Grants MUST be checked before handler dispatch | REQUIRED |
-| Handlers MUST NOT write to `storage/` directly | REQUIRED |
+| Handlers MUST NOT write to `data/` directly | REQUIRED |
 | Instance creation MUST occur inside the loop, not the handler | REQUIRED |
 | Edge subscriptions MUST be materialised from `conceptkernel.yaml` at startup | REQUIRED |
 | Processor code MUST NOT contain hardcoded edge subscriptions | REQUIRED |

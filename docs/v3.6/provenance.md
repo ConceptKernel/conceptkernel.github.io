@@ -30,7 +30,7 @@ These three fields establish the minimum provenance: **what** created it, **who*
 ### Instance Provenance Example
 
 ```yaml
-# storage/instances/i-tx-a8f3c1-1712345678/manifest.json
+# data/instances/i-tx-a8f3c1-1712345678/manifest.json
 {
   "instance_id": "i-tx-a8f3c1-1712345678",
   "instance_type": "exchange",
@@ -54,7 +54,7 @@ Every action that produces instances SHOULD also include these fields for a rich
 ### Action Provenance Example
 
 ```yaml
-# storage/proof/proof-exchange.parse-1712345678.json
+# data/proof/proof-exchange.parse-1712345678.json
 {
   "action_urn": "ckp://Action#Delvinator.Core/exchange.parse-1712345678",
   "prov:wasAssociatedWith": "ckp://Kernel#Delvinator.Core:v1.0",

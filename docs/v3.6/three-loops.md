@@ -16,7 +16,7 @@ The loops are not peers. They exist in a deliberate dependency order that reflec
 | Loop | Exists For | Depends On | Serves |
 |------|-----------|------------|--------|
 | **DATA** | Accumulating what the kernel knows and has produced | TOOL (to produce instances), CK (for schema + rules) | Other kernels via grants block; the `web/` surface; `llm/` memory |
-| **TOOL** | Executing the kernel's capability | CK loop (for `ontology.yaml`, `rules.shacl`, identity) | DATA loop -- every tool execution writes to `storage/` |
+| **TOOL** | Executing the kernel's capability | CK loop (for `ontology.yaml`, `rules.shacl`, identity) | DATA loop -- every tool execution writes to `data/` |
 | **CK** | Defining and sustaining the Material Entity | Nothing -- this is the root | TOOL loop (schema, rules, identity) and DATA loop (schema, rules) |
 
 The dependency is strictly hierarchical: CK depends on nothing, TOOL depends on CK, DATA depends on both. There are no circular dependencies between loops.
@@ -39,7 +39,7 @@ graph TD
 ## The Three-Loop Separation Axiom
 
 ::: danger AXIOM
-A storage write (DATA) MUST NOT cause a CK loop commit. A tool execution (TOOL) MUST NOT rewrite `ontology.yaml` or `rules.shacl`. A CK loop commit MUST NOT write directly to `storage/`. These boundaries SHALL be enforced by write authority rules on each filesystem volume -- not by convention.
+A storage write (DATA) MUST NOT cause a CK loop commit. A tool execution (TOOL) MUST NOT rewrite `ontology.yaml` or `rules.shacl`. A CK loop commit MUST NOT write directly to `data/`. These boundaries SHALL be enforced by write authority rules on each filesystem volume -- not by convention.
 :::
 
 This axiom is the foundational invariant of CKP. Every conformant implementation MUST enforce it at the infrastructure level (volume driver `readOnly` flags, mount options, or equivalent platform mechanism). Violation of this axiom is a **fatal conformance failure**.
@@ -59,7 +59,7 @@ This axiom is the foundational invariant of CKP. Every conformant implementation
 | TOOL -> CK loop | Tool execution writing to any file in the CK root volume | CK identity is operator-governed -- runtime cannot alter who the kernel is |
 | DATA -> CK loop | Storage writes causing commits to `conceptkernel.yaml` or schema | Identity and schema are design-time artifacts -- not derived from outputs |
 | DATA -> TOOL | Instance data retroactively modifying tool source or config | Tools are versioned independently -- instances are their outputs, not inputs to their definition |
-| CK -> DATA direct | A CK loop commit writing an instance into `storage/` | Instances are produced by tool execution -- they require the full [tool-to-storage contract](./tool-loop#the-tool-to-storage-contract) |
+| CK -> DATA direct | A CK loop commit writing an instance into `data/` | Instances are produced by tool execution -- they require the full [tool-to-storage contract](./tool-loop#the-tool-to-storage-contract) |
 | CK_B -> CK_A writes | Any kernel writing to another kernel's CK or TOOL volume | Volumes are sovereign -- another kernel MAY only read DATA loop outputs via declared access |
 
 ## Description Logic Box Correspondence
@@ -126,16 +126,15 @@ Every Concept Kernel presents a single unified filesystem tree to all processes 
 |- CHANGELOG.md                <- What I have become
 |- ontology.yaml               <- Shape of my world
 |- rules.shacl                 <- My constraints
-|- serving.json                <- Which version of me is active
 +- .policy                     <- Local governance rules
 |
-|  -- TOOL (virtual mount: ck-{guid}-tool) --
+|  -- TOOL (sibling mount: ck-{project}-{kernel}-{version}-tool) --
 |
 |- tool/                       <- TOOL loop root
 |
-|  -- STORAGE (virtual mount: ck-{guid}-storage) --
+|  -- DATA (sibling mount: ck-{project}-{kernel}-{version}-data) --
 |
-+- storage/                    <- DATA loop root -- append-only
++- data/                       <- DATA loop root -- append-only
     |- instance-<short-tx>/    <- sealed instance folder
     |- i-task-{conv_guid}/     <- task instance folder
     |- proof/
@@ -145,8 +144,8 @@ Every Concept Kernel presents a single unified filesystem tree to all processes 
     +- web/
 ```
 
-::: tip Platform Convention
-This filesystem layout is applied identically to every kernel on mint. It is never declared in `conceptkernel.yaml` -- that file carries identity only. The platform routes `/{class}/{guid}/` to `ck-{guid}-ck`, `/{class}/{guid}/tool/` to `ck-{guid}-tool`, and `/{class}/{guid}/storage/` to `ck-{guid}-storage`. Three volumes, one tree.
+::: tip Platform Convention (v3.6.1)
+This filesystem layout is applied identically to every kernel. Three PVs mount as **sibling directories** under `/ck/{kernel}/`: `ck/` (ReadOnly), `tool/` (ReadOnly), `data/` (ReadWrite). The kernel name directory is not a volume — it is a namespace created by the kubelet. No volume is nested inside another volume. Version state lives in the CK.Project custom resource, not on disk. `serving.json` is retired (v3.6.1).
 :::
 
 ## Commit Frequency as Governance Signal
@@ -155,11 +154,11 @@ Commit frequency per file is a first-class observable in CKP. Commit frequency m
 
 | Frequency Band | Files | Loop | If Violated |
 |---------------|-------|------|-------------|
-| **High** -- runtime accumulation | `storage/ledger.json`, `storage/llm/context.jsonl`, `storage/index/*` | DATA | Expected -- these are append-only logs |
+| **High** -- runtime accumulation | `data/ledger.json`, `data/llm/context.jsonl`, `data/index/*` | DATA | Expected -- these are append-only logs |
 | **Medium** -- developer-paced | `CLAUDE.md`, `SKILL.md`, `CHANGELOG.md` | CK | Expected -- identity evolves gradually |
 | **Low** -- stable foundation | `conceptkernel.yaml`, `ontology.yaml`, `rules.shacl`, `README.md` | CK | Flag if >20 commits -- schema churn is a smell |
 | **Variable** -- tool development | `tool/*` -- all tool source files | TOOL | Expected during active dev; low in production |
-| **Near-zero** -- sealed outputs | `storage/i-*/data.json` (sealed instances) | DATA | Flag if >1-3 commits -- mutation policy may be violated |
+| **Near-zero** -- sealed outputs | `data/i-*/data.json` (sealed instances) | DATA | Flag if >1-3 commits -- mutation policy may be violated |
 
 ## Fleet Operations Engine
 
@@ -168,9 +167,9 @@ The three-loop model is the implementation substrate for the fleet's autonomous 
 | Fleet Pattern | CKP Implementation | Status |
 |--------------|---------------------|--------|
 | Unlimited autonomous directions | Goal kernel instances -- each goal is a direction; tasks distributed across kernels | Implemented |
-| Formal task descriptions | `task.yaml` in task kernel `storage/` with typed inputs, outputs, `quality_criteria`, `acceptance_conditions` | Partial |
+| Formal task descriptions | `task.yaml` in task kernel `data/` with typed inputs, outputs, `quality_criteria`, `acceptance_conditions` | Partial |
 | Capability advertisement to registries | `spec.actions` + `capability:` block in `conceptkernel.yaml`; discovery kernel `fleet.catalog` | Implemented |
-| Audience profile accumulation | `i-audience-{session}/` instances in web-serving kernel `storage/` | Future |
+| Audience profile accumulation | `i-audience-{session}/` instances in web-serving kernel `data/` | Future |
 | Provenance for all autonomous actions | PROV-O fields in every `manifest.json`; GPG+OIDC+SVID three-factor audit chain | Implemented (MUST) |
 | Deployment as ontological event | `i-deploy-{ts}/` instance with manifests, probe result, operator identity | Implemented |
 | SHACL reactive business rules | `rules.shacl` reactive logic layer; SHACL Advanced Rules for trigger conditions | Future |

@@ -15,7 +15,7 @@ Every Concept Kernel already carries the exact files a Claude Code subagent need
 | `CLAUDE.md` | Behavioral instructions |
 | `SKILL.md` | Action catalog with parameters and examples |
 | `ontology.yaml` | Data schema -- what the agent can produce |
-| `storage/memory/MEMORY.md` | Persistent cross-session memory |
+| `data/memory/MEMORY.md` | Persistent cross-session memory |
 
 There is no translation layer. The files that define the kernel's identity in the three-loop model are the same files that define the agent's prompt. This is why `/ck Operator` can spawn a subagent that IS the CK.Operator kernel -- not a simulation of it, but the same identity loaded into a different runtime.
 
@@ -45,7 +45,7 @@ The `/ck` command triggers the `ck-agent` skill, which:
 3. **Constructs** a subagent prompt from the loaded files
 4. **Spawns** a Claude Code `Agent` subprocess with the prompt
 5. **Captures** the agent's output, including any memory updates
-6. **Persists** memory updates to `storage/memory/MEMORY.md`
+6. **Persists** memory updates to `data/memory/MEMORY.md`
 
 ### 8-File Loading Order
 
@@ -60,8 +60,8 @@ Loading order:
   3. SKILL.md               -- action catalog (what to do)
   4. ontology.yaml          -- data schema (what things are)
   5. rules.shacl            -- validation constraints (what's allowed)
-  6. storage/memory/MEMORY.md -- persistent memory (what's been learned)
-  7. storage/tasks/          -- pending tasks (what needs doing)
+  6. data/memory/MEMORY.md -- persistent memory (what's been learned)
+  7. data/tasks/          -- pending tasks (what needs doing)
   8. changelog              -- recent changes (what's happened)
 ```
 
@@ -107,13 +107,13 @@ Type: {qualities.type} | Governance: {governance_mode}
 {formatted classes from ontology.yaml}
 
 ## Memory
-{contents of storage/memory/MEMORY.md, or "No memory yet."}
+{contents of data/memory/MEMORY.md, or "No memory yet."}
 
 ## Three-Loop Rules
 - CK loop files are READ-ONLY (CLAUDE.md, SKILL.md, conceptkernel.yaml,
   ontology.yaml, rules.shacl, serving.json)
 - TOOL loop is READ-ONLY (tool/processor.py)
-- DATA loop is WRITABLE (storage/ -- instances, proof, ledger, memory)
+- DATA loop is WRITABLE (data/ -- instances, proof, ledger, memory)
 - You may suggest changes to CK loop files, but output them as
   proposals for the parent agent to apply
 
@@ -129,7 +129,7 @@ The subagent operates under the same separation axiom as the runtime:
 |------|----------------|------|
 | CK | **Read-only** | CLAUDE.md, SKILL.md, conceptkernel.yaml, ontology.yaml, rules.shacl |
 | TOOL | **Read-only** | tool/processor.py -- can read to understand capabilities, never modify |
-| DATA | **Read-write** | storage/ -- can create instances, write memory, append ledger |
+| DATA | **Read-write** | data/ -- can create instances, write memory, append ledger |
 
 The subagent MUST NOT modify CK loop files. This is not just a rule in the prompt -- it reflects the physical volume separation. In the cluster, the CK volume is `ReadOnlyMany`. In the subagent, the same discipline applies through instruction.
 
@@ -144,12 +144,12 @@ The solution is a clean separation of powers: the subagent can PROPOSE changes (
 
 ## Memory Persistence
 
-Each kernel has persistent memory at `storage/memory/MEMORY.md`. This file survives across Claude Code sessions, providing continuity. The agent SHOULD read memory at session start and SHOULD update it with significant learnings at session end.
+Each kernel has persistent memory at `data/memory/MEMORY.md`. This file survives across Claude Code sessions, providing continuity. The agent SHOULD read memory at session start and SHOULD update it with significant learnings at session end.
 
 After the subagent completes, the parent agent:
 
 1. Checks output for a `MEMORY_UPDATE` section
-2. Appends it to `{kernel}/storage/memory/MEMORY.md` (DATA loop -- writable)
+2. Appends it to `{kernel}/data/memory/MEMORY.md` (DATA loop -- writable)
 3. Next invocation of `/ck {kernel}` includes the accumulated memory
 
 Memory is part of the **DATA loop** (writable), not the CK loop (read-only). This is intentional: memory accumulates knowledge, which is a data concern. Identity (CK loop) changes only through [governed evolution](./evolution).
@@ -201,7 +201,7 @@ All changes go through git -- version controlled, auditable, rollback-able. The 
 
 ## Multi-Root Search and Storage
 
-The ck-agent skill creates `storage/memory/` directories for all discovered kernels, ensuring the DATA loop writable path exists even for kernels that have never been invoked as subagents.
+The ck-agent skill creates `data/memory/` directories for all discovered kernels, ensuring the DATA loop writable path exists even for kernels that have never been invoked as subagents.
 
 Multi-root search covers:
 - `$CK_CONCEPTS_DIR` -- explicit override
@@ -218,11 +218,11 @@ Multi-root search covers:
 
 **Question:** Can the subagent produce instances?
 
-**Answer:** Yes. The subagent writes to `storage/` (DATA loop), which IS the instance store. However, instances produced by the subagent are not sealed in the same way as runtime instances -- they lack the NATS event trail and the proof chain. This is a known gap. A future version should generate lightweight proof records for subagent-produced instances.
+**Answer:** Yes. The subagent writes to `data/` (DATA loop), which IS the instance store. However, instances produced by the subagent are not sealed in the same way as runtime instances -- they lack the NATS event trail and the proof chain. This is a known gap. A future version should generate lightweight proof records for subagent-produced instances.
 
 **Question:** What happens if two developers use `/ck Core` simultaneously?
 
-**Answer:** Each Claude Code session spawns its own subagent. Both read the same CK loop (identity is shared, read-only). Both write to the same DATA loop (storage/memory/). This creates a potential memory conflict -- the last writer wins. This is acceptable for the current single-developer model but will need addressing in the multi-user sessions feature (v3.5.14).
+**Answer:** Each Claude Code session spawns its own subagent. Both read the same CK loop (identity is shared, read-only). Both write to the same DATA loop (data/memory/). This creates a potential memory conflict -- the last writer wins. This is acceptable for the current single-developer model but will need addressing in the multi-user sessions feature (v3.5.14).
 
 **Gap identified:** The subagent does not currently validate instances against `rules.shacl` before writing to storage. In the deployed runtime, the processor validates via SHACL before sealing. The subagent skips this step. This means subagent-produced instances may not conform to the kernel's constraints.
 :::
@@ -248,7 +248,7 @@ The `context_items` parameter controls what gets loaded, allowing lightweight co
 |---|---|
 | `/ck` MUST load the kernel's CK loop in the specified 8-file order | REQUIRED |
 | Agents MUST NOT modify CK loop files during normal operation | REQUIRED |
-| Memory MUST persist in the DATA loop at `storage/memory/MEMORY.md` | REQUIRED |
+| Memory MUST persist in the DATA loop at `data/memory/MEMORY.md` | REQUIRED |
 | Context building MUST use `build_context()` or equivalent | REQUIRED |
 | Agents MUST respect the kernel's governance mode | REQUIRED |
 | Every Concept Kernel MUST have CLAUDE.md and SKILL.md in its CK loop | REQUIRED |

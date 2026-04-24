@@ -588,6 +588,92 @@ ckp:criticalGap a owl:AnnotationProperty ;
     rdfs:comment "A critical missing feature or integration"@en .
 
 #################################################################
+#    Version Materialisation (v3.6.1)
+#################################################################
+
+### VersionDeclaration — a named version with per-kernel git refs
+### Grounded as GenericallyDependentContinuant (depends on CK.Project)
+
+ckp:VersionDeclaration a owl:Class ;
+    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant
+    rdfs:label "Version Declaration"@en ;
+    rdfs:comment "A named version with per-kernel git refs, mapped to a URL route. Each version materialises three sibling directories per kernel: ck/ (identity, ReadOnly), tool/ (code, ReadOnly), data/ (state, ReadWrite). No nested mounts — three independent PVs mounted as siblings under /ck/{kernel}/."@en .
+
+ckp:hasVersionName a owl:DatatypeProperty ;
+    rdfs:domain ckp:VersionDeclaration ;
+    rdfs:range xsd:string ;
+    rdfs:label "version name"@en ;
+    rdfs:comment "Version tag (v1.0.0, v1.3.2) — used in filer paths, PV names, HTTPRoute rules"@en .
+
+ckp:hasRoute a owl:DatatypeProperty ;
+    rdfs:domain ckp:VersionDeclaration ;
+    rdfs:range xsd:string ;
+    rdfs:label "route"@en ;
+    rdfs:comment "URL path prefix on project hostname (e.g. /, /next)"@en .
+
+ckp:hasDataIsolation a owl:ObjectProperty ;
+    rdfs:domain ckp:VersionDeclaration ;
+    rdfs:range ckp:DataIsolationMode ;
+    rdfs:label "data isolation mode"@en ;
+    rdfs:comment "Controls whether this version gets its own DATA directory or shares with another version"@en .
+
+ckp:hasKernelRef a owl:ObjectProperty ;
+    rdfs:domain ckp:VersionDeclaration ;
+    rdfs:range ckp:KernelVersionRef ;
+    rdfs:label "kernel version ref"@en ;
+    rdfs:comment "Per-kernel git refs for this version"@en .
+
+### KernelVersionRef — per-kernel, per-loop git references
+
+ckp:KernelVersionRef a owl:Class ;
+    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant
+    rdfs:label "Kernel Version Ref"@en ;
+    rdfs:comment "Per-kernel, per-loop git references for version materialisation. Each concept kernel has three independently versioned storage concerns: CK loop (ck_ref from ck.git), TOOL loop (tool_ref from tool.git), DATA loop (directory-based, no git ref). Full-tree git archive produces loop content directly — no subtree filtering."@en .
+
+ckp:refKernelName a owl:DatatypeProperty ;
+    rdfs:domain ckp:KernelVersionRef ;
+    rdfs:range xsd:string ;
+    rdfs:label "kernel name"@en ;
+    rdfs:comment "Concept kernel name. Maps to registry {name}/ck.git and {name}/tool.git, filer /ck/{name}/ck.git/ and /ck/{name}/tool.git/"@en .
+
+ckp:ckRef a owl:DatatypeProperty ;
+    rdfs:domain ckp:KernelVersionRef ;
+    rdfs:range xsd:string ;
+    rdfs:label "CK loop ref"@en ;
+    rdfs:comment "Git commit hash for CK loop. Full-tree archive from per-kernel CK bare repo. Extracted to /ck/{kernel}/{version}/ck/ on filer. Mounted at /ck/{kernel}/ck/ in pod (ReadOnlyMany)."@en .
+
+ckp:toolRef a owl:DatatypeProperty ;
+    rdfs:domain ckp:KernelVersionRef ;
+    rdfs:range xsd:string ;
+    rdfs:label "TOOL loop ref"@en ;
+    rdfs:comment "Git commit hash for TOOL loop. Full-tree archive from per-kernel TOOL bare repo. Extracted to /ck/{kernel}/{version}/tool/ on filer. Mounted at /ck/{kernel}/tool/ in pod (ReadOnlyMany or ReadWriteMany for hot-reload)."@en .
+
+ckp:hasAutoUpdate a owl:ObjectProperty ;
+    rdfs:domain ckp:KernelVersionRef ;
+    rdfs:range ckp:AutoUpdatePolicy ;
+    rdfs:label "auto-update policy"@en ;
+    rdfs:comment "Policy for webhook-driven ref updates from the git registry"@en .
+
+### GitRegistryConfig — registry connection for a project
+
+ckp:GitRegistryConfig a owl:Class ;
+    rdfs:subClassOf bfo:0000031 ;  # bfo:GenericallyDependentContinuant
+    rdfs:label "Git Registry Config"@en ;
+    rdfs:comment "Git registry connection configuration. The operator discovers this from the CK.Project ontology at runtime via the COMPOSES edge — not hardcoded."@en .
+
+ckp:registryUrl a owl:DatatypeProperty ;
+    rdfs:domain ckp:GitRegistryConfig ;
+    rdfs:range xsd:anyURI ;
+    rdfs:label "registry URL"@en ;
+    rdfs:comment "Registry base URL (e.g. http://soft-serve-http.git.svc)"@en .
+
+ckp:authSecret a owl:DatatypeProperty ;
+    rdfs:domain ckp:GitRegistryConfig ;
+    rdfs:range xsd:string ;
+    rdfs:label "auth secret"@en ;
+    rdfs:comment "K8s Secret name containing registry credentials. Optional for cluster-internal registries."@en .
+
+#################################################################
 #    Coverage Summary (as OWL Individuals)
 #################################################################
 

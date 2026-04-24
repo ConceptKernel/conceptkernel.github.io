@@ -301,6 +301,69 @@ ckp:KernelReferenceIntegrityShape
         """ ;
     ] .
 
+# ----------------------------------------------------------------------------
+# Version Declaration Shape (v3.6.1)
+# ----------------------------------------------------------------------------
+ckp:VersionDeclarationShape
+    a sh:NodeShape ;
+    sh:targetClass ckp:VersionDeclaration ;
+
+    sh:property [
+        sh:path ckp:hasVersionName ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:pattern "^[a-zA-Z0-9][a-zA-Z0-9._-]*$" ;
+        sh:message "Version name must be alphanumeric with dots, hyphens, underscores" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:hasRoute ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:pattern "^/" ;
+        sh:message "Route must start with /" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:hasKernelRef ;
+        sh:node ckp:KernelVersionRefShape ;
+        sh:minCount 1 ;
+        sh:message "Version must declare at least one kernel ref" ;
+    ] .
+
+# ----------------------------------------------------------------------------
+# Kernel Version Ref Shape (v3.6.1)
+# ----------------------------------------------------------------------------
+ckp:KernelVersionRefShape
+    a sh:NodeShape ;
+    sh:targetClass ckp:KernelVersionRef ;
+
+    sh:property [
+        sh:path ckp:refKernelName ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Kernel name is required" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:ckRef ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:pattern "^[0-9a-f]{7,40}$" ;
+        sh:message "ck_ref must be a hex commit hash (7-40 chars)" ;
+    ] ;
+
+    sh:property [
+        sh:path ckp:toolRef ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:pattern "^[0-9a-f]{7,40}$" ;
+        sh:message "tool_ref must be a hex commit hash (7-40 chars)" ;
+    ] .
+
 # EOF - ConceptKernel SHACL Shapes v1.3.20
 # Creator: Peter Styk <peter@conceptkernel.org>
 # Project: https://conceptkernel.org

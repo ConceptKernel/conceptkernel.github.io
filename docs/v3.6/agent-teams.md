@@ -55,12 +55,12 @@ Each agent in the team loads its own CK loop, following the same awakening seque
 | 2 | `CLAUDE.md` | Behavioral instructions |
 | 3 | `SKILL.md` | Action catalog |
 | 4 | `ontology.yaml` | Data schema |
-| 5 | `storage/memory/MEMORY.md` | Persistent memory |
+| 5 | `data/memory/MEMORY.md` | Persistent memory |
 
 Each agent operates under three-loop discipline:
 - **CK loop**: Read-only -- the agent reads its identity but cannot modify it
 - **TOOL loop**: Read-only -- the agent can read `tool/processor.py` to understand capabilities
-- **DATA loop**: Writable -- the agent writes to `storage/` (instances, proof, memory)
+- **DATA loop**: Writable -- the agent writes to `data/` (instances, proof, memory)
 
 Each agent works within its kernel directory. There is no shared writable path between agents.
 
@@ -105,7 +105,7 @@ Parent collects results from all agents as they complete. Agents may finish at d
 
 ### 4. Memory Merge
 
-Parent persists each agent's memory updates to their respective `storage/memory/MEMORY.md`. Each kernel's memory is updated independently -- there is no shared memory across agents.
+Parent persists each agent's memory updates to their respective `data/memory/MEMORY.md`. Each kernel's memory is updated independently -- there is no shared memory across agents.
 
 ### 5. Unified Report
 
@@ -135,7 +135,7 @@ Each kernel's `CLAUDE.md` must declare inter-kernel communication patterns for t
 
 **Question:** How do agents avoid conflicting DATA loop writes?
 
-**Answer:** Each agent writes to its OWN kernel's DATA loop. ComplianceCheck writes to `CK.ComplianceCheck/storage/`, Operator writes to `CK.Operator/storage/`, Core writes to `Delvinator.Core/storage/`. There is no shared writable path. Cross-kernel communication goes through NATS, not filesystem.
+**Answer:** Each agent writes to its OWN kernel's DATA loop. ComplianceCheck writes to `CK.ComplianceCheck/data/`, Operator writes to `CK.Operator/data/`, Core writes to `Delvinator.Core/data/`. There is no shared writable path. Cross-kernel communication goes through NATS, not filesystem.
 
 **Question:** Can agents in a team use EXTENDS?
 

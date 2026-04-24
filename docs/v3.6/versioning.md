@@ -485,5 +485,5 @@ v3.6.1 has been proven on a live AKS cluster with SeaweedFS 3.93 and the Seaweed
 - CK PV MUST always be ReadOnly
 - TOOL PV SHOULD be ReadOnly; MAY be ReadWrite for hot-reload scenarios
 - DATA PV MUST be ReadWrite
-- Mountpoint stub directories (`tool/`, `storage/` inside CK volume content) MUST NOT be created -- they do not work with runc
+- Mountpoint stub directories (`tool/`, `data/` inside CK volume content) MUST NOT be created -- they do not work with runc
 - Quick setup mode (no git, no refs) MUST be supported -- operator mounts whatever is at the version's `ck/` and `tool/` paths

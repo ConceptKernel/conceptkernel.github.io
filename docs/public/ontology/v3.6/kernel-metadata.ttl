@@ -342,6 +342,52 @@ ckp:TemplateKernel a owl:Class ;
     rdfs:comment "Template kernel for creating new kernels via forking"@en .
 
 #################################################################
+#    Version Materialisation Enums (v3.6.1)
+#################################################################
+
+### DataIsolationMode — controls DATA directory scoping per version
+
+ckp:DataIsolationMode a owl:Class ;
+    rdfs:subClassOf bfo:0000019 ;  # bfo:Quality
+    rdfs:label "Data Isolation Mode"@en ;
+    rdfs:comment "Controls whether a version gets its own DATA directory or shares with another version"@en .
+
+ckp:DataIsolation-Isolated a ckp:DataIsolationMode ;
+    rdfs:label "Isolated"@en ;
+    rdfs:comment "Version gets its own DATA directory at /ck-data/{hostname}/{kernel}/{version}/"@en .
+
+ckp:DataIsolation-Shared a ckp:DataIsolationMode ;
+    rdfs:label "Shared"@en ;
+    rdfs:comment "Version shares DATA directory with another version"@en .
+
+### AutoUpdatePolicy — webhook-driven ref update behaviour
+
+ckp:AutoUpdatePolicy a owl:Class ;
+    rdfs:subClassOf bfo:0000019 ;  # bfo:Quality
+    rdfs:label "Auto Update Policy"@en ;
+    rdfs:comment "Policy for handling ref-update webhooks from the git registry"@en .
+
+ckp:AutoUpdate-Auto a ckp:AutoUpdatePolicy ;
+    rdfs:label "Auto"@en ;
+    rdfs:comment "Operator auto-patches CR with new ref on webhook. Triggers reconcile."@en .
+
+ckp:AutoUpdate-Manual a ckp:AutoUpdatePolicy ;
+    rdfs:label "Manual"@en ;
+    rdfs:comment "Operator emits ref-update.available event. Requires manual CR patch."@en .
+
+### StorageMedium additions (v3.6.1)
+
+ckp:StorageMedium-GIT_BARE_REPO a ckp:StorageMedium ;
+    rdfs:label "Git Bare Repository"@en ;
+    rdfs:comment "Per-loop bare git repository on filer. CK loop at /ck/{kernel}/ck.git/, TOOL loop at /ck/{kernel}/tool.git/. Source of truth for git archive materialisation."@en .
+
+### DeploymentMethod additions (v3.6.1)
+
+ckp:DeploymentMethod-THREE_SIBLING a ckp:DeploymentMethod ;
+    rdfs:label "Three Sibling Mounts"@en ;
+    rdfs:comment "v3.6.1 Option A: three independent PVs mounted as siblings under /ck/{kernel}/. No nested volumes. Avoids runc EROFS constraint on ReadOnly parent overlays."@en .
+
+#################################################################
 #    Status Individuals
 #################################################################
 

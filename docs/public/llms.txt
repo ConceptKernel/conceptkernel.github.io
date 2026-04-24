@@ -31,16 +31,10 @@ CKP v3.7 is the current specification. v3.6 is frozen and remains browseable; ol
 - Evidence-Based Proof: https://conceptkernel.org/v3.7/proof
 - Reconciliation & Logging: https://conceptkernel.org/v3.7/reconciliation
 - Versioning (per-kernel repos, 3 sibling dirs): https://conceptkernel.org/v3.7/versioning
-- CK as Subagent: https://conceptkernel.org/v3.7/subagent
-- Streaming: https://conceptkernel.org/v3.7/streaming
-- Web Shell: https://conceptkernel.org/v3.7/web-shell
-- CK Loop Evolution: https://conceptkernel.org/v3.7/evolution
 - CK.Consensus: https://conceptkernel.org/v3.7/consensus
 - Task Engine: https://conceptkernel.org/v3.7/task-engine
 - Ontological Graph: https://conceptkernel.org/v3.7/graph
-- Sessions & Agent Teams: https://conceptkernel.org/v3.7/sessions
-- Agent Teams: https://conceptkernel.org/v3.7/agent-teams
-- Dynamic Spawning: https://conceptkernel.org/v3.7/spawning
+- Sessions: https://conceptkernel.org/v3.7/sessions
 - PROV-O Provenance: https://conceptkernel.org/v3.7/provenance
 - Full Changelog: https://conceptkernel.org/v3.7/changelog
 

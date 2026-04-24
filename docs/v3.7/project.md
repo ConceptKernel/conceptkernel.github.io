@@ -357,7 +357,6 @@ CKPage is the unified page harness (`console.html`) that auto-detects the kernel
 | Parameter form | 280px | Per-action input fields, JSON preview, send button |
 | Results | flex | NATS messages in chat, body, or envelope view |
 
-For more on the web console, see [Web Shell](./web-shell).
 
 ### CK.Lib.Js Conformance
 

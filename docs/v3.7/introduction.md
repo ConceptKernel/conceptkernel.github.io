@@ -114,28 +114,27 @@ The following table summarises the implementation status of major protocol featu
 
 ## Specification Structure
 
-CKP v3.7 is organised into ten parts:
+CKP v3.7 is organised into nine parts:
 
-| Part | Chapters | Scope |
-|------|----------|-------|
-| I | 1--5 | Foundations: purpose, [conformance](./conformance), [terminology](./conformance#defined-terms), [namespaces](./namespaces), design principles |
-| II | 6--9 | The Three Loops: [CK identity](./ck-loop), [TOOL capability](./tool-loop), [DATA knowledge](./data-loop), [system integration](./three-loops) |
-| III | 10--11 | Ontology: BFO 2020 grounding, four-layer model, published modules, SHACL |
-| IV | 12--13 | Physical Architecture: unified filesystem tree, volume layout, version materialisation, NATS topology |
-| V | 14--17 | Identity and Security: SPIFFE, grants, loop isolation, NATS authentication |
-| VI | 18--21 | Lifecycle: mint to knowledge accumulation, URN scheme, instance versioning, commit frequency |
-| VII | 22--27 | Composition and Governance: action types, edges, activation models, goals/tasks |
-| VIII | 28--33 | System Kernels: taxonomy, CK.ComplianceCheck, CK.Operator, CK.Project, CK.Lib.Py, CK.Lib.Js |
-| IX | 34--42 | Dynamic Kernels, Provenance, and Protocol Patterns |
-| X | 43--50 | Reference: gateway routing, SPARQL, SHACL, security, conformance, registries |
+| Part | Scope |
+|------|-------|
+| I | Foundations: purpose, [conformance](./conformance), [terminology](./conformance#defined-terms), [namespaces](./namespaces), design principles |
+| II | The Three Loops: [CK identity](./ck-loop), [TOOL capability](./tool-loop), [DATA knowledge](./data-loop), [system integration](./three-loops) |
+| III | Ontology: [BFO 2020 grounding](./bfo-grounding), [four-layer model](./ontology-model), published modules, SHACL |
+| IV | Messaging: [NATS transport and topics](./nats), [message envelope](./message-envelope) |
+| V | Security: [loop isolation](./isolation), [authentication](./auth), [namespace security](./namespace-security) |
+| VI | Edges & Composition: [edge predicates](./edges), [EXTENDS](./extends) |
+| VII | System Kernels: [taxonomy](./taxonomy), [CK.ComplianceCheck](./compliance), [CK.Operator](./operator), [CK.Project & Libraries](./project) |
+| VIII | Infrastructure: [ConceptKernel + CKProject CRDs](./crd), [evidence-based proof](./proof), [reconciliation](./reconciliation), [versioning](./versioning) |
+| IX | Governance & Accumulation: [CK.Consensus](./consensus), [task engine](./task-engine), [ontological graph](./graph), [sessions](./sessions), [PROV-O provenance](./provenance) |
 
 ## The Shift: From Specification to Runtime
 
-CKP v3.5 defined the foundation: the three-loop model, BFO 2020 grounding, Description Logic box mapping, and a 50-chapter specification. It answered the question "what IS a concept kernel?"
+CKP v3.5 defined the foundation: the three-loop model, BFO 2020 grounding, and Description Logic box mapping. It answered the question "what IS a concept kernel?"
 
 v3.7 answers a different question: **how do you operate one?**
 
-v3.5 gives you the ontology. v3.7 gives you the operator, the auth, the web shell, the Claude integration, the consensus loop, and the graph store. v3.5 is the constitution; v3.7 is the government.
+v3.5 gives you the ontology. v3.7 gives you the operator, the auth, the CRDs, the reconciliation lifecycle, the consensus loop, and the graph store. v3.5 is the constitution; v3.7 is the government.
 
 | Concern | v3.5 (Foundation) | v3.7 (Runtime) |
 |---------|-------------------|----------------|
@@ -277,24 +276,21 @@ The v3.7 docs are organized by capability, not by version number. Each page expl
 |------|--------|
 | [Conformance & Terminology](/v3.7/conformance) | RFC 2119 keywords, conformance levels, glossary of defined terms |
 | [Namespaces](/v3.7/namespaces) | 13 namespace prefixes and their URIs |
-| [CK Loop](/v3.7/ck-loop) | Awakening sequence, identity document, NATS topics (Ch. 6) |
-| [TOOL Loop](/v3.7/tool-loop) | Tool forms, storage contract, SHACL validation (Ch. 7) |
-| [DATA Loop](/v3.7/data-loop) | Instance tree, PROV-O provenance, mutation policy (Ch. 8) |
-| [Three Loops](/v3.7/three-loops) | Dependency order, separation axiom, filesystem tree (Ch. 9) |
-| [Auth](/v3.7/auth) | AuthConfig ontology, deploy.auth, Keycloak integration (v3.5.5, v3.5.7) |
-| [Web Shell](/v3.7/web-shell) | console.html, three-panel layout, action discovery (v3.5.6, v3.5.6.1) |
-| [Operator](/v3.7/operator) | CK.Operator lifecycle, 15-check proof, CRD, namespace isolation (v3.5.2, v3.5.5, v3.5.7) |
-| [Subagent](/v3.7/subagent) | /ck command, CK loop as agent context, three-loop discipline (v3.5.4, v3.5.8) |
-| [Streaming](/v3.7/streaming) | stream.{kernel} topic, claude_agent_sdk mapping (v3.5.9) |
-| [EXTENDS](/v3.7/extends) | EXTENDS predicate, CK.Claude, persona mounting (v3.5.10) |
-| [Consensus](/v3.7/consensus) | CK.Consensus kernel, propose/evaluate/approve (v3.5.11) |
-| [Graph](/v3.7/graph) | Jena Fuseki, /ckp dataset, SPARQL queries (v3.5.12) |
-| [Sessions](/v3.7/sessions) | Multi-user NATS sessions (v3.5.14, planned) |
-| [Task Engine](/v3.7/task-engine) | Consensus-driven headless execution (v3.5.15, planned) |
-| [Agent Teams](/v3.7/agent-teams) | Multi-kernel coordination (v3.5.16, planned) |
-| [Versioning](/v3.7/versioning) | Git model, tag prefixes, .git-ref provenance (v3.7) |
+| [CK Loop](/v3.7/ck-loop) | Awakening sequence, identity document, NATS topics |
+| [TOOL Loop](/v3.7/tool-loop) | Tool forms, storage contract, SHACL validation |
+| [DATA Loop](/v3.7/data-loop) | Instance tree, PROV-O provenance, mutation policy |
+| [Three Loops](/v3.7/three-loops) | Dependency order, separation axiom, filesystem tree |
+| [Auth](/v3.7/auth) | AuthConfig ontology, deploy.auth, Keycloak integration |
+| [Operator](/v3.7/operator) | CK.Operator lifecycle, proof, reconciliation, namespace isolation |
+| [CRDs](/v3.7/crd) | ConceptKernel and CKProject CRD OpenAPI schemas |
+| [EXTENDS](/v3.7/extends) | EXTENDS predicate — capability mounting via ontology edges |
+| [Consensus](/v3.7/consensus) | CK.Consensus kernel, propose/evaluate/approve |
+| [Graph](/v3.7/graph) | Jena Fuseki, /ckp dataset, SPARQL queries |
+| [Sessions](/v3.7/sessions) | Multi-user NATS sessions |
+| [Task Engine](/v3.7/task-engine) | Consensus-driven executor dispatch |
+| [Versioning](/v3.7/versioning) | Per-kernel bare repos, three sibling dirs, .git-ref provenance |
 | [Changelog](/v3.7/changelog) | Full version-by-version changelog |
 
 ::: info Logical Analysis Note
-Three of the operational pages (Sessions, Task Engine, Agent Teams) cover planned features that are not yet implemented. They are included because the v3.5.4 delta specification defines them normatively, and the architecture is designed to support them. They are clearly marked as PLANNED.
+Two of the operational pages (Sessions, Task Engine) cover planned features that are not yet implemented. They are included because the delta specification defines them normatively and the architecture is designed to support them. They are clearly marked as PLANNED.
 :::

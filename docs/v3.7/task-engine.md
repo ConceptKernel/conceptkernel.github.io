@@ -7,7 +7,7 @@ description: How consensus-produced tasks are executed by headless Claude Code, 
 
 ## The Missing Link, Closed
 
-The [consensus loop](./consensus) produces approved tasks. The [subagent](./subagent) proves that Claude Code can modify kernel files. The Task Execution Engine bridges these: it picks up approved tasks, executes them via headless Claude Code, validates the output against the kernel's ontology, and seals the result with full [provenance](./provenance) linking back to the consensus decision.
+The [consensus loop](./consensus) produces approved tasks. The Task Execution Engine picks up those approved tasks, dispatches them to an authorized executor (typically an `agent`-type kernel), validates the output against the kernel's ontology, and seals the result with full [provenance](./provenance) linking back to the consensus decision.
 
 ::: info Separation of Concerns
 The governance engine ([CK.Consensus](./consensus)) decides **what** should change and **why**. The task execution engine decides **how** to implement that change. This separation allows different execution strategies (manual, automated, AI-assisted) without changing the governance protocol.
@@ -112,7 +112,7 @@ Stale tasks are flagged for human review, not auto-executed, because the change 
 
 ## Execution Modes
 
-Two modes, matching the [streaming architecture](./streaming):
+Two modes:
 
 ### Batch (`claude -p`)
 

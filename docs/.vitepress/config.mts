@@ -96,7 +96,7 @@ export default withMermaid(defineConfig({
           text: 'Part VI: Edges & Composition',
           items: [
             { text: 'Edge Predicates', link: '/v3.7/edges' },
-            { text: 'EXTENDS + CK.Claude', link: '/v3.7/extends' },
+            { text: 'EXTENDS', link: '/v3.7/extends' },
           ]
         },
         {
@@ -118,23 +118,12 @@ export default withMermaid(defineConfig({
           ]
         },
         {
-          text: 'Part IX: Claude Integration',
-          items: [
-            { text: 'CK as Subagent', link: '/v3.7/subagent' },
-            { text: 'Streaming', link: '/v3.7/streaming' },
-            { text: 'Web Shell', link: '/v3.7/web-shell' },
-            { text: 'CK Loop Evolution', link: '/v3.7/evolution' },
-          ]
-        },
-        {
-          text: 'Part X: Governance',
+          text: 'Part IX: Governance & Accumulation',
           items: [
             { text: 'CK.Consensus', link: '/v3.7/consensus' },
             { text: 'Task Engine', link: '/v3.7/task-engine' },
             { text: 'Ontological Graph', link: '/v3.7/graph' },
-            { text: 'Sessions & Agent Teams', link: '/v3.7/sessions' },
-            { text: 'Agent Teams', link: '/v3.7/agent-teams' },
-            { text: 'Dynamic Spawning', link: '/v3.7/spawning' },
+            { text: 'Sessions', link: '/v3.7/sessions' },
             { text: 'PROV-O Provenance', link: '/v3.7/provenance' },
           ]
         },

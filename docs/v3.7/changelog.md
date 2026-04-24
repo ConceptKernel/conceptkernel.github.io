@@ -9,7 +9,7 @@ description: Full changelog for CKP v3.7 -- the complete 10-part, 48-chapter spe
 
 **Date:** 2026-04-06
 
-CKP v3.7 is the consolidation of the entire protocol into a single normative specification: **SPEC.CKP.v3.7.full.md** -- 10 parts, 48 chapters, covering every aspect of concept kernel design, deployment, and governance.
+CKP v3.7 is the consolidation of the protocol into a single normative specification organised as **nine parts**, covering every aspect of concept kernel design, deployment, and governance.
 
 ### What Is New vs v3.5-alpha6
 
@@ -17,27 +17,29 @@ v3.5-alpha6 was the last deployed incremental release. v3.7 adds:
 
 | Area | v3.5-alpha6 | v3.7 |
 |---|---|---|
-| Specification | 8 delta specs across multiple files | Single unified 48-chapter spec |
-| Claude integration | Subagent + streaming implemented | Full Part IX: EXTENDS runtime, CK loop evolution, multi-model config |
-| Governance | CK.Consensus kernel deployed | Full Part X: task engine, sessions, agent teams, spawning, PROV-O |
+| Specification | 8 delta specs across multiple files | Single unified nine-part spec |
+| Governance | CK.Consensus kernel deployed | Part IX: consensus, task engine, graph, sessions, PROV-O |
 | Compliance checks | 13 checks | 20 checks (added provenance, edge, topology, governance checks) |
 | Ontological graph | 10 Turtle modules loaded | Published triples per project/kernel/edge, SPARQL query catalog |
 | Provenance | Instance-level prov fields | Full PROV-O model with three-factor audit chain |
 
-### Specification Scope -- All 10 Parts
+### Specification Scope -- Nine Parts
 
-| Part | Chapters | Title | Key Content |
-|---|---|---|---|
-| I | 1-4 | Foundations | CKP purpose, BFO 2020 grounding, three-loop separation, 8 awakening files |
-| II | 5-10 | Ontology | URN scheme, 5 edge predicates, governance modes, ontology.yaml, rules.shacl |
-| III | 11-16 | Runtime Semantics | Action lifecycle, instance sealing, NATS messaging, event types, proof records |
-| IV | 17-22 | Compliance and Proof | CK.ComplianceCheck, 20 check types, proof verification, compliance scoring |
-| V | 23-27 | System Kernels | CK.Operator, CK.Project, CK.Filer, CK.ComplianceCheck, CK.Consensus |
-| VI | 28-30 | Infrastructure | Kubernetes CRD, volume layout, namespace isolation, ConceptKernel CR |
-| VII | 31-35 | Libraries and Tools | CK.Lib.Py, CK.Lib.Js, web shell, AuthConfig, deploy pipeline |
-| VIII | 36-38 | Claude Integration (Runtime) | Subagent, streaming, EXTENDS predicate, CK.Claude |
-| IX | 39-40 | Claude Integration (Evolution) | CK loop evolution workflow, multi-model configuration |
-| X | 41-48 | Governance and Coordination | Consensus, task engine, graph, sessions, agent teams, spawning, provenance |
+| Part | Scope |
+|---|---|
+| I | Foundations: purpose, conformance, terminology, namespaces, design principles |
+| II | The Three Loops: CK identity, TOOL capability, DATA knowledge, system integration |
+| III | Ontology: BFO 2020 grounding, four-layer model, published modules, SHACL |
+| IV | Messaging: NATS transport and topics, message envelope |
+| V | Security: loop isolation, authentication, namespace security |
+| VI | Edges & Composition: edge predicates, EXTENDS |
+| VII | System Kernels: taxonomy, CK.ComplianceCheck, CK.Operator, CK.Project & Libraries |
+| VIII | Infrastructure: ConceptKernel + CKProject CRDs, evidence-based proof, reconciliation, versioning |
+| IX | Governance & Accumulation: CK.Consensus, task engine, ontological graph, sessions, PROV-O provenance |
+
+::: info Deferred (not part of the v3.7 normative specification)
+Six chapters drafted during v3.5.x development -- *CK as Subagent*, *Streaming*, *Web Shell*, *CK Loop Evolution*, *Agent Teams*, *Dynamic Spawning* -- have been moved out of the normative v3.7 spec. They exposed vendor-specific integrations (Claude Code) and aspirational features that belong in tooling specs rather than the protocol specification. The consolidated content is preserved for future revisiting at `parked/3.7-deferred.md` in the source tree; it is intentionally not served on the website.
+:::
 
 ---
 

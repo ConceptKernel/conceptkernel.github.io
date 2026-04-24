@@ -215,7 +215,7 @@ Consensus behavior depends on the target kernel's governance mode:
 
 This means CK.ComplianceCheck (STRICT governance) requires consensus for every change, while a development kernel with RELAXED governance can iterate faster on documentation without governance overhead. Even AUTONOMOUS kernels should record provenance -- the audit trail matters even when governance is relaxed.
 
-The governance mode is declared in `conceptkernel.yaml` -- the developer sets the rules, consensus enforces them. See [CK Loop Evolution](./evolution) for the full workflow including change types and governance levels.
+The governance mode is declared in `conceptkernel.yaml` -- the developer sets the rules, consensus enforces them.
 
 ## Architectural Consistency Check
 

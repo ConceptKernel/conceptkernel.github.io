@@ -36,7 +36,7 @@ Sessions progress through five phases:
 | **Create** | `session.create` | Authenticated user sends a create action to a project kernel |
 | **Join** | NATS subscribe | Other users subscribe to `session.{project}.{id}` via WSS |
 | **Interact** | Send/receive | Messages carry `X-User-ID` and `Authorization` headers |
-| **Presence** | Heartbeat | 30-second heartbeat messages; [web shell](./web-shell) shows who is online |
+| **Presence** | Heartbeat | 30-second heartbeat messages; subscribed clients render who is online |
 | **Close** | `session.close` | Session creator sends close action; subscribers notified |
 
 ### Create
@@ -91,8 +91,8 @@ Sessions introduce a new topic layer alongside the existing kernel topics:
 | Topic Pattern | Purpose | Who Subscribes |
 |---|---|---|
 | `input.{kernel}` | Action dispatch to kernel | Kernel processor |
-| `result.{kernel}` | Action results from kernel | Web shell (single user) |
-| `stream.{kernel}` | Claude [streaming](./streaming) output | Web shell |
+| `result.{kernel}` | Action results from kernel | Subscribed client (single user) |
+| `stream.{kernel}` | Progressive token stream from an `agent`-type kernel | Subscribed client |
 | `session.{project}.{id}` | Shared conversation | All session participants |
 
 Results from kernel actions are ALSO published to the session topic so all participants see them. This dual publication ensures that solo users (not in a session) still receive results on `result.{kernel}`, while session participants see results on the session topic.

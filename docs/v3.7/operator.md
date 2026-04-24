@@ -373,7 +373,7 @@ CK.Operator declares outbound [edges](./edges) to other system kernels:
 
 ## Lifecycle Events
 
-CK.Operator emits lifecycle events to `event.CK.Operator` at each phase transition, enabling real-time monitoring from the [web shell](./web-shell) and triggering downstream kernels via edges.
+CK.Operator emits lifecycle events to `event.CK.Operator` at each phase transition, enabling real-time monitoring from web console clients and triggering downstream kernels via edges.
 
 | Event | When | Payload |
 |-------|------|---------|

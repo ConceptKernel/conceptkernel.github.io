@@ -1,13 +1,13 @@
 /**
  * CKP Ontology Browser — Configuration
- * Concept Kernel Protocol v3.6
+ * Concept Kernel Protocol v3.7
  */
 
-const VERSION = 'v3.6';
+const VERSION = 'v3.7';
 
 // Use relative URLs when served from same origin (conceptkernel.org or localhost)
 // Falls back to absolute URLs with CORS proxy for cross-origin
-const BASE = '/ontology/v3.6/';
+const BASE = '/ontology/v3.7/';
 const CKP_ONTOLOGY_URLS = [
     `${BASE}core.ttl`,
     `${BASE}kernel-metadata.ttl`,
@@ -21,11 +21,11 @@ const CKP_ONTOLOGY_URLS = [
 ];
 
 const CKP_PREFIXES = {
-    'ckp': 'https://conceptkernel.org/ontology/v3.6/',
-    'ckpp': 'https://conceptkernel.org/ontology/v3.6/process/',
-    'ckpr': 'https://conceptkernel.org/ontology/v3.6/relation/',
-    'ckpw': 'https://conceptkernel.org/ontology/v3.6/workflow/',
-    'ckpi': 'https://conceptkernel.org/ontology/v3.6/improvement/',
+    'ckp': 'https://conceptkernel.org/ontology/v3.7/',
+    'ckpp': 'https://conceptkernel.org/ontology/v3.7/process/',
+    'ckpr': 'https://conceptkernel.org/ontology/v3.7/relation/',
+    'ckpw': 'https://conceptkernel.org/ontology/v3.7/workflow/',
+    'ckpi': 'https://conceptkernel.org/ontology/v3.7/improvement/',
     'bfo': 'http://purl.obolibrary.org/obo/BFO_',
     'iao': 'http://purl.obolibrary.org/obo/IAO_',
     'cco': 'http://www.ontologyrepository.com/CommonCoreOntologies/',

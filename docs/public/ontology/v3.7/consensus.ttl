@@ -1,0 +1,229 @@
+# ConceptKernel Consensus Ontology
+# Version: v3.7
+# Date: 2026-04-06
+# Purpose: CK.Consensus formal ontology — proposals, votes, validation layers, decisions
+# NEW in v3.7
+
+@prefix : <https://conceptkernel.org/ontology/v3.7/consensus#> .
+@prefix ckp: <https://conceptkernel.org/ontology/v3.7/> .
+@prefix ckpc: <https://conceptkernel.org/ontology/v3.7/consensus#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix iao: <http://purl.obolibrary.org/obo/IAO_> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://conceptkernel.org/ontology/v3.7/consensus> a owl:Ontology ;
+    dc:title "ConceptKernel Consensus Ontology" ;
+    dc:description "Formal ontology for CK.Consensus governance engine: proposals, votes, four validation layers, decisions, and task generation" ;
+    dcterms:created "2026-04-06"^^xsd:date ;
+    dcterms:modified "2026-04-06"^^xsd:date ;
+    owl:versionInfo "v3.7" ;
+    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
+    rdfs:seeAlso <https://conceptkernel.org> ;
+    rdfs:seeAlso <https://github.com/ConceptKernel> ;
+    rdfs:comment "v3.7 addition. Formalises CK.Consensus from SPEC.CKP.v3.7 Part X Chapter 41." ;
+    owl:imports <https://conceptkernel.org/ontology/v3.7/> ,
+                <http://purl.obolibrary.org/obo/bfo.owl> ,
+                <http://www.w3.org/ns/prov#> .
+
+#################################################################
+#    ConsensusProposal — lifecycle-tracked proposal
+#################################################################
+
+ckpc:ConsensusProposal a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # iao:InformationContentEntity
+    rdfs:label "Consensus Proposal"@en ;
+    rdfs:comment "A formal proposal submitted to CK.Consensus for governance review. Proposals declare what to change, where, and why. They go through four validation layers before a verdict is reached."@en ;
+    dc:description "Stored in CK.Consensus DATA loop. Lifecycle: proposed -> evaluating -> approved/rejected/needs_revision." .
+
+### ConsensusProposal Properties
+
+ckpc:proposalId a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusProposal ;
+    rdfs:range xsd:string ;
+    rdfs:label "proposal ID"@en ;
+    rdfs:comment "Unique identifier for this proposal, format: P-{uuid_prefix}"@en .
+
+ckpc:changeType a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusProposal ;
+    rdfs:range xsd:string ;
+    rdfs:label "change type"@en ;
+    rdfs:comment "The type of change: action_add, action_remove, edge_add, ontology_update, skill_update, claude_md_update"@en .
+
+ckpc:targetKernel a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusProposal ;
+    rdfs:range xsd:string ;
+    rdfs:label "target kernel"@en ;
+    rdfs:comment "The kernel whose CK loop would be modified by this proposal"@en .
+
+ckpc:rationale a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusProposal ;
+    rdfs:range xsd:string ;
+    rdfs:label "rationale"@en ;
+    rdfs:comment "Human-readable explanation of why this change is proposed"@en .
+
+ckpc:specification a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusProposal ;
+    rdfs:range xsd:string ;
+    rdfs:label "specification"@en ;
+    rdfs:comment "JSON-serialized specification of the proposed change"@en .
+
+### Proposal Lifecycle States
+
+ckpc:ProposalState a owl:Class ;
+    rdfs:subClassOf bfo:0000019 ;  # bfo:Quality
+    rdfs:label "Proposal State"@en ;
+    rdfs:comment "The lifecycle state of a consensus proposal"@en .
+
+ckpc:ProposalState-PROPOSED a owl:NamedIndividual , ckpc:ProposalState ;
+    rdfs:label "PROPOSED"@en ;
+    rdfs:comment "Proposal submitted, awaiting evaluation"@en .
+
+ckpc:ProposalState-EVALUATING a owl:NamedIndividual , ckpc:ProposalState ;
+    rdfs:label "EVALUATING"@en ;
+    rdfs:comment "Proposal is being evaluated through four validation layers"@en .
+
+ckpc:ProposalState-APPROVED a owl:NamedIndividual , ckpc:ProposalState ;
+    rdfs:label "APPROVED"@en ;
+    rdfs:comment "Proposal passed all validation layers and is approved"@en .
+
+ckpc:ProposalState-REJECTED a owl:NamedIndividual , ckpc:ProposalState ;
+    rdfs:label "REJECTED"@en ;
+    rdfs:comment "Proposal failed one or more critical validation layers"@en .
+
+ckpc:ProposalState-NEEDS_REVISION a owl:NamedIndividual , ckpc:ProposalState ;
+    rdfs:label "NEEDS_REVISION"@en ;
+    rdfs:comment "Proposal requires specific changes before re-evaluation"@en .
+
+ckpc:hasProposalState a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusProposal ;
+    rdfs:range ckpc:ProposalState ;
+    rdfs:label "has proposal state"@en ;
+    rdfs:comment "The current lifecycle state of this proposal"@en .
+
+#################################################################
+#    ConsensusVote — individual vote record
+#################################################################
+
+ckpc:ConsensusVote a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # iao:InformationContentEntity
+    rdfs:label "Consensus Vote"@en ;
+    rdfs:comment "An individual vote cast on a consensus proposal. Records the voter identity, verdict, and timestamp."@en .
+
+### ConsensusVote Properties
+
+ckpc:voteVerdict a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusVote ;
+    rdfs:range xsd:string ;
+    rdfs:label "vote verdict"@en ;
+    rdfs:comment "The voter's verdict: approve, reject, abstain"@en .
+
+ckpc:votedBy a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusVote ;
+    rdfs:range xsd:string ;
+    rdfs:label "voted by"@en ;
+    rdfs:comment "URN of the agent that cast this vote"@en .
+
+ckpc:votedAt a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusVote ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "voted at"@en ;
+    rdfs:comment "ISO 8601 timestamp of when this vote was cast"@en .
+
+ckpc:voteOnProposal a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusVote ;
+    rdfs:range ckpc:ConsensusProposal ;
+    rdfs:label "vote on proposal"@en ;
+    rdfs:comment "The proposal this vote is cast on"@en .
+
+#################################################################
+#    ValidationLayer — four evaluation layers
+#################################################################
+
+ckpc:ValidationLayer a owl:Class ;
+    rdfs:subClassOf bfo:0000019 ;  # bfo:Quality
+    rdfs:label "Validation Layer"@en ;
+    rdfs:comment "One of four validation layers that CK.Consensus applies to every proposal. Each layer produces a pass/fail/warn result with evidence."@en ;
+    dc:description "SPEC.CKP.v3.7 Chapter 41.4: ontological, constraint, topology, compliance." .
+
+### Four ValidationLayer Individuals
+
+ckpc:ValidationLayer-ONTOLOGICAL a owl:NamedIndividual , ckpc:ValidationLayer ;
+    rdfs:label "Ontological Validity"@en ;
+    rdfs:comment "Does the proposed change conform to the target kernel's ontology.yaml? Actions referencing undefined classes are rejected."@en .
+
+ckpc:ValidationLayer-CONSTRAINT a owl:NamedIndividual , ckpc:ValidationLayer ;
+    rdfs:label "Constraint Compliance"@en ;
+    rdfs:comment "Does the change satisfy rules.shacl? A new edge to a non-existent kernel violates structural constraints."@en .
+
+ckpc:ValidationLayer-TOPOLOGY a owl:NamedIndividual , ckpc:ValidationLayer ;
+    rdfs:label "Fleet Topology"@en ;
+    rdfs:comment "Does the change create orphan references, circular dependencies, or broken edge targets?"@en .
+
+ckpc:ValidationLayer-COMPLIANCE a owl:NamedIndividual , ckpc:ValidationLayer ;
+    rdfs:label "CKP Compliance"@en ;
+    rdfs:comment "Does the change pass CK.ComplianceCheck's 20 check types? Triggered via the TRIGGERS edge."@en .
+
+#################################################################
+#    Consensus Decision — PROV-O grounded
+#################################################################
+
+ckpc:ConsensusDecision a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Consensus Decision"@en ;
+    rdfs:comment "A decision record produced by CK.Consensus. Every consensus decision is a prov:Activity that links the change to its author, rationale, and validation outcome. Approved decisions generate tasks."@en .
+
+### ConsensusDecision Properties
+
+ckpc:decisionId a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusDecision ;
+    rdfs:range xsd:string ;
+    rdfs:label "decision ID"@en ;
+    rdfs:comment "Unique identifier for this decision, format: D-{uuid_prefix}"@en .
+
+ckpc:decidesProposal a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusDecision ;
+    rdfs:range ckpc:ConsensusProposal ;
+    rdfs:label "decides proposal"@en ;
+    rdfs:comment "The proposal that this decision evaluates"@en .
+
+ckpc:decisionVerdict a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusDecision ;
+    rdfs:range xsd:string ;
+    rdfs:label "decision verdict"@en ;
+    rdfs:comment "The final verdict: pass, fail, needs_revision"@en .
+
+### Provenance linkage
+
+ckpc:proposedBy a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusProposal ;
+    rdfs:range xsd:string ;
+    rdfs:label "proposed by"@en ;
+    rdfs:comment "URN of the actor who created this proposal (e.g., ckp://Actor#developer.peter)"@en .
+
+ckpc:evaluatedBy a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusDecision ;
+    rdfs:range ckp:ConsensusKernel ;
+    rdfs:label "evaluated by"@en ;
+    rdfs:comment "The CK.Consensus kernel that evaluated this decision"@en .
+
+ckpc:approvedAt a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpc:ConsensusDecision ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "approved at"@en ;
+    rdfs:comment "ISO 8601 timestamp of when this decision was finalised"@en .
+
+ckpc:generatesTask a owl:ObjectProperty ;
+    rdfs:domain ckpc:ConsensusDecision ;
+    rdfs:range ckp:TaskInstance ;
+    rdfs:label "generates task"@en ;
+    rdfs:comment "A task generated from this approved consensus decision"@en .
+
+#################################################################
+# End of ConceptKernel Consensus Ontology v3.7
+#################################################################

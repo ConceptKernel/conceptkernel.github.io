@@ -5,7 +5,8 @@ import { useRoute } from 'vitepress'
 const route = useRoute()
 
 const versions = [
-  { label: 'v3.6', prefix: '/v3.6/', badge: 'latest', color: '#3b82f6' },
+  { label: 'v3.7', prefix: '/v3.7/', badge: 'latest', color: '#3b82f6' },
+  { label: 'v3.6', prefix: '/v3.6/', badge: 'frozen', color: '#8b5cf6' },
   { label: 'v3.5-alpha6', prefix: '/v3.5-alpha6/', badge: 'stable', color: '#22c55e' },
   { label: 'v3.5-alpha3', prefix: '/v3.5-alpha3/', badge: 'alpha', color: '#eab308' },
   { label: 'v3.4', prefix: '/v3.4/', badge: 'legacy', color: '#6b7280' },

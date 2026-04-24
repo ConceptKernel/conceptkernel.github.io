@@ -1,0 +1,70 @@
+# Kernel Entity Template for ConceptKernel Ontologies
+# This template defines the BFO-aligned structure for kernel entities
+# Replace {KERNEL_NAME}, {KERNEL_LOWER}, {KERNEL_URN}, etc. with actual values
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix ckp: <https://conceptkernel.org/ontology/v3.7/> .
+
+# ============================================================================
+# KERNEL ENTITY - BFO Material Entity
+# ============================================================================
+# The kernel itself is a BFO MaterialEntity (bfo:0000040)
+# It is an IndependentContinuant that persists through time
+
+<https://conceptkernel.org/kernel/{KERNEL_NAME}>
+  rdf:type bfo:0000040 ;  # BFO:MaterialEntity
+  rdf:type ckp:Kernel ;
+  rdfs:label "{KERNEL_NAME} Kernel" ;
+  rdfs:comment "{KERNEL_DESCRIPTION}" ;
+  ckp:hasUrn "{KERNEL_URN}" ;
+  ckp:kernelType "{KERNEL_TYPE}" ;  # e.g., "rust:hot", "node:cold"
+  ckp:version "{VERSION}" ;
+  owl:versionInfo "{VERSION}" ;
+    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
+    rdfs:seeAlso <https://conceptkernel.org> ;
+    rdfs:seeAlso <https://github.com/ConceptKernel> ;{PROVENANCE}
+
+# ============================================================================
+# ROLES - BFO Realizable Entities
+# ============================================================================
+# Roles (bfo:0000023) are things the kernel CAN BEAR
+# They define what the kernel IS in relation to the system
+# Examples: "gateway", "mediator", "validator", "storage-provider"
+
+{ROLES}
+
+# ============================================================================
+# FUNCTIONS - BFO Realizable Entities
+# ============================================================================
+# Functions (bfo:0000034) are things the kernel CAN REALIZE
+# They define what the kernel DOES or is DESIGNED TO DO
+# Examples: "routing", "consensus", "broadcasting", "storage"
+
+{FUNCTIONS}
+
+# ============================================================================
+# USAGE EXAMPLE
+# ============================================================================
+# For System.Gateway kernel:
+#
+# <https://conceptkernel.org/kernel/System.Gateway>
+#   rdf:type bfo:0000040 ;
+#   rdfs:label "System.Gateway Kernel" ;
+#   ckp:hasUrn "ckp://Continuant#Kernel-System.Gateway" ;
+#   ckp:kernelType "rust:hot" ;
+#   ckp:version "0.1.0" .
+#
+# <https://conceptkernel.org/kernel/System.Gateway/role/http-ingress>
+#   rdf:type bfo:0000023 ;
+#   rdfs:label "HTTP Ingress" ;
+#   ckp:bearer <https://conceptkernel.org/kernel/System.Gateway> .
+#
+# <https://conceptkernel.org/kernel/System.Gateway/function/gateway>
+#   rdf:type bfo:0000034 ;
+#   rdfs:label "Gateway" ;
+#   ckp:realizedBy <https://conceptkernel.org/kernel/System.Gateway> ;
+#   ckp:capability "ingress-routing" , "http-handling" .

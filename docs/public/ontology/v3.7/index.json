@@ -1,0 +1,274 @@
+{
+  "ontology": {
+    "name": "ConceptKernel BFO Ontology",
+    "version": "v3.7",
+    "date": "2026-04-06",
+    "description": "Formal ontology mapping ConceptKernel architecture to Basic Formal Ontology (BFO). v3.7 adds AgentKernel, PersonaTemplate, ModelConfiguration, five edge predicates, 20 check types, consensus governance, task execution, dynamic spawning, multi-user sessions, and agent teams.",
+    "baseUri": "https://conceptkernel.org/ontology/v3.7/",
+    "bfoVersion": "2020",
+    "bfoUri": "http://purl.obolibrary.org/obo/bfo.owl",
+    "midLevelOntologies": [
+      "IAO (Information Artifact Ontology)",
+      "CCO Agent/Artifact/InformationEntity/Event",
+      "PROV-O",
+      "ValueFlows"
+    ]
+  },
+  "files": {
+    "core": {
+      "filename": "core.ttl",
+      "path": "ontology/v3.7/core.ttl",
+      "format": "text/turtle",
+      "description": "Core BFO mappings for ConceptKernel continuants. v3.7 adds AgentKernel, PersonaTemplate, ModelConfiguration, LOOPS_WITH edge predicate.",
+      "coverage": {
+        "entities": [
+          "ckp:Kernel",
+          "ckp:HotKernel",
+          "ckp:ColdKernel",
+          "ckp:InlineKernel",
+          "ckp:StaticKernel",
+          "ckp:AgentKernel",
+          "ckp:Edge",
+          "ckp:Instance",
+          "ckp:KernelOntology",
+          "ckp:Project",
+          "ckp:Action",
+          "ckp:Reconciliation",
+          "ckp:PersonaTemplate",
+          "ckp:ModelConfiguration",
+          "ckp:EdgeKernel",
+          "ckp:ConsensusKernel",
+          "ckp:WssHubKernel"
+        ]
+      }
+    },
+    "kernel-metadata": {
+      "filename": "kernel-metadata.ttl",
+      "path": "ontology/v3.7/kernel-metadata.ttl",
+      "format": "text/turtle",
+      "description": "RDF schema for kernel metadata. v3.7 adds hasPersona, defaultModel, modelEffort.",
+      "coverage": {
+        "v36_additions": [
+          "ckp:hasPersona (ObjectProperty, links kernel to PersonaTemplate)",
+          "ckp:defaultModel (DatatypeProperty, default LLM model)",
+          "ckp:modelEffort (DatatypeProperty, default LLM effort level)"
+        ]
+      }
+    },
+    "kernel-entity-template": {
+      "filename": "kernel-entity-template.ttl",
+      "path": "ontology/v3.7/kernel-entity-template.ttl",
+      "format": "text/turtle",
+      "description": "BFO-aligned template for defining individual kernel entities"
+    },
+    "processes": {
+      "filename": "processes.ttl",
+      "path": "ontology/v3.7/processes.ttl",
+      "format": "text/turtle",
+      "description": "Occurrent (Process) definitions. v3.7 adds TaskExecutionProcess, SpawningProcess, SessionProcess, ConsensusEvaluationProcess.",
+      "coverage": {
+        "entities": [
+          "ckpp:InvocationProcess",
+          "ckpp:EdgeCommunicationProcess",
+          "ckpp:EdgeSubscriptionProcess",
+          "ckpp:ConsensusProcess",
+          "ckpp:BroadcastProcess",
+          "ckpp:TaskExecutionProcess",
+          "ckpp:SpawningProcess",
+          "ckpp:SessionProcess",
+          "ckpp:ConsensusEvaluationProcess",
+          "ckpp:TemporalPart",
+          "ckpp:ProcessBoundary",
+          "ckpp:StatusChangeEvent"
+        ]
+      }
+    },
+    "relations": {
+      "filename": "relations.ttl",
+      "path": "ontology/v3.7/relations.ttl",
+      "format": "text/turtle",
+      "description": "Relationships and inference rules. v3.7 adds extends_with, loops_with, spawned_by, composes, triggers, produces.",
+      "coverage": {
+        "v36_additions": [
+          "ckpr:extends_with",
+          "ckpr:loops_with",
+          "ckpr:spawned_by",
+          "ckpr:composes",
+          "ckpr:triggers",
+          "ckpr:produces"
+        ]
+      }
+    },
+    "edges": {
+      "filename": "edges.ttl",
+      "path": "ontology/v3.7/edges.ttl",
+      "format": "text/turtle",
+      "description": "Dedicated edge predicate ontology with five individuals: COMPOSES, TRIGGERS, PRODUCES, EXTENDS, LOOPS_WITH.",
+      "new_in": "v3.7",
+      "coverage": {
+        "entities": [
+          "ckpe:EdgePredicate",
+          "ckpe:COMPOSES",
+          "ckpe:TRIGGERS",
+          "ckpe:PRODUCES",
+          "ckpe:EXTENDS",
+          "ckpe:LOOPS_WITH"
+        ]
+      }
+    },
+    "consensus": {
+      "filename": "consensus.ttl",
+      "path": "ontology/v3.7/consensus.ttl",
+      "format": "text/turtle",
+      "description": "CK.Consensus formal ontology: proposals, votes, four validation layers, decisions with PROV-O provenance.",
+      "new_in": "v3.7",
+      "coverage": {
+        "entities": [
+          "ckpc:ConsensusProposal",
+          "ckpc:ConsensusVote",
+          "ckpc:ValidationLayer",
+          "ckpc:ConsensusDecision",
+          "ckpc:ProposalState"
+        ],
+        "individuals": [
+          "ckpc:ValidationLayer-ONTOLOGICAL",
+          "ckpc:ValidationLayer-CONSTRAINT",
+          "ckpc:ValidationLayer-TOPOLOGY",
+          "ckpc:ValidationLayer-COMPLIANCE",
+          "ckpc:ProposalState-PROPOSED",
+          "ckpc:ProposalState-EVALUATING",
+          "ckpc:ProposalState-APPROVED",
+          "ckpc:ProposalState-REJECTED",
+          "ckpc:ProposalState-NEEDS_REVISION"
+        ]
+      }
+    },
+    "shapes": {
+      "filename": "shapes.ttl",
+      "path": "ontology/v3.7/shapes.ttl",
+      "format": "text/turtle",
+      "description": "SHACL shapes for triple validation constraints"
+    },
+    "rbac": {
+      "filename": "rbac.ttl",
+      "path": "ontology/v3.7/rbac.ttl",
+      "format": "text/turtle",
+      "description": "Role-Based Access Control ontology. v3.7 adds TeamCoordinator role and GovernanceLevel individuals."
+    },
+    "workflow": {
+      "filename": "workflow.ttl",
+      "path": "ontology/v3.7/workflow.ttl",
+      "format": "text/turtle",
+      "description": "CKDL formalization for declarative workflow orchestration"
+    },
+    "self-improvement": {
+      "filename": "self-improvement.ttl",
+      "path": "ontology/v3.7/self-improvement.ttl",
+      "format": "text/turtle",
+      "description": "Autonomous self-improvement and ontology-driven validation processes"
+    },
+    "base-instances": {
+      "filename": "base-instances.ttl",
+      "path": "ontology/v3.7/base-instances.ttl",
+      "format": "text/turtle",
+      "description": "Base instance shapes. v3.7 adds TaskInstance and ConversationInstance.",
+      "coverage": {
+        "entities": [
+          "ckp:InstanceManifest",
+          "ckp:SealedInstance",
+          "ckp:LedgerEntry",
+          "ckp:TaskInstance",
+          "ckp:ConversationInstance"
+        ]
+      }
+    },
+    "proof": {
+      "filename": "proof.ttl",
+      "path": "ontology/v3.7/proof.ttl",
+      "format": "text/turtle",
+      "description": "Proof verification. v3.7 expands CheckType from 6 to 20 individuals matching spec's 20 check types.",
+      "coverage": {
+        "individuals": [
+          "ckp:ProofOutcome-PASS",
+          "ckp:ProofOutcome-FAIL",
+          "ckp:ProofOutcome-PARTIAL",
+          "ckp:CheckType-SCHEMA",
+          "ckp:CheckType-SHACL",
+          "ckp:CheckType-PROVENANCE",
+          "ckp:CheckType-STRUCTURE",
+          "ckp:CheckType-INTEGRITY",
+          "ckp:CheckType-OPERATIONAL",
+          "ckp:CheckType-IDENTITY",
+          "ckp:CheckType-AWAKENING",
+          "ckp:CheckType-TYPES",
+          "ckp:CheckType-EDGES",
+          "ckp:CheckType-TOOL",
+          "ckp:CheckType-WEB",
+          "ckp:CheckType-GRANTS",
+          "ckp:CheckType-LLM",
+          "ckp:CheckType-ONTOLOGY_TYPES",
+          "ckp:CheckType-INSTANCE_TYPING",
+          "ckp:CheckType-THREE_LOOP_ISOLATION",
+          "ckp:CheckType-EDGE_MATERIALISATION",
+          "ckp:CheckType-SHACL_VALIDITY",
+          "ckp:CheckType-CONSENSUS_PROVENANCE"
+        ]
+      }
+    },
+    "schema": {
+      "filename": "schema.yaml",
+      "path": "ontology/v3.7/schema.yaml",
+      "format": "application/x-yaml",
+      "description": "LinkML schema governing Concept Kernel shape. v3.7 adds AgentKernel, PersonaTemplate, TaskInstance, ConversationInstance, and new enum values."
+    }
+  },
+  "coverage": {
+    "overall": {
+      "score": 0.75,
+      "description": "Overall BFO alignment coverage: 75% (up from 68% in v3.5-alpha6, with v3.7 additions)"
+    }
+  },
+  "changelog": {
+    "v3.7": {
+      "date": "2026-04-06",
+      "changes": [
+        "NEW: ckp:AgentKernel — LLM-capable kernel type supporting streaming, sessions, personas",
+        "NEW: ckp:PersonaTemplate — reusable system prompt templates for LLM behaviour",
+        "NEW: ckp:ModelConfiguration — quality for LLM model selection and effort level",
+        "NEW: ckp:LOOPS_WITH — bidirectional cooperation edge predicate",
+        "NEW: edges.ttl — dedicated edge predicate ontology with 5 individuals (COMPOSES, TRIGGERS, PRODUCES, EXTENDS, LOOPS_WITH)",
+        "NEW: consensus.ttl — CK.Consensus formal ontology (proposals, votes, 4 validation layers, decisions)",
+        "NEW: ckpp:TaskExecutionProcess — headless Claude Code task execution",
+        "NEW: ckpp:SpawningProcess — dynamic kernel creation",
+        "NEW: ckpp:SessionProcess — multi-user NATS sessions",
+        "NEW: ckpp:ConsensusEvaluationProcess — four-layer consensus evaluation",
+        "NEW: ckpr:extends_with, ckpr:loops_with, ckpr:spawned_by, ckpr:composes, ckpr:triggers, ckpr:produces",
+        "NEW: ckp:TaskInstance — consensus-generated task instance shape",
+        "NEW: ckp:ConversationInstance — multi-turn LLM conversation instance shape",
+        "NEW: 14 additional CheckType individuals (total 20, matching spec's 20 check types)",
+        "NEW: ckp:TeamCoordinator role for Agent Teams",
+        "NEW: ckp:GovernanceLevel with STRICT/RELAXED/AUTONOMOUS individuals",
+        "NEW: ckp:hasPersona, ckp:defaultModel, ckp:modelEffort properties",
+        "UPDATED: All namespaces from v3.5 to v3.7",
+        "UPDATED: Project description refined per v3.7 CK.Project spec",
+        "UPDATED: Overall coverage score 68% -> 75%"
+      ]
+    },
+    "v3.5-alpha6": {
+      "date": "2026-03-31",
+      "changes": [
+        "InlineKernel, StaticKernel, Project, Reconciliation",
+        "StorageMedium, DeploymentMethod, ServingDisposition",
+        "IAO/CCO grounding annotations"
+      ]
+    }
+  },
+  "references": {
+    "bfo": "http://purl.obolibrary.org/obo/bfo.owl",
+    "bfoSpecification": "https://basic-formal-ontology.org/",
+    "provO": "http://www.w3.org/ns/prov#",
+    "iao": "http://purl.obolibrary.org/obo/iao.owl",
+    "cco": "https://github.com/CommonCoreOntologies/CommonCoreOntologies",
+    "spec": "SPEC.CKP.v3.7.full.md"
+  }
+}

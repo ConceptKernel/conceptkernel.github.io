@@ -1,0 +1,139 @@
+# ConceptKernel Edge Predicate Ontology
+# Version: v3.7
+# Date: 2026-04-06
+# Purpose: Dedicated ontology for the five CKP edge predicates with formal
+#          composition semantics, instance ownership, and activation models
+# NEW in v3.7
+
+@prefix : <https://conceptkernel.org/ontology/v3.7/edge#> .
+@prefix ckp: <https://conceptkernel.org/ontology/v3.7/> .
+@prefix ckpe: <https://conceptkernel.org/ontology/v3.7/edge#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix cco: <http://www.ontologyrepository.com/CommonCoreOntologies/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<https://conceptkernel.org/ontology/v3.7/edge> a owl:Ontology ;
+    dc:title "ConceptKernel Edge Predicate Ontology" ;
+    dc:description "Dedicated ontology for the five CKP edge predicates: COMPOSES, TRIGGERS, PRODUCES, EXTENDS, LOOPS_WITH. Defines composition semantics, instance ownership, activation models, and NATS materialisation." ;
+    dcterms:created "2026-04-06"^^xsd:date ;
+    dcterms:modified "2026-04-06"^^xsd:date ;
+    owl:versionInfo "v3.7" ;
+    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
+    rdfs:seeAlso <https://conceptkernel.org> ;
+    rdfs:seeAlso <https://github.com/ConceptKernel> ;
+    rdfs:comment "v3.7 addition. Formalises the five edge predicates from SPEC.CKP.v3.7 Part VI Chapter 20." ;
+    owl:imports <https://conceptkernel.org/ontology/v3.7/> ,
+                <http://purl.obolibrary.org/obo/bfo.owl> .
+
+#################################################################
+#    EdgePredicate Class
+#################################################################
+
+ckpe:EdgePredicate a owl:Class ;
+    rdfs:subClassOf bfo:0000019 ;  # bfo:Quality
+    rdfs:label "Edge Predicate"@en ;
+    rdfs:comment "A closed-set classification of edge relationship semantics. CKP defines exactly five edge predicates. Each determines how actions compose, how NATS subscriptions materialise, and how instances are owned."@en ;
+    dc:description "Closed set per SPEC.CKP.v3.7 Chapter 23. Extensions REQUIRE specification amendment." .
+
+#################################################################
+#    EdgePredicate Properties
+#################################################################
+
+ckpe:compositionStyle a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpe:EdgePredicate ;
+    rdfs:range xsd:string ;
+    rdfs:label "composition style"@en ;
+    rdfs:comment "How actions compose across the edge boundary (e.g., module pattern, sequential, event-driven, capability mounting, bidirectional)"@en .
+
+ckpe:instanceOwnership a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpe:EdgePredicate ;
+    rdfs:range xsd:string ;
+    rdfs:label "instance ownership"@en ;
+    rdfs:comment "Which kernel's DATA loop stores instances produced through this edge"@en .
+
+ckpe:activationModel a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpe:EdgePredicate ;
+    rdfs:range xsd:string ;
+    rdfs:label "activation model"@en ;
+    rdfs:comment "How the target kernel is activated: on-demand, automatic, event-driven, bidirectional"@en .
+
+ckpe:contextAssembly a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpe:EdgePredicate ;
+    rdfs:range xsd:string ;
+    rdfs:label "context assembly"@en ;
+    rdfs:comment "What context is loaded when traversing this edge"@en .
+
+ckpe:natsSubscription a owl:DatatypeProperty ;
+    rdfs:domain ckpe:EdgePredicate ;
+    rdfs:range xsd:string ;
+    rdfs:label "NATS subscription"@en ;
+    rdfs:comment "The NATS subscription pattern materialised for this edge predicate"@en .
+
+ckpe:contributesToEffectiveActions a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain ckpe:EdgePredicate ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "contributes to effective actions"@en ;
+    rdfs:comment "Whether this predicate adds actions to the source kernel's effective action set"@en .
+
+#################################################################
+#    Five EdgePredicate Individuals
+#################################################################
+
+ckpe:COMPOSES a owl:NamedIndividual , ckpe:EdgePredicate ;
+    rdfs:label "COMPOSES"@en ;
+    rdfs:comment "Hub-spoke module composition. Source (parent/hub) gains access to target (child/spoke) kernel's declared actions. The parent can invoke any of the child's actions as if they were its own."@en ;
+    ckpe:compositionStyle "module pattern"^^xsd:string ;
+    ckpe:instanceOwnership "each kernel writes its own"^^xsd:string ;
+    ckpe:activationModel "on-demand, hub decides"^^xsd:string ;
+    ckpe:contextAssembly "own context + target SKILL.md"^^xsd:string ;
+    ckpe:natsSubscription "subscribe result.{spoke}; publish input.{spoke}"^^xsd:string ;
+    ckpe:contributesToEffectiveActions true .
+
+ckpe:TRIGGERS a owl:NamedIndividual , ckpe:EdgePredicate ;
+    rdfs:label "TRIGGERS"@en ;
+    rdfs:comment "Sequential activation. Source fires target's specified action after own action completes. Automatic event-driven activation."@en ;
+    ckpe:compositionStyle "sequential"^^xsd:string ;
+    ckpe:instanceOwnership "each kernel writes its own"^^xsd:string ;
+    ckpe:activationModel "automatic post-completion"^^xsd:string ;
+    ckpe:contextAssembly "target loads its own full context"^^xsd:string ;
+    ckpe:natsSubscription "subscribe event.{source} with action filter"^^xsd:string ;
+    ckpe:contributesToEffectiveActions false .
+
+ckpe:PRODUCES a owl:NamedIndividual , ckpe:EdgePredicate ;
+    rdfs:label "PRODUCES"@en ;
+    rdfs:comment "Event broadcasting. Source emits events consumed by target. No request/reply — target auto-invokes its default action on event receipt."@en ;
+    ckpe:compositionStyle "event-driven, no request/reply"^^xsd:string ;
+    ckpe:instanceOwnership "each kernel writes its own"^^xsd:string ;
+    ckpe:activationModel "event-driven automatic"^^xsd:string ;
+    ckpe:contextAssembly "none (event payload only)"^^xsd:string ;
+    ckpe:natsSubscription "subscribe event.{source}"^^xsd:string ;
+    ckpe:contributesToEffectiveActions false .
+
+ckpe:EXTENDS a owl:NamedIndividual , ckpe:EdgePredicate ;
+    rdfs:label "EXTENDS"@en ;
+    rdfs:comment "Capability mounting. Source gains NEW actions backed by target's runtime. Actions defined in edge config, not target SKILL.md. Instances sealed in source's DATA loop. Primary mechanism for mounting LLM capabilities via CK.Claude."@en ;
+    ckpe:compositionStyle "capability mounting"^^xsd:string ;
+    ckpe:instanceOwnership "source kernel writes all"^^xsd:string ;
+    ckpe:activationModel "on-demand via persona"^^xsd:string ;
+    ckpe:contextAssembly "own context + target persona template"^^xsd:string ;
+    ckpe:natsSubscription "subscribe result.{target}"^^xsd:string ;
+    ckpe:contributesToEffectiveActions true .
+
+ckpe:LOOPS_WITH a owl:NamedIndividual , ckpe:EdgePredicate ;
+    rdfs:label "LOOPS_WITH"@en ;
+    rdfs:comment "Bidirectional cooperation. Both kernels can invoke each other. Requires circular guard via visited set to prevent infinite recursion."@en ;
+    ckpe:compositionStyle "bidirectional"^^xsd:string ;
+    ckpe:instanceOwnership "each kernel writes its own"^^xsd:string ;
+    ckpe:activationModel "bidirectional invocation"^^xsd:string ;
+    ckpe:contextAssembly "both SKILL.md files (with circular guard)"^^xsd:string ;
+    ckpe:natsSubscription "both subscribe event.{peer}"^^xsd:string ;
+    ckpe:contributesToEffectiveActions true .
+
+#################################################################
+# End of ConceptKernel Edge Predicate Ontology v3.7
+#################################################################

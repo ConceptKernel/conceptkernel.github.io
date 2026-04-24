@@ -1,0 +1,787 @@
+# ConceptKernel Relations BFO Ontology
+# Version: v3.7
+# Date: 2026-04-06
+# Purpose: Relationships and inference rules for automatic reasoning
+# Alpha-6: Adds belongsToProject, hasKernel, hasStorageMedium,
+#           hasServingDisposition, reconciles
+
+@prefix : <https://conceptkernel.org/ontology/v3.7/relation#> .
+@prefix ckp: <https://conceptkernel.org/ontology/v3.7/> .
+@prefix ckpp: <https://conceptkernel.org/ontology/v3.7/process#> .
+@prefix ckpr: <https://conceptkernel.org/ontology/v3.7/relation#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix swrl: <http://www.w3.org/2003/11/swrl#> .
+@prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .
+
+<https://conceptkernel.org/ontology/v3.7/relation> a owl:Ontology ;
+    dc:title "ConceptKernel Relations Ontology" ;
+    dc:description "Relationships and inference rules for automatic reasoning about ConceptKernel entities" ;
+    dcterms:created "2025-11-23"^^xsd:date ;
+    dcterms:modified "2026-04-06"^^xsd:date ;
+    owl:versionInfo "v3.7" ;
+    dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
+    rdfs:seeAlso <https://conceptkernel.org> ;
+    rdfs:seeAlso <https://github.com/ConceptKernel> ;
+    rdfs:comment "Defines properties, property chains, and SWRL rules for inference. Alpha-6 adds project, storage, serving, and reconciliation relations." ;
+    owl:imports <https://conceptkernel.org/ontology/v3.7/> ,
+                <https://conceptkernel.org/ontology/v3.7/process> ,
+                <http://purl.obolibrary.org/obo/bfo.owl> .
+
+#################################################################
+#    Core Relations (BFO-Aligned)
+#################################################################
+
+### Continuant Relations
+
+ckpr:connected_by a owl:ObjectProperty ;
+    rdfs:label "connected by"@en ;
+    rdfs:comment "Two kernels are connected by an Edge. CRITICAL: This is the ONLY way kernels can communicate."@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel ;
+    ckp:architecturalConstraint "Kernels can ONLY communicate if connected by an Edge."^^xsd:string .
+
+# Property chain: If KernelA has outgoing edge E, and E has target KernelB, then KernelA is connected to KernelB
+ckpr:connected_by owl:propertyChainAxiom ( ckp:hasOutgoingEdge ckp:hasTarget ) .
+
+ckpr:depends_on a owl:ObjectProperty ;
+    rdfs:label "depends on"@en ;
+    rdfs:comment "A continuant depends on another continuant for its existence"@en ;
+    rdfs:domain bfo:0000002 ;  # bfo:Continuant
+    rdfs:range bfo:0000002 ;
+    rdfs:subPropertyOf bfo:0000084 .  # bfo:depends_on
+
+# Instance depends on Kernel
+# If Instance I was created by Kernel K, then I depends on K
+[] a owl:Axiom ;
+    owl:annotatedSource ckpr:depends_on ;
+    owl:annotatedProperty rdfs:comment ;
+    owl:annotatedTarget "Instances depend on the Kernels that create them"@en ;
+    dc:description "Inference: ?instance ckp:createdByKernel ?kernel -> ?instance ckpr:depends_on ?kernel" .
+
+ckpr:part_of a owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:label "part of"@en ;
+    rdfs:comment "A continuant is part of another continuant"@en ;
+    rdfs:domain bfo:0000002 ;
+    rdfs:range bfo:0000002 ;
+    rdfs:subPropertyOf bfo:0000050 .  # bfo:part_of
+
+### Occurrent Relations
+
+ckpr:has_participant a owl:ObjectProperty ;
+    rdfs:label "has participant"@en ;
+    rdfs:comment "An occurrent has a continuant as participant"@en ;
+    rdfs:domain bfo:0000003 ;  # bfo:Occurrent
+    rdfs:range bfo:0000002 ;   # bfo:Continuant
+    rdfs:subPropertyOf bfo:0000057 ;  # bfo:has_participant
+    owl:inverseOf ckpr:participates_in .
+
+ckpr:participates_in a owl:ObjectProperty ;
+    rdfs:label "participates in"@en ;
+    rdfs:comment "A continuant participates in an occurrent"@en ;
+    rdfs:domain bfo:0000002 ;
+    rdfs:range bfo:0000003 ;
+    rdfs:subPropertyOf bfo:0000056 ;  # bfo:participates_in
+    owl:inverseOf ckpr:has_participant .
+
+ckpr:occurs_in a owl:ObjectProperty ;
+    rdfs:label "occurs in"@en ;
+    rdfs:comment "An occurrent occurs in a temporal region"@en ;
+    rdfs:domain bfo:0000003 ;
+    rdfs:range bfo:0000008 ;  # bfo:TemporalRegion
+    rdfs:subPropertyOf bfo:0000066 .  # bfo:occurs_in
+
+ckpr:precedes a owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:label "precedes"@en ;
+    rdfs:comment "One occurrent temporally precedes another"@en ;
+    rdfs:domain bfo:0000003 ;
+    rdfs:range bfo:0000003 ;
+    rdfs:subPropertyOf bfo:0000063 .  # bfo:precedes
+
+ckpr:has_temporal_part a owl:ObjectProperty ;
+    rdfs:label "has temporal part"@en ;
+    rdfs:comment "An occurrent has a temporal part (phase)"@en ;
+    rdfs:domain ckpp:Process ;
+    rdfs:range ckpp:TemporalPart .
+
+#################################################################
+#    Mediation Relations (Three Mediators Pattern)
+#################################################################
+
+ckpr:mediates a owl:ObjectProperty ;
+    rdfs:label "mediates"@en ;
+    rdfs:comment "A mediator kernel controls or manages some entity or process"@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range owl:Thing .
+
+ckpr:mediates_communication a owl:ObjectProperty ;
+    rdfs:subPropertyOf ckpr:mediates ;
+    rdfs:label "mediates communication"@en ;
+    rdfs:comment "EdgeKernel mediates ALL inter-kernel communication"@en ;
+    rdfs:domain ckp:EdgeKernel ;
+    rdfs:range ckpp:EdgeCommunicationProcess .
+
+ckpr:mediates_governance a owl:ObjectProperty ;
+    rdfs:subPropertyOf ckpr:mediates ;
+    rdfs:label "mediates governance"@en ;
+    rdfs:comment "System.Consensus mediates ALL governance decisions"@en ;
+    rdfs:domain ckp:ConsensusKernel ;
+    rdfs:range ckpp:ConsensusProcess .
+
+ckpr:mediates_broadcast a owl:ObjectProperty ;
+    rdfs:subPropertyOf ckpr:mediates ;
+    rdfs:label "mediates broadcast"@en ;
+    rdfs:comment "System.WssHub mediates ALL real-time broadcasts"@en ;
+    rdfs:domain ckp:WssHubKernel ;
+    rdfs:range ckpp:BroadcastProcess .
+
+#################################################################
+#    Provenance Relations
+#################################################################
+
+ckpr:created_by_process a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "created by process"@en ;
+    rdfs:comment "A continuant was created by this process (provenance)"@en ;
+    rdfs:domain bfo:0000002 ;  # bfo:Continuant
+    rdfs:range ckpp:Process ;
+    owl:inverseOf ckpr:creates .
+
+ckpr:creates a owl:ObjectProperty ;
+    rdfs:label "creates"@en ;
+    rdfs:comment "A process creates a continuant"@en ;
+    rdfs:domain ckpp:Process ;
+    rdfs:range bfo:0000002 ;
+    owl:inverseOf ckpr:created_by_process .
+
+# Instance provenance chain
+# If Process P has output Instance I, then P creates I
+ckpr:creates owl:propertyChainAxiom ( ckpp:hasOutputInstance ) .
+
+# If Process P has kernel participant K, and P creates Instance I, then I was created by K
+# This is a SWRL rule (see rules section below)
+
+#################################################################
+#    Graph Traversal Relations
+#################################################################
+
+ckpr:can_reach a owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:label "can reach"@en ;
+    rdfs:comment "Kernel A can reach Kernel B through a chain of edges (transitive closure)"@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel .
+
+# Base case: Direct connection
+# If KernelA has outgoing edge to KernelB, then A can_reach B
+ckpr:can_reach owl:propertyChainAxiom ( ckp:hasOutgoingEdge ckp:hasTarget ) .
+
+# Transitive case is automatic due to owl:TransitiveProperty
+
+ckpr:upstream_of a owl:ObjectProperty ;
+    rdfs:label "upstream of"@en ;
+    rdfs:comment "Kernel A is upstream of Kernel B if A can reach B"@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel ;
+    owl:equivalentProperty ckpr:can_reach .
+
+ckpr:downstream_of a owl:ObjectProperty ;
+    rdfs:label "downstream of"@en ;
+    rdfs:comment "Kernel B is downstream of Kernel A if A is upstream of B"@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel ;
+    owl:inverseOf ckpr:upstream_of .
+
+ckpr:sibling_of a owl:ObjectProperty , owl:SymmetricProperty ;
+    rdfs:label "sibling of"@en ;
+    rdfs:comment "Two kernels are siblings if they share a common upstream source"@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel .
+
+# SWRL rule for sibling detection (see rules section)
+
+#################################################################
+#    Type Compatibility Relations
+#################################################################
+
+ckpr:type_compatible_with a owl:ObjectProperty ;
+    rdfs:label "type compatible with"@en ;
+    rdfs:comment "Instance type is compatible with Edge type_mapping"@en ;
+    rdfs:domain ckp:Instance ;
+    rdfs:range ckp:Edge ;
+    dc:description "Validated during edge communication setup" .
+
+ckpr:accepts_type a owl:DatatypeProperty ;
+    rdfs:label "accepts type"@en ;
+    rdfs:comment "Kernel accepts instances of this type (via queue_contract)"@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string .  # URN of accepted type
+
+ckpr:produces_type a owl:DatatypeProperty ;
+    rdfs:label "produces type"@en ;
+    rdfs:comment "Kernel produces instances of this type (via storage_contract)"@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range xsd:string .  # URN of produced type
+
+#################################################################
+#    Authorization Relations
+#################################################################
+
+ckpr:authorizes_edge a owl:ObjectProperty ;
+    rdfs:label "authorizes edge"@en ;
+    rdfs:comment "Target kernel explicitly authorizes this edge in its queue_contract.edges"@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Edge .
+
+# If Edge E has target Kernel K, and K lists E in queue_contract.edges, then K authorizes E
+# This must be validated at runtime by EdgeKernel
+
+ckpr:authorized_by a owl:ObjectProperty ;
+    rdfs:label "authorized by"@en ;
+    rdfs:comment "Edge is authorized by its target kernel"@en ;
+    rdfs:domain ckp:Edge ;
+    rdfs:range ckp:Kernel ;
+    owl:inverseOf ckpr:authorizes_edge .
+
+#################################################################
+#    Consensus Relations
+#################################################################
+
+ckpr:requires_consensus a owl:DatatypeProperty ;
+    rdfs:label "requires consensus"@en ;
+    rdfs:comment "Entity creation requires consensus approval"@en ;
+    rdfs:domain owl:Thing ;
+    rdfs:range xsd:boolean .
+
+ckpr:approved_by_consensus a owl:ObjectProperty ;
+    rdfs:label "approved by consensus"@en ;
+    rdfs:comment "Entity was approved by this consensus process"@en ;
+    rdfs:domain owl:Thing ;
+    rdfs:range ckpp:ConsensusProcess .
+
+ckpr:announced_via a owl:ObjectProperty ;
+    rdfs:label "announced via"@en ;
+    rdfs:comment "Entity was publicly announced via this broadcast process"@en ;
+    rdfs:domain owl:Thing ;
+    rdfs:range ckpp:BroadcastProcess .
+
+# Consensus-required entities
+ckp:Edge rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty ckpr:requires_consensus ;
+    owl:hasValue true
+] .
+
+#################################################################
+#    Alpha-6: Project Relations
+#################################################################
+
+ckp:belongsToProject a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Project ;
+    rdfs:label "belongs to project"@en ;
+    rdfs:comment "The project that this kernel belongs to. A kernel is organized under exactly one project (.ckproject declaration)."@en ;
+    dc:description "Alpha-6 addition. Inverse of ckp:hasKernel." ;
+    owl:inverseOf ckp:hasKernel .
+
+ckp:hasKernel a owl:ObjectProperty ;
+    rdfs:domain ckp:Project ;
+    rdfs:range ckp:Kernel ;
+    rdfs:label "has kernel"@en ;
+    rdfs:comment "A kernel that belongs to this project. A project may contain multiple kernels."@en ;
+    dc:description "Alpha-6 addition. Inverse of ckp:belongsToProject." ;
+    owl:inverseOf ckp:belongsToProject .
+
+#################################################################
+#    Alpha-6: Storage and Serving Relations
+#################################################################
+
+ckp:hasStorageMedium a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:StorageContract ;
+    rdfs:range ckp:StorageMedium ;
+    rdfs:label "has storage medium"@en ;
+    rdfs:comment "The physical storage mechanism used by this storage contract (FILESYSTEM, DOCUMENT_STORE, CONFIGMAP)."@en ;
+    dc:description "Alpha-6 addition. Links StorageContract to its underlying StorageMedium." .
+
+ckp:hasServingDisposition a owl:ObjectProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:ServingDisposition ;
+    rdfs:label "has serving disposition"@en ;
+    rdfs:comment "How this kernel serves its functionality (APIServing, WebServing, NATSListening, NATSBrowserClient). A kernel may have multiple serving dispositions."@en ;
+    dc:description "Alpha-6 addition. Links Kernel to its serving capabilities." .
+
+ckp:hasDeploymentMethod a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:DeploymentMethod ;
+    rdfs:label "has deployment method"@en ;
+    rdfs:comment "How this kernel's code is delivered to its execution environment (VOLUME, FILER, CONFIGMAP_DEPLOY, INLINE_DEPLOY)."@en ;
+    dc:description "Alpha-6 addition. Links Kernel to its deployment strategy." .
+
+#################################################################
+#    Alpha-6: Reconciliation Relations
+#################################################################
+
+ckp:reconciles a owl:ObjectProperty ;
+    rdfs:domain ckp:Reconciliation ;
+    rdfs:range ckp:Kernel ;
+    rdfs:label "reconciles"@en ;
+    rdfs:comment "The kernel that is being reconciled by this reconciliation cycle. The operator compares desired vs actual state and converges."@en ;
+    dc:description "Alpha-6 addition. Links a Reconciliation action to the kernel it acts upon." .
+
+#################################################################
+#    SWRL Rules for Automatic Inference
+#################################################################
+
+### Rule 1: Instance Provenance Chain
+# If Process P has kernel participant K, and P has output Instance I,
+# then I was created by K
+
+:InstanceProvenanceRule a swrl:Imp ;
+    rdfs:label "Instance Provenance Rule"@en ;
+    rdfs:comment "Infer instance creator from process participant"@en ;
+    swrl:body (
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckpp:hasKernelParticipant ;
+          swrl:argument1 :p ;
+          swrl:argument2 :k ]
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckpp:hasOutputInstance ;
+          swrl:argument1 :p ;
+          swrl:argument2 :i ]
+    ) ;
+    swrl:head (
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckp:createdByKernel ;
+          swrl:argument1 :i ;
+          swrl:argument2 :k ]
+    ) .
+
+### Rule 2: Edge Communication Inference
+# If Instance I was created by Kernel A,
+# and Edge E connects A to B,
+# and E is authorized,
+# then EdgeCommunicationProcess exists routing I through E to B
+
+:EdgeCommunicationInferenceRule a swrl:Imp ;
+    rdfs:label "Edge Communication Inference Rule"@en ;
+    rdfs:comment "Infer communication process from instance creation and edge"@en ;
+    swrl:body (
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckp:createdByKernel ;
+          swrl:argument1 :i ;
+          swrl:argument2 :a ]
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckp:hasSource ;
+          swrl:argument1 :e ;
+          swrl:argument2 :a ]
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckp:hasTarget ;
+          swrl:argument1 :e ;
+          swrl:argument2 :b ]
+        [ a swrl:DatavaluedPropertyAtom ;
+          swrl:propertyPredicate ckp:isAuthorized ;
+          swrl:argument1 :e ;
+          swrl:argument2 true ]
+    ) ;
+    swrl:head (
+        [ a swrl:ClassAtom ;
+          swrl:classPredicate ckpp:EdgeCommunicationProcess ;
+          swrl:argument1 :comm_process ]
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckpp:routesInstance ;
+          swrl:argument1 :comm_process ;
+          swrl:argument2 :i ]
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckpp:hasEdge ;
+          swrl:argument1 :comm_process ;
+          swrl:argument2 :e ]
+    ) .
+
+### Rule 3: Sibling Kernel Detection
+# If Kernel X produces output to Kernel A,
+# and Kernel X produces output to Kernel B,
+# and A != B,
+# then A and B are siblings
+
+:SiblingKernelRule a swrl:Imp ;
+    rdfs:label "Sibling Kernel Rule"@en ;
+    rdfs:comment "Detect kernels that share common upstream source"@en ;
+    swrl:body (
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckp:hasSource ;
+          swrl:argument1 :e1 ;
+          swrl:argument2 :x ]
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckp:hasTarget ;
+          swrl:argument1 :e1 ;
+          swrl:argument2 :a ]
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckp:hasSource ;
+          swrl:argument1 :e2 ;
+          swrl:argument2 :x ]
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckp:hasTarget ;
+          swrl:argument1 :e2 ;
+          swrl:argument2 :b ]
+        [ a swrl:DifferentIndividualsAtom ;
+          swrl:argument1 :a ;
+          swrl:argument2 :b ]
+    ) ;
+    swrl:head (
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckpr:sibling_of ;
+          swrl:argument1 :a ;
+          swrl:argument2 :b ]
+    ) .
+
+### Rule 4: Workflow Chain Detection
+# If Process P1 creates Instance I1,
+# and Process P2 has input I1,
+# then P1 precedes P2 (workflow dependency)
+
+:WorkflowChainRule a swrl:Imp ;
+    rdfs:label "Workflow Chain Rule"@en ;
+    rdfs:comment "Detect temporal ordering of processes through data dependencies"@en ;
+    swrl:body (
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckpp:hasOutputInstance ;
+          swrl:argument1 :p1 ;
+          swrl:argument2 :i1 ]
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckpp:hasInputInstance ;
+          swrl:argument1 :p2 ;
+          swrl:argument2 :i1 ]
+    ) ;
+    swrl:head (
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckpr:precedes ;
+          swrl:argument1 :p1 ;
+          swrl:argument2 :p2 ]
+    ) .
+
+### Rule 5: Authorization Requirement
+# If Edge E has target Kernel K,
+# and K does NOT authorize E,
+# then E is NOT authorized (validation failure)
+
+:AuthorizationRequirementRule a swrl:Imp ;
+    rdfs:label "Authorization Requirement Rule"@en ;
+    rdfs:comment "Validate that target kernel authorizes incoming edge"@en ;
+    swrl:body (
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckp:hasTarget ;
+          swrl:argument1 :e ;
+          swrl:argument2 :k ]
+        [ a swrl:BuiltinAtom ;
+          swrl:builtin swrlb:not ;
+          swrl:arguments (
+            [ a swrl:IndividualPropertyAtom ;
+              swrl:propertyPredicate ckpr:authorizes_edge ;
+              swrl:argument1 :k ;
+              swrl:argument2 :e ]
+          ) ]
+    ) ;
+    swrl:head (
+        [ a swrl:DatavaluedPropertyAtom ;
+          swrl:propertyPredicate ckp:isAuthorized ;
+          swrl:argument1 :e ;
+          swrl:argument2 false ]
+    ) .
+
+### Rule 6: Instance Dependency
+# If Instance I was created by Kernel K,
+# then I depends on K
+
+:InstanceDependencyRule a swrl:Imp ;
+    rdfs:label "Instance Dependency Rule"@en ;
+    rdfs:comment "Instances depend on their creating kernels"@en ;
+    swrl:body (
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckp:createdByKernel ;
+          swrl:argument1 :i ;
+          swrl:argument2 :k ]
+    ) ;
+    swrl:head (
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckpr:depends_on ;
+          swrl:argument1 :i ;
+          swrl:argument2 :k ]
+    ) .
+
+### Rule 7: Consensus Requirement for Edges
+# If Edge E exists,
+# then there must exist ConsensusProcess C that approved E
+
+:ConsensusRequirementRule a swrl:Imp ;
+    rdfs:label "Consensus Requirement Rule"@en ;
+    rdfs:comment "All edges must be approved by consensus"@en ;
+    ckp:implementationStatus "NOT_ENFORCED"^^xsd:string ;
+    ckp:criticalGap "Edge creation doesn't trigger consensus (manual only)"^^xsd:string ;
+    swrl:body (
+        [ a swrl:ClassAtom ;
+          swrl:classPredicate ckp:Edge ;
+          swrl:argument1 :e ]
+    ) ;
+    swrl:head (
+        [ a swrl:ClassAtom ;
+          swrl:classPredicate ckpp:ConsensusProcess ;
+          swrl:argument1 :c ]
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckpr:approved_by_consensus ;
+          swrl:argument1 :e ;
+          swrl:argument2 :c ]
+    ) .
+
+### Rule 8 (Alpha-6): Project Membership Inference
+# If Kernel K belongs to Project P,
+# and Kernel K has outgoing edge to Kernel L,
+# and L belongs to Project Q,
+# and P != Q,
+# then the Edge is a cross-project edge (requires extra authorization)
+
+:CrossProjectEdgeRule a swrl:Imp ;
+    rdfs:label "Cross-Project Edge Rule"@en ;
+    rdfs:comment "Alpha-6: Detect edges that cross project boundaries"@en ;
+    ckp:implementationStatus "NOT_ENFORCED"^^xsd:string ;
+    swrl:body (
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckp:belongsToProject ;
+          swrl:argument1 :k ;
+          swrl:argument2 :p ]
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckp:hasOutgoingEdge ;
+          swrl:argument1 :k ;
+          swrl:argument2 :e ]
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckp:hasTarget ;
+          swrl:argument1 :e ;
+          swrl:argument2 :l ]
+        [ a swrl:IndividualPropertyAtom ;
+          swrl:propertyPredicate ckp:belongsToProject ;
+          swrl:argument1 :l ;
+          swrl:argument2 :q ]
+        [ a swrl:DifferentIndividualsAtom ;
+          swrl:argument1 :p ;
+          swrl:argument2 :q ]
+    ) ;
+    swrl:head (
+        [ a swrl:DatavaluedPropertyAtom ;
+          swrl:propertyPredicate ckpr:requires_consensus ;
+          swrl:argument1 :e ;
+          swrl:argument2 true ]
+    ) .
+
+#################################################################
+#    Property Characteristics for Inference
+#################################################################
+
+### Transitivity
+
+ckpr:can_reach a owl:TransitiveProperty .
+ckpr:precedes a owl:TransitiveProperty .
+ckpr:part_of a owl:TransitiveProperty .
+ckpr:upstream_of a owl:TransitiveProperty .
+
+### Symmetry
+
+ckpr:sibling_of a owl:SymmetricProperty .
+# ckpr:connected_by — NOT symmetric (edges are directed)
+
+### Functionality (single-valued)
+
+ckp:hasUrn a owl:FunctionalProperty .
+ckp:hasSource a owl:FunctionalProperty .
+ckp:hasTarget a owl:FunctionalProperty .
+ckpp:hasProcessUrn a owl:FunctionalProperty .
+ckpp:hasKernelParticipant a owl:FunctionalProperty .
+ckpp:hasOutputInstance a owl:FunctionalProperty .
+ckp:belongsToProject a owl:FunctionalProperty .
+
+### Inverse Properties
+
+ckp:hasOutgoingEdge owl:inverseOf ckp:hasSource .
+ckp:hasIncomingEdge owl:inverseOf ckp:hasTarget .
+ckpr:participates_in owl:inverseOf ckpr:has_participant .
+ckpr:upstream_of owl:inverseOf ckpr:downstream_of .
+ckpr:authorizes_edge owl:inverseOf ckpr:authorized_by .
+ckp:belongsToProject owl:inverseOf ckp:hasKernel .
+
+#################################################################
+#    Property Chains for Inference
+#################################################################
+
+### Chain 1: Connected kernels
+# hasOutgoingEdge o hasTarget -> connected_by
+ckpr:connected_by owl:propertyChainAxiom ( ckp:hasOutgoingEdge ckp:hasTarget ) .
+
+### Chain 2: Transitive reachability
+# can_reach o can_reach -> can_reach (automatic via owl:TransitiveProperty)
+
+### Chain 3: Instance creator inference
+# hasOutputInstance -> creates
+ckpr:creates owl:propertyChainAxiom ( ckpp:hasOutputInstance ) .
+
+### Chain 4: Process participant inference
+# participates_in o has_participant -> related_to (generic relationship)
+# This allows querying: "What kernels are related through process participation?"
+
+#################################################################
+#    OWL Class Definitions Using Relations
+#################################################################
+
+### Connected Kernel Pair
+
+:ConnectedKernelPair a owl:Class ;
+    owl:equivalentClass [
+        a owl:Restriction ;
+        owl:onProperty ckpr:connected_by ;
+        owl:someValuesFrom ckp:Kernel
+    ] ;
+    rdfs:label "Connected Kernel Pair"@en ;
+    rdfs:comment "Two kernels that can communicate via an edge"@en .
+
+### Authorized Communication Path
+
+:AuthorizedCommunicationPath a owl:Class ;
+    owl:equivalentClass [
+        a owl:Class ;
+        owl:intersectionOf (
+            ckp:Edge
+            [
+                a owl:Restriction ;
+                owl:onProperty ckp:isAuthorized ;
+                owl:hasValue true
+            ]
+        )
+    ] ;
+    rdfs:label "Authorized Communication Path"@en ;
+    rdfs:comment "An edge that is authorized by its target kernel"@en .
+
+### Workflow Chain
+
+:WorkflowChain a owl:Class ;
+    rdfs:subClassOf ckpp:Process ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty ckpr:precedes ;
+        owl:minCardinality 1
+    ] ;
+    rdfs:label "Workflow Chain"@en ;
+    rdfs:comment "A process that is part of a larger workflow (has predecessors or successors)"@en .
+
+#################################################################
+#    Inference Example Queries (SPARQL)
+#################################################################
+
+# Example 1: Find all kernels reachable from source kernel
+# SELECT ?target WHERE { ?source ckpr:can_reach ?target }
+
+# Example 2: Find provenance chain for instance
+# SELECT ?kernel ?process WHERE {
+#   ?instance ckp:createdByKernel ?kernel .
+#   ?instance ckpr:created_by_process ?process .
+# }
+
+# Example 3: Find unauthorized edges (validation)
+# SELECT ?edge WHERE {
+#   ?edge a ckp:Edge .
+#   ?edge ckp:isAuthorized false .
+# }
+
+# Example 4: Find workflow dependencies
+# SELECT ?p1 ?p2 WHERE {
+#   ?p1 ckpr:precedes ?p2 .
+# }
+
+# Example 5: Find sibling kernels (share upstream source)
+# SELECT ?k1 ?k2 WHERE {
+#   ?k1 ckpr:sibling_of ?k2 .
+# }
+
+# Example 6 (Alpha-6): Find all kernels in a project
+# SELECT ?kernel ?name WHERE {
+#   ?kernel ckp:belongsToProject ?project .
+#   ?kernel ckp:hasName ?name .
+#   ?project rdfs:label "MyProject" .
+# }
+
+# Example 7 (Alpha-6): Find cross-project edges
+# SELECT ?edge ?srcProject ?tgtProject WHERE {
+#   ?edge a ckp:Edge ;
+#         ckp:hasSource ?src ;
+#         ckp:hasTarget ?tgt .
+#   ?src ckp:belongsToProject ?srcProject .
+#   ?tgt ckp:belongsToProject ?tgtProject .
+#   FILTER(?srcProject != ?tgtProject)
+# }
+
+#################################################################
+#    Coverage Summary
+#################################################################
+
+:RelationCoverage a owl:NamedIndividual ;
+    rdfs:label "Relation Coverage"@en ;
+    ckp:coverageScore "0.78"^^xsd:decimal ;
+    rdfs:comment "Relations defined for inference: Graph traversal (Y), Provenance (Y), Authorization (Y), Consensus (partial), Project (alpha-6), Serving (alpha-6)"@en ;
+    ckp:criticalGap "SWRL rules not enforced at runtime. Requires reasoner integration."^^xsd:string .
+
+#################################################################
+#################################################################
+
+#################################################################
+#    v3.7: Edge Predicate Relations
+#################################################################
+
+ckpr:extends_with a owl:ObjectProperty ;
+    rdfs:subPropertyOf ckp:relatesTo ;
+    rdfs:label "extends with"@en ;
+    rdfs:comment "Source kernel gains NEW actions from target kernel via the EXTENDS edge predicate. Unlike COMPOSES (which inherits existing actions), EXTENDS creates actions defined in the edge config, backed by the target's runtime."@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel ;
+    dc:description "v3.7 addition. Instances sealed in source DATA loop, not target's." .
+
+ckpr:loops_with a owl:ObjectProperty , owl:SymmetricProperty ;
+    rdfs:subPropertyOf ckp:relatesTo ;
+    rdfs:label "loops with"@en ;
+    rdfs:comment "Bidirectional cooperation: both kernels can invoke each other. MUST implement circular guard via visited set to prevent infinite recursion."@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel ;
+    dc:description "v3.7 addition. Both subscribe to each other's event.* topics." .
+
+ckpr:spawned_by a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "spawned by"@en ;
+    rdfs:comment "A dynamically spawned kernel tracks its parent (the kernel that discovered the concept and triggered kernel.spawn)."@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel ;
+    dc:description "v3.7 addition. Links spawned concept kernels to their discoverer." .
+
+ckpr:composes a owl:ObjectProperty ;
+    rdfs:subPropertyOf ckp:relatesTo ;
+    rdfs:label "composes"@en ;
+    rdfs:comment "Hub-spoke composition: source (hub) kernel gains access to target (spoke) kernel's declared actions. The hub can invoke any spoke action as if it were its own."@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel ;
+    dc:description "v3.7 addition. Hub subscribes to result.{spoke}, publishes to input.{spoke}." .
+
+ckpr:triggers a owl:ObjectProperty ;
+    rdfs:subPropertyOf ckp:relatesTo ;
+    rdfs:label "triggers"@en ;
+    rdfs:comment "Sequential activation: source fires target's specified action after own action completes. Automatic event-driven activation."@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel ;
+    dc:description "v3.7 addition. Source publishes to event.{source} with trigger_action field." .
+
+ckpr:produces a owl:ObjectProperty ;
+    rdfs:subPropertyOf ckp:relatesTo ;
+    rdfs:label "produces"@en ;
+    rdfs:comment "Event broadcasting: source emits events consumed by target. No request/reply. Target auto-invokes its default action on event receipt."@en ;
+    rdfs:domain ckp:Kernel ;
+    rdfs:range ckp:Kernel ;
+    dc:description "v3.7 addition. Source publishes to event.{source}, target subscribes." .
+
+#################################################################
+# End of ConceptKernel Relations Ontology v3.7
+#################################################################

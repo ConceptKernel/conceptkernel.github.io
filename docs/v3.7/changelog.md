@@ -124,7 +124,7 @@ All notable changes in the development increments that compose v3.7. Each versio
 - Loaded 10 CKP v3.5-alpha6 Turtle modules into `/ckp` dataset on Jena Fuseki
 - 2,797 triples across core, proof, base-instances, kernel-metadata, processes, rbac, relations, self-improvement, shapes, workflow modules
 - SPARQL endpoint live at `jena-fuseki.jena.svc:3030/ckp/sparql`
-- `kernel-entity-template.ttl` renamed to `kernel-entity-template.ttl.template` — it's a scaffolding template with placeholder tokens, not valid Turtle; the new extension signals RDF loaders to skip it (previously caused HTTP 400 from Fuseki)
+- `kernel-entity-template.ttl` renamed to `kernel-entity-template.ttl.template` — it's a scaffolding template with placeholder tokens, not valid Turtle. The new suffix keeps it out of the `*.ttl` glob used by the ontology loader, so Jena Fuseki no longer attempts to parse it (previously returned HTTP 400).
 - 7 of 17 spec-declared modules not yet published as Turtle (instance, action, identity, governance, lifecycle, economic, topology)
 
 ### v3.5.11 -- CK.Consensus Kernel <Badge type="tip" text="DEPLOYED" />

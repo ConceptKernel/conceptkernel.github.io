@@ -122,7 +122,7 @@ The output shows `{passing_kernels}/{total_kernels}` for each check type. A flee
 
 | Category | Check Types | What It Covers |
 |----------|-------------|----------------|
-| **Identity** | 1, 2, 4, 11 | apiVersion, awakening files, type/governance, version/serving |
+| **Identity** | 1, 2, 4, 11 | apiVersion, awakening files, type/governance, version pinned in `.ckproject` |
 | **Structure** | 3, 6, 7, 9 | Directory layout, processor, web, file integrity |
 | **Edges & NATS** | 5, 12, 17 | Edge validity, NATS topics, edge materialisation |
 | **Ontology** | 14, 15, 18 | Ontology types, instance typing, SHACL validity |

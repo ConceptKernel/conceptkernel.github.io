@@ -35,6 +35,10 @@ A conformant CKP implementation:
 | 12 | Support all five edge predicates | MUST |
 | 13 | Implement the star topology activation model | MAY |
 
+::: tip CRDs
+The two custom resources published by v3.7 are the **ConceptKernel CRD** (`conceptkernel.org/v1`, shortname `ck`) for per-kernel identity and proof status, and the **CKProject CRD** (`ck.tech.games/v1`, shortname `ckp`) for project-level orchestration. Both schemas are in [Custom Resource Definitions](./crd).
+:::
+
 ## Conformance Levels
 
 CKP defines two conformance levels. Implementations MUST declare which level they target. Partial conformance (meeting some but not all Core requirements) is **non-conformant**.

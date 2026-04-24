@@ -24,7 +24,7 @@ CK.Project is a `static` kernel because it holds only declarations; it has no pr
 
 CK.Project's DATA organ holds one **`.ckproject` manifest** per tracked project, keyed by the project's hostname. The hostname is the project's identity -- it determines DNS routing, namespace naming, and filer path prefixes.
 
-The `.ckproject` manifest is the authoritative record of the project's frozen deployment. [CK.Operator](./operator) reads it to materialize kernels at their pinned versions.
+The `.ckproject` manifest is the authoritative record of the project's frozen deployment *intent* -- which kernels, which versions, which commits. [CK.Operator](./operator) reads it to materialize kernels at their pinned versions. Note that "frozen" applies to the CK and TOOL organs (ReadOnlyMany at runtime); the DATA organ still drifts at runtime by design -- see [Pin Semantics](#pin-semantics-pins-ck-pins-tool-pins-data) below for the asymmetry.
 
 **Canonical path** (inside CK.Project's DATA organ on the SeaweedFS filer):
 

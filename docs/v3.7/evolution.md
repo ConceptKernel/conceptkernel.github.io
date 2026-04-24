@@ -177,5 +177,5 @@ Persona templates are stored in the target kernel's DATA loop (writable), allowi
 | Memory updates (DATA loop) MAY be written directly by agents | PERMITTED |
 | Model selection MUST follow the three-level precedence chain | REQUIRED |
 | Edge-level constraints MUST override persona-level settings | REQUIRED |
-| All LLM calls MUST go through Claude Code CLI, not direct API | REQUIRED |
+| All LLM calls MUST go through Claude Code CLI (`claude -p`) or the Claude Code SDK (`claude_agent_sdk`); direct API calls with self-managed API keys are PROHIBITED | REQUIRED |
 | Structured output SHOULD use `--json-schema` for validation | RECOMMENDED |

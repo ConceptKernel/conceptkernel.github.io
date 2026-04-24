@@ -55,7 +55,7 @@ Seven modules declared in the spec are not yet published as Turtle:
 | `topology.ttl` | Fleet topology, namespace mapping, volume layout | Docs stub only |
 
 ::: info Template Exclusion
-`kernel-entity-template.ttl.template` is intentionally excluded from the Turtle publication set. It is a scaffolding template that contains placeholder tokens (`{KERNEL_NAME}`, `{ROLES}`, etc.) and is therefore not valid Turtle. The `.ttl.template` extension signals to Jena Fuseki and other RDF loaders to skip it; per-kernel entity triples are produced at kernel creation time and published per-kernel rather than consumed from this template.
+`kernel-entity-template.ttl.template` is intentionally excluded from the Turtle publication set. It is a scaffolding template that contains placeholder tokens (`{KERNEL_NAME}`, `{ROLES}`, etc.) and is therefore not valid Turtle. The `.ttl.template` suffix keeps it out of the `*.ttl` glob used by the materialisation loader (RDF loaders like Jena Fuseki match by glob, not by extension semantics — the rename ensures the file simply is not fed to the parser). Per-kernel entity triples are produced at kernel creation time and published per-kernel rather than consumed from this template.
 :::
 
 ## Published Triples

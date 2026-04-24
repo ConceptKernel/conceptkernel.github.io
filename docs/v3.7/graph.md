@@ -54,8 +54,8 @@ Seven modules declared in the spec are not yet published as Turtle:
 | `economic.ttl` | ValueFlows/REA economic events | Docs stub only |
 | `topology.ttl` | Fleet topology, namespace mapping, volume layout | Docs stub only |
 
-::: warning Known Issue
-`kernel-entity-template.ttl` was skipped due to a parse error (HTTP 400 from Fuseki). The template file contains placeholder syntax that is not valid Turtle. This needs to be either fixed or excluded from the Turtle publication set.
+::: info Template Exclusion
+`kernel-entity-template.ttl.template` is intentionally excluded from the Turtle publication set. It is a scaffolding template that contains placeholder tokens (`{KERNEL_NAME}`, `{ROLES}`, etc.) and is therefore not valid Turtle. The `.ttl.template` extension signals to Jena Fuseki and other RDF loaders to skip it; per-kernel entity triples are produced at kernel creation time and published per-kernel rather than consumed from this template.
 :::
 
 ## Published Triples

@@ -99,34 +99,26 @@ A conformant `.ckproject` manifest MUST declare:
 | `versions.<kernel>.version` | semver | Kernel version tag the project should deploy |
 | `versions.<kernel>.pins.{ck,tool,data}` | SHA1 string | Commit hash pinning each organ for the declared version |
 
-### AuthConfig
+### AuthConfig (manifest-level binding)
 
-CK.Project instances MAY declare an `auth` block for OIDC identity provider configuration. Identity is a project-scoped concern: each project has its own realm, client, and access policies.
+A `.ckproject` manifest MAY include an `auth` block that binds the project to an OIDC identity provider. Identity is project-scoped: each project has its own realm, client, and access policies.
 
 ```yaml
+# .ckproject (fragment)
 auth:
-  provider: keycloak         # keycloak | none
-  instance: keycloak-name    # Keycloak CR on cluster
-  realm: realm-name          # Keycloak realm name
-  client_id: ck-web          # OIDC public client
+  provider: keycloak
+  realm: realm-name
+  client_id: ck-web
   issuer_url: https://id.example.com/realms/realm-name
-  create_realm: false        # true = operator creates realm via KeycloakRealmImport
-  redirect_uris: []          # REQUIRED if create_realm is true
-  web_origins: []            # REQUIRED if create_realm is true
+  # see auth.md for the full schema and create_realm semantics
 ```
 
-**Two modes:**
+The canonical treatment of AuthConfig -- full schema, reuse vs. create-realm modes, the `deploy.auth` reconciliation step, JWT verification, token refresh, and grants enforcement -- lives in **[Auth](./auth)**. This section lists only the manifest-level rules that CK.Project's instance data must satisfy:
 
-| Mode | Behaviour | Keycloak Permissions |
-|------|-----------|---------------------|
-| **Reuse** (`create_realm: false`) | Operator injects existing issuer URL into deployments, verifies OIDC endpoint | None (zero write) |
-| **Create** (`create_realm: true`) | Operator creates `KeycloakRealmImport` CR; Keycloak operator provisions realm | `get`, `list`, `create` on `keycloakrealmimports` |
-
-On teardown, the `KeycloakRealmImport` is RETAINED. Identity outlives compute.
-
-::: tip Auth Details
-For the full authentication flow including JWT verification, token lifecycle, and grants enforcement, see [Auth](./auth).
-:::
+- If `auth` is omitted, the project operates anonymous-only. All actions declared `access: auth` become unreachable.
+- If `auth.provider == keycloak`, the fields `realm`, `client_id`, and `issuer_url` MUST be present.
+- If `auth.create_realm == true`, the fields `redirect_uris` and `web_origins` MUST be present.
+- On project teardown, any `KeycloakRealmImport` CR created by `deploy.auth` is RETAINED -- identity outlives compute.
 
 ### Ontology Publishing
 

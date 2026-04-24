@@ -1,6 +1,15 @@
 # Kernel Entity Template for ConceptKernel Ontologies
-# This template defines the BFO-aligned structure for kernel entities
-# Replace {KERNEL_NAME}, {KERNEL_LOWER}, {KERNEL_URN}, etc. with actual values
+#
+# This file is a TEMPLATE, not valid Turtle. It contains placeholder tokens
+# ({KERNEL_NAME}, {KERNEL_URN}, {ROLES}, {FUNCTIONS}, {PROVENANCE}, etc.)
+# that are replaced by the scaffolding tool when a new kernel is created.
+#
+# The `.ttl.template` extension signals to Jena Fuseki and other RDF loaders
+# that this file must not be auto-parsed as Turtle. Consumers of the v3.7
+# ontology set should ignore this file; kernel entity triples are produced
+# at kernel creation time and published per-kernel.
+#
+# Replace {KERNEL_NAME}, {KERNEL_LOWER}, {KERNEL_URN}, etc. with actual values.
 
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .

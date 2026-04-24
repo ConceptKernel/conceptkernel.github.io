@@ -54,10 +54,10 @@
       }
     },
     "kernel-entity-template": {
-      "filename": "kernel-entity-template.ttl",
-      "path": "ontology/v3.7/kernel-entity-template.ttl",
-      "format": "text/turtle",
-      "description": "BFO-aligned template for defining individual kernel entities"
+      "filename": "kernel-entity-template.ttl.template",
+      "path": "ontology/v3.7/kernel-entity-template.ttl.template",
+      "format": "text/plain",
+      "description": "BFO-aligned template for generating per-kernel entity triples. Contains placeholder tokens ({KERNEL_NAME}, {ROLES}, etc.) and is NOT valid Turtle; the .ttl.template extension signals RDF loaders to skip it."
     },
     "processes": {
       "filename": "processes.ttl",

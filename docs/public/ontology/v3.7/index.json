@@ -2,8 +2,8 @@
   "ontology": {
     "name": "ConceptKernel BFO Ontology",
     "version": "v3.7",
-    "date": "2026-04-06",
-    "description": "Formal ontology mapping ConceptKernel architecture to Basic Formal Ontology (BFO). v3.7 adds AgentKernel, PersonaTemplate, ModelConfiguration, five edge predicates, 20 check types, consensus governance, task execution, dynamic spawning, multi-user sessions, and agent teams.",
+    "date": "2026-04-24",
+    "description": "Formal ontology mapping ConceptKernel architecture to Basic Formal Ontology (BFO). AgentKernel, PersonaTemplate, ModelConfiguration, edge predicates, 20 check types, consensus governance, task execution, dynamic spawning, multi-user sessions, and agent teams are v3.6 additions carried forward. v3.7 refines the Project class around the .ckproject symlink + SHA1-manifest model and removes EdgeKernel/WssHubKernel (edges are ontology predicates; broadcast externalized to CK.Stream).",
     "baseUri": "https://conceptkernel.org/ontology/v3.7/",
     "bfoVersion": "2020",
     "bfoUri": "http://purl.obolibrary.org/obo/bfo.owl",
@@ -19,7 +19,7 @@
       "filename": "core.ttl",
       "path": "ontology/v3.7/core.ttl",
       "format": "text/turtle",
-      "description": "Core BFO mappings for ConceptKernel continuants. v3.7 adds AgentKernel, PersonaTemplate, ModelConfiguration, LOOPS_WITH edge predicate.",
+      "description": "Core BFO mappings for ConceptKernel continuants. AgentKernel, PersonaTemplate, ModelConfiguration, LOOPS_WITH: v3.6 additions. v3.7 refines Project and removes EdgeKernel/WssHubKernel.",
       "coverage": {
         "entities": [
           "ckp:Kernel",
@@ -36,9 +36,7 @@
           "ckp:Reconciliation",
           "ckp:PersonaTemplate",
           "ckp:ModelConfiguration",
-          "ckp:EdgeKernel",
-          "ckp:ConsensusKernel",
-          "ckp:WssHubKernel"
+          "ckp:ConsensusKernel"
         ]
       }
     },
@@ -46,7 +44,7 @@
       "filename": "kernel-metadata.ttl",
       "path": "ontology/v3.7/kernel-metadata.ttl",
       "format": "text/turtle",
-      "description": "RDF schema for kernel metadata. v3.7 adds hasPersona, defaultModel, modelEffort.",
+      "description": "RDF schema for kernel metadata. hasPersona, defaultModel, modelEffort are v3.6 additions, unchanged in v3.7.",
       "coverage": {
         "v36_additions": [
           "ckp:hasPersona (ObjectProperty, links kernel to PersonaTemplate)",
@@ -65,7 +63,7 @@
       "filename": "processes.ttl",
       "path": "ontology/v3.7/processes.ttl",
       "format": "text/turtle",
-      "description": "Occurrent (Process) definitions. v3.7 adds TaskExecutionProcess, SpawningProcess, SessionProcess, ConsensusEvaluationProcess.",
+      "description": "Occurrent (Process) definitions. TaskExecutionProcess, SpawningProcess, SessionProcess, ConsensusEvaluationProcess were v3.6 additions. v3.7 removes hasMediatorKernel and hasBroadcastMediator (EdgeKernel/WssHubKernel retired).",
       "coverage": {
         "entities": [
           "ckpp:InvocationProcess",
@@ -87,7 +85,7 @@
       "filename": "relations.ttl",
       "path": "ontology/v3.7/relations.ttl",
       "format": "text/turtle",
-      "description": "Relationships and inference rules. v3.7 adds extends_with, loops_with, spawned_by, composes, triggers, produces.",
+      "description": "Relationships and inference rules. extends_with, loops_with, spawned_by, composes, triggers, produces are v3.6 additions. v3.7 removes mediates_communication and mediates_broadcast (EdgeKernel/WssHubKernel retired).",
       "coverage": {
         "v36_additions": [
           "ckpr:extends_with",
@@ -103,8 +101,8 @@
       "filename": "edges.ttl",
       "path": "ontology/v3.7/edges.ttl",
       "format": "text/turtle",
-      "description": "Dedicated edge predicate ontology with five individuals: COMPOSES, TRIGGERS, PRODUCES, EXTENDS, LOOPS_WITH.",
-      "new_in": "v3.7",
+      "description": "Dedicated edge predicate ontology with five individuals: COMPOSES, TRIGGERS, PRODUCES, EXTENDS, LOOPS_WITH. Introduced in v3.6.",
+      "new_in": "v3.6",
       "coverage": {
         "entities": [
           "ckpe:EdgePredicate",
@@ -120,8 +118,8 @@
       "filename": "consensus.ttl",
       "path": "ontology/v3.7/consensus.ttl",
       "format": "text/turtle",
-      "description": "CK.Consensus formal ontology: proposals, votes, four validation layers, decisions with PROV-O provenance.",
-      "new_in": "v3.7",
+      "description": "CK.Consensus formal ontology: proposals, votes, four validation layers, decisions with PROV-O provenance. Introduced in v3.6.",
+      "new_in": "v3.6",
       "coverage": {
         "entities": [
           "ckpc:ConsensusProposal",
@@ -153,7 +151,7 @@
       "filename": "rbac.ttl",
       "path": "ontology/v3.7/rbac.ttl",
       "format": "text/turtle",
-      "description": "Role-Based Access Control ontology. v3.7 adds TeamCoordinator role and GovernanceLevel individuals."
+      "description": "Role-Based Access Control ontology. TeamCoordinator role and GovernanceLevel individuals were v3.6 additions. v3.7 updates authorization-enforcement prose: enforced by target kernel (queue_contract.edges), not by an EdgeKernel."
     },
     "workflow": {
       "filename": "workflow.ttl",
@@ -171,7 +169,7 @@
       "filename": "base-instances.ttl",
       "path": "ontology/v3.7/base-instances.ttl",
       "format": "text/turtle",
-      "description": "Base instance shapes. v3.7 adds TaskInstance and ConversationInstance.",
+      "description": "Base instance shapes. TaskInstance and ConversationInstance were v3.6 additions.",
       "coverage": {
         "entities": [
           "ckp:InstanceManifest",
@@ -186,7 +184,7 @@
       "filename": "proof.ttl",
       "path": "ontology/v3.7/proof.ttl",
       "format": "text/turtle",
-      "description": "Proof verification. v3.7 expands CheckType from 6 to 20 individuals matching spec's 20 check types.",
+      "description": "Proof verification. CheckType expansion from 6 to 20 individuals was a v3.6 change; unchanged in v3.7.",
       "coverage": {
         "individuals": [
           "ckp:ProofOutcome-PASS",
@@ -219,39 +217,45 @@
       "filename": "schema.yaml",
       "path": "ontology/v3.7/schema.yaml",
       "format": "application/x-yaml",
-      "description": "LinkML schema governing Concept Kernel shape. v3.7 adds AgentKernel, PersonaTemplate, TaskInstance, ConversationInstance, and new enum values."
+      "description": "LinkML schema governing Concept Kernel shape. AgentKernel, PersonaTemplate, TaskInstance, ConversationInstance, and expanded enums were v3.6 additions."
     }
   },
   "coverage": {
     "overall": {
       "score": 0.75,
-      "description": "Overall BFO alignment coverage: 75% (up from 68% in v3.5-alpha6, with v3.7 additions)"
+      "description": "Overall BFO alignment coverage: 75% (carried forward from v3.6)"
     }
   },
   "changelog": {
     "v3.7": {
+      "date": "2026-04-24",
+      "changes": [
+        "REMOVED: ckp:EdgeKernel class (edges are ontology-level predicates on kernels, not a mediator class)",
+        "REMOVED: ckp:WssHubKernel class (real-time broadcast externalized to the CK.Stream library kernel concept)",
+        "REMOVED: ckp:mediatesEdge object property",
+        "REMOVED: ckpp:hasMediatorKernel (EdgeKernel range) and ckpp:hasBroadcastMediator (WssHubKernel range)",
+        "REMOVED: ckpr:mediates_communication and ckpr:mediates_broadcast (ckpr:mediates_governance retained — CK.Consensus still exists)",
+        "REFINED: ckp:Project description rewritten around the .ckproject manifest — authoritative instance in CK.Project's DATA organ, symlinked from the project root, holds SHA1 commit pins for each of the 3 organs (ck, tool, data) per kernel version",
+        "UPDATED: ckp:Instance storage path corrected to data/instances/ (was stale storage/instances/)",
+        "UPDATED: Edge architecturalConstraint rephrased — authorization is declared at the target kernel's queue_contract.edges (ckp:isAuthorized), not enforced by a mediator kernel",
+        "UPDATED: EdgeCommunication temporal phases rewritten in predicate/NATS language (no EdgeKernel role)",
+        "UPDATED: Broadcast temporal phases rewritten (no WssHubKernel role)"
+      ]
+    },
+    "v3.6": {
       "date": "2026-04-06",
       "changes": [
-        "NEW: ckp:AgentKernel — LLM-capable kernel type supporting streaming, sessions, personas",
-        "NEW: ckp:PersonaTemplate — reusable system prompt templates for LLM behaviour",
-        "NEW: ckp:ModelConfiguration — quality for LLM model selection and effort level",
-        "NEW: ckp:LOOPS_WITH — bidirectional cooperation edge predicate",
-        "NEW: edges.ttl — dedicated edge predicate ontology with 5 individuals (COMPOSES, TRIGGERS, PRODUCES, EXTENDS, LOOPS_WITH)",
-        "NEW: consensus.ttl — CK.Consensus formal ontology (proposals, votes, 4 validation layers, decisions)",
-        "NEW: ckpp:TaskExecutionProcess — headless Claude Code task execution",
-        "NEW: ckpp:SpawningProcess — dynamic kernel creation",
-        "NEW: ckpp:SessionProcess — multi-user NATS sessions",
-        "NEW: ckpp:ConsensusEvaluationProcess — four-layer consensus evaluation",
-        "NEW: ckpr:extends_with, ckpr:loops_with, ckpr:spawned_by, ckpr:composes, ckpr:triggers, ckpr:produces",
-        "NEW: ckp:TaskInstance — consensus-generated task instance shape",
-        "NEW: ckp:ConversationInstance — multi-turn LLM conversation instance shape",
-        "NEW: 14 additional CheckType individuals (total 20, matching spec's 20 check types)",
-        "NEW: ckp:TeamCoordinator role for Agent Teams",
-        "NEW: ckp:GovernanceLevel with STRICT/RELAXED/AUTONOMOUS individuals",
-        "NEW: ckp:hasPersona, ckp:defaultModel, ckp:modelEffort properties",
-        "UPDATED: All namespaces from v3.5 to v3.7",
-        "UPDATED: Project description refined per v3.7 CK.Project spec",
-        "UPDATED: Overall coverage score 68% -> 75%"
+        "ckp:AgentKernel — LLM-capable kernel type (streaming, sessions, personas)",
+        "ckp:PersonaTemplate, ckp:ModelConfiguration",
+        "ckp:LOOPS_WITH edge predicate",
+        "edges.ttl — dedicated edge predicate ontology (5 individuals)",
+        "consensus.ttl — CK.Consensus formal ontology",
+        "ckpp:TaskExecutionProcess, SpawningProcess, SessionProcess, ConsensusEvaluationProcess",
+        "ckpr:extends_with, loops_with, spawned_by, composes, triggers, produces",
+        "ckp:TaskInstance, ckp:ConversationInstance",
+        "CheckType expansion from 6 to 20 individuals",
+        "ckp:TeamCoordinator role; ckp:GovernanceLevel (STRICT/RELAXED/AUTONOMOUS)",
+        "ckp:hasPersona, ckp:defaultModel, ckp:modelEffort properties"
       ]
     },
     "v3.5-alpha6": {

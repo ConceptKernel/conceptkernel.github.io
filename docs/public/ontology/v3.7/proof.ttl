@@ -1,6 +1,6 @@
 # ConceptKernel Proof Ontology
 # Version: v3.7
-# Date: 2026-04-06
+# Date: 2026-04-24
 # Purpose: OWL classes for ProofRecord, ProofCheck, ProofOutcome, and CheckType
 
 @prefix : <https://conceptkernel.org/ontology/v3.7/> .
@@ -17,8 +17,8 @@
 <https://conceptkernel.org/ontology/v3.7/proof> a owl:Ontology ;
     dc:title "ConceptKernel Proof Ontology" ;
     dc:description "OWL classes defining proof records, proof checks, outcomes, and check types for verifiable instance integrity" ;
-    dcterms:created "2026-04-06"^^xsd:date ;
-    dcterms:modified "2026-04-06"^^xsd:date ;
+    dcterms:created "2026-04-07"^^xsd:date ;
+    dcterms:modified "2026-04-24"^^xsd:date ;
     owl:versionInfo "v3.7" ;
     dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
     rdfs:seeAlso <https://conceptkernel.org> ;

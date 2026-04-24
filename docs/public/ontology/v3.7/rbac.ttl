@@ -1,6 +1,6 @@
 # ConceptKernel RBAC Ontology
 # Version: v3.7
-# Date: 2026-04-06
+# Date: 2026-04-24
 # Purpose: Role-Based Access Control ontology for ConceptKernel agents, roles, and permissions
 # Architecture: Distributed ontology model - kernels define roles/permissions, System.Ontology aggregates
 
@@ -18,7 +18,7 @@
     dc:title "ConceptKernel RBAC Ontology" ;
     dc:description "Role-Based Access Control framework for ConceptKernel - agents, roles, permissions, quorum" ;
     dcterms:created "2025-12-01"^^xsd:date ;
-    dcterms:modified "2026-04-06"^^xsd:date ;
+    dcterms:modified "2026-04-24"^^xsd:date ;
     owl:versionInfo "v3.7" ;
     dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
     rdfs:seeAlso <https://conceptkernel.org> ;

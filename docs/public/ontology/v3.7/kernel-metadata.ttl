@@ -1,8 +1,9 @@
 # ConceptKernel Kernel Metadata Ontology
 # Version: v3.7
-# Date: 2026-04-06
+# Date: 2026-04-24
 # Purpose: RDF schema for kernel metadata (from kernel.yaml) for semantic registry
-# v3.7: Adds hasPersona, defaultModel, modelEffort persona/model properties
+# v3.6: Adds hasPersona, defaultModel, modelEffort persona/model properties;
+# unchanged in v3.7.
 
 @prefix : <https://conceptkernel.org/ontology/v3.7/> .
 @prefix ckp: <https://conceptkernel.org/ontology/v3.7/> .
@@ -18,12 +19,12 @@
     dc:title "ConceptKernel Kernel Metadata Ontology" ;
     dc:description "Formal ontology for kernel metadata enabling semantic registry and SPARQL queries" ;
     dcterms:created "2025-12-21"^^xsd:date ;
-    dcterms:modified "2026-04-06"^^xsd:date ;
+    dcterms:modified "2026-04-24"^^xsd:date ;
     owl:versionInfo "v3.7" ;
     dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
     rdfs:seeAlso <https://conceptkernel.org> ;
     rdfs:seeAlso <https://github.com/ConceptKernel> ;
-    rdfs:comment "Defines metadata structure for kernels: runtime, ports, capabilities, dependencies, status. v3.7 adds persona and model configuration properties." ;
+    rdfs:comment "Defines metadata structure for kernels: runtime, ports, capabilities, dependencies, status. Persona and model configuration properties were added in v3.6." ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ,
                 <https://conceptkernel.org/ontology/v3.7/> .
 

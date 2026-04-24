@@ -1,9 +1,11 @@
 # ConceptKernel Edge Predicate Ontology
 # Version: v3.7
-# Date: 2026-04-06
+# Date: 2026-04-24
 # Purpose: Dedicated ontology for the five CKP edge predicates with formal
 #          composition semantics, instance ownership, and activation models
-# NEW in v3.7
+# Introduced in v3.6 (edge predicates as first-class ontology entities);
+# refined in v3.7: authorization is declared at the target kernel
+# (queue_contract.edges, ckp:isAuthorized) — no EdgeKernel mediator.
 
 @prefix : <https://conceptkernel.org/ontology/v3.7/edge#> .
 @prefix ckp: <https://conceptkernel.org/ontology/v3.7/> .
@@ -20,8 +22,8 @@
 <https://conceptkernel.org/ontology/v3.7/edge> a owl:Ontology ;
     dc:title "ConceptKernel Edge Predicate Ontology" ;
     dc:description "Dedicated ontology for the five CKP edge predicates: COMPOSES, TRIGGERS, PRODUCES, EXTENDS, LOOPS_WITH. Defines composition semantics, instance ownership, activation models, and NATS materialisation." ;
-    dcterms:created "2026-04-06"^^xsd:date ;
-    dcterms:modified "2026-04-06"^^xsd:date ;
+    dcterms:created "2026-04-07"^^xsd:date ;
+    dcterms:modified "2026-04-24"^^xsd:date ;
     owl:versionInfo "v3.7" ;
     dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
     rdfs:seeAlso <https://conceptkernel.org> ;

@@ -1,8 +1,8 @@
 # ConceptKernel Consensus Ontology
 # Version: v3.7
-# Date: 2026-04-06
+# Date: 2026-04-24
 # Purpose: CK.Consensus formal ontology — proposals, votes, validation layers, decisions
-# NEW in v3.7
+# Introduced in v3.6; unchanged in v3.7.
 
 @prefix : <https://conceptkernel.org/ontology/v3.7/consensus#> .
 @prefix ckp: <https://conceptkernel.org/ontology/v3.7/> .
@@ -20,8 +20,8 @@
 <https://conceptkernel.org/ontology/v3.7/consensus> a owl:Ontology ;
     dc:title "ConceptKernel Consensus Ontology" ;
     dc:description "Formal ontology for CK.Consensus governance engine: proposals, votes, four validation layers, decisions, and task generation" ;
-    dcterms:created "2026-04-06"^^xsd:date ;
-    dcterms:modified "2026-04-06"^^xsd:date ;
+    dcterms:created "2026-04-07"^^xsd:date ;
+    dcterms:modified "2026-04-24"^^xsd:date ;
     owl:versionInfo "v3.7" ;
     dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
     rdfs:seeAlso <https://conceptkernel.org> ;

@@ -4,9 +4,12 @@ title: ConceptKernel Governance Schema v3.7
 description: >
   LinkML schema governing Concept Kernel shape. Drives scaffolding tool —
   the tool reads this schema to create CK folders and enforce structure.
-  Aligned with BFO2020 + PROV-O. v3.7 adds AgentKernel, PersonaTemplate,
+  Aligned with BFO2020 + PROV-O. AgentKernel, PersonaTemplate,
   TaskInstance, ConversationInstance, ModelConfiguration, edge predicates,
-  consensus, and 20 check types.
+  consensus, and 20 check types were v3.6 additions; v3.7 carries them
+  forward with a refined Project model (see the .ckproject manifest) and
+  without EdgeKernel/WssHubKernel (edges are ontology predicates;
+  broadcast externalized).
 
 prefixes:
   ck: https://conceptkernel.org/ontology/v3.7/
@@ -45,7 +48,7 @@ classes:
     attributes:
       web_root: { ifabsent: "web/", description: "Root directory for static assets" }
 
-  # --- v3.7: AgentKernel ---
+  # --- AgentKernel (v3.6 addition, unchanged in v3.7) ---
   AgentKernel:
     is_a: Kernel
     description: >

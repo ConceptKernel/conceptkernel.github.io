@@ -1,8 +1,8 @@
 # ConceptKernel Relations BFO Ontology
 # Version: v3.7
-# Date: 2026-04-06
+# Date: 2026-04-24
 # Purpose: Relationships and inference rules for automatic reasoning
-# Alpha-6: Adds belongsToProject, hasKernel, hasStorageMedium,
+# v3.5-alpha6: Adds belongsToProject, hasKernel, hasStorageMedium,
 #           hasServingDisposition, reconciles
 
 @prefix : <https://conceptkernel.org/ontology/v3.7/relation#> .
@@ -23,12 +23,12 @@
     dc:title "ConceptKernel Relations Ontology" ;
     dc:description "Relationships and inference rules for automatic reasoning about ConceptKernel entities" ;
     dcterms:created "2025-11-23"^^xsd:date ;
-    dcterms:modified "2026-04-06"^^xsd:date ;
+    dcterms:modified "2026-04-24"^^xsd:date ;
     owl:versionInfo "v3.7" ;
     dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
     rdfs:seeAlso <https://conceptkernel.org> ;
     rdfs:seeAlso <https://github.com/ConceptKernel> ;
-    rdfs:comment "Defines properties, property chains, and SWRL rules for inference. Alpha-6 adds project, storage, serving, and reconciliation relations." ;
+    rdfs:comment "Defines properties, property chains, and SWRL rules for inference. v3.5-alpha6 adds project, storage, serving, and reconciliation relations." ;
     owl:imports <https://conceptkernel.org/ontology/v3.7/> ,
                 <https://conceptkernel.org/ontology/v3.7/process> ,
                 <http://purl.obolibrary.org/obo/bfo.owl> .
@@ -270,7 +270,7 @@ ckp:Edge rdfs:subClassOf [
 ] .
 
 #################################################################
-#    Alpha-6: Project Relations
+#    v3.5-alpha6: Project Relations
 #################################################################
 
 ckp:belongsToProject a owl:ObjectProperty , owl:FunctionalProperty ;
@@ -278,7 +278,7 @@ ckp:belongsToProject a owl:ObjectProperty , owl:FunctionalProperty ;
     rdfs:range ckp:Project ;
     rdfs:label "belongs to project"@en ;
     rdfs:comment "The project that this kernel belongs to. A kernel is organized under exactly one project (.ckproject declaration)."@en ;
-    dc:description "Alpha-6 addition. Inverse of ckp:hasKernel." ;
+    dc:description "v3.5-alpha6 addition. Inverse of ckp:hasKernel." ;
     owl:inverseOf ckp:hasKernel .
 
 ckp:hasKernel a owl:ObjectProperty ;
@@ -286,11 +286,11 @@ ckp:hasKernel a owl:ObjectProperty ;
     rdfs:range ckp:Kernel ;
     rdfs:label "has kernel"@en ;
     rdfs:comment "A kernel that belongs to this project. A project may contain multiple kernels."@en ;
-    dc:description "Alpha-6 addition. Inverse of ckp:belongsToProject." ;
+    dc:description "v3.5-alpha6 addition. Inverse of ckp:belongsToProject." ;
     owl:inverseOf ckp:belongsToProject .
 
 #################################################################
-#    Alpha-6: Storage and Serving Relations
+#    v3.5-alpha6: Storage and Serving Relations
 #################################################################
 
 ckp:hasStorageMedium a owl:ObjectProperty , owl:FunctionalProperty ;
@@ -298,24 +298,24 @@ ckp:hasStorageMedium a owl:ObjectProperty , owl:FunctionalProperty ;
     rdfs:range ckp:StorageMedium ;
     rdfs:label "has storage medium"@en ;
     rdfs:comment "The physical storage mechanism used by this storage contract (FILESYSTEM, DOCUMENT_STORE, CONFIGMAP)."@en ;
-    dc:description "Alpha-6 addition. Links StorageContract to its underlying StorageMedium." .
+    dc:description "v3.5-alpha6 addition. Links StorageContract to its underlying StorageMedium." .
 
 ckp:hasServingDisposition a owl:ObjectProperty ;
     rdfs:domain ckp:Kernel ;
     rdfs:range ckp:ServingDisposition ;
     rdfs:label "has serving disposition"@en ;
     rdfs:comment "How this kernel serves its functionality (APIServing, WebServing, NATSListening, NATSBrowserClient). A kernel may have multiple serving dispositions."@en ;
-    dc:description "Alpha-6 addition. Links Kernel to its serving capabilities." .
+    dc:description "v3.5-alpha6 addition. Links Kernel to its serving capabilities." .
 
 ckp:hasDeploymentMethod a owl:ObjectProperty , owl:FunctionalProperty ;
     rdfs:domain ckp:Kernel ;
     rdfs:range ckp:DeploymentMethod ;
     rdfs:label "has deployment method"@en ;
     rdfs:comment "How this kernel's code is delivered to its execution environment (VOLUME, FILER, CONFIGMAP_DEPLOY, INLINE_DEPLOY)."@en ;
-    dc:description "Alpha-6 addition. Links Kernel to its deployment strategy." .
+    dc:description "v3.5-alpha6 addition. Links Kernel to its deployment strategy." .
 
 #################################################################
-#    Alpha-6: Reconciliation Relations
+#    v3.5-alpha6: Reconciliation Relations
 #################################################################
 
 ckp:reconciles a owl:ObjectProperty ;
@@ -323,7 +323,7 @@ ckp:reconciles a owl:ObjectProperty ;
     rdfs:range ckp:Kernel ;
     rdfs:label "reconciles"@en ;
     rdfs:comment "The kernel that is being reconciled by this reconciliation cycle. The operator compares desired vs actual state and converges."@en ;
-    dc:description "Alpha-6 addition. Links a Reconciliation action to the kernel it acts upon." .
+    dc:description "v3.5-alpha6 addition. Links a Reconciliation action to the kernel it acts upon." .
 
 #################################################################
 #    SWRL Rules for Automatic Inference
@@ -529,7 +529,7 @@ ckp:reconciles a owl:ObjectProperty ;
           swrl:argument2 :c ]
     ) .
 
-### Rule 8 (Alpha-6): Project Membership Inference
+### Rule 8 (v3.5-alpha6): Project Membership Inference
 # If Kernel K belongs to Project P,
 # and Kernel K has outgoing edge to Kernel L,
 # and L belongs to Project Q,
@@ -538,7 +538,7 @@ ckp:reconciles a owl:ObjectProperty ;
 
 :CrossProjectEdgeRule a swrl:Imp ;
     rdfs:label "Cross-Project Edge Rule"@en ;
-    rdfs:comment "Alpha-6: Detect edges that cross project boundaries"@en ;
+    rdfs:comment "v3.5-alpha6: Detect edges that cross project boundaries"@en ;
     ckp:implementationStatus "NOT_ENFORCED"^^xsd:string ;
     swrl:body (
         [ a swrl:IndividualPropertyAtom ;
@@ -695,14 +695,14 @@ ckpr:creates owl:propertyChainAxiom ( ckpp:hasOutputInstance ) .
 #   ?k1 ckpr:sibling_of ?k2 .
 # }
 
-# Example 6 (Alpha-6): Find all kernels in a project
+# Example 6 (v3.5-alpha6): Find all kernels in a project
 # SELECT ?kernel ?name WHERE {
 #   ?kernel ckp:belongsToProject ?project .
 #   ?kernel ckp:hasName ?name .
 #   ?project rdfs:label "MyProject" .
 # }
 
-# Example 7 (Alpha-6): Find cross-project edges
+# Example 7 (v3.5-alpha6): Find cross-project edges
 # SELECT ?edge ?srcProject ?tgtProject WHERE {
 #   ?edge a ckp:Edge ;
 #         ckp:hasSource ?src ;

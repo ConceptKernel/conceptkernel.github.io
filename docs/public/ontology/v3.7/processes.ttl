@@ -1,6 +1,6 @@
 # ConceptKernel Processes BFO Ontology
 # Version: v3.7
-# Date: 2026-04-06
+# Date: 2026-04-24
 # Purpose: Occurrent (Process) definitions for ConceptKernel temporal events
 
 @prefix : <https://conceptkernel.org/ontology/v3.7/process#> .
@@ -18,7 +18,7 @@
     dc:title "ConceptKernel Process Ontology" ;
     dc:description "Formal ontology defining Occurrents (processes that unfold over time) in ConceptKernel" ;
     dcterms:created "2025-11-23"^^xsd:date ;
-    dcterms:modified "2026-04-06"^^xsd:date ;
+    dcterms:modified "2026-04-24"^^xsd:date ;
     owl:versionInfo "v3.7" ;
     dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
     rdfs:seeAlso <https://conceptkernel.org> ;

@@ -1,8 +1,11 @@
 # ConceptKernel Core Ontology
 # Version: v3.7
-# Date: 2026-04-06
+# Date: 2026-04-24
 # Purpose: Core entity definitions with formal IAO/CCO mid-level grounding
-# v3.7: AgentKernel, PersonaTemplate, ModelConfiguration, refined Project
+# v3.6: Adds AgentKernel, PersonaTemplate, ModelConfiguration.
+# v3.7: Refines Project around the .ckproject symlink + SHA1-manifest model;
+#       removes EdgeKernel and WssHubKernel classes (edges are ontology
+#       predicates; broadcast externalized to the CK.Stream library kernel).
 
 @prefix : <https://conceptkernel.org/ontology/v3.7/> .
 @prefix ckp: <https://conceptkernel.org/ontology/v3.7/> .
@@ -22,12 +25,12 @@
     dc:title "ConceptKernel Core Ontology" ;
     dc:description "Core entity definitions for ConceptKernel with formal IAO/CCO mid-level grounding per CKP v3.7 ontology layering strategy" ;
     dcterms:created "2025-11-23"^^xsd:date ;
-    dcterms:modified "2026-04-06"^^xsd:date ;
+    dcterms:modified "2026-04-24"^^xsd:date ;
     owl:versionInfo "v3.7" ;
     dcterms:creator "Peter Styk <peter@conceptkernel.org>" ;
     rdfs:seeAlso <https://conceptkernel.org> ;
     rdfs:seeAlso <https://github.com/ConceptKernel> ;
-    rdfs:comment "Core continuants and occurrents: Kernel, Edge, Instance, Ontology, Action, GovernanceMode. v3.7 adds AgentKernel, PersonaTemplate, ModelConfiguration. Formal IAO/CCO grounding (Layer 0.5)."@en ;
+    rdfs:comment "Core continuants and occurrents: Kernel, Edge, Instance, Ontology, Action, GovernanceMode. AgentKernel, PersonaTemplate, ModelConfiguration are v3.6 additions. v3.7 refines the Project class around the .ckproject manifest model and removes EdgeKernel/WssHubKernel (edges are ontology predicates; broadcast externalized). Formal IAO/CCO grounding (Layer 0.5)."@en ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ,
                 <http://purl.obolibrary.org/obo/iao.owl> ,
                 <http://www.ontologyrepository.com/CommonCoreOntologies/AgentOntology> ,
@@ -86,13 +89,13 @@ ckp:StaticKernel a owl:Class ;
     dc:description "Deployment method: VOLUME or FILER. Serving: WebServing only." ;
     ckp:implementationStatus "PARTIAL"^^xsd:string .
 
-### v3.7: AgentKernel — LLM-capable kernel with agent type
+### AgentKernel — LLM-capable kernel with agent type (v3.6 addition, unchanged in v3.7)
 
 ckp:AgentKernel a owl:Class ;
     rdfs:subClassOf ckp:Kernel ;
     rdfs:label "Agent Kernel"@en ;
     rdfs:comment "A kernel of type 'agent' that supports long-running conversational sessions with LLM inference. Agent kernels MUST support streaming via stream.{kernel}, multi-turn sessions, and persona templates from storage/personas/. CK.Claude is the canonical AgentKernel."@en ;
-    dc:description "v3.7 addition. Type: agent. NATS pattern: persistent subscriber with streaming. Example: CK.Claude." ;
+    dc:description "v3.6 addition. Type: agent. NATS pattern: persistent subscriber with streaming. Example: CK.Claude." ;
     ckp:implementationStatus "PARTIAL"^^xsd:string .
 
 ### Kernel Properties

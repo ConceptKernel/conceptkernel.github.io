@@ -92,11 +92,11 @@ Prior to v3.7, `serving.json` was the sole exception to the CK loop's read-only 
 2. **Inert file** -- `serving.json` existed on disk but was not enforced by the runtime, making it decorative.
 3. **Decorative refs** -- the git branch names in `serving.json` had no mechanism to resolve to actual commit hashes.
 
-v3.7 dissolves all three problems by moving version state from the filesystem to the Kubernetes control plane. `serving.json` no longer exists on disk. The CK volume is purely ReadOnlyMany with no exceptions.
+v3.7 dissolves all three problems by moving version state into the project's `.ckproject` manifest (an instance record in [CK.Project](./project)'s DATA organ, reflected to the cluster as a `CKProject` custom resource). `serving.json` no longer exists on disk, and the CK volume is purely ReadOnlyMany with no exceptions.
 
-### Version State in CK.Project CR
+### Version State: `.ckproject` Manifest and `CKProject` CR
 
-Version declarations live in the CK.Project custom resource. Each version specifies per-kernel git refs for both CK and TOOL loops:
+The authoritative version declarations live in the project's `.ckproject` manifest; the cluster-side `CKProject` custom resource is the manifest projected into the Kubernetes control plane so the operator and kubectl clients can read and patch it. Each version specifies per-kernel SHA1 commit pins for each organ (`ck`, `tool`, `data`):
 
 ```yaml
 apiVersion: ck.tech.games/v1

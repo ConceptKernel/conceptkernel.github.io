@@ -35,7 +35,7 @@ spec:
                   description: "Fully qualified kernel class name (e.g., Delvinator.Core)"
                 type:
                   type: string
-                  enum: ["node:hot", "node:cold", "inline", "static"]
+                  enum: ["node:hot", "node:cold", "inline", "static", "agent"]
                   description: "Kernel deployment type per CKP type registry"
                 governance:
                   type: string

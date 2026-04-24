@@ -195,7 +195,7 @@ CKP uses implicit deny: if an action is not listed in the grants block for a giv
 |--------|------|-------------------|------|
 | `read-identity` | inspect | `conceptkernel.yaml`, `README.md`, `CLAUDE.md`, `ontology.yaml` | CK |
 | `read-skill` | inspect | `SKILL.md` only | CK |
-| `read-tool-ref` | inspect | `serving.json` -- current version info | CK |
+| `read-tool-ref` | inspect | `.ckproject` manifest (read-only) -- current version pins | CK |
 | `read-storage` | inspect | `data/instance-*/data.json`, `proof/` | DATA |
 | `read-index` | inspect | `data/index/*` | DATA |
 | `read-ledger` | inspect | `data/ledger/audit.jsonl` | DATA |

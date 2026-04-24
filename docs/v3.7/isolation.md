@@ -67,17 +67,11 @@ Every row in the table below represents a class of bugs or security vulnerabilit
 A tool that can rewrite `ontology.yaml` can change the validation rules that govern its own output. A kernel that can write to another kernel's CK loop can impersonate it. These are not theoretical risks -- they are the failure modes that the protocol exists to prevent.
 :::
 
-## serving.json Exception
+## No Write-Through Exception (v3.7)
 
-`serving.json` is the sole file in the CK loop that is mutated at runtime by the platform. The platform holds write authority to this file via a volume sub-path mount or sidecar mechanism. The CK loop volume MUST remain ReadOnlyMany for all other files.
+Prior to v3.7, a single file (`serving.json`) was mutated at runtime inside each CK loop to track the active version. That exception is retired. In v3.7 the CK loop volume is ReadOnlyMany with **no exceptions** — there is no sub-path write mount, no sidecar, no CSI per-file rule.
 
-Version promotion (stable/canary/develop) is a platform operation that must take effect without a developer commit. The `serving.json` file is the minimal surface area needed for runtime version control. Its write-through mechanism MUST be documented by the implementation because it represents the only breach of the CK loop read-only invariant.
-
-Acceptable write-through mechanisms:
-
-1. Volume sub-path mount with `readOnly: false` on the `serving.json` path only.
-2. Sidecar process with write access to the `serving.json` path via a shared emptyDir.
-3. CSI driver with per-file access control.
+Version state is externalized to the project's `.ckproject` manifest, which lives in [CK.Project](./project)'s DATA organ (per-hostname, per-project) and is symlinked from the project root. The manifest records SHA1 commit pins for each of the 3 organs (`ck/`, `tool/`, `data/`) per kernel version. [CK.Operator](./operator) reads it to materialize kernels at frozen versions — no CK-loop write is ever required.
 
 ## Container Sealing
 
@@ -116,7 +110,7 @@ Sealed instances are immutable. There is no `delete instance` operation. Archiva
 | CK and TOOL volumes MUST be mounted ReadOnly at runtime | REQUIRED |
 | Only the DATA volume MUST be writable by the kernel runtime | REQUIRED |
 | Cross-kernel volume writes MUST be prohibited | REQUIRED |
-| `serving.json` write-through mechanism MUST be documented | REQUIRED |
+| Version state MUST live outside the CK loop (in the project's `.ckproject` manifest) | REQUIRED |
 | Container security context MUST enforce non-root, read-only root FS, no privilege escalation | REQUIRED |
 | `project.teardown` MUST retain persistent volumes | REQUIRED |
 | Sealed instances MUST NOT be deletable | REQUIRED |

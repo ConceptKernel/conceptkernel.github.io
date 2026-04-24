@@ -169,12 +169,11 @@ ckpp:CompletedPhase a owl:Class ;
 ckpp:EdgeCommunicationProcess a owl:Class ;
     rdfs:subClassOf ckpp:Process ;
     rdfs:label "Edge Communication Process"@en ;
-    rdfs:comment "The FUNDAMENTAL process by which kernels interact - mediated by EdgeKernel. This is the ONLY way kernels can communicate (architectural constraint)."@en ;
+    rdfs:comment "The FUNDAMENTAL process by which kernels interact — authorized by an Edge declared in the target's queue_contract.edges and carried over NATS. The ONLY way kernels can communicate (architectural constraint)."@en ;
     dc:description "Edge communication process — inter-kernel message relay" ;
-    dc:description "Also: EdgeRequestBuilder.js:createEdgeRequests():64-128" ;
     ckp:implementationStatus "PARTIAL"^^xsd:string ;
     ckp:coverageScore "0.65"^^xsd:decimal ;
-    ckp:architecturalConstraint "NO direct Kernel-to-Kernel communication. ONLY via EdgeKernel."^^xsd:string ;
+    ckp:architecturalConstraint "NO direct Kernel-to-Kernel communication. All inter-Kernel interaction flows through an authorized Edge (ckp:isAuthorized true in the target's queue_contract.edges), carried over NATS."^^xsd:string ;
     ckp:criticalGap "No Process URN generation. Temporal parts not tracked."^^xsd:string .
 
 ### Edge Communication Participants
@@ -197,12 +196,9 @@ ckpp:hasTargetKernel a owl:ObjectProperty , owl:FunctionalProperty ;
     rdfs:label "has target kernel"@en ;
     rdfs:comment "The kernel receiving the routed instance"@en .
 
-ckpp:hasMediatorKernel a owl:ObjectProperty , owl:FunctionalProperty ;
-    rdfs:domain ckpp:EdgeCommunicationProcess ;
-    rdfs:range ckp:EdgeKernel ;
-    rdfs:label "has mediator kernel"@en ;
-    rdfs:comment "The EdgeKernel that mediates this communication"@en ;
-    ckp:architecturalInvariant "ALWAYS System.EdgeKernel"^^xsd:string .
+# ckpp:hasMediatorKernel removed in v3.7 — edge communication is not
+# mediated by a dedicated kernel; authorization is declared at the target
+# (ckp:Edge with ckp:isAuthorized) and the message is carried over NATS.
 
 ckpp:routesInstance a owl:ObjectProperty , owl:FunctionalProperty ;
     rdfs:domain ckpp:EdgeCommunicationProcess ;
@@ -221,21 +217,21 @@ ckpp:InstanceCreatedPhase a owl:Class ;
 ckpp:EdgeDetectedPhase a owl:Class ;
     rdfs:subClassOf ckpp:TemporalPart ;
     rdfs:label "Edge Detected Phase"@en ;
-    rdfs:comment "EdgeKernel detects new instance and queries outgoing edges"@en ;
+    rdfs:comment "Source kernel publishes the instance and its outgoing Edge declarations are resolved"@en ;
     ckp:implementationStatus "IMPLICIT"^^xsd:string .
 
 ckpp:TypeValidatedPhase a owl:Class ;
     rdfs:subClassOf ckpp:TemporalPart ;
     rdfs:label "Type Validated Phase"@en ;
-    rdfs:comment "EdgeKernel validates instance type against edge type_mapping"@en ;
-    dc:description "Validates source kernel identity before accepting edge communication" ;
+    rdfs:comment "Target kernel validates instance type against its queue_contract.edges before accepting"@en ;
+    dc:description "Target-side validation of source kernel identity and instance type prior to handler dispatch" ;
     ckp:implementationStatus "IMPLICIT"^^xsd:string .
 
 ckpp:RoutedPhase a owl:Class ;
     rdfs:subClassOf ckpp:TemporalPart ;
     rdfs:label "Routed Phase"@en ;
-    rdfs:comment "EdgeKernel creates symlink in target inbox (routing)"@en ;
-    dc:description "Establishes destination link for edge communication" ;
+    rdfs:comment "NATS delivers the message to the target kernel's input topic along the authorized Edge"@en ;
+    dc:description "Delivery over NATS along an authorized Edge" ;
     ckp:implementationStatus "IMPLICIT"^^xsd:string .
 
 ckpp:DeliveredPhase a owl:Class ;
@@ -251,7 +247,7 @@ ckpp:EdgeSubscriptionProcess a owl:Class ;
     rdfs:subClassOf ckpp:Process ;
     rdfs:label "Edge Subscription Process"@en ;
     rdfs:comment "The process of establishing a new Edge between kernels. Requires consensus approval and public announcement."@en ;
-    dc:description "NOT IMPLEMENTED: EdgeKernel doesn't trigger consensus for edge creation" ;
+    dc:description "NOT IMPLEMENTED: no automated flow triggers consensus on edge creation" ;
     ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string ;
     ckp:coverageScore "0.00"^^xsd:decimal ;
     ckp:criticalGap "Edge creation is manual (ck create-edge). No consensus integration."^^xsd:string .
@@ -267,7 +263,7 @@ ckpp:SubscriptionRequestPhase a owl:Class ;
 ckpp:ConsensusProposalPhase a owl:Class ;
     rdfs:subClassOf ckpp:TemporalPart ;
     rdfs:label "Consensus Proposal Phase"@en ;
-    rdfs:comment "EdgeKernel creates consensus proposal"@en ;
+    rdfs:comment "Requesting kernel creates a consensus proposal for the new Edge"@en ;
     ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
 
 ckpp:VotingPhase a owl:Class ;
@@ -279,13 +275,13 @@ ckpp:VotingPhase a owl:Class ;
 ckpp:EdgeCreationPhase a owl:Class ;
     rdfs:subClassOf ckpp:TemporalPart ;
     rdfs:label "Edge Creation Phase"@en ;
-    rdfs:comment "Upon approval, EdgeKernel creates Edge entity"@en ;
+    rdfs:comment "Upon approval, the Edge is recorded in the target's queue_contract.edges and the requesting kernel's outbound edges"@en ;
     ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
 
 ckpp:AnnouncementPhase a owl:Class ;
     rdfs:subClassOf ckpp:TemporalPart ;
     rdfs:label "Announcement Phase"@en ;
-    rdfs:comment "WssHub broadcasts new Edge (public announcement)"@en ;
+    rdfs:comment "The new Edge is broadcast to subscribers on the project's event.* NATS topics"@en ;
     ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string .
 
 #################################################################
@@ -382,11 +378,10 @@ ckpp:hasEventSource a owl:ObjectProperty ;
     rdfs:label "has event source"@en ;
     rdfs:comment "The kernel that generated the event"@en .
 
-ckpp:hasBroadcastMediator a owl:ObjectProperty , owl:FunctionalProperty ;
-    rdfs:domain ckpp:BroadcastProcess ;
-    rdfs:range ckp:WssHubKernel ;
-    rdfs:label "has broadcast mediator"@en ;
-    rdfs:comment "The WssHub kernel broadcasting this event"@en .
+# ckpp:hasBroadcastMediator removed in v3.7 — broadcast is not owned
+# by a dedicated WssHubKernel class. Real-time broadcast to clients is
+# handled by the library kernel concept (CK.Stream, externalized; see
+# streaming.md for the NATS stream.* topic scheme).
 
 ckpp:hasClientRecipient a owl:DatatypeProperty ;
     rdfs:domain ckpp:BroadcastProcess ;
@@ -405,22 +400,20 @@ ckpp:EventGeneratedPhase a owl:Class ;
 ckpp:EventReceivedPhase a owl:Class ;
     rdfs:subClassOf ckpp:TemporalPart ;
     rdfs:label "Event Received Phase"@en ;
-    rdfs:comment "WssHub receives event (via inbox symlink)"@en ;
-    dc:description "Code: /concepts/System.WssHub/tool/tool.js:watcher.on('add'):84-136" ;
+    rdfs:comment "The broadcasting library kernel receives the event on its subscribed NATS subject"@en ;
     ckp:implementationStatus "IMPLICIT"^^xsd:string .
 
 ckpp:FilteringPhase a owl:Class ;
     rdfs:subClassOf ckpp:TemporalPart ;
     rdfs:label "Filtering Phase"@en ;
-    rdfs:comment "WssHub filters based on client subscriptions"@en ;
+    rdfs:comment "Events are filtered by client subscription predicate before delivery"@en ;
     ckp:implementationStatus "NOT_IMPLEMENTED"^^xsd:string ;
-    ckp:criticalGap "No filtering. All clients receive all events."^^xsd:string .
+    ckp:criticalGap "No filtering. All subscribed clients receive all events."^^xsd:string .
 
 ckpp:DeliveryPhase a owl:Class ;
     rdfs:subClassOf ckpp:TemporalPart ;
     rdfs:label "Delivery Phase"@en ;
-    rdfs:comment "Parallel delivery to N WebSocket clients"@en ;
-    dc:description "Code: /concepts/System.WssHub/tool/tool.js:broadcast():59-64" ;
+    rdfs:comment "Parallel delivery to N WebSocket clients via the stream.* NATS topic scheme"@en ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string .
 
 ckpp:CompletionPhase a owl:Class ;
@@ -513,7 +506,7 @@ ckpp:precedes a owl:ObjectProperty ;
     rdfs:label "Occurrent Coverage"@en ;
     ckp:coverageScore "0.45"^^xsd:decimal ;
     rdfs:comment "Overall Occurrent coverage: Invocation (60%), EdgeCommunication (65%), EdgeSubscription (0%), Consensus (50%), Broadcast (70%)"@en ;
-    ckp:criticalGap "No Process URN generation. No temporal parts tracking. EdgeKernel-Consensus not integrated."^^xsd:string .
+    ckp:criticalGap "No Process URN generation. No temporal parts tracking. Edge creation not integrated with Consensus."^^xsd:string .
 
 #################################################################
 #################################################################

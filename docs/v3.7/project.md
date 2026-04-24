@@ -20,12 +20,39 @@ CK.Project is a `static` kernel because it holds only declarations; it has no pr
 | Governance | `STRICT` |
 | Archetype | Declarator |
 
-### Project Instance Structure
+### The `.ckproject` Manifest
 
-Each project is an instance stored at `CK.Project/data/instances/{hostname}/data.yaml`. The hostname is the project's identity -- it determines DNS routing, namespace naming, and filer path prefixes.
+CK.Project's DATA organ holds one **`.ckproject` manifest** per tracked project, keyed by the project's hostname. The hostname is the project's identity -- it determines DNS routing, namespace naming, and filer path prefixes.
+
+The `.ckproject` manifest is the authoritative record of the project's frozen deployment. [CK.Operator](./operator) reads it to materialize kernels at their pinned versions.
+
+**Canonical path** (inside CK.Project's DATA organ on the SeaweedFS filer):
+
+```
+/ck-data/<project-hostname>/CK.Project/<version>/instances/.ckproject
+```
+
+**Every other `.ckproject` you see is a symlink**, including:
+
+| Location | Typical use |
+|---|---|
+| `/ck-data/<project-hostname>/.ckproject` | Convenience entry point at the project's DATA root on the filer |
+| `<project-root>/.ckproject` | Symlinked into the project's git working tree (via filer-backed volume mount) so developers and CI see the same manifest the cluster does |
+
+The symlink contract means there is exactly one authoritative manifest; the other paths are readable views of the same file.
+
+### Manifest Contents
+
+A `.ckproject` manifest declares:
+
+1. **Project identity** -- `domain`, `serving.subdomain`, hostname, namespace naming
+2. **Version pins per kernel** -- a SHA1 commit hash for each of the 3 organs (`ck/`, `tool/`, `data/`) per kernel version the project should deploy. These pins are what freeze a deployment: CK.Operator mounts exactly the commits named here
+3. **AuthConfig** (optional) -- OIDC identity provider configuration (see [Auth](./auth))
+4. **Gateway binding** -- Kubernetes Gateway API `parentRef`
+5. **Backends** -- NATS endpoint, WSS endpoint, filer prefix
 
 ```yaml
-# CK.Project instance: delvinator.tech.games
+# .ckproject manifest: delvinator.tech.games
 domain: tech.games
 serving:
   subdomain: delvinator
@@ -39,11 +66,28 @@ backends:
   nats:
     endpoint: nats://nats.nats.svc:4222
     wssEndpoint: wss://stream.tech.games
+
+# SHA1 pins per kernel (materialization intent)
+versions:
+  Delvinator.Core:
+    version: v1.3.19
+    pins:
+      ck:   "abc123f..."  # SHA1 of ck/ organ at this version
+      tool: "bbb222..."   # SHA1 of tool/ organ at this version
+      data: "ccc333..."   # SHA1 of initial data/ seed at this version
+  Hello.Greeter:
+    version: v1.3.2
+    pins:
+      ck:   "..."
+      tool: "..."
+      data: "..."
 ```
+
+Rolling back a kernel means editing its pin in the manifest and re-reconciling -- no git history rewriting, no container mutation. See [Versioning](./versioning) for the filer layout these pins resolve against, and [Operator](./operator) for how reconciliation consumes the manifest.
 
 ### Required Fields
 
-A conformant CK.Project instance MUST declare:
+A conformant `.ckproject` manifest MUST declare:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -52,6 +96,8 @@ A conformant CK.Project instance MUST declare:
 | `storage` | enum | Deployment method: `volume`, `filer`, or `configmap` |
 | `gateway.parentRef.name` | string | Kubernetes Gateway API gateway name |
 | `gateway.parentRef.namespace` | string | Gateway namespace |
+| `versions.<kernel>.version` | semver | Kernel version tag the project should deploy |
+| `versions.<kernel>.pins.{ck,tool,data}` | SHA1 string | Commit hash pinning each organ for the declared version |
 
 ### AuthConfig
 
@@ -106,7 +152,10 @@ classes:
 
 | Criterion | Level |
 |-----------|-------|
-| CK.Project MUST declare `domain`, `serving.subdomain`, `storage`, `gateway.parentRef` | REQUIRED |
+| Each project MUST have exactly one authoritative `.ckproject` manifest under CK.Project's DATA organ | REQUIRED |
+| All other `.ckproject` entries (project-root, filer convenience) MUST be symlinks to the authoritative manifest | REQUIRED |
+| `.ckproject` MUST declare `domain`, `serving.subdomain`, `storage`, `gateway.parentRef` | REQUIRED |
+| Each kernel listed in `versions` MUST declare SHA1 pins for `ck`, `tool`, and `data` organs | REQUIRED |
 | Each project SHOULD publish a Layer 2 ontology | RECOMMENDED |
 | Project `ontology.yaml` MUST import CKP Layer 1 | REQUIRED |
 | If `auth.provider` is `keycloak`, `realm`, `client_id`, `issuer_url` MUST be present | REQUIRED |

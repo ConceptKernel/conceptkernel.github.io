@@ -73,18 +73,7 @@ Files that define kernel identity (actions, edges, ontology) require consensus. 
 
 ## Version Pinning
 
-Every CK loop mutation is tied to a specific git commit. The `serving.json` file tracks which version is active:
-
-```json
-{
-  "versions": [
-    {"ref": "abc123", "created": "2026-04-05T10:00:00Z", "active": true},
-    {"ref": "def456", "created": "2026-04-04T15:00:00Z", "active": false}
-  ]
-}
-```
-
-Only the `active: true` version is mounted into containers. Rolling back means changing which version is active, not reverting git history. This provides instant rollback without history rewriting.
+Every CK loop mutation is tied to a specific git commit. Version pinning is project-wide: the project's `.ckproject` manifest holds a SHA1 pin for each of the 3 organs (`ck/`, `tool/`, `data/`) per kernel version. [CK.Operator](./operator) reads the manifest and materializes the kernel at those exact commits. Rolling back means editing the manifest, not rewriting git history — instant, reversible, and auditable. See [Versioning](./versioning) for the full storage model and [CK.Project](./project) for the manifest itself.
 
 ## Multi-Model Configuration
 
@@ -184,7 +173,7 @@ Persona templates are stored in the target kernel's DATA loop (writable), allowi
 | CK loop modifications MUST follow the evolution workflow | REQUIRED |
 | STRICT governance changes MUST pass through [CK.Consensus](./consensus) | REQUIRED |
 | Every CK loop change MUST be committed to git with a traceable reference | REQUIRED |
-| Only the active version in `serving.json` MUST be mounted | REQUIRED |
+| Only versions pinned in the project's `.ckproject` manifest MUST be mounted | REQUIRED |
 | Memory updates (DATA loop) MAY be written directly by agents | PERMITTED |
 | Model selection MUST follow the three-level precedence chain | REQUIRED |
 | Edge-level constraints MUST override persona-level settings | REQUIRED |

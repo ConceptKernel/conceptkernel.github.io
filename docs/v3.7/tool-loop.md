@@ -130,7 +130,7 @@ The TOOL loop volume MUST be mounted **ReadOnly** at runtime. This is enforced a
 
 | Volume | Who Writes | When | ReadOnly at Runtime |
 |--------|-----------|------|---------------------|
-| `ck-{guid}-ck` | Operator, developer, CI pipeline | Design time | `true` (except `serving.json`) |
+| `ck-{guid}-ck` | Operator, developer, CI pipeline | Design time | `true` (no exceptions) |
 | `ck-{guid}-tool` | Tool developer, CI pipeline | Development / release | `true` |
 | `ck-{guid}-storage` | Kernel runtime exclusively | Execution time | `false` |
 

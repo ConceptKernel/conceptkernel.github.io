@@ -182,7 +182,7 @@ v3.7  serving-multiversion-unpack (CK.Operator v1.3.0)       PROVEN
         kopf + NATS dual control plane
         Per-version deployments, 3 PVs per kernel per version
         Quick setup mode (no git required)
-        serving.json retired, version state in CK.Project CR
+        serving.json retired; version pins in .ckproject manifest + CKProject CR
         Proven: hello-v1-0-0-proc Running with three sibling PVs
 ```
 

@@ -45,11 +45,12 @@ v3.5-alpha6 was the last deployed incremental release. v3.7 adds:
 
 **Date:** 2026-04-06 | **Implements:** CK.Operator v1.3.0
 
-Version materialisation moves from `serving.json` on disk to the CK.Project custom resource. The CK volume becomes purely immutable -- no write-through exceptions. Storage uses per-kernel bare repositories and three sibling directories per kernel version (Option A).
+Version materialisation moves from `serving.json` on disk to the project's `.ckproject` manifest (held in [CK.Project](./project)'s DATA organ, reflected onto the cluster as a `CKProject` custom resource). The CK volume becomes purely immutable -- no write-through exceptions. Storage uses per-kernel bare repositories and three sibling directories per kernel version (Option A).
 
 ### What Changes
 
-- **serving.json retired** -- no longer exists on disk. The three problems it created (write-through hack, inert file, decorative git refs) are dissolved.
+- **`.ckproject` manifest introduced** -- one authoritative instance per project under CK.Project's DATA organ. Holds SHA1 commit pins for each of the 3 organs (`ck/`, `tool/`, `data/`) per kernel version. All other `.ckproject` paths (project-root, filer convenience) are symlinks to it. See [CK.Project](./project).
+- **serving.json retired** -- no longer exists on disk. The three problems it created (write-through hack, inert file, decorative git refs) are dissolved by moving version state into the `.ckproject` manifest above.
 - **Option A: Three sibling dirs** -- in-container mount layout uses `/ck/{kernel}/ck/`, `/ck/{kernel}/tool/`, `/ck/{kernel}/data/` as three sibling PVs under a kubelet-created namespace directory. No nested volume mounts. Driven by the runc constraint: `mkdirat` fails with EROFS in ReadOnly parent overlays before CSI volume content is visible.
 - **Per-kernel bare repos** -- each kernel has its own isolated bare git repository at `/ck/{kernel}/` on the SeaweedFS filer. No monorepo. No `spec.repo`. CK and TOOL loops extract from the same bare repo to sibling `ck/` and `tool/` directories.
 - **CKProject CRD** -- `ck.tech.games/v1` kind `CKProject` with `spec.versions` containing per-kernel `ck_ref` and `tool_ref`. `kubectl get ckp -A` shows Phase, Versions, and Checks.
@@ -89,7 +90,7 @@ Version materialisation moves from `serving.json` on disk to the CK.Project cust
 |-----------|-----------|
 | D1: No version materialisation | `git archive` from per-kernel bare repos, commit-pinned via `ck_ref`/`tool_ref` |
 | D2: Per-kernel volume isolation | Resolved by three-PV model (ck, tool, data per kernel per version) |
-| D3: No serving.json write-through | serving.json retired, version state in CK.Project CR |
+| D3: No serving.json write-through | serving.json retired; version pins now live in `.ckproject` manifest (reflected to `CKProject` CR) |
 | D6: No git integration on filer | Per-kernel bare repos on filer, `.git-ref` traceability |
 
 ### New CK.Project CRD Fields

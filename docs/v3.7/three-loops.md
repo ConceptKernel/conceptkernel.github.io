@@ -48,7 +48,7 @@ This axiom is the foundational invariant of CKP. Every conformant implementation
 
 | Volume | Write Authority | ReadOnly at Runtime |
 |--------|----------------|---------------------|
-| `ck-{guid}-ck` | Operator, developer, CI pipeline | **Yes** (except `serving.json`) |
+| `ck-{guid}-ck` | Operator, developer, CI pipeline | **Yes** (no exceptions) |
 | `ck-{guid}-tool` | Tool developer, CI pipeline | **Yes** |
 | `ck-{guid}-storage` | Kernel runtime exclusively | **No** -- this is the writable surface |
 
@@ -145,7 +145,7 @@ Every Concept Kernel presents a single unified filesystem tree to all processes 
 ```
 
 ::: tip Platform Convention (v3.7)
-This filesystem layout is applied identically to every kernel. Three PVs mount as **sibling directories** under `/ck/{kernel}/`: `ck/` (ReadOnly), `tool/` (ReadOnly), `data/` (ReadWrite). The kernel name directory is not a volume — it is a namespace created by the kubelet. No volume is nested inside another volume. Version state lives in the CK.Project custom resource, not on disk. `serving.json` is retired (v3.7).
+This filesystem layout is applied identically to every kernel. Three PVs mount as **sibling directories** under `/ck/{kernel}/`: `ck/` (ReadOnly), `tool/` (ReadOnly), `data/` (ReadWrite). The kernel name directory is not a volume — it is a namespace created by the kubelet. No volume is nested inside another volume. Version state is externalized to the project's `.ckproject` manifest (SHA1 pins per organ, lives in [CK.Project](./project)'s DATA organ, symlinked from the project root). `serving.json` is retired (v3.7).
 :::
 
 ## Commit Frequency as Governance Signal

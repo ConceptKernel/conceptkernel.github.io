@@ -230,8 +230,8 @@ Containers are sealed environments. They see ONLY what the operator mounted:
 
 - **CK + TOOL loops:** ReadOnly -- container cannot modify identity or code
 - **DATA loop:** ReadWrite -- the only writable surface
-- **Version pinning:** Only versions marked `active: true` in `serving.json` can be mounted
-- The operator verifies ontology + rules.shacl + serving.json BEFORE creating the container
+- **Version pinning:** Only the SHA1 commits declared in the project's `.ckproject` manifest (per organ, per kernel version) can be mounted
+- The operator verifies ontology + rules.shacl + `.ckproject` manifest BEFORE creating the container
 - If validation fails, the container MUST NOT be created
 
 ### NATS Authentication

@@ -9,7 +9,7 @@ description: How CKP uses per-kernel bare git repositories on the SeaweedFS file
 
 CKP's three-loop model gives each kernel three independently-versioned concerns: CK (identity), TOOL (capability), and DATA (knowledge). The question is: how do you version CK and TOOL without creating a compatibility nightmare, and how do you mount three independent loops into a container without hitting container runtime constraints?
 
-v3.7 answers both questions with a single design: **per-kernel bare repositories** on the SeaweedFS filer, **three sibling directories** inside the pod, and **CK.Project CR-driven materialisation** replacing the retired `serving.json`.
+v3.7 answers both questions with a single design: **per-kernel bare repositories** on the SeaweedFS filer, **three sibling directories** inside the pod, and **`.ckproject` manifest-driven materialisation** (held in [CK.Project](./project)'s DATA organ, reflected onto the cluster as a `CKProject` CR) replacing the retired `serving.json`.
 
 ## Per-Kernel Bare Repositories (Not Monorepo)
 
@@ -124,6 +124,17 @@ The filer uses two roots (`/ck/` and `/ck-data/`) with per-kernel bare repos and
 - `.git-ref` in each loop directory (`ck/` and `tool/`) contains the commit hash for verification.
 - No files exist at the version root (`/ck/{kernel}/{version}/`). The version root is a namespace containing only `ck/` and `tool/` subdirectories.
 - The flat `/ck/{KernelName}/` layout (without version subdirs) is NOT the materialisation target.
+
+### `.ckproject` and `.git-ref` -- Two Halves of the Provenance Contract
+
+Version provenance is carried by two files working in tandem:
+
+| File | Lives where | Who writes it | What it says |
+|------|-------------|---------------|--------------|
+| `.ckproject` manifest | [CK.Project](./project)'s DATA organ (`/ck-data/<project>/CK.Project/...`), symlinked from `<project-root>/.ckproject` and `/ck-data/<project>/.ckproject` | The operator / developer / governance process | **Intent**: "this project should deploy kernel X at version vN.M.P, with organ `ck/` pinned to SHA1 abc123, `tool/` to bbb222, `data/` to ccc333" |
+| `.git-ref` (per organ) | Inside each materialised organ dir (`/ck/<kernel>/<version>/ck/.git-ref`, `.../tool/.git-ref`, and the DATA organ equivalent) | Written by CK.Operator at materialisation | **Outcome**: "this directory was extracted from SHA1 abc123" |
+
+CK.Operator materialises a kernel by (1) reading the `.ckproject` pins, (2) running `git archive <pin>` from the bare repo to populate the version directory, and (3) writing the SHA1 into that directory's `.git-ref`. A conformant cluster can verify frozen deployment at any time: for every kernel-organ mounted, the `.git-ref` contents MUST equal the matching pin in the project's `.ckproject`. If they disagree, the deployment has drifted and the kernel MUST NOT serve traffic.
 
 ## In-Container Mount Layout -- Three Sibling Dirs (Option A)
 

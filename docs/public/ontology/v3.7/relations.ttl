@@ -119,12 +119,9 @@ ckpr:mediates a owl:ObjectProperty ;
     rdfs:domain ckp:Kernel ;
     rdfs:range owl:Thing .
 
-ckpr:mediates_communication a owl:ObjectProperty ;
-    rdfs:subPropertyOf ckpr:mediates ;
-    rdfs:label "mediates communication"@en ;
-    rdfs:comment "EdgeKernel mediates ALL inter-kernel communication"@en ;
-    rdfs:domain ckp:EdgeKernel ;
-    rdfs:range ckpp:EdgeCommunicationProcess .
+# ckpr:mediates_communication removed in v3.7 — edge communication is
+# not owned by a dedicated mediator kernel; it flows along authorized
+# Edges over NATS (see ckp:Edge, ckp:isAuthorized).
 
 ckpr:mediates_governance a owl:ObjectProperty ;
     rdfs:subPropertyOf ckpr:mediates ;
@@ -133,12 +130,9 @@ ckpr:mediates_governance a owl:ObjectProperty ;
     rdfs:domain ckp:ConsensusKernel ;
     rdfs:range ckpp:ConsensusProcess .
 
-ckpr:mediates_broadcast a owl:ObjectProperty ;
-    rdfs:subPropertyOf ckpr:mediates ;
-    rdfs:label "mediates broadcast"@en ;
-    rdfs:comment "System.WssHub mediates ALL real-time broadcasts"@en ;
-    rdfs:domain ckp:WssHubKernel ;
-    rdfs:range ckpp:BroadcastProcess .
+# ckpr:mediates_broadcast removed in v3.7 — real-time broadcast is
+# externalized into the CK.Stream library kernel concept and not
+# described by the core ontology.
 
 #################################################################
 #    Provenance Relations
@@ -237,7 +231,7 @@ ckpr:authorizes_edge a owl:ObjectProperty ;
     rdfs:range ckp:Edge .
 
 # If Edge E has target Kernel K, and K lists E in queue_contract.edges, then K authorizes E
-# This must be validated at runtime by EdgeKernel
+# This must be validated at runtime by the target kernel on message receipt.
 
 ckpr:authorized_by a owl:ObjectProperty ;
     rdfs:label "authorized by"@en ;

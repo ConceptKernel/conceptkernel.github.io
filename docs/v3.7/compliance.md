@@ -46,7 +46,7 @@ Full checks extend core validation with ontological, runtime, and provenance-lev
 |---|------------|-----------|-------------------|
 | 9 | `check.integrity` | BFO:0000144 | Files non-empty, YAML parses, no stale or deprecated fields |
 | 10 | `check.llm` | BFO:0000017 | `CLAUDE.md` at project root (not in `llm/`), `SKILL.md` sections valid |
-| 11 | `check.versions` | BFO:0000008 | `metadata.version` is valid semver, `serving.json` present |
+| 11 | `check.versions` | BFO:0000008 | `metadata.version` is valid semver, kernel version is pinned in the project's `.ckproject` manifest |
 | 12 | `check.nats` | BFO:0000015 | `spec.nats` with input/result/event topics declared |
 | 13 | `check.mutation_frequency` | BFO:0000144 | Git commit count per file matches expected governance band |
 | 14 | `check.ontology_types` | BFO:0000017 | `ontology.yaml` has non-empty `classes:` with `is_a:` and `attributes:` |

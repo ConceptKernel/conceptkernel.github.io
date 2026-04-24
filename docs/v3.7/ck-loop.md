@@ -29,7 +29,7 @@ When a Concept Kernel wakes, it MUST read its identity files in **strict order**
 | 5a | **SPIRE agent** | Am I cryptographically who I claim? | **Fatal** for non-LOCAL kernels; skip for `LOCAL.*` prefix |
 | 6 | `ontology.yaml` | How is my world shaped? | **Fatal** -- kernel has no data schema |
 | 7 | `rules.shacl` | What constraints bind me? | Warning -- permissive stub mode (all writes accepted) |
-| 8 | ~~`serving.json`~~ | ~~Which version am I?~~ | **Retired (v3.7)** -- version state in CK.Project CR |
+| 8 | ~~`serving.json`~~ | ~~Which version am I?~~ | **Retired (v3.7)** -- version pins live in the project's `.ckproject` manifest |
 | 8a | `.ck-guid` | What is my canonical SPID? | Warning -- fallback to `kernel_id` from YAML |
 
 ::: danger Fatal Failure Points
@@ -149,7 +149,7 @@ Example: `ckp://Kernel#ACME.Finance.Employee:v1.0`
 ## Version Materialisation (v3.7)
 
 ::: info serving.json Retired
-`serving.json` was retired in v3.7. Version state now lives entirely in the **CK.Project custom resource** (`spec.versions`). The CK loop volume is purely ReadOnlyMany with **no exceptions**. No write-through hack, no sidecar mechanism. See [Version Materialisation](./versioning) for the full model.
+`serving.json` was retired in v3.7. Version state now lives in the project's **`.ckproject` manifest** -- an instance record in [CK.Project](./project)'s DATA organ (`/ck-data/<project>/CK.Project/.../.ckproject`), symlinked from `<project-root>/.ckproject` and reflected to the cluster via the `CKProject` custom resource's `spec.versions`. The CK loop volume is purely ReadOnlyMany with **no exceptions**. No write-through hack, no sidecar mechanism. See [Version Materialisation](./versioning) for the full model.
 :::
 
 Version declarations are part of the CK.Project custom resource. Each version specifies per-kernel git commit hashes for CK and TOOL loops independently:

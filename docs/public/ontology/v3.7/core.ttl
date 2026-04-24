@@ -177,7 +177,7 @@ ckp:Edge a owl:Class ;
     rdfs:comment "An abstract relationship between two kernels — the ONLY mechanism for inter-Kernel communication. Edges are constructed artifacts that define the connectivity graph. Formally grounded in cco:Artifact."@en ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
     ckp:coverageScore "0.85"^^xsd:decimal ;
-    ckp:architecturalConstraint "NO direct Kernel-to-Kernel communication. ONLY through EdgeKernel-managed Edges."^^xsd:string .
+    ckp:architecturalConstraint "NO direct Kernel-to-Kernel communication. All inter-Kernel interaction is mediated by authorized Edges declared in each target's queue_contract.edges."^^xsd:string .
 
 ### Edge Relationship Types
 
@@ -267,7 +267,7 @@ ckp:hasIncomingEdge a owl:ObjectProperty ;
     rdfs:comment "An edge targeting this kernel"@en ;
     owl:inverseOf ckp:hasTarget .
 
-### Edge Authorization (enforced by EdgeKernel)
+### Edge Authorization (enforced by target kernel's queue_contract.edges)
 
 ckp:isAuthorized a owl:DatatypeProperty ;
     rdfs:domain ckp:Edge ;
@@ -282,7 +282,7 @@ ckp:isAuthorized a owl:DatatypeProperty ;
 ckp:Instance a owl:Class ;
     rdfs:subClassOf iao:0000027 ;  # iao:DataItem
     rdfs:label "Instance"@en ;
-    rdfs:comment "A persistent information entity — the result of a Process. Instances are immutable artifacts stored in {kernel}/storage/instances/i-{identifier}/. Formally grounded in iao:DataItem — an instance is a truthful data item about something."@en ;
+    rdfs:comment "A persistent information entity — the result of a Process. Instances are immutable artifacts stored in {kernel}/data/instances/i-{identifier}/. Formally grounded in iao:DataItem — an instance is a truthful data item about something."@en ;
     ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
     ckp:coverageScore "0.80"^^xsd:decimal .
 
@@ -459,23 +459,23 @@ ckp:hasOntology a owl:ObjectProperty , owl:FunctionalProperty ;
 ckp:Project a owl:Class ;
     rdfs:subClassOf cco:Organization ;  # cco:Organization
     rdfs:label "Project"@en ;
-    rdfs:comment ".ckproject declaration, organizes kernels into a coherent unit. A project is the top-level container that groups related kernels, edges, and workflows. Formally grounded in cco:Organization. v3.7: CK.Project is a static kernel providing AuthConfig and storage configuration."@en ;
-    dc:description "Declared via .ckproject file at project root. CK.Project kernel declares existence, scope, and configuration." ;
+    rdfs:comment "Organizes kernels into a coherent deployment unit: a pinned set of frozen versions, the edges between them, and project-scoped configuration. Formally grounded in cco:Organization."@en ;
+    dc:description "Each Project instance is materialized by a .ckproject manifest. The manifest is the authoritative record of the project's frozen deployment — SHA1 commit pins for each of the 3 organs (ck, tool, data) per kernel. The instance lives in CK.Project's DATA organ under ck-data/<project>/.ckproject on the SeaweedFS filer; a symlink at the project root (<project>/.ckproject) points at the same instance. CK.Operator reads the manifest to materialize kernels at their pinned versions."@en ;
     ckp:implementationStatus "PARTIAL"^^xsd:string .
 
 #################################################################
-#    System Mediators (Special Independent Continuants)
+#    System Kernels
 #################################################################
-
-### EdgeKernel - Communication Mediator
-
-ckp:EdgeKernel a owl:Class ;
-    rdfs:subClassOf ckp:Kernel , ckp:HotKernel ;
-    rdfs:label "Edge Kernel"@en ;
-    rdfs:comment "Special system kernel that mediates ALL inter-Kernel communication. Enforces Edge-only communication (architectural constraint)."@en ;
-    dc:description "URN: ckp://System.EdgeKernel:v1.0" ;
-    ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
-    ckp:architecturalRole "Communication Mediator"^^xsd:string .
+#
+# v3.7: Edges are ontology-level predicates on kernels (see ckp:Edge,
+# ckp:RelationshipType, ckp:isAuthorized above), not a dedicated kernel
+# class. Inter-Kernel communication is authorized and traced through
+# Edge instances declared in each target's queue_contract.edges and
+# carried over NATS — no EdgeKernel mediator is required.
+#
+# Real-time broadcast responsibilities previously assigned to a
+# WssHubKernel are externalized into the CK.Stream library kernel
+# concept and out of scope for the core ontology.
 
 ### System.Consensus - Governance Mediator
 
@@ -486,16 +486,6 @@ ckp:ConsensusKernel a owl:Class ;
     dc:description "URN: ckp://Kernel#CK.Consensus:v1.0" ;
     ckp:implementationStatus "PARTIAL"^^xsd:string ;
     ckp:architecturalRole "Governance Mediator"^^xsd:string .
-
-### System.WssHub - Broadcast Mediator
-
-ckp:WssHubKernel a owl:Class ;
-    rdfs:subClassOf ckp:Kernel , ckp:HotKernel ;
-    rdfs:label "WebSocket Hub Kernel"@en ;
-    rdfs:comment "Special system kernel that mediates ALL real-time broadcasts (WebSocket events to all clients)."@en ;
-    dc:description "URN: ckp://System.WssHub:v1.0" ;
-    ckp:implementationStatus "WELL_IMPLEMENTED"^^xsd:string ;
-    ckp:architecturalRole "Broadcast Mediator"^^xsd:string .
 
 #################################################################
 #    Base Relationship Property
@@ -515,12 +505,9 @@ ckp:mediates a owl:ObjectProperty ;
     rdfs:label "mediates"@en ;
     rdfs:comment "A mediator kernel manages or controls some entity or process"@en .
 
-ckp:mediatesEdge a owl:ObjectProperty ;
-    rdfs:subPropertyOf ckp:mediates ;
-    rdfs:domain ckp:EdgeKernel ;
-    rdfs:range ckp:Edge ;
-    rdfs:label "mediates edge"@en ;
-    rdfs:comment "EdgeKernel manages this edge"@en .
+# ckp:mediatesEdge removed in v3.7 — edges are ontology-level predicates,
+# not objects managed by a mediator kernel. See ckp:Edge, ckp:hasSource,
+# ckp:hasTarget, ckp:hasRelationshipType, ckp:isAuthorized above.
 
 #################################################################
 #    Architectural Constraints (as OWL Axioms)

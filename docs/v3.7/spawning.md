@@ -55,7 +55,7 @@ The spawn action MUST create a CKP-compliant kernel directory with all **eight a
 | 5 | `rules.shacl` | Validation constraints for instances |
 | 6 | `tool/processor.py` | Action handler implementation |
 | 7 | `data/memory/MEMORY.md` | Empty initial memory (DATA loop) |
-| 8 | `serving.json` | Version tracking with initial commit reference |
+| — | _(version tracking)_ | Recorded at the project level in `.ckproject` (SHA1 pins per organ), not inside the kernel's CK loop |
 
 ### Spawned Kernel Properties
 

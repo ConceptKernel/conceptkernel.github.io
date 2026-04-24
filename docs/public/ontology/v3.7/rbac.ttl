@@ -227,7 +227,7 @@ ckp:AuthorizationCheck a owl:Class ;
     rdfs:subClassOf bfo:0000015 ;  # bfo:Process
     rdfs:label "Authorization Check"@en ;
     rdfs:comment "A temporal process that validates whether an agent has permission to perform an action. Implemented as SPARQL ASK query against unified ontology."@en ;
-    dc:description "Performed by: EdgeKernel (before routing), PermissionChecker (before action)" ;
+    dc:description "Performed by: target kernel (edge authorization on message receipt), PermissionChecker (before action)" ;
     dc:description "Query: ASK { ?agent ckp:hasRole ?role . ?role ckp:grants ?perm . ?perm ckp:permissionString ?permString }" ;
     ckp:implementationStatus "PARTIAL"^^xsd:string ;
     ckp:criticalGap "Not ontology-driven yet, uses hardcoded logic"^^xsd:string .
@@ -365,7 +365,7 @@ ckp:Role
 # - Other systems query System.Ontology for discovery
 
 # NOTE 3: Authorization Enforcement Points
-# - EdgeKernel: Queries ontology BEFORE routing (edge authorization)
+# - Target kernel: validates Edge authorization (ckp:isAuthorized in queue_contract.edges) on message receipt
 # - PermissionChecker: Queries ontology BEFORE action (permission check)
 # - System.Consensus: Queries ontology for quorum validation
 

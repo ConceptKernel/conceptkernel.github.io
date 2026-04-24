@@ -111,7 +111,7 @@ Type: {qualities.type} | Governance: {governance_mode}
 
 ## Three-Loop Rules
 - CK loop files are READ-ONLY (CLAUDE.md, SKILL.md, conceptkernel.yaml,
-  ontology.yaml, rules.shacl, serving.json)
+  ontology.yaml, rules.shacl)
 - TOOL loop is READ-ONLY (tool/processor.py)
 - DATA loop is WRITABLE (data/ -- instances, proof, ledger, memory)
 - You may suggest changes to CK loop files, but output them as

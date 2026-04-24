@@ -151,7 +151,7 @@ Each lifecycle operation has distinct proof requirements.
 | Diff computed | Desired vs actual state delta recorded | kubectl diff |
 | Resources updated | Apply succeeded | kubectl apply return code |
 | No regression | All existing probes still pass | Re-run create proofs |
-| Version pinned | `serving.json` active version matches mounted ref | Compare file contents |
+| Version pinned | `.ckproject` manifest SHA1 pins match mounted refs | Compare manifest pin to mounted git commit |
 
 ### Destroy (project.teardown)
 

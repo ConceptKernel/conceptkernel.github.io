@@ -85,6 +85,18 @@ versions:
 
 Rolling back a kernel means editing its pin in the manifest and re-reconciling -- no git history rewriting, no container mutation. See [Versioning](./versioning) for the filer layout these pins resolve against, and [Operator](./operator) for how reconciliation consumes the manifest.
 
+### Pin Semantics (`pins.ck`, `pins.tool`, `pins.data`)
+
+Each pin is a SHA1 commit hash from the kernel's per-organ bare repository on the SeaweedFS filer (see [Versioning](./versioning) for the per-kernel bare-repo layout). The three pins are not symmetric:
+
+| Pin | Role | Lifetime on DATA organ | Required |
+|---|---|---|---|
+| `pins.ck` | Identity materialisation — CK.Operator runs `git archive <pin>` from `/ck/{kernel}/` to produce `/ck/{kernel}/{version}/ck/`. The commit is stamped into `.git-ref`. | Immutable at runtime (CK organ is ReadOnlyMany). | **REQUIRED** |
+| `pins.tool` | Capability materialisation — same mechanism, extracts to `/ck/{kernel}/{version}/tool/`. | Immutable at runtime (TOOL organ is ReadOnlyMany). | **REQUIRED** |
+| `pins.data` | Initial seed — records the commit that populates `/ck-data/{hostname}/{kernel}/{version}/` at first reconcile. Kernels that start from an empty DATA organ can omit this. | The pin captures *seed* state. Runtime drift is expected and correct — DATA is ReadWriteMany. The seed `.git-ref` stays stamped as provenance of where the data organ started, not what it contains now. | OPTIONAL |
+
+At materialisation time, `deploy.materialise` verifies that each extracted organ's `.git-ref` matches its declared pin. If it doesn't, the reconcile fails and the kernel is not promoted.
+
 ### Required Fields
 
 A conformant `.ckproject` manifest MUST declare:

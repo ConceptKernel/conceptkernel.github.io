@@ -111,24 +111,30 @@ spec:
       data: isolated
       kernels:
         - name: Hello.Greeter
-          ck_ref: abc123f
-          tool_ref: aaa111
+          pins:
+            ck:   "abc123f..."   # SHA1 of ck/ organ at this version
+            tool: "aaa111..."    # SHA1 of tool/ organ at this version
+            data: "ccc333..."    # SHA1 of initial data/ seed (optional)
         - name: CK.Lib.Py
-          ck_ref: eee555
-          tool_ref: fff666
+          pins:
+            ck:   "eee555..."
+            tool: "fff666..."
     - name: v1.3.19
       route: /next
       data: isolated
       kernels:
         - name: Hello.Greeter
-          ck_ref: def4567
-          tool_ref: bbb222
+          pins:
+            ck:   "def4567..."
+            tool: "bbb222..."
+            data: "ccc333..."    # same as v1.3.2 when seed is unchanged
         - name: CK.Lib.Py
-          ck_ref: eee555              # same as v1.3.2
-          tool_ref: fff666            # same as v1.3.2
+          pins:
+            ck:   "eee555..."    # same as v1.3.2
+            tool: "fff666..."    # same as v1.3.2
 ```
 
-The operator reads `spec.versions`, materialises each version from per-kernel bare repositories on the SeaweedFS filer, and creates per-version deployments, PVs, and HTTPRoute rules. A version promotion is a CK.Project resource update -- `kubectl patch`, NATS command, or operator API. Standard Kubernetes-native workflow with etcd history.
+The operator reads `spec.versions`, materialises each version from per-kernel bare repositories on the SeaweedFS filer, and creates per-version deployments, PVs, and HTTPRoute rules. A version promotion is a CKProject resource update -- `kubectl patch`, NATS command, or operator API. Standard Kubernetes-native workflow with etcd history. The CR is the cluster-side projection of the project's `.ckproject` manifest (see [CK.Project](./project) for the manifest itself).
 
 ### Per-Version Deployments
 

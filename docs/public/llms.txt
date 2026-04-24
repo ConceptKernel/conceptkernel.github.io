@@ -4,32 +4,67 @@
 ## What is this?
 An open protocol for autonomous concept governance. Every entity is a Material Entity (BFO:0000040) with three independently-versioned loops mapped to Description Logic boxes: CK Loop → TBox (what CAN exist), TOOL Loop → RBox (how things RELATE), DATA Loop → ABox (what DOES exist).
 
-## Key pages
-- Specification: https://conceptkernel.org/v3.5-alpha6/introduction
-- Three Loops (DL Boxes): https://conceptkernel.org/v3.5-alpha6/three-loops
-- Ontology Layering: https://conceptkernel.org/v3.5-alpha6/ontology-layering
-- BFO Type Mapping: https://conceptkernel.org/v3.5-alpha6/bfo-mapping
-- Implementation Patterns: https://conceptkernel.org/v3.5-alpha6/patterns
-- CK.Operator: https://conceptkernel.org/v3.5-alpha6/operator
+## Current version
+CKP v3.7 is the current specification. v3.6 is frozen and remains browseable; older versions (v3.5-alpha6, v3.5-alpha3, v3.4) are historical.
+
+## Key pages (v3.7)
+- Introduction: https://conceptkernel.org/v3.7/introduction
+- Conformance & Terminology: https://conceptkernel.org/v3.7/conformance
+- Three Loops as One System: https://conceptkernel.org/v3.7/three-loops
+- CK Loop (Identity): https://conceptkernel.org/v3.7/ck-loop
+- TOOL Loop (Capability): https://conceptkernel.org/v3.7/tool-loop
+- DATA Loop (Knowledge): https://conceptkernel.org/v3.7/data-loop
+- BFO 2020 Grounding: https://conceptkernel.org/v3.7/bfo-grounding
+- Four-Layer Ontology Model: https://conceptkernel.org/v3.7/ontology-model
+- NATS Transport & Topics: https://conceptkernel.org/v3.7/nats
+- Message Envelope & Processing: https://conceptkernel.org/v3.7/message-envelope
+- Loop Isolation: https://conceptkernel.org/v3.7/isolation
+- Authentication: https://conceptkernel.org/v3.7/auth
+- Namespace Security: https://conceptkernel.org/v3.7/namespace-security
+- Edge Predicates: https://conceptkernel.org/v3.7/edges
+- EXTENDS + CK.Claude: https://conceptkernel.org/v3.7/extends
+- System Kernel Taxonomy: https://conceptkernel.org/v3.7/taxonomy
+- CK.ComplianceCheck: https://conceptkernel.org/v3.7/compliance
+- CK.Operator: https://conceptkernel.org/v3.7/operator
+- CK.Project & Libraries (incl. .ckproject manifest): https://conceptkernel.org/v3.7/project
+- ConceptKernel + CKProject CRDs: https://conceptkernel.org/v3.7/crd
+- Evidence-Based Proof: https://conceptkernel.org/v3.7/proof
+- Reconciliation & Logging: https://conceptkernel.org/v3.7/reconciliation
+- Versioning (per-kernel repos, 3 sibling dirs): https://conceptkernel.org/v3.7/versioning
+- CK as Subagent: https://conceptkernel.org/v3.7/subagent
+- Streaming: https://conceptkernel.org/v3.7/streaming
+- Web Shell: https://conceptkernel.org/v3.7/web-shell
+- CK Loop Evolution: https://conceptkernel.org/v3.7/evolution
+- CK.Consensus: https://conceptkernel.org/v3.7/consensus
+- Task Engine: https://conceptkernel.org/v3.7/task-engine
+- Ontological Graph: https://conceptkernel.org/v3.7/graph
+- Sessions & Agent Teams: https://conceptkernel.org/v3.7/sessions
+- Agent Teams: https://conceptkernel.org/v3.7/agent-teams
+- Dynamic Spawning: https://conceptkernel.org/v3.7/spawning
+- PROV-O Provenance: https://conceptkernel.org/v3.7/provenance
+- Full Changelog: https://conceptkernel.org/v3.7/changelog
 
 ## Ontology files (Turtle)
-- Core: https://conceptkernel.org/ontology/v3.5-alpha6/core.ttl
-- Metadata: https://conceptkernel.org/ontology/v3.5-alpha6/kernel-metadata.ttl
-- Processes: https://conceptkernel.org/ontology/v3.5-alpha6/processes.ttl
-- Relations: https://conceptkernel.org/ontology/v3.5-alpha6/relations.ttl
-- Instances: https://conceptkernel.org/ontology/v3.5-alpha6/base-instances.ttl
-- Proof: https://conceptkernel.org/ontology/v3.5-alpha6/proof.ttl
-- RBAC: https://conceptkernel.org/ontology/v3.5-alpha6/rbac.ttl
-- Index: https://conceptkernel.org/ontology/v3.5-alpha6/index.json
+- Core: https://conceptkernel.org/ontology/v3.7/core.ttl
+- Kernel Metadata: https://conceptkernel.org/ontology/v3.7/kernel-metadata.ttl
+- Processes: https://conceptkernel.org/ontology/v3.7/processes.ttl
+- Relations: https://conceptkernel.org/ontology/v3.7/relations.ttl
+- Base Instances: https://conceptkernel.org/ontology/v3.7/base-instances.ttl
+- Proof: https://conceptkernel.org/ontology/v3.7/proof.ttl
+- RBAC: https://conceptkernel.org/ontology/v3.7/rbac.ttl
+- Edges: https://conceptkernel.org/ontology/v3.7/edges.ttl
+- Consensus: https://conceptkernel.org/ontology/v3.7/consensus.ttl
+- Shapes (SHACL): https://conceptkernel.org/ontology/v3.7/shapes.ttl
+- Index (JSON-LD): https://conceptkernel.org/ontology/v3.7/index.json
 
-## Browse ontology programmatically
+## Browse ontology interactively
+- Interactive browser: https://conceptkernel.org/browse/
 - By class: https://conceptkernel.org/browse/?class=Kernel
 - By URN: https://conceptkernel.org/browse/?urn=ckp://Kernel#CK.Task:v1.0
-- Interactive: https://conceptkernel.org/browse/
 
 ## Namespace
-- CKP: https://conceptkernel.org/ontology/v3.5/
-- Prefix: @prefix ckp: <https://conceptkernel.org/ontology/v3.5/> .
+- CKP: https://conceptkernel.org/ontology/v3.7/
+- Prefix: @prefix ckp: <https://conceptkernel.org/ontology/v3.7/> .
 
 ## Grounding ontologies
 - BFO 2020: http://purl.obolibrary.org/obo/bfo.owl
@@ -37,6 +72,9 @@ An open protocol for autonomous concept governance. Every entity is a Material E
 - CCO: https://github.com/CommonCoreOntology/CommonCoreOntologies
 - PROV-O: http://www.w3.org/ns/prov
 - ValueFlows: https://w3id.org/valueflows
+
+## Frozen previous spec
+- v3.6 (frozen): https://conceptkernel.org/v3.6/introduction
 
 ## Community
 - GitHub: https://github.com/ConceptKernel

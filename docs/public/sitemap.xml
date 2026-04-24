@@ -3,41 +3,75 @@
 
   <!-- Root -->
   <url><loc>https://conceptkernel.org/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
-
-  <!-- Spec: v3.5-alpha6 (latest) -->
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/introduction</loc><priority>0.9</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/three-loops</loc><priority>0.9</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/ontology-layering</loc><priority>0.8</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/ck-loop</loc><priority>0.7</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/tool-loop</loc><priority>0.7</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/data-loop</loc><priority>0.7</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/system</loc><priority>0.7</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/topology</loc><priority>0.7</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/spiffe</loc><priority>0.6</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/lifecycle</loc><priority>0.6</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/nats</loc><priority>0.6</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/urn</loc><priority>0.6</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/operator</loc><priority>0.7</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/bfo-mapping</loc><priority>0.8</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/ontology-browser</loc><priority>0.7</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/compliance</loc><priority>0.6</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/taxonomy</loc><priority>0.6</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/autonomous-ops</loc><priority>0.6</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/patterns</loc><priority>0.7</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha6/whats-new</loc><priority>0.7</priority></url>
-
-  <!-- Ontology Browser -->
-  <url><loc>https://conceptkernel.org/browse/</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://conceptkernel.org/browse/welcome.html</loc><priority>0.9</priority></url>
 
-  <!-- Ontology TTL Files -->
-  <url><loc>https://conceptkernel.org/ontology/v3.5-alpha6/</loc><priority>0.8</priority></url>
-  <url><loc>https://conceptkernel.org/ontology/v3.5-alpha3/</loc><priority>0.5</priority></url>
-  <url><loc>https://conceptkernel.org/ontology/v3.4/</loc><priority>0.5</priority></url>
+  <!-- Ontology Browser -->
+  <url><loc>https://conceptkernel.org/browse/</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
 
-  <!-- Stable docs -->
-  <url><loc>https://conceptkernel.org/v3.4/introduction</loc><priority>0.5</priority></url>
-  <url><loc>https://conceptkernel.org/v3.5-alpha3/</loc><priority>0.4</priority></url>
+  <!-- Spec: v3.7 (current) -->
+  <url><loc>https://conceptkernel.org/v3.7/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://conceptkernel.org/v3.7/introduction</loc><priority>1.0</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/conformance</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/namespaces</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/three-loops</loc><priority>1.0</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/ck-loop</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/tool-loop</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/data-loop</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/bfo-grounding</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/ontology-model</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/nats</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/message-envelope</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/isolation</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/auth</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/namespace-security</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/edges</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/extends</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/taxonomy</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/compliance</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/operator</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/project</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/crd</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/proof</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/reconciliation</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/versioning</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/subagent</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/streaming</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/web-shell</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/evolution</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/consensus</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/task-engine</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/graph</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/sessions</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/agent-teams</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/spawning</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/provenance</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/v3.7/changelog</loc><priority>0.6</priority></url>
+
+  <!-- Ontology TTL files (v3.7) -->
+  <url><loc>https://conceptkernel.org/ontology/v3.7/</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.7/core.ttl</loc><priority>0.8</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.7/kernel-metadata.ttl</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.7/processes.ttl</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.7/relations.ttl</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.7/base-instances.ttl</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.7/proof.ttl</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.7/rbac.ttl</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.7/edges.ttl</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.7/consensus.ttl</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.7/shapes.ttl</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.7/index.json</loc><priority>0.6</priority></url>
+
+  <!-- Frozen previous spec: v3.6 -->
+  <url><loc>https://conceptkernel.org/v3.6/</loc><priority>0.5</priority></url>
+  <url><loc>https://conceptkernel.org/v3.6/introduction</loc><priority>0.5</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.6/</loc><priority>0.5</priority></url>
+
+  <!-- Historical specs -->
+  <url><loc>https://conceptkernel.org/v3.5-alpha6/introduction</loc><priority>0.3</priority></url>
+  <url><loc>https://conceptkernel.org/v3.5-alpha3/introduction</loc><priority>0.3</priority></url>
+  <url><loc>https://conceptkernel.org/v3.4/introduction</loc><priority>0.3</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.5-alpha6/</loc><priority>0.3</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.5-alpha3/</loc><priority>0.3</priority></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.4/</loc><priority>0.3</priority></url>
 
 </urlset>

@@ -127,6 +127,8 @@ Conformant implementations MUST publish the following NATS topics for DATA loop 
 
 ## Instance Lifecycle -- Create, Seal, Ledger
 
+The DATA volume is mounted ReadWriteMany (the kernel can create new instance folders, append ledger entries, and write proof records). The *sealed* and *append-only* semantics below are application-level contracts the platform enforces at the write boundary — not volume-level restrictions. Rephrased: the volume permits writes; the platform ensures each sealed file is written exactly once and each ledger is extended (not rewritten).
+
 Instance lifecycle follows a strict progression:
 
 ```mermaid

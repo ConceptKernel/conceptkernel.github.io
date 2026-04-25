@@ -22,7 +22,7 @@ System kernels map to five functional archetypes. Each archetype corresponds to 
 | **Materialiser** | `CK.Operator` | `node:hot` | `AUTONOMOUS` | Converts ontological declarations into running infrastructure; reconciles desired state against actual cluster state |
 | **Validator** | `CK.ComplianceCheck` | `node:hot` | `STRICT` | Validates fleet against the CKP specification; produces compliance reports as sealed instances |
 | **Declarator** | `CK.Project` | `static` | `STRICT` | Declares projects (kernel collections under a shared domain); provides AuthConfig and storage configuration |
-| **Capability** | `CK.Claude` | `node:hot` | `AUTONOMOUS` | Provides LLM capability to other kernels via the [EXTENDS](./extends) predicate; manages persona templates and streaming |
+| **Capability Provider** | (project-specific) | `agent` | `AUTONOMOUS` | A kernel that provides a capability (LLM inference, search, transcoding, etc.) to other kernels via the [EXTENDS](./extends) predicate; maintains its own behavioural-template registry. Concrete provider kernels are project-specific and not part of the protocol specification. |
 | **Governor** | `CK.Consensus` | `node:hot` | `STRICT` | Evaluates and approves proposed changes to kernel CK loops; generates tasks from approved decisions |
 
 ::: tip Runtime Libraries
@@ -38,7 +38,6 @@ Each system kernel has a stable URN and kernel_id that persists across versions.
 | `CK.Operator` | `ckp://Kernel#CK.Operator:v1.0` | `BFO:0000040` | `input.CK.Operator` |
 | `CK.ComplianceCheck` | `ckp://Kernel#CK.ComplianceCheck:v1.0` | `BFO:0000040` | `input.CK.ComplianceCheck` |
 | `CK.Project` | `ckp://Kernel#CK.Project:v1.0` | `BFO:0000040` | `input.CK.Project` |
-| `CK.Claude` | `ckp://Kernel#CK.Claude:v1.0` | `BFO:0000040` | `input.CK.Claude` |
 | `CK.Consensus` | `ckp://Kernel#CK.Consensus:v1.0` | `BFO:0000040` | `input.CK.Consensus` |
 
 All system kernels are typed as `BFO:0000040` (Material Entity) -- they are persistent, identifiable objects in the CKP ontology.
@@ -51,7 +50,7 @@ System kernels form a connected graph. The edges encode the platform's own opera
 CK.Consensus
   |--- TRIGGERS ---> CK.ComplianceCheck
   |--- TRIGGERS ---> CK.Operator
-  |--- EXTENDS ----> CK.Claude (strict-auditor persona)
+  |--- EXTENDS ----> {capability provider}    # project-specific
 
 CK.Operator
   |--- TRIGGERS ---> CK.ComplianceCheck
@@ -64,7 +63,7 @@ CK.Operator
 | `CK.Operator` | `COMPOSES` | `CK.Project` | Inherit project declaration actions |
 | `CK.Consensus` | `TRIGGERS` | `CK.ComplianceCheck` | After approval, validate compliance |
 | `CK.Consensus` | `TRIGGERS` | `CK.Operator` | After approval, reconcile changes |
-| `CK.Consensus` | `EXTENDS` | `CK.Claude` | AI review via strict-auditor persona |
+| `CK.Consensus` | `EXTENDS` | (capability provider) | The protocol does not name a provider; deployments declare their own. |
 
 ::: tip Reading Edges
 For a full explanation of what each predicate means and how edges compose actions, see [Edge Predicates and Action Composition](./edges).
@@ -101,19 +100,19 @@ CK.Project declares the existence, scope, and configuration of a project. It is 
 
 See [CK.Project, CK.Lib.Py, and CK.Lib.Js](./project) for the full specification.
 
-### Capability: CK.Claude
+### Capability Provider (project-specific)
 
-CK.Claude is an `agent`-type system kernel that provides LLM inference as a mountable capability. Domain kernels use the EXTENDS edge predicate to gain Claude-backed actions without becoming LLM wrappers themselves.
+The CKP specification reserves the **Capability Provider** archetype for kernels that supply a runtime capability (LLM inference, search, transcoding, simulation, etc.) to other kernels via the EXTENDS edge predicate. The protocol does not name a specific provider kernel — concrete providers are project-specific deployments. A capability-provider kernel typically:
 
-- **Agent type:** Persistent subscriber with streaming and multi-turn sessions
-- **Persona templates:** `analytical-reviewer`, `strict-auditor`, `creative-explorer`, `code-implementer`, `documentation-writer`
-- **EXTENDS pattern:** Source kernel defines actions; CK.Claude provides runtime
+- declares `qualities.type: agent` (long-running subscriber, supports streaming, multi-turn sessions)
+- maintains its own behavioural-template registry under `data/templates/` (or an equivalent provider-defined path)
+- honours the EXTENDS dispatch contract documented in [EXTENDS Predicate](./extends)
 
-See [EXTENDS Predicate and CK.Claude](./extends) for the full specification.
+A consumer kernel that EXTENDS a provider gains new actions backed by that provider's runtime, with a behavioural template selected per edge. See [EXTENDS Predicate](./extends) for the predicate semantics and the dispatch contract.
 
 ### Governor: CK.Consensus
 
-CK.Consensus evaluates and approves proposed changes to kernel CK loops, generating tasks from approved decisions. It uses a `strict-auditor` persona via EXTENDS to CK.Claude for AI-assisted review.
+CK.Consensus evaluates and approves proposed changes to kernel CK loops, generating tasks from approved decisions. Consensus deployments often EXTEND a capability provider for AI-assisted review (using a strict-auditor template), but doing so is a deployment choice, not part of the protocol.
 
 - **STRICT governance:** All changes require consensus approval
 - **Triggers downstream:** After approval, triggers both CK.ComplianceCheck (validate) and CK.Operator (reconcile)

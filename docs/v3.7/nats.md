@@ -131,7 +131,7 @@ Session topics are conversation-scoped. Kernel topics are kernel-scoped. A singl
 |---------------|---------|----------------|
 | `input.{kernel}` | Action dispatch | Kernel processor |
 | `result.{kernel}` | Action results | Requesting client |
-| `stream.{kernel}` | Claude streaming | Subscribing client |
+| `stream.{kernel}` | Progressive token stream from an `agent`-type kernel | Subscribing client |
 | `event.{kernel}` | Lifecycle events | Any interested party |
 | `session.{project}.{id}` | Shared conversation | All session participants |
 

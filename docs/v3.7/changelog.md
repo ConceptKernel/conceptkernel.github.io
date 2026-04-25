@@ -1,6 +1,6 @@
 ---
 title: Changelog
-description: Full changelog for CKP v3.7 -- the complete 10-part, 48-chapter specification covering identity, ontology, runtime, infrastructure, Claude integration, and governance.
+description: Full changelog for CKP v3.7 -- the nine-part specification covering identity, ontology, runtime, infrastructure, edges & composition, system kernels, and governance.
 ---
 
 # Changelog
@@ -38,7 +38,7 @@ v3.5-alpha6 was the last deployed incremental release. v3.7 adds:
 | IX | Governance & Accumulation: CK.Consensus, task engine, ontological graph, sessions, PROV-O provenance |
 
 ::: info Deferred (not part of the v3.7 normative specification)
-Six chapters drafted during v3.5.x development -- *CK as Subagent*, *Streaming*, *Web Shell*, *CK Loop Evolution*, *Agent Teams*, *Dynamic Spawning* -- have been moved out of the normative v3.7 spec. They exposed vendor-specific integrations (Claude Code) and aspirational features that belong in tooling specs rather than the protocol specification. The consolidated content is preserved for future revisiting at `parked/3.7-deferred.md` in the source tree; it is intentionally not served on the website.
+Six chapters drafted during v3.5.x development -- *CK as Subagent*, *Streaming*, *Web Shell*, *CK Loop Evolution*, *Agent Teams*, *Dynamic Spawning* -- have been moved out of the normative v3.7 spec. They were authored around vendor-specific integrations and aspirational features that belong in tooling specs rather than the protocol specification. The consolidated content is preserved for future revisiting at `parked/3.7-deferred.md` in the source tree; it is intentionally not served on the website.
 :::
 
 ---
@@ -135,47 +135,39 @@ All notable changes in the development increments that compose v3.7. Each versio
 
 - CK.Consensus kernel: ontological governance engine
 - Five actions: propose, evaluate, approve, decisions, review
-- Review action EXTENDS CK.Claude with `strict-auditor` persona
+- Review action EXTENDS a capability provider (deployment-specific) with a strict-auditor-style template
 - Proposal evaluation against ontology + SHACL + fleet topology
-- Task generation for headless Claude execution
+- Task generation for downstream execution by an authorised executor
 - Every decision is a `prov:Activity` with full audit chain
 - `spec-parts/consensus-loop.md`: normative definition
 
-### v3.5.10 -- EXTENDS Predicate + CK.Claude <Badge type="tip" text="DEPLOYED" />
+### v3.5.10 -- EXTENDS Predicate <Badge type="tip" text="DEPLOYED" />
 
 **Date:** 2026-04-06
 
 - EXTENDS predicate implementation in `cklib/actions.py`
 - EXTENDS creates NEW actions on source kernel from edge config (not inherited from target)
-- `get_effective_actions()` enriches EXTENDS actions with persona + constraints metadata
-- CK.Claude kernel: agent-type with persona templates (analytical-reviewer, friendly-assistant, strict-auditor)
-- CK.Claude `processor.py`: handles message/analyze/summarize via `claude -p` with persona loading
+- `get_effective_actions()` enriches EXTENDS actions with the edge's `template` and `constraints` metadata
+- First capability-provider kernel deployed (vendor-specific; not part of the protocol — see [parked deferred chapters](https://github.com/ConceptKernel/conceptkernel.github.io/blob/main/parked/3.7-deferred.md))
 - `resolve_composed_actions()`: COMPOSES inherits target actions; EXTENDS creates new from edge config
 - `spec-parts/extends-predicate.md`: full normative definition
 
-### v3.5.9 -- Claude Streaming via NATS <Badge type="tip" text="DEPLOYED" />
+### v3.5.9 -- Stream Topic Added <Badge type="tip" text="DEPLOYED" />
 
 **Date:** 2026-04-06
 
-- `stream.{kernel}` topic added to NatsKernelLoop (`cklib/nats_loop.py`)
+- `stream.{kernel}` topic added to NatsKernelLoop (`cklib/nats_loop.py`) for progressive output from `agent`-type kernels
 - `stream_event()` callback passed to handlers for per-token NATS publishing
 - Handler signature extended: `handler_fn(body, nc=, trace_id=, stream=)` -- backwards compatible
 - Structured JSON logging replaces `[rx]`/`[tx]` print statements
 - `_log()` method for spec-compliant JSON output (ts, level, kernel, event)
 - `spec-parts/structured-logging.md`: stream topic definition + conformance
 
-### v3.5.8 -- CK as Claude Code Subagent <Badge type="tip" text="DEPLOYED" />
+### v3.5.8 -- Subagent Tooling <Badge type="info" text="DEFERRED" />
 
 **Date:** 2026-04-06
 
-- Updated ck-agent skill (`~/.claude/skills/ck-agent/SKILL.md`) for CKP v3.5 layout
-- CLAUDE.md at root (not llm/), SKILL.md loading, ontology.yaml summary
-- Three-loop discipline enforced: CK read-only, TOOL read-only, DATA writable
-- Memory persistence: `data/memory/MEMORY.md` (DATA loop)
-- Multi-root search: `$CK_CONCEPTS_DIR`, `./concepts/`, `~/git/delve_workspace/concepts/`
-- Fuzzy kernel resolution: `CK.*`, `Delvinator.*`, `CS.*`, `Hello.*`
-- NATS bridge: optional dispatch to live kernel via `nats pub`
-- `data/memory/` directories created for all kernels
+This increment landed a vendor-specific subagent integration (talking to a kernel through an external IDE-style assistant). The chapter is preserved at [parked/3.7-deferred.md](https://github.com/ConceptKernel/conceptkernel.github.io/blob/main/parked/3.7-deferred.md) for future revisiting; it is not part of the v3.7 normative specification.
 
 ### v3.5.7 -- Hello.Greeter Kernel <Badge type="tip" text="DEPLOYED" />
 
@@ -234,7 +226,7 @@ All notable changes in the development increments that compose v3.7. Each versio
 
 **Date:** 2026-04-05
 
-- `SPEC.CKP.v3.5.4.delta.md`: CK-as-subagent (D1-D4), Claude streaming (D5), LOCAL.ClaudeCode bridge (D6), Consensus loop (D7), EXTENDS predicate (D8)
+- `SPEC.CKP.v3.5.4.delta.md`: subagent (D1-D4, deferred), stream topic (D5), local-bridge (D6, deferred), Consensus loop (D7), EXTENDS predicate (D8)
 - Consensus services integration: `PLAN.v002.md`, updated CLAUDE.md + README.md in `ref-consensus-services/`
 
 ### v3.5.3 -- Auth/Web Shell Delta Spec <Badge type="info" text="SPEC" />

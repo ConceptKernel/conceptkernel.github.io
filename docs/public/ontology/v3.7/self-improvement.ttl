@@ -40,7 +40,7 @@ ckpi:SelfInspectorRole
 ckpi:AIAnalystRole
   rdf:type bfo:0000023 ;  # BFO:Role
   rdfs:label "AI Analyst" ;
-  rdfs:comment "Role borne by LLM kernels (Fabric, Claude) that analyze validation issues and propose solutions" ;
+  rdfs:comment "Role borne by capability-provider kernels (typically `agent`-type, project-specific) that analyse validation issues and propose solutions" ;
   ckp:roleContext "ai-analysis" ;
   ckp:grants ckpi:permission-analyze-issues ;
   ckp:grants ckpi:permission-propose-solutions .
@@ -256,7 +256,7 @@ ckpi:analyzedBy
   rdfs:domain ckpi:ValidationIssue ;
   rdfs:range ckp:Kernel ;
   rdfs:label "analyzed by" ;
-  rdfs:comment "Links issue to AI analyst kernel (Fabric, Claude)" .
+  rdfs:comment "Links issue to the analyst kernel (a project-specific capability-provider kernel)" .
 
 ckpi:submittedToConsensus
   rdf:type owl:ObjectProperty ;

@@ -7,7 +7,7 @@ description: How changes to concept kernels go through proposal, evaluation, and
 
 ## The Core Principle
 
-A developer does not edit a concept kernel's tool directly. They **talk to the kernel** via Claude Code (`/ck`), propose changes through **consensus**, and the kernel's ontology governs what changes are valid. The tool is a consequence of the ontology, not the other way around.
+A developer does not edit a concept kernel's tool directly. They propose changes through **consensus**, and the kernel's ontology governs what changes are valid. The tool is a consequence of the ontology, not the other way around.
 
 This inverts the typical development flow:
 
@@ -21,10 +21,7 @@ This inverts the typical development flow:
 ## The Consensus Loop
 
 ```
-Developer (Claude Code)
-    |
-    v
-  /ck {Kernel}                    -- Talk to the CK loop
+Developer
     |
     v
   CK.Consensus propose            -- Submit change proposal
@@ -36,7 +33,7 @@ Developer (Claude Code)
   CK.Consensus approve            -- Generate tasks for TOOL changes
     |
     v
-  Headless Claude Code             -- Execute tasks against tool/processor.py
+  Authorized executor              -- Execute tasks against tool/processor.py
     |
     v
   Tool behaves per ontology        -- Produces typed instances
@@ -58,19 +55,19 @@ CK.Consensus is a system kernel (`node:hot`, STRICT governance) with five action
 | `evaluate` | auth | Evaluate a proposal against ontology, SHACL, and fleet topology |
 | `approve` | auth | Approve an evaluated proposal, generate tasks |
 | `decisions` | anon | List all consensus decisions with provenance |
-| `review` | auth | Review a pending proposal (uses CK.Claude strict-auditor) |
+| `review` | auth | Review a pending proposal (deployment-specific: typically delegated to a capability provider via EXTENDS — see [EXTENDS Predicate](./extends)) |
 
 ### Edges
 
-CK.Consensus declares three outbound edges:
+CK.Consensus declares (at minimum) two outbound edges; deployments MAY declare additional edges to capability providers for AI-assisted review.
 
 | Target | Predicate | Rationale |
 |---|---|---|
 | `CK.ComplianceCheck` | `TRIGGERS` | Validate proposals against CKP compliance (20 check types) |
 | `CK.Operator` | `TRIGGERS` | Reconcile changes after tasks complete |
-| `CK.Claude` | `EXTENDS` | AI review of proposals via `strict-auditor` persona |
+| (capability provider) | `EXTENDS` | OPTIONAL: AI review of proposals via a `strict-auditor`-style template; provider is project-specific. |
 
-The EXTENDS edge to CK.Claude means CK.Consensus gains a `review` action that uses Claude with the `strict-auditor` persona -- zero speculation, evidence-only verdicts. The TRIGGERS edges create the governance pipeline: proposals are validated by ComplianceCheck and, once approved and executed, reconciled by the Operator.
+The TRIGGERS edges create the governance pipeline: proposals are validated by ComplianceCheck and, once approved and executed, reconciled by the Operator. If a deployment EXTENDS a capability provider, CK.Consensus gains a `review` action backed by that provider's runtime — selecting a strict-auditor-style template (zero speculation, evidence-only verdicts) is a typical configuration.
 
 ## Propose
 
@@ -160,7 +157,7 @@ prov:wasAttributedTo: "ckp://Actor#developer.peter"
 prov:generatedAtTime: "2026-04-05T10:00:00Z"
 ```
 
-Tasks flow to the [Task Execution Engine](./task-engine) for automated execution via headless Claude Code. See the task engine documentation for the full lifecycle (pending, executing, completed, failed), task operations (split, evolve, merge), and version pinning details.
+Tasks flow to the [Task Execution Engine](./task-engine) for dispatch to an authorized executor. See the task engine documentation for the full lifecycle (pending, executing, completed, failed), task operations (split, evolve, merge), and version pinning details.
 
 ## Provenance: Every Decision Is a prov:Activity
 
@@ -229,9 +226,9 @@ The governance mode is declared in `conceptkernel.yaml` -- the developer sets th
 
 **Answer:** CK.Consensus has STRICT governance, which means changes to CK.Consensus must go through... CK.Consensus. This is deliberately self-referential. The bootstrap case (initial CK.Consensus deployment) is handled by the operator, which creates the kernel from a template. After that, all changes are self-governed.
 
-**Question:** How does headless Claude Code execution work in practice?
+**Question:** How does task execution work in practice?
 
-**Answer:** Currently, tasks are executed via `claude -p` (batch mode) or `claude_agent_sdk` (streaming). The task instruction is the prompt. The constraints are injected as system-level rules. Claude makes the code changes, and the output is validated against the kernel's ontology before sealing. This is the v3.5.15 (Task Execution Engine) feature -- currently at the design stage.
+**Answer:** Tasks are executed by an authorized executor — typically a capability-provider kernel reached via EXTENDS. The task instruction defines the work; the constraints declared in the consensus decision bound it; the output is validated against the target kernel's ontology before sealing. The Task Execution Engine specifies this dispatch contract; concrete executors are deployment-specific. This is the v3.5.15 feature — currently at the design stage.
 
 **Gap identified:** The evaluate step checks against the target kernel's current ontology. But if the proposal includes an `ontology_update`, the new ontology does not exist yet at evaluation time. The evaluator must speculatively validate against the proposed ontology -- a form of dry-run that is not yet implemented. Currently, ontology_update proposals are evaluated only for structural validity (valid YAML, valid LinkML), not for semantic consistency with the fleet.
 

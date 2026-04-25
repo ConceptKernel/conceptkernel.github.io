@@ -59,7 +59,7 @@
 <div class="prefix-box">@prefix ckp: &lt;https://conceptkernel.org/ontology/v3.7/&gt; .</div>
 
 <h2>Abstract</h2>
-<p class="abstract">v3.7 extends the CKP ontology with the agent kernel type (CK.Claude), five formal edge predicates (COMPOSES, TRIGGERS, PRODUCES, EXTENDS, LOOPS_WITH), 20 compliance check types, a four-layer consensus governance engine, task execution via headless Claude Code, dynamic kernel spawning, multi-user NATS sessions, and persona-based LLM capability mounting. All classes maintain BFO 2020 grounding through the four-layer import chain.</p>
+<p class="abstract">v3.7 extends the CKP ontology with the `agent` kernel type (long-running, conversational), five formal edge predicates (COMPOSES, TRIGGERS, PRODUCES, EXTENDS, LOOPS_WITH), 20 compliance check types, a four-layer consensus governance engine, a task execution dispatch contract, multi-user NATS sessions, and capability mounting via the EXTENDS edge predicate. Concrete capability-provider kernels are project-specific and out of scope for the protocol. All classes maintain BFO 2020 grounding through the four-layer import chain.</p>
 
 <h2>Ontology Modules</h2>
 <table>
@@ -87,7 +87,7 @@
   <tr><td><code>ckp:LOOPS_WITH</code></td><td>core.ttl</td><td>ckp:RelationshipType</td><td>Bidirectional cooperation edge predicate</td></tr>
   <tr><td><code>edges.ttl</code></td><td>NEW MODULE</td><td>bfo:Quality</td><td>5 edge predicates with composition semantics</td></tr>
   <tr><td><code>consensus.ttl</code></td><td>NEW MODULE</td><td>prov:Activity</td><td>Proposals, votes, 4 validation layers, decisions</td></tr>
-  <tr><td><code>ckpp:TaskExecutionProcess</code></td><td>processes.ttl</td><td>bfo:Process</td><td>Headless Claude Code task execution</td></tr>
+  <tr><td><code>ckpp:TaskExecutionProcess</code></td><td>processes.ttl</td><td>bfo:Process</td><td>Consensus-driven task execution by an authorised executor</td></tr>
   <tr><td><code>ckpp:SpawningProcess</code></td><td>processes.ttl</td><td>bfo:Process</td><td>Dynamic kernel creation from discovered concepts</td></tr>
   <tr><td><code>ckpp:SessionProcess</code></td><td>processes.ttl</td><td>bfo:Process</td><td>Multi-user NATS collaborative sessions</td></tr>
   <tr><td><code>ckpp:ConsensusEvaluationProcess</code></td><td>processes.ttl</td><td>bfo:Process</td><td>Four-layer consensus evaluation</td></tr>

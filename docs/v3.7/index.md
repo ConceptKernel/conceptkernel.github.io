@@ -3,7 +3,7 @@ layout: home
 hero:
   name: Concept Kernel
   text: Protocol v3.7
-  tagline: "10 parts. 48 chapters. Three loops. BFO-grounded ontology. Claude integration. Consensus governance. PROV-O provenance. The full specification for concept-driven development."
+  tagline: "Nine parts. Three loops. BFO-grounded ontology. Consensus governance. PROV-O provenance. The full specification for concept-driven development."
   actions:
     - theme: brand
       text: Introduction
@@ -30,13 +30,13 @@ features:
     details: "CK.ComplianceCheck validates identity, ontology, SHACL, edges, NATS, provenance, and more. Every kernel carries a proof record."
   - icon: "\U0001F3DB\uFE0F"
     title: CK.Consensus Governance
-    details: "Propose, evaluate, approve. Four validation layers. Tasks generated for headless Claude execution. Every decision is a prov:Activity."
+    details: "Propose, evaluate, approve. Four validation layers. Tasks generated for downstream execution. Every decision is a prov:Activity."
   - icon: "\U0001F50D"
     title: PROV-O Provenance
     details: "Every instance traces back through action, kernel, task, and goal. Three mandatory fields. Enforced by check.provenance."
   - icon: "\U0001F916"
-    title: Claude as Subagent
-    details: "/ck spawns a Claude Code subagent loaded with a kernel's CK loop. EXTENDS mounts Claude capability. Streaming via NATS."
+    title: EXTENDS Capability Mounting
+    details: "Source kernels declare new actions backed by capability-provider kernels. The provider supplies the runtime; the source keeps its identity."
   - icon: "\U0001F4CA"
     title: Ontological Graph
     details: "Jena Fuseki /ckp dataset. SPARQL-queryable fleet. BFO-typed nodes. Named graphs per project."

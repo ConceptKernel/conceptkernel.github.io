@@ -47,7 +47,7 @@ spec:
                 type:
                   type: string
                   enum: ["node:hot", "node:cold", "inline", "static", "agent"]
-                  description: "Kernel deployment type per CKP type registry. `agent` kernels support long-running conversational sessions with LLM inference, streaming via stream.{kernel}, and persona templates from data/personas/ (see extends.md and streaming.md)."
+                  description: "Kernel deployment type per CKP type registry. `agent` kernels are long-running, conversational, persistent NATS subscribers that support multi-turn sessions, streaming via stream.{kernel}, and a behavioural-template registry served from their DATA organ. They are typically used as capability providers reached via the EXTENDS edge predicate (see extends.md)."
                 governance:
                   type: string
                   enum: ["STRICT", "RELAXED", "AUTONOMOUS"]

@@ -325,7 +325,7 @@ ckp:SystemKernel a owl:Class ;
     rdfs:subClassOf ckp:Kernel ;
     rdfs:label "System Kernel"@en ;
     rdfs:comment "Core system kernel (CK.*) providing infrastructure services"@en ;
-    dc:description "Examples: CK.Operator, CK.ComplianceCheck, CK.Claude, CK.Consensus" .
+    dc:description "Examples: CK.Operator, CK.ComplianceCheck, CK.Consensus, and project-specific capability-provider kernels reached via the EXTENDS predicate." .
 
 ckp:ApplicationKernel a owl:Class ;
     rdfs:subClassOf ckp:Kernel ;

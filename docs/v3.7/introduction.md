@@ -157,20 +157,16 @@ v3.5.0  Foundation (spec, three-loop, BFO ontology)              RELEASED
 v3.5.1  Full 50-chapter specification                            RELEASED
 v3.5.2  CRD, namespace isolation, evidence-based proof           DEPLOYED
 v3.5.3  AuthConfig + deploy.auth (delta spec)                    SPEC
-v3.5.4  CK-as-subagent, streaming, consensus, EXTENDS (delta)   SPEC
+v3.5.4  Subagent, streaming, consensus, EXTENDS (delta)          SPEC
 v3.5.5  AuthConfig implementation + Keycloak integration         DEPLOYED
-v3.5.6  Web shell (console.html in CK.Lib.Js)                   DEPLOYED
-v3.5.6.1 Console config resolution + action discovery fix        DEPLOYED
+v3.5.6  Web client (deferred from v3.7 spec)                     DEPLOYED
 v3.5.7  Hello.Greeter kernel + multi-project deploy              DEPLOYED
-v3.5.8  CK as Claude Code subagent                               DEPLOYED
-v3.5.9  Claude streaming via NATS                                DEPLOYED
-v3.5.10 EXTENDS predicate + CK.Claude kernel                    DEPLOYED
-v3.5.11 CK.Consensus kernel                                     DEPLOYED
-v3.5.12 Jena Fuseki /ckp ontology dataset                       DEPLOYED
+v3.5.10 EXTENDS predicate (capability mounting)                  DEPLOYED
+v3.5.11 CK.Consensus kernel                                      DEPLOYED
+v3.5.12 Jena Fuseki /ckp ontology dataset                        DEPLOYED
 v3.5.13 Ontological graph materialisation                        PLANNED
 v3.5.14 Multi-user NATS sessions                                 PLANNED
 v3.5.15 Task execution engine                                    PLANNED
-v3.5.16 Agent Teams                                              PLANNED
 ---------------------------------------------------------------------
 v3.7    Full release -- sum of all above
 
@@ -207,36 +203,30 @@ This is why v3.5.3 (AuthConfig spec) was written before v3.5.5 (AuthConfig imple
 
 ## What v3.7 Adds: The Operational Stack
 
-v3.7 builds seven layers of operational capability on top of the v3.5 foundation:
+v3.7 builds five layers of operational capability on top of the v3.5 foundation:
 
 ```mermaid
 graph TD
     subgraph v35["v3.5 Foundation"]
-        SPEC["50-Chapter Spec<br/>Three Loops, BFO, DL Boxes"]
+        SPEC["Three-Loop Spec<br/>Three Loops, BFO, DL Boxes"]
     end
 
-    subgraph v36["v3.7 Runtime"]
-        OP["CK.Operator<br/>CRD + 15 Checks + Namespace Isolation"]
+    subgraph v37["v3.7 Runtime"]
+        OP["CK.Operator + CRDs<br/>ConceptKernel + CKProject CRDs<br/>20 checks, namespace isolation"]
         AUTH["AuthConfig<br/>Keycloak OIDC + deploy.auth"]
-        WEB["Web Shell<br/>Three-Panel UI + Action Discovery"]
-        AGENT["CK as Subagent<br/>/ck Command + Three-Loop Discipline"]
-        STREAM["Streaming<br/>stream.{kernel} + claude_agent_sdk"]
-        EXTENDS["EXTENDS + CK.Claude<br/>Persona Mounting + Runtime Dispatch"]
-        CONSENSUS["CK.Consensus<br/>Propose/Evaluate/Approve"]
+        EXTENDS["EXTENDS<br/>Capability mounting via ontology edges"]
+        CONSENSUS["CK.Consensus<br/>Propose / Evaluate / Approve"]
         GRAPH["Jena Fuseki<br/>/ckp Dataset + SPARQL"]
     end
 
     SPEC --> OP
     OP --> AUTH
-    AUTH --> WEB
-    WEB --> AGENT
-    AGENT --> STREAM
-    STREAM --> EXTENDS
+    AUTH --> EXTENDS
     EXTENDS --> CONSENSUS
     CONSENSUS --> GRAPH
 ```
 
-Each layer depends on all layers below it. The web shell needs auth. Streaming needs the subagent pattern. EXTENDS needs streaming. Consensus needs EXTENDS (for CK.Claude strict-auditor). The graph needs the full fleet deployed.
+Each layer depends on the layers below it. Auth needs the operator. EXTENDS needs auth (so capability invocations carry identity). Consensus uses EXTENDS to delegate proposal review to a capability provider. The graph materialises only after the full fleet is reconcilable.
 
 ## Known Implementations
 

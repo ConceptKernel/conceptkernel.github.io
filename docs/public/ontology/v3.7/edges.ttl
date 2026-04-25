@@ -118,7 +118,7 @@ ckpe:PRODUCES a owl:NamedIndividual , ckpe:EdgePredicate ;
 
 ckpe:EXTENDS a owl:NamedIndividual , ckpe:EdgePredicate ;
     rdfs:label "EXTENDS"@en ;
-    rdfs:comment "Capability mounting. Source gains NEW actions backed by target's runtime. Actions defined in edge config, not target SKILL.md. Instances sealed in source's DATA loop. Primary mechanism for mounting LLM capabilities via CK.Claude."@en ;
+    rdfs:comment "Capability mounting. Source gains NEW actions backed by target's runtime. Actions defined in edge config, not target SKILL.md. Instances sealed in source's DATA loop. Primary mechanism for mounting any kind of capability provider — LLM inference, search, transcoding, simulation — without coupling the source kernel's identity to a specific runtime."@en ;
     ckpe:compositionStyle "capability mounting"^^xsd:string ;
     ckpe:instanceOwnership "source kernel writes all"^^xsd:string ;
     ckpe:activationModel "on-demand via persona"^^xsd:string ;

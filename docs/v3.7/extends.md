@@ -1,19 +1,19 @@
 ---
-title: EXTENDS Predicate and CK.Claude
-description: How the EXTENDS edge predicate mounts Claude capability onto any kernel through persona templates, and why this is architecturally different from COMPOSES and TRIGGERS.
+title: EXTENDS Predicate
+description: How the EXTENDS edge predicate mounts a capability provider's runtime onto a source kernel, declaring entirely new actions backed by the provider — without importing the provider's code or coupling the source's identity to a specific runtime.
 ---
 
-# EXTENDS Predicate and CK.Claude
+# EXTENDS Predicate
 
-## The Design Problem: Claude Is Not Built-In
+## The Design Problem: Capability Mounting
 
-A naive approach to adding LLM capability to concept kernels would be to embed Claude calls in every kernel's processor. This is wrong for three reasons:
+Some capabilities — LLM inference, search, transcoding, simulation — are too heavy or too specialised to embed in every kernel that wants to use them. A naive approach is to import a provider's library into every consumer's processor. That breaks three desirable properties of a concept kernel system:
 
-1. **Not every kernel needs Claude.** A kernel that calculates checksums or routes NATS messages has no use for an LLM. Embedding Claude would add unnecessary dependencies.
-2. **Different kernels need different Claude behaviors.** An analytical reviewer and a friendly assistant use the same model but with different prompts, tool permissions, and output formats.
-3. **Claude capability should be composable.** If Kernel A can analyze data with Claude, and Kernel B composes Kernel A, then Kernel B should inherit the analysis capability -- without B knowing that Claude exists.
+1. **Not every kernel needs the capability.** A kernel that calculates checksums or routes NATS messages should not carry the inference runtime of an LLM-backed provider just because some sibling kernel does.
+2. **Different consumers need different shapes of the same capability.** An analytical reviewer and a friendly assistant might both call the same LLM provider but with different system prompts, tool permissions, and output formats. The shape belongs to the consumer; the engine belongs to the provider.
+3. **Capability should be composable.** If Kernel A gains a `summarise` action by EXTENDing a provider, and Kernel B COMPOSES Kernel A, then Kernel B should see `summarise` as a first-class action of A — without needing to know which provider implements it.
 
-The v3.7 answer is to make Claude a **concept kernel** (`CK.Claude`) that other kernels reference via the `EXTENDS` edge predicate. The capability is mounted, not inherited.
+The v3.7 answer is the `EXTENDS` edge predicate. A source kernel declares an EXTENDS edge to a *capability provider* kernel and lists the new actions it gains from that provider. The capability is mounted, not inherited; the source kernel's identity stays sovereign while gaining new behaviour. The provider is just another concept kernel — there is nothing protocol-level that ties EXTENDS to a particular vendor or runtime.
 
 ## EXTENDS vs COMPOSES vs TRIGGERS
 
@@ -25,12 +25,12 @@ v3.7 introduces EXTENDS as the fifth edge predicate. Understanding it requires c
 | **TRIGGERS** | Source can invoke target's actions remotely | Target kernel | ExchangeParser TRIGGERS IntentMapper -- parser calls `classify` on mapper |
 | **PRODUCES** | Source generates output for target's input | Neither (data flow) | ThreadScout PRODUCES ExchangeParser -- output feeds input |
 | **CONSUMES** | Source reads target's output | Neither (data flow) | Core CONSUMES TaxonomySynthesis -- reads synthesized data |
-| **EXTENDS** | Source gains NEW actions backed by target's capability | **Source kernel** | Core EXTENDS CK.Claude -- Core gains `analyze` |
+| **EXTENDS** | Source gains NEW actions backed by target's capability | **Source kernel** | Core EXTENDS {provider} -- Core gains `analyze` (action defined by Core's edge config; backed by provider's runtime) |
 
 The critical distinction between COMPOSES and EXTENDS:
 
 - **COMPOSES** exposes the target's EXISTING actions on the source. `check.all` already exists on CK.ComplianceCheck; COMPOSES makes it available on Core.
-- **EXTENDS** creates ENTIRELY NEW actions on the source, backed by the target's capability. `analyze` does NOT exist on CK.Claude; EXTENDS creates it on Core, using Claude as the execution engine.
+- **EXTENDS** creates ENTIRELY NEW actions on the source, backed by the target's capability. `analyze` does NOT exist on the provider as a discrete action — the source kernel declares it in its edge config, and the provider supplies the execution engine.
 
 ## Edge Declaration
 
@@ -39,162 +39,47 @@ The critical distinction between COMPOSES and EXTENDS:
 spec:
   edges:
     outbound:
-      - target_kernel: CK.Claude
+      - target_kernel: {provider-kernel}        # any capability-provider kernel
         predicate: EXTENDS
         config:
-          persona: analytical-reviewer
+          template: {provider-template-id}     # OPTIONAL — provider-defined behaviour template
           actions:
             - name: analyze
-              description: "Deep analysis using Claude"
+              description: "Deep analysis backed by {provider-kernel}"
               access: auth
             - name: summarize
-              description: "Summarize instances using Claude"
+              description: "Summarize instances backed by {provider-kernel}"
               access: auth
-          constraints:
-            max_tokens: 4096
-            tools: ["Read", "Grep"]
-            model: sonnet
+          constraints:                          # OPTIONAL — provider-defined bounds
+            ...
 ```
 
-The `actions` list defines what NEW actions the source kernel gains. The `persona` field references which personality template Claude uses. The `constraints` field bounds the Claude invocation.
+The `actions` list is what the source kernel declares as its new actions. They appear on the source kernel, not on the provider. The optional `template` field references a provider-defined behavioural template (analogous to a persona, system prompt, or pre-canned configuration); its semantics are owned by the provider, not by the EXTENDS predicate. The optional `constraints` field carries provider-specific bounds (rate limits, tool allowlists, model selection, output schemas, etc.) — again opaque to the predicate, interpreted by the provider.
 
-## CK.Claude Identity
+## Capability Provider Kernels
 
-CK.Claude is an `agent`-type system kernel. Its purpose is not to be invoked directly -- it is to provide Claude capability to other kernels via EXTENDS.
+A *capability provider* is any concept kernel that another kernel can target with an EXTENDS edge. The protocol does not enumerate which kernels are providers — any kernel that satisfies the provider contract may serve in this role.
 
-```yaml
-kernel_class:      CK.Claude
-namespace_prefix:  CK
-type:              agent
-governance:        AUTONOMOUS
-```
+The provider contract:
 
-CK.Claude is a first-class system kernel. When deployed to a cluster, it operates as a `node:hot` persistent subscriber. In local development, it operates as a `LOCAL.CK.Claude` kernel without SPIFFE.
+1. **Declares its capability boundary.** The provider's `ontology.yaml` describes what kinds of inputs its runtime can shape into outputs. EXTENDS consumers MUST declare actions that fit within this boundary.
+2. **Optionally publishes a behavioural-template registry.** A provider MAY maintain templates in its DATA organ (e.g., `data/templates/`, `data/personas/`, `data/profiles/`) that consumers reference via the edge `config.template` field. The schema and semantics of those templates are owned by the provider.
+3. **Honours the runtime dispatch contract.** When a consumer invokes an EXTENDS-derived action, the provider's processor receives a request that names the action, its arguments, the consumer kernel's identity, and the optional template ID. The provider executes and returns a typed result.
 
-### Agent Kernel Type
+Many providers will be `agent`-type kernels (long-running conversational, persistent subscribers, often LLM-backed), but EXTENDS works for any provider type whose runtime can be invoked over NATS — `node:hot`, `node:cold`, even an external library kernel routed through a bridge. Type compatibility is enforced by the source kernel's ontology, not by EXTENDS itself.
 
-The `agent` type is a kernel type that supports long-running conversational sessions with LLM inference. Agent kernels differ from other types in three ways:
+## Behavioural Templates (Provider-Defined)
 
-| Characteristic | Agent | node:hot | node:cold |
-|----------------|-------|----------|-----------|
-| NATS pattern | Persistent subscriber | Persistent subscriber | Started on message |
-| Streaming | MUST publish to `stream.{kernel}` | MAY publish to `stream.{kernel}` | MAY publish |
-| Session support | MUST support multi-turn sessions | OPTIONAL | NOT APPLICABLE |
-| Persona templates | MUST serve from `data/personas/` | NOT APPLICABLE | NOT APPLICABLE |
-| Context window | Maintains conversation context | Stateless per message | Stateless per message |
+When a provider supports configurable behaviour (e.g., system prompts for an LLM, output profiles for a renderer, query plans for a search engine), it MAY publish a registry of named *templates* in its DATA organ. The EXTENDS edge config references one template by name via `config.template`.
 
-### Direct Actions
+Important properties:
 
-CK.Claude itself declares minimal actions. Its primary value is delivered through EXTENDS edges, not through direct invocation.
+- **Templates live in the provider's DATA loop**, not the consumer's. The consumer references a template by ID; the provider serves its current version at invocation time.
+- **Template schema is provider-defined.** EXTENDS does not specify a template format. One provider may use `system_prompt`/`tools`/`temperature`; another may use `query_plan`/`fields`/`limit`. The provider's `ontology.yaml` types each template.
+- **Templates are versioned via git** alongside the rest of the provider's DATA organ. Edge invocations resolve to the template's HEAD content at the time of dispatch.
+- **The optional `config.constraints` block** carries opaque provider-specific bounds (rate limits, max tokens, allowed tools, etc.) that bound or override the template's defaults for this particular EXTENDS edge.
 
-| Action | Type | Description |
-|--------|------|-------------|
-| `status` | inspect | Return kernel status and available personas |
-| `personas.list` | query | List available persona templates |
-| `personas.get` | inspect | Return a specific persona template |
-| `chat` | operate | Direct LLM conversation (no persona mounting) |
-
-### File Structure
-
-CK.Claude's DATA loop contains persona templates:
-
-```
-CK.Claude/
-  conceptkernel.yaml    # CK loop -- identity
-  CLAUDE.md             # behavioral instructions
-  SKILL.md              # actions: message, analyze, summarize
-  ontology.yaml         # defines persona, constraint types
-  data/
-    personas/
-      analytical-reviewer.yaml
-      strict-auditor.yaml
-      creative-explorer.yaml
-      code-implementer.yaml
-      documentation-writer.yaml
-```
-
-## Persona Template Registry
-
-CK.Claude maintains persona templates in `data/personas/`. Each template defines a specialised LLM behaviour that other kernels can mount via EXTENDS. Persona templates are versioned via the DATA loop's git history. A kernel that EXTENDS CK.Claude with a specific persona receives the current version of the template at invocation time.
-
-### 5 Standard Personas
-
-A persona defines the behavioral shape of a Claude invocation:
-
-```yaml
-# data/personas/analytical-reviewer.yaml
-name: analytical-reviewer
-system_prompt: |
-  You are a precise analytical reviewer. You examine data structures,
-  identify patterns, and produce structured assessments. You never
-  speculate -- only report what the evidence shows.
-tools: [Read, Grep, Glob]
-output_format: structured
-temperature: 0.1
-```
-
-```yaml
-# data/personas/strict-auditor.yaml
-name: strict-auditor
-system_prompt: |
-  You are a strict auditor. You evaluate proposals against ontological
-  rules and produce pass/fail verdicts with evidence citations.
-  No suggestions, no alternatives -- only verdicts.
-tools: [Read, Grep]
-output_format: structured
-temperature: 0.0
-```
-
-```yaml
-# data/personas/creative-explorer.yaml
-name: creative-explorer
-system_prompt: |
-  You are a creative explorer. You generate novel approaches,
-  brainstorm alternatives, and find unexpected connections.
-tools: [Read, Grep, Glob, Bash]
-output_format: markdown
-temperature: 0.8
-```
-
-```yaml
-# data/personas/code-implementer.yaml
-name: code-implementer
-system_prompt: |
-  You are a precise code implementer. You write clean, tested,
-  well-documented code that follows the project's conventions.
-tools: [Read, Grep, Glob, Bash, Edit, Write]
-output_format: code
-temperature: 0.2
-```
-
-```yaml
-# data/personas/documentation-writer.yaml
-name: documentation-writer
-system_prompt: |
-  You are a documentation writer. You produce clear, accurate,
-  well-structured documentation from code and specifications.
-tools: [Read, Grep, Glob]
-output_format: markdown
-temperature: 0.4
-```
-
-### Persona Template Fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | REQUIRED | Persona identifier matching `config.persona` |
-| `system_prompt` | string | REQUIRED | System prompt injected into the LLM context |
-| `tools` | list[string] | OPTIONAL | Tool allowlist for the LLM session |
-| `output_format` | string | OPTIONAL | `structured`, `markdown`, `code`, or `freeform` |
-| `temperature` | float | OPTIONAL | LLM temperature parameter |
-
-Different kernels mount different personas:
-
-| Kernel | Persona | Use Case |
-|--------|---------|----------|
-| Delvinator.Core | `analytical-reviewer` | Structured data analysis |
-| CK.Consensus | `strict-auditor` | Proposal evaluation |
-| CK.Operator | `code-implementer` | Kernel scaffolding |
+The result is that a single capability provider can serve many consumers with different behaviours without duplicating its runtime — the runtime is shared, the behaviour is per-edge.
 
 ## get_effective_actions() -- Action Resolution
 
@@ -202,7 +87,7 @@ When the operator or web shell needs a kernel's full action list, it calls `get_
 
 1. Start with the kernel's own `spec.actions.common` and `spec.actions.unique`
 2. For each COMPOSES edge: inherit target's existing actions
-3. For each EXTENDS edge: create new actions from edge config with persona + constraints metadata
+3. For each EXTENDS edge: create new actions from edge config, attaching the edge's `template` (if any) and `constraints` as metadata so the dispatcher can forward them to the provider
 
 The resolved action list is what appears in:
 - The web shell action sidebar
@@ -233,7 +118,7 @@ def get_effective_actions(kernel_yaml, concepts_dir):
             for action in config['actions']:
                 action['_extends'] = {
                     'target': edge['target_kernel'],
-                    'persona': config.get('persona'),
+                    'template': config.get('template'),
                     'constraints': config.get('constraints', {})
                 }
                 actions.append(action)
@@ -242,43 +127,44 @@ def get_effective_actions(kernel_yaml, concepts_dir):
 
 ## Runtime Dispatch
 
-When `input.Delvinator.Core` receives `{action: "analyze", data: {...}}`:
+When `input.{source}` receives a message naming an EXTENDS-declared action (`{action: "analyze", data: {...}}`):
 
 ```mermaid
 graph TD
-    A["input.Delvinator.Core<br/>{action: analyze, data: {...}}"] --> B["Core processor<br/>sees 'analyze' is EXTENDS action"]
-    B --> C["Load persona template<br/>CK.Claude/data/personas/analytical-reviewer.yaml"]
-    C --> D["Build prompt:<br/>persona system_prompt + Core ontology context + user data"]
-    D --> E{"Streaming?"}
-    E -->|Yes| F["claude_agent_sdk.query()<br/>async generator"]
-    E -->|No| G["claude -p<br/>batch subprocess"]
-    F --> H["Publish to stream.Delvinator.Core<br/>(not stream.CK.Claude)"]
-    G --> I["Capture full output"]
-    H --> J["Seal result in Core's DATA loop<br/>(not CK.Claude's DATA loop)"]
+    A["input.{source}<br/>{action: analyze, data: {...}}"] --> B["Source processor<br/>sees 'analyze' is an EXTENDS action"]
+    B --> C["Resolve template<br/>{provider}/data/templates/{template-id}"]
+    C --> D["Build dispatch:<br/>template + source ontology context + arguments + constraints"]
+    D --> E["Forward to provider<br/>via NATS along the EXTENDS edge"]
+    E --> F{"Provider streams?"}
+    F -->|Yes| G["Provider publishes progressive output"]
+    F -->|No| H["Provider publishes single result"]
+    G --> I["Source republishes to stream.{source}<br/>(NOT stream.{provider})"]
+    H --> J["Source captures result"]
     I --> J
-    J --> K["Publish to result.Delvinator.Core"]
+    J --> K["Seal as instance in source DATA loop<br/>(NOT provider DATA loop)"]
+    K --> L["Publish to result.{source}"]
 ```
 
-Key design decisions in this flow:
+Key design properties of this flow, all required for conformance:
 
-1. **Stream to source kernel's topic.** The user subscribed to `stream.Delvinator.Core`. If events went to `stream.CK.Claude`, the user would need to know about the EXTENDS relationship to find the output.
-2. **Seal in source kernel's DATA loop.** The analysis result is Core's instance, shaped by Core's ontology. CK.Claude's DATA loop is for CK.Claude's own data -- not for every kernel that extends it.
-3. **Persona loaded from target's storage.** The persona template lives in CK.Claude's DATA loop, not Core's. Core does not own the persona -- it references it via the edge.
+1. **Stream to source kernel's topic.** Subscribers track the source kernel — they should not need to discover the EXTENDS relationship to find streamed output. Republishing on `stream.{source}` keeps the abstraction clean.
+2. **Seal in source kernel's DATA loop.** The result is an instance of the source kernel's ontology, not the provider's. The provider's DATA loop is for the provider's own state; consumer instances live with the consumer.
+3. **Template loaded from provider's storage.** Templates live in the provider's DATA loop. The source references them by name via the edge; it does not own or copy them.
 
-## Why Not Just Call Claude Directly?
+## Why EXTENDS Instead of Direct Invocation
 
-Six architectural reasons:
+A consumer could in principle call a provider's runtime directly (publish to the provider's `input.*`, parse `result.*`). EXTENDS is preferred because it makes the relationship a first-class ontology edge rather than runtime glue:
 
-| Concern | Direct Claude Call | EXTENDS CK.Claude |
-|---------|-------------------|-------------------|
+| Concern | Direct Invocation | EXTENDS |
+|---------|-------------------|---------|
 | **Ontological grounding** | Ad-hoc, untyped output | Typed in source kernel's ontology |
 | **Access control** | No governance | Source kernel's grants govern who can invoke |
-| **Provenance** | No trace | Instance traces to source kernel's action |
-| **Personality** | Global or ad-hoc | Per-kernel persona selection |
-| **Composability** | Not composable | `analyze` can be further composed by kernels that COMPOSE Core |
-| **Location independence** | Requires Claude locally | EXTENDS works via NATS relay -- Claude can be local or remote |
+| **Provenance** | No trace | Instance traces to source kernel's action; `prov:used` links to the provider |
+| **Behaviour shape** | Per-call ad-hoc | Per-edge template + constraints, declared in CK loop |
+| **Composability** | Not composable | The new action can be further composed by kernels that COMPOSE the source |
+| **Location independence** | Requires runtime locally | EXTENDS works via NATS relay — provider can be local or remote |
 
-The EXTENDS predicate makes Claude capability an **ontological edge**, not a runtime dependency. A kernel that does not EXTEND CK.Claude has no LLM capability -- it is purely algorithmic. A kernel that does EXTEND it gains specific, persona-shaped, access-controlled LLM actions that are indistinguishable from its native actions.
+A kernel that does not declare any EXTENDS edges has no provider-backed actions — it is purely algorithmic. A kernel that does declare EXTENDS edges gains specific, template-shaped, access-controlled actions that are indistinguishable from its native actions to consumers.
 
 ## 7 Action Types
 
@@ -339,7 +225,7 @@ Edge predicates materialise as NATS subscriptions at kernel startup. No edge sub
 | `PRODUCES` | Target subscribes to `event.{source}` | Target auto-invokes default action |
 | `TRIGGERS` | Target subscribes to `event.{source}` with `trigger_action` | Target invokes the specified action |
 | `COMPOSES` | Hub subscribes to `result.{spoke}`, publishes to `input.{spoke}` | Hub dispatches, receives results |
-| `EXTENDS` | Source subscribes to `result.{target}`, dispatches via persona | Source forwards EXTENDS actions to target |
+| `EXTENDS` | Source subscribes to `result.{target}`, dispatches with edge `template`/`constraints` | Source forwards EXTENDS actions to target |
 | `LOOPS_WITH` | Both subscribe to each other's `event.*` topics | Bidirectional invocation with circular guard |
 
 ### Ontological Graph Materialisation
@@ -370,34 +256,36 @@ Named graphs per project (`urn:ckp:fleet:{hostname}`) enable per-project SPARQL 
 
 ::: details Logical Analysis: EXTENDS Design
 
-**Question:** If CK.Claude is a concept kernel, does it have its own three loops?
+**Question:** Does a capability provider have its own three loops?
 
-**Answer:** Yes. CK.Claude has:
-- CK loop: conceptkernel.yaml, CLAUDE.md, SKILL.md, ontology.yaml (defines Persona, Constraint types)
-- TOOL loop: tool/processor.py (handles message/analyze/summarize actions via Claude)
-- DATA loop: data/personas/ (persona templates), data/instances/ (its own results when invoked directly)
+**Answer:** Yes — a provider is a normal concept kernel and so has the standard three organs:
+- CK loop: identity, ontology (defines its template and constraint types), behavioural instructions
+- TOOL loop: processor that handles its declared actions
+- DATA loop: behavioural templates, its own instance records when invoked directly
 
-CK.Claude CAN be invoked directly (via TRIGGERS or NATS publish). But its primary use is as an EXTENDS target.
+A provider CAN be invoked directly (via TRIGGERS or NATS publish to its `input.*`). EXTENDS is the predicate that makes "use the provider's runtime to power my own actions" first-class.
 
-**Question:** What prevents a circular EXTENDS (A EXTENDS B EXTENDS A)?
+**Question:** What prevents a circular EXTENDS chain (A EXTENDS B EXTENDS A)?
 
-**Answer:** Nothing in the current implementation. The `get_effective_actions()` function does not detect cycles. A circular EXTENDS would create an infinite loop in action resolution. This is a gap -- the compliance check (`check.edges`) should detect and reject circular EXTENDS paths.
+**Answer:** A SHOULD-level rule, not yet a hard enforcement. `get_effective_actions()` does not currently detect cycles, and a circular EXTENDS chain would loop in action resolution. Conformant compliance checks (`check.edges`) SHOULD detect and reject cycles in the EXTENDS sub-graph; this is a known gap to be tightened in a future revision.
 
-**Question:** Can a kernel EXTENDS multiple targets?
+**Question:** Can a kernel EXTENDS multiple providers?
 
-**Answer:** Yes. A kernel could EXTENDS CK.Claude for LLM capability AND EXTENDS some future CK.Search for search capability. Each EXTENDS edge adds its own actions. There is no conflict as long as action names are unique.
+**Answer:** Yes. A source kernel can declare EXTENDS edges to as many providers as it needs — one for inference, one for search, one for transcoding, etc. Each EXTENDS edge contributes its own actions. Action names MUST be unique across the source kernel's effective action set.
 
-**Contradiction check:** The spec says EXTENDS creates "new actions on the source kernel backed by target's capability." But the persona template lives in the target's DATA loop. This means the source kernel depends on the target's DATA loop content at runtime -- a cross-loop read. Is this a separation axiom violation?
+**Contradiction check:** EXTENDS creates "new actions on the source kernel backed by the target's capability." But behavioural templates live in the target's DATA loop. The source kernel reads the target's DATA loop content at runtime — a cross-loop read. Is this a separation-axiom violation?
 
-**Resolution:** No. The separation axiom prohibits a kernel from WRITING to another kernel's loops. READING another kernel's DATA loop is permitted through declared access (grants). The EXTENDS edge declaration IS the grant. CK.Claude's persona templates are read-only shared assets, analogous to how COMPOSES reads another kernel's action catalog.
+**Resolution:** No. The separation axiom prohibits a kernel from WRITING to another kernel's loops. READING another kernel's DATA loop is permitted through declared access (grants). The EXTENDS edge declaration IS the grant. Templates in the provider's DATA loop are read-only shared assets, analogous to how COMPOSES reads another kernel's action catalog.
 :::
 
 ## Conformance Requirements
 
-- EXTENDS MUST create new actions on the source kernel, not expose the target's actions
-- The `config.persona` field MUST reference a valid persona template on the target kernel
-- Actions created by EXTENDS MUST be listed in the source kernel's action sidebar
-- Instances produced by EXTENDS actions MUST be sealed in the source kernel's DATA loop
-- Provenance MUST trace to the source kernel's action, with `prov:used` linking to CK.Claude
-- The EXTENDS target MUST be a kernel with LLM capability (type `agent` or with `claude_agent_sdk`)
-- Stream events from EXTENDS actions MUST be published to `stream.{source_kernel}`, not `stream.{target_kernel}`
+- EXTENDS MUST create new actions on the source kernel; it MUST NOT expose the target's existing actions (that is the role of COMPOSES).
+- If `config.template` is present, it MUST reference a valid behavioural template in the target's DATA loop.
+- Actions created by EXTENDS MUST be listed in the source kernel's effective action set returned by `get_effective_actions()`.
+- Instances produced by EXTENDS-derived actions MUST be sealed in the **source** kernel's DATA loop, never the target's.
+- Provenance MUST trace to the source kernel's action; `prov:used` MUST include the target kernel's identity.
+- The EXTENDS target MUST be a concept kernel that satisfies the capability-provider contract for the declared actions; type compatibility is asserted by the source kernel's ontology, not by the EXTENDS predicate.
+- Stream events from EXTENDS-derived actions MUST be published to `stream.{source_kernel}`, not `stream.{target_kernel}`.
+- Action names declared in `config.actions` MUST be unique across the source kernel's effective action set (no collisions with own actions, COMPOSED actions, or other EXTENDS edges).
+- Compliance checks SHOULD detect and reject cyclic EXTENDS chains in the kernel graph.

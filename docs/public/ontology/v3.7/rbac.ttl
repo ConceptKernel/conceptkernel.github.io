@@ -60,7 +60,7 @@ ckp:ProcessAgent a owl:Class ;
     rdfs:comment "A kernel executing as an autonomous agent capable of performing actions."@en ;
     dc:description "URN: ckp://Agent/process:{KernelName}" ;
     dc:description "Example: ckp://Agent/process:System.Consensus (governance agent)" ;
-    dc:description "Example: ckp://Agent/process:ConceptKernel.LLM.Claude (autonomous LLM)" .
+    dc:description "Example: ckp://Agent/process:{capability-provider-kernel} (an autonomous capability provider reached via EXTENDS)" .
 
 ### Agent Properties
 

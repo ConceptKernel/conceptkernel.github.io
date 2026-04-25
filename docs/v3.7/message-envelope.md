@@ -96,7 +96,7 @@ Structured JSON logging enables log aggregation via standard Kubernetes tooling 
 
 ## Stream Topics for Real-Time Events
 
-Kernels with LLM or streaming capability SHOULD publish per-token events to `stream.{kernel}`. This enables browser clients to render Claude responses in real time without polling.
+Kernels of type `agent` (long-running, conversational) SHOULD publish per-token events to `stream.{kernel}`. This enables subscribed clients to render progressive output in real time without polling.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|

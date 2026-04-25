@@ -110,7 +110,7 @@ Edge predicates from `conceptkernel.yaml` become RDF triples:
 <ckp://Kernel#Delvinator.Core:v1.0>
     ckp:composes <ckp://Kernel#CK.ComplianceCheck:v1.0> ;
     ckp:produces <ckp://Kernel#Delvinator.TaxonomySynthesis:v1.0> ;
-    ckp:extends  <ckp://Kernel#CK.Claude:v1.0> .
+    ckp:extends  <ckp://Kernel#{provider-kernel}:v1.0> .
 ```
 
 ### Project as Named Graph
@@ -175,12 +175,13 @@ SELECT ?action ?agent ?time WHERE {
 }
 ```
 
-### Kernels That EXTEND CK.Claude
+### Kernels That EXTEND a Specific Capability Provider
 
 ```sparql
-SELECT ?kernel ?persona WHERE {
-  ?kernel ckp:extends <ckp://Kernel#CK.Claude:v1.0> .
-  OPTIONAL { ?kernel ckp:hasPersona ?persona }
+SELECT ?kernel ?template WHERE {
+  ?kernel ckp:extends ?provider .
+  FILTER(?provider = <ckp://Kernel#{provider-kernel}:v1.0>)
+  OPTIONAL { ?kernel ckp:hasTemplate ?template }
 }
 ```
 

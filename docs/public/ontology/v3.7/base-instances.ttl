@@ -49,7 +49,7 @@ ckp:kernel_class a owl:DatatypeProperty , owl:FunctionalProperty ;
     rdfs:domain ckp:InstanceManifest ;
     rdfs:range xsd:string ;
     rdfs:label "kernel class"@en ;
-    rdfs:comment "The class name of the kernel that produced this instance (e.g., LOCAL.ClaudeCode)"@en .
+    rdfs:comment "The class name of the kernel that produced this instance (e.g., a project-specific bridge or capability-provider kernel)"@en .
 
 ckp:kernel_id a owl:DatatypeProperty , owl:FunctionalProperty ;
     rdfs:domain ckp:InstanceManifest ;

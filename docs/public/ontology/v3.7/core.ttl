@@ -94,8 +94,8 @@ ckp:StaticKernel a owl:Class ;
 ckp:AgentKernel a owl:Class ;
     rdfs:subClassOf ckp:Kernel ;
     rdfs:label "Agent Kernel"@en ;
-    rdfs:comment "A kernel of type 'agent' that supports long-running conversational sessions with LLM inference. Agent kernels MUST support streaming via stream.{kernel}, multi-turn sessions, and persona templates from storage/personas/. CK.Claude is the canonical AgentKernel."@en ;
-    dc:description "v3.6 addition. Type: agent. NATS pattern: persistent subscriber with streaming. Example: CK.Claude." ;
+    rdfs:comment "A kernel of type 'agent' that supports long-running conversational sessions with inference-style runtime. Agent kernels MUST support streaming via stream.{kernel}, multi-turn sessions, and a behavioural-template registry served from their DATA organ (e.g., data/templates/, data/personas/, data/profiles/). Concrete provider kernels are project-specific and not part of the protocol specification."@en ;
+    dc:description "v3.6 addition. Type: agent. NATS pattern: persistent subscriber with streaming." ;
     ckp:implementationStatus "PARTIAL"^^xsd:string .
 
 ### Kernel Properties
@@ -400,7 +400,7 @@ ckp:personaTemperature a owl:DatatypeProperty ;
 ckp:ModelConfiguration a owl:Class ;
     rdfs:subClassOf bfo:0000019 ;  # bfo:Quality
     rdfs:label "Model Configuration"@en ;
-    rdfs:comment "A quality describing LLM model selection and effort level for a kernel or action. v3.7 defines a three-level precedence chain: CK.Claude default < persona template < EXTENDS edge config."@en ;
+    rdfs:comment "A quality describing model selection and effort level for an agent-type kernel or action backed by one. The precedence chain is provider-defined and typically: provider default < behavioural template < EXTENDS edge config."@en ;
     dc:description "v3.7 addition. Properties: defaultModel, modelEffort. Values: haiku, sonnet, opus; low, medium, high, max." .
 
 #################################################################

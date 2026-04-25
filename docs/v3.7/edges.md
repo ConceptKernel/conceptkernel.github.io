@@ -37,13 +37,13 @@ edges:
     - target_kernel: CK.ComplianceCheck
       predicate: TRIGGERS
       trigger_action: check.identity
-    - target_kernel: CK.Claude
+    - target_kernel: {provider-kernel}
       predicate: EXTENDS
       config:
-        persona: analytical-reviewer
+        template: analytical-reviewer
         actions:
           - name: analyze
-            description: "Deep analysis using Claude"
+            description: "Deep analysis backed by the provider kernel"
             access: auth
           - name: summarize
             description: "Summarize instances"
@@ -131,7 +131,7 @@ EXTENDS is the most distinctive CKP edge predicate. Unlike COMPOSES (which inher
 | TRIGGERS | Source invokes target's existing actions post-completion | Target `SKILL.md` | Each writes its own |
 | EXTENDS | Source gains NEW actions backed by target's runtime | Edge `config.actions` | Source writes all |
 
-For a deep dive into CK.Claude, persona templates, and the EXTENDS integration pattern, see [EXTENDS Predicate and CK.Claude](./extends).
+For a deep dive into the EXTENDS predicate, capability-provider kernels, and the dispatch contract, see [EXTENDS Predicate](./extends).
 
 ## LOOPS_WITH -- Bidirectional Cooperation
 

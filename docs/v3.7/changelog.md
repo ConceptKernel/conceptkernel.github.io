@@ -69,21 +69,24 @@ Version materialisation moves from `serving.json` on disk to the project's `.ckp
 - **Backward compatible** -- no `spec.versions` means flat layout, existing projects unchanged.
 - **Proven on live cluster** -- `hello-v1-0-0-proc` Running with three sibling PVs on AKS + SeaweedFS 3.93.
 
-### Reconciliation Lifecycle (Versioned -- 12 Steps)
+### Reconciliation Lifecycle (Versioned Implementation Expansion -- 13 Steps)
+
+This is the **implementation expansion** of the canonical 11-step lifecycle in [Reconciliation](./reconciliation). At the implementation layer, step 4 (`deploy.storage`) splits into three per-organ PV-creation steps. The canonical lifecycle is normative; this expansion is descriptive of what the operator actually does in v3.7.
 
 ```
   1. deploy.namespace
-  2. deploy.materialise          -- NEW
-  3. deploy.storage.ck
-  4. deploy.storage.tool         -- NEW (separate TOOL PVs)
-  5. deploy.storage.data
-  6. deploy.processors
-  7. deploy.web
-  8. deploy.routing
-  9. deploy.conceptkernels
-  10. deploy.auth
-  11. deploy.graph
-  12. deploy.endpoint
+  2. deploy.security             -- ServiceAccount, NetworkPolicies
+  3. deploy.materialise          -- git archive from per-kernel bare repos
+  4. deploy.storage.ck           -- ┐
+  5. deploy.storage.tool         --  } step 4 of canonical, split per organ
+  6. deploy.storage.data         -- ┘
+  7. deploy.processors
+  8. deploy.web
+  9. deploy.routing
+  10. deploy.conceptkernels
+  11. deploy.auth
+  12. deploy.graph
+  13. deploy.endpoint
 ```
 
 ### Deficiencies Resolved

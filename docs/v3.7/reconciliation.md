@@ -1,29 +1,34 @@
 ---
 title: Reconciliation Lifecycle, Logging, and Security
-description: The 10-step reconciliation lifecycle from namespace creation to endpoint verification, structured JSON logging, and security considerations.
+description: The 11-step canonical reconciliation lifecycle from namespace creation to endpoint verification, structured JSON logging, and security considerations.
 ---
 
 # Reconciliation Lifecycle, Logging, and Security
 
 ## Reconciliation Purpose
 
-The reconciliation lifecycle is the ordered sequence of substeps that transforms a CKProject declaration into running Kubernetes resources. It is specified as a deterministic pipeline rather than a bag of operations because ordering matters: volumes must exist before deployments can mount them, deployments must exist before services can route to them, and authentication must be configured before the endpoint can be verified.
+The reconciliation lifecycle is the ordered sequence of substeps that transforms a CKProject declaration into running Kubernetes resources. It is specified as a deterministic pipeline rather than a bag of operations because ordering matters: organs must be materialised before volumes can mount them, volumes must exist before deployments can mount them, deployments must exist before services can route to them, and authentication must be configured before the endpoint can be verified.
 
-## Full 10-Step Lifecycle
+This page is the **normative** lifecycle. The [Changelog](./changelog) describes the same pipeline at the implementation layer, where step 4 (`deploy.storage`) further expands into per-organ steps `deploy.storage.{ck,tool,data}`. When the two views differ in granularity, this page wins.
+
+## Full 11-Step Lifecycle
 
 ```
 project.deploy lifecycle:
 
-  1. deploy.namespace     -- Create namespace ck-{subdomain}
-  2. deploy.security      -- ServiceAccount, NetworkPolicies
-  3. deploy.storage       -- PV/PVC per three-loop spec
-  4. deploy.processors    -- ConfigMap (boot.py) + Deployment
-  5. deploy.web           -- index.html generation + web Deployment + Service
-  6. deploy.routing       -- HTTPRoute with Gateway API parentRef
-  7. deploy.ck_resources  -- ConceptKernel CRs per kernel
-  8. deploy.auth          -- Keycloak realm creation/reuse
-  9. deploy.graph         -- RDF materialisation to Jena Fuseki
-  10. deploy.endpoint     -- External endpoint verification
+  1. deploy.namespace          -- Create namespace ck-{subdomain}
+  2. deploy.security           -- ServiceAccount, NetworkPolicies
+  3. deploy.materialise        -- git archive each kernel's organs from per-kernel
+                                  bare repos to /ck/{kernel}/{version}/{ck,tool}/
+  4. deploy.storage            -- PV/PVC per three-loop spec, mounting the
+                                  materialised organ paths
+  5. deploy.processors         -- ConfigMap (boot.py) + Deployment
+  6. deploy.web                -- index.html generation + web Deployment + Service
+  7. deploy.routing            -- HTTPRoute with Gateway API parentRef
+  8. deploy.conceptkernels     -- ConceptKernel CRs per kernel
+  9. deploy.auth               -- Keycloak realm creation/reuse
+  10. deploy.graph             -- RDF materialisation to Jena Fuseki
+  11. deploy.endpoint          -- External endpoint verification
 ```
 
 Each step produces an occurrent with [proof verification](./proof). If any step fails, the action halts and subsequent steps do not execute.
@@ -50,7 +55,19 @@ Creates per-project security resources. The rationale for default-deny is defenc
 
 `automountServiceAccountToken: false` prevents processor pods from accessing the Kubernetes API. The separation axiom extends to the control plane: kernel code cannot inspect or modify cluster resources.
 
-### 3. deploy.storage
+### 3. deploy.materialise
+
+Extracts each kernel's `ck/` and `tool/` organs from per-kernel bare repositories on the SeaweedFS filer to versioned materialisation paths under `/ck/{kernel}/{version}/`. Implementation: `git archive <pin>` for each organ, where the pin is the SHA1 declared in the project's `.ckproject` manifest (see [Versioning](./versioning)).
+
+| Output | Location | Content |
+|---|---|---|
+| Materialised CK organ | `/ck/{kernel}/{version}/ck/` | Files extracted from `ck/` organ at the manifest pin |
+| Materialised TOOL organ | `/ck/{kernel}/{version}/tool/` | Files extracted from `tool/` organ at the manifest pin |
+| `.git-ref` provenance | `/ck/{kernel}/{version}/{ck,tool}/.git-ref` | The exact SHA1 the directory was extracted from |
+
+This step runs before `deploy.storage` because the PVs created in step 4 mount these materialised paths. If `deploy.materialise` fails (missing pin, unreachable filer, archive error), `deploy.storage` cannot create valid PVs and the lifecycle halts.
+
+### 4. deploy.storage
 
 Creates PersistentVolumes and PersistentVolumeClaims for the three-loop filesystem. CK and TOOL loops share one ReadOnlyMany volume; DATA uses a separate ReadWriteMany volume.
 
@@ -61,13 +78,13 @@ Creates PersistentVolumes and PersistentVolumeClaims for the three-loop filesyst
 | PV | `ck-{sub}-data` | ReadWriteMany | DATA loop must be writable |
 | PVC | `data` | ReadWriteMany | Binds to DATA PV |
 
-### 4. deploy.processors
+### 5. deploy.processors
 
 Creates the ConfigMap containing `boot.py` (the Python startup script that discovers and runs all kernel processors) and the Deployment that runs processor pods.
 
 The boot ConfigMap is generated from the project's kernel list. Each kernel's `tool/processor.py` is executed as a subprocess by `boot.py`.
 
-### 5. deploy.web -- Web Shell Generation
+### 6. deploy.web -- Web Shell Generation
 
 [CK.Operator](./operator) generates a minimal `index.html` (~30 lines) that bootstraps the web shell from CK.Lib.Js on the CK volume. The shell reads kernel declarations to build the UI dynamically.
 
@@ -80,7 +97,7 @@ The boot ConfigMap is generated from the project's kernel list. Each kernel's `t
 
 The rationale for generating a minimal shell rather than deploying a full SPA is that the shell's behaviour is entirely driven by kernel declarations. Changing the fleet changes the UI without redeploying the web tier.
 
-### 6. deploy.routing
+### 7. deploy.routing
 
 Creates Gateway API HTTPRoutes from kernel ontology declarations.
 
@@ -93,11 +110,11 @@ Creates Gateway API HTTPRoutes from kernel ontology declarations.
 
 Edge subpath rules: each `COMPOSES` edge with `web.serve: true` on the target produces an HTTPRoute rule `/{edge_slug}/*` -> target's `data/web/`.
 
-### 7. deploy.ck_resources
+### 8. deploy.conceptkernels
 
 Creates [ConceptKernel CRs](./crd) for every kernel declared in the project. The kopf timer begins re-verifying status after creation.
 
-### 8. deploy.auth -- Authentication Provisioning
+### 9. deploy.auth -- Authentication Provisioning
 
 Executes between routing and endpoint verification. Auth configuration must be injected into both the processor deployment (env vars) and the web ConfigMap (inline config) before the endpoint can be verified.
 
@@ -121,7 +138,7 @@ Executes between routing and endpoint verification. Auth configuration must be i
 
 CK.Operator can create realms but MUST NOT modify or delete existing ones. On teardown, `KeycloakRealmImport` is RETAINED -- identity outlives compute.
 
-### 9. deploy.graph -- Ontological Graph Materialisation
+### 10. deploy.graph -- Ontological Graph Materialisation
 
 After successful deployment, CK.Operator publishes kernel metadata and edges as RDF triples to Jena Fuseki's `/ckp` dataset.
 
@@ -169,7 +186,7 @@ SELECT ?source ?predicate ?target WHERE {
 Graph materialisation is best-effort: deploy succeeds even if Jena is unreachable, but the operator SHOULD log a warning.
 :::
 
-### 10. deploy.endpoint
+### 11. deploy.endpoint
 
 Verifies the external endpoint returns HTTP 200. This is the final health check that confirms the full stack is operational from the user's perspective.
 

@@ -134,7 +134,7 @@ A SPIFFE Verifiable Identity Document issued to each kernel at mint time, provid
 
 ### Kernel Type
 
-One of four deployment profiles: `node:hot` (always-on), `node:cold` (on-demand), `inline` (browser-side), `static` (filer-served, no process). All four are Material Entities; they differ in runtime characteristics, not ontological status.
+One of five deployment profiles: `node:hot` (always-on), `node:cold` (on-demand), `inline` (browser-side), `static` (filer-served, no process), `agent` (long-running, conversational, persistent NATS subscriber that supports streaming and behavioural-template registries — see [EXTENDS](./extends)). All five are Material Entities; they differ in runtime characteristics, not ontological status.
 
 ### Action
 

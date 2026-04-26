@@ -355,7 +355,7 @@ ckp:DataIsolationMode a owl:Class ;
 
 ckp:DataIsolation-Isolated a ckp:DataIsolationMode ;
     rdfs:label "Isolated"@en ;
-    rdfs:comment "Version gets its own DATA directory at /ck-data/{hostname}/{kernel}/{version}/"@en .
+    rdfs:comment "Version gets its own DATA directory at /ck-data/{hostname}/{kernel}/{version}/data/ — every metadata folder (instances, proof, ledger, index, llm, web, logs) lives under that data/ root."@en .
 
 ckp:DataIsolation-Shared a ckp:DataIsolationMode ;
     rdfs:label "Shared"@en ;

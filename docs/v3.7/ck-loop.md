@@ -149,7 +149,7 @@ Example: `ckp://Kernel#ACME.Finance.Employee:v1.0`
 ## Version Materialisation (v3.7)
 
 ::: info serving.json Retired
-`serving.json` was retired in v3.7. Version state now lives in the project's **`.ckproject` manifest** -- an instance record in [CK.Project](./project)'s DATA organ (`/ck-data/<project>/CK.Project/.../.ckproject`), symlinked from `<project-root>/.ckproject` and reflected to the cluster via the `CKProject` custom resource's `spec.versions`. The CK loop volume is purely ReadOnlyMany with **no exceptions**. No write-through hack, no sidecar mechanism. See [Version Materialisation](./versioning) for the full model.
+`serving.json` was retired in v3.7. Version state now lives in the project's **`.ckproject` manifest** -- an instance record in [CK.Project](./project)'s DATA organ at `/ck-data/<project>/CK.Project/<version>/data/instances/.ckproject`, symlinked from `<project-root>/.ckproject` and reflected to the cluster via the `CKProject` custom resource's `spec.versions`. The CK loop volume is purely ReadOnlyMany with **no exceptions**. No write-through hack, no sidecar mechanism. See [Version Materialisation](./versioning) for the full model.
 :::
 
 Version declarations are part of the CK.Project custom resource. Each version specifies per-kernel git commit hashes for CK and TOOL loops independently:

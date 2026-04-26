@@ -154,7 +154,7 @@ Each kernel in each version gets three independent PVs:
 ```
 ck-{project}-{kernel}-{version}-ck       → /ck/{kernel}/{version}/ck/         ReadOnlyMany
 ck-{project}-{kernel}-{version}-tool     → /ck/{kernel}/{version}/tool/       ReadOnlyMany
-ck-{project}-{kernel}-{version}-data     → /ck-data/{hostname}/{kernel}/{version}/  ReadWriteMany
+ck-{project}-{kernel}-{version}-data     → /ck-data/{hostname}/{kernel}/{version}/data/  ReadWriteMany
 ```
 
 Inside the pod, these mount as three sibling directories under the kernel name:
@@ -309,7 +309,7 @@ If `spec.versions` is absent from a CK.Project resource, the operator falls back
 
 **deploy.storage.ck**: PersistentVolume for the CK loop with `ReadOnlyMany` access mode. Filer path: `/ck/{project}/concepts/{kernel}/`. This volume holds identity files -- the runtime process cannot modify them.
 
-**deploy.storage.data**: PersistentVolume for the DATA loop with `ReadWriteMany` access mode. Filer path: `/ck-data/{hostname}`. This is where instances, proofs, and ledger entries accumulate.
+**deploy.storage.data**: PersistentVolume for the DATA loop with `ReadWriteMany` access mode. Filer path: `/ck-data/{hostname}/{kernel}/{version}/data/`. This is where instances, proofs, ledger entries, indices, llm context, web data, and logs accumulate — every metadata folder lives under `data/`.
 
 **deploy.processors**: For each `node:hot` kernel, a Deployment with the processor container, volume mounts for CK (ReadOnly), TOOL (ReadOnly), and DATA (ReadWrite), and a Service for internal communication.
 

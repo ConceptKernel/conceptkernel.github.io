@@ -91,34 +91,44 @@ The filer uses two roots (`/ck/` and `/ck-data/`) with per-kernel bare repos and
 ├── hello.tech.games/                      project: hello
 │   └── Hello.Greeter/
 │       ├── v1.3.2/                        data for v1.3.2 deployment
-│       │   ├── instances/
-│       │   ├── proof/
-│       │   ├── ledger/
-│       │   ├── index/
-│       │   ├── llm/
-│       │   └── web/
+│       │   └── data/                      DATA organ root — all metadata lives here
+│       │       ├── instances/             typed + task instance records
+│       │       ├── proof/                 verification evidence
+│       │       ├── ledger/                append-only audit trail
+│       │       ├── index/                 derived search indices
+│       │       ├── llm/                   LLM interaction logs
+│       │       ├── web/                   runtime web data
+│       │       └── logs/                  process / runtime logs
 │       └── v1.3.19/                       data for v1.3.19 deployment
-│           ├── instances/                 ← isolated from v1.3.2
-│           ├── proof/
-│           ├── ledger/
-│           ├── index/
-│           ├── llm/
-│           └── web/
+│           └── data/                      isolated from v1.3.2
+│               ├── instances/
+│               ├── proof/
+│               ├── ledger/
+│               ├── index/
+│               ├── llm/
+│               ├── web/
+│               └── logs/
 │
 └── delvinator.tech.games/                 project: delvinator
     ├── Delvinator.Core/
     │   └── v1.3.2/
-    │       ├── instances/
-    │       ├── proof/
-    │       └── ...
+    │       └── data/
+    │           ├── instances/
+    │           ├── proof/
+    │           └── ...
     └── Delvinator.ThreadScout/
         └── v1.3.2/
-            └── ...
+            └── data/
+                └── ...
 ```
+
+::: tip All metadata lives under `data/`
+The DATA organ root is `/ck-data/<host>/<Kernel>/<version>/data/`. Every metadata folder — instances, proof, ledger, index, llm, web, logs, and any future kind — is a child of that single `data/` directory. Nothing metadata-related lives at `<version>/` directly; that level is reserved for organ folders (`data/` here, with `ck/`/`tool/` materialised under `/ck/<Kernel>/<version>/` on the other filer root).
+:::
 
 ### Key Rules
 
-- `/ck/{ConceptKernel}/{version}/ck/` is the CK loop materialisation path. `/ck/{ConceptKernel}/{version}/tool/` is the TOOL loop materialisation path. `/ck-data/{hostname}/{ConceptKernel}/{version}/` is the DATA loop path.
+- `/ck/{ConceptKernel}/{version}/ck/` is the CK loop materialisation path. `/ck/{ConceptKernel}/{version}/tool/` is the TOOL loop materialisation path. `/ck-data/{hostname}/{ConceptKernel}/{version}/data/` is the DATA loop path — everything below `data/` is metadata folders (`instances/`, `proof/`, `ledger/`, `index/`, `llm/`, `web/`, `logs/`, …).
 - Each concept kernel has its own bare repo under `/ck/{kernel}/` -- no monorepo. CK and TOOL loops share the same bare repo root but extract to separate sibling directories.
 - Bare repo git internals (`HEAD`, `objects/`, `refs/`) and materialised version directories coexist under the same kernel directory. PVs mount `ck/` and `tool/` within version subdirectories -- pods never see git internals.
 - `.git-ref` in each loop directory (`ck/` and `tool/`) contains the commit hash for verification.
@@ -131,7 +141,7 @@ Version provenance is carried by two files working in tandem:
 
 | File | Lives where | Who writes it | What it says |
 |------|-------------|---------------|--------------|
-| `.ckproject` manifest | [CK.Project](./project)'s DATA organ (`/ck-data/<project>/CK.Project/...`), symlinked from `<project-root>/.ckproject` and `/ck-data/<project>/.ckproject` | The operator / developer / governance process | **Intent**: "this project should deploy kernel X at version vN.M.P, with organ `ck/` pinned to SHA1 abc123, `tool/` to bbb222, `data/` to ccc333" |
+| `.ckproject` manifest | [CK.Project](./project)'s DATA organ (`/ck-data/<project>/CK.Project/<version>/data/instances/.ckproject`), symlinked from `<project-root>/.ckproject` and `/ck-data/<project>/.ckproject` | The operator / developer / governance process | **Intent**: "this project should deploy kernel X at version vN.M.P, with organ `ck/` pinned to SHA1 abc123, `tool/` to bbb222, `data/` to ccc333" |
 | `.git-ref` (per organ) | Inside each materialised organ dir (`/ck/<kernel>/<version>/ck/.git-ref`, `.../tool/.git-ref`, and the DATA organ equivalent) | Written by CK.Operator at materialisation | **Outcome**: "this directory was extracted from SHA1 abc123" |
 
 CK.Operator materialises a kernel by (1) reading the `.ckproject` pins, (2) running `git archive <pin>` from the bare repo to populate the version directory, and (3) writing the SHA1 into that directory's `.git-ref`. A conformant cluster can verify frozen deployment at any time: for every kernel-organ mounted, the `.git-ref` contents MUST equal the matching pin in the project's `.ckproject`. If they disagree, the deployment has drifted and the kernel MUST NOT serve traffic.
@@ -166,7 +176,7 @@ IN-CONTAINER MOUNT                FILER PATH                                    
 ───────────────────────────────── ─────────────────────────────────────────────────── ─────
 /ck/Hello.Greeter/ck/             /ck/Hello.Greeter/v1.3.2/ck/                        RO
 /ck/Hello.Greeter/tool/           /ck/Hello.Greeter/v1.3.2/tool/                      RO
-/ck/Hello.Greeter/data/           /ck-data/hello.tech.games/Hello.Greeter/v1.3.2/     RW
+/ck/Hello.Greeter/data/           /ck-data/hello.tech.games/Hello.Greeter/v1.3.2/data/   RW
 ```
 
 The version tag is invisible to the kernel. The operator wires it through PV volumeAttributes. CK and TOOL both source from the same filer root (`/ck/`) under sibling subdirectories of the version path.
@@ -223,7 +233,7 @@ Three PVs per kernel per version:
 ```
 ck-{project}-{kernel}-{version}-ck       CK loop     → /ck/{kernel}/{version}/ck/
 ck-{project}-{kernel}-{version}-tool     TOOL loop   → /ck/{kernel}/{version}/tool/
-ck-{project}-{kernel}-{version}-data     DATA loop   → /ck-data/{hostname}/{kernel}/{version}/
+ck-{project}-{kernel}-{version}-data     DATA loop   → /ck-data/{hostname}/{kernel}/{version}/data/
 ```
 
 ### PV Definitions
@@ -276,7 +286,7 @@ spec:
     driver: seaweedfs-csi-driver
     volumeHandle: ck-hello-greeter-v1.3.2-data
     volumeAttributes:
-      path: "/ck-data/hello.tech.games/Hello.Greeter/v1.3.2"
+      path: "/ck-data/hello.tech.games/Hello.Greeter/v1.3.2/data"
   storageClassName: seaweedfs
 ```
 
@@ -301,7 +311,7 @@ During initial development or quick setup, a bare repository is NOT required. Th
 ```
 /ck/Hello.Greeter/v1.0.0/ck/conceptkernel.yaml
 /ck/Hello.Greeter/v1.0.0/tool/greet.py
-/ck-data/hello.tech.games/Hello.Greeter/v1.0.0/   (scaffolded by operator)
+/ck-data/hello.tech.games/Hello.Greeter/v1.0.0/data/   (scaffolded by operator)
 ```
 
 If no bare repo exists under the kernel directory, the operator treats the version folder as manually managed. It mounts whatever is there. The `.git-ref` file is absent, indicating no git provenance. Integrity verification and commit traceability are unavailable in this mode.

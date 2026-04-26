@@ -29,8 +29,10 @@ The `.ckproject` manifest is the authoritative record of the project's frozen de
 **Canonical path** (inside CK.Project's DATA organ on the SeaweedFS filer):
 
 ```
-/ck-data/<project-hostname>/CK.Project/<version>/instances/.ckproject
+/ck-data/<project-hostname>/CK.Project/<version>/data/instances/.ckproject
 ```
+
+`.ckproject` is itself an instance of `ckp:Project`, so it lives under CK.Project's `data/instances/` folder — the canonical location for any kernel's instance records.
 
 **Every other `.ckproject` you see is a symlink**, including:
 
@@ -93,7 +95,7 @@ Each pin is a SHA1 commit hash from the kernel's per-organ bare repository on th
 |---|---|---|---|
 | `pins.ck` | Identity materialisation — CK.Operator runs `git archive <pin>` from `/ck/{kernel}/` to produce `/ck/{kernel}/{version}/ck/`. The commit is stamped into `.git-ref`. | Immutable at runtime (CK organ is ReadOnlyMany). | **REQUIRED** |
 | `pins.tool` | Capability materialisation — same mechanism, extracts to `/ck/{kernel}/{version}/tool/`. | Immutable at runtime (TOOL organ is ReadOnlyMany). | **REQUIRED** |
-| `pins.data` | Initial seed — records the commit that populates `/ck-data/{hostname}/{kernel}/{version}/` at first reconcile. Kernels that start from an empty DATA organ can omit this. | The pin captures *seed* state. Runtime drift is expected and correct — DATA is ReadWriteMany. The seed `.git-ref` stays stamped as provenance of where the data organ started, not what it contains now. | OPTIONAL |
+| `pins.data` | Initial seed — records the commit that populates `/ck-data/{hostname}/{kernel}/{version}/data/` at first reconcile. Kernels that start from an empty DATA organ can omit this. | The pin captures *seed* state. Runtime drift is expected and correct — DATA is ReadWriteMany. The seed `.git-ref` stays stamped as provenance of where the data organ started, not what it contains now. | OPTIONAL |
 
 At materialisation time, `deploy.materialise` verifies that each extracted organ's `.git-ref` matches its declared pin. If it doesn't, the reconcile fails and the kernel is not promoted.
 

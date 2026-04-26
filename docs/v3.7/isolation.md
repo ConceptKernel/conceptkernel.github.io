@@ -39,7 +39,7 @@ graph LR
     subgraph "Volumes"
         CK["CK Volume<br/>ReadOnly<br/>conceptkernel.yaml<br/>ontology.yaml<br/>rules.shacl"]
         TOOL["TOOL Volume<br/>ReadOnly<br/>processor.py<br/>scripts, services"]
-        DATA["DATA Volume<br/>ReadWrite<br/>instances/<br/>proof/, ledger/"]
+        DATA["DATA Volume<br/>ReadWrite<br/>data/instances/<br/>data/proof/, data/ledger/<br/>data/index/, data/llm/<br/>data/web/, data/logs/"]
     end
     OP -->|"writes at deploy time"| CK
     DEV -->|"writes via git"| TOOL

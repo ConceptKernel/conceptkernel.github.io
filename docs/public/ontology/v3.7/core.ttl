@@ -463,7 +463,7 @@ ckp:Project a owl:Class ;
     rdfs:subClassOf cco:Organization ;  # cco:Organization
     rdfs:label "Project"@en ;
     rdfs:comment "Organizes kernels into a coherent deployment unit: a pinned set of frozen versions, the edges between them, and project-scoped configuration. Formally grounded in cco:Organization."@en ;
-    dc:description "Each Project instance is materialized by a .ckproject manifest. The manifest is the authoritative record of the project's frozen deployment — SHA1 commit pins for each of the 3 organs (ck, tool, data) per kernel. The instance lives in CK.Project's DATA organ under ck-data/<project>/.ckproject on the SeaweedFS filer; a symlink at the project root (<project>/.ckproject) points at the same instance. CK.Operator reads the manifest to materialize kernels at their pinned versions."@en ;
+    dc:description "Each Project instance is materialized by a .ckproject manifest. The manifest is the authoritative record of the project's frozen deployment — SHA1 commit pins for each of the 3 organs (ck, tool, data) per kernel. The instance lives in CK.Project's DATA organ at /ck-data/<project>/CK.Project/<version>/data/instances/.ckproject on the SeaweedFS filer; a convenience symlink at /ck-data/<project>/.ckproject and a working-tree symlink at <project-root>/.ckproject both point at the same authoritative instance. All metadata folders (instances, proof, ledger, index, llm, web, logs) live under each kernel's DATA organ root at /ck-data/<host>/<Kernel>/<version>/data/. CK.Operator reads the manifest to materialize kernels at their pinned versions."@en ;
     ckp:implementationStatus "PARTIAL"^^xsd:string .
 
 #################################################################

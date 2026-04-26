@@ -99,7 +99,7 @@ The TBox and ABox mappings are rigorous. The RBox mapping is approximate -- the 
 |--------|----------|----------|---------------------|-----------|
 | TBox | CK Loop | `conceptkernel.yaml`, `ontology.yaml`, `rules.shacl` | Volume `ck-{guid}-ck`, ReadOnly | Rigorous |
 | RBox | TOOL Loop | `tool/processor.py`, scripts, services, build artifacts | Volume `ck-{guid}-tool`, ReadOnly | Approximate |
-| ABox | DATA Loop | `data/instances/`, `proof/`, `ledger/`, `index/`, `llm/`, `web/` | Volume `ck-{guid}-storage`, ReadWrite | Rigorous |
+| ABox | DATA Loop | `data/instances/`, `data/proof/`, `data/ledger/`, `data/index/`, `data/llm/`, `data/web/`, `data/logs/` | Volume `ck-{guid}-storage`, ReadWrite | Rigorous |
 
 :::warning
 The RBox mapping is deliberately approximate. The TOOL loop contains executable code -- Python handlers, scripts, build artifacts -- not Description Logic role axioms. Do not attempt to reason about TOOL loop contents using DL tools. The analogy is structural (the TOOL loop governs *how the kernel relates* to other things), not formal.

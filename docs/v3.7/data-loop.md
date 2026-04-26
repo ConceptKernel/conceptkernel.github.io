@@ -9,7 +9,7 @@ description: The DATA loop is the memory organ of the Material Entity. Instance 
 
 ## Purpose
 
-The DATA loop is the memory organ of the Material Entity. It is the accumulation of everything the kernel has created, verified, and come to know. Instances live here. Proofs live here. The audit ledger lives here. LLM context lives here. The web surface lives here. Nothing is ever rewritten. The storage volume grows over time and is the kernel's most valuable asset.
+The DATA loop is the memory organ of the Material Entity. It is the accumulation of everything the kernel has created, verified, and come to know. Instances live here. Proofs live here. The audit ledger lives here. LLM context lives here. The web surface lives here. Logs live here. Every metadata kind the kernel writes at runtime is a folder under `data/`. Nothing is ever rewritten. The storage volume grows over time and is the kernel's most valuable asset.
 
 The DATA loop exists because knowledge must outlive any individual process execution. A kernel that loses its accumulated data loses its purpose. By isolating knowledge in a dedicated, append-only volume, CKP ensures that identity upgrades and tool changes never risk data loss.
 
@@ -20,28 +20,27 @@ In Description Logic terms, the DATA loop is the **ABox**. Its contents are indi
 Every tool execution that produces an output creates one instance folder. CKP distinguishes two instance kinds: **sealed instances** (write-once from first write) and **task instances** (lifecycle state tracked in `ledger.json` via NATS; `data.json` sealed at completion).
 
 ```
-data/                              # DATA loop root (v3.7: renamed from data/)
+data/                              # DATA loop root — every metadata folder lives here
                                    # Mounted at /ck/{kernel}/data/ in pod
-                                   # Sourced from /ck-data/{hostname}/{kernel}/{version}/
+                                   # Sourced from /ck-data/{hostname}/{kernel}/{version}/data/
 
-# -- TYPED INSTANCES (direct children of the kernel) --
-|- instance-<short-tx>/            # sealed instance — the kernel's typed output
-|   |- manifest.json              # who, what, when, bindings
-|   |- data.json                  # write-once output sealed on first write
-|   |- proof.json                 # validation result (check-type actions)
-|   +- ledger.json                # before/after for mutate-type actions
+|- instances/                      # parent for all instance records
+|   |
+|   |- instance-<short-tx>/        # sealed instance — the kernel's typed output
+|   |   |- manifest.json          # who, what, when, bindings
+|   |   |- data.json              # write-once output sealed on first write
+|   |   |- proof.json             # validation result (check-type actions)
+|   |   +- ledger.json            # before/after for mutate-type actions
+|   |
+|   +- i-task-{conv_guid}/         # task instance (task kernel)
+|       |- manifest.json          # status, target_ck, goal_id, priority, order
+|       |- conversation_ref.json  # { conv_guid, path } pointer to agent session
+|       |- data.json              # write-once -- sealed at task.complete NATS event ONLY
+|       |- ledger.json            # append-only state log -- all mutations via NATS
+|       +- conversation/          # operate-type: append-only session records
+|           |- c-{conv_id_1}.jsonl  #   first session
+|           +- c-{conv_id_2}.jsonl  #   resumed session
 
-# -- TASK INSTANCE (task kernel) --
-|- i-task-{conv_guid}/
-|   |- manifest.json              # status, target_ck, goal_id, priority, order
-|   |- conversation_ref.json      # { conv_guid, path } pointer to agent session
-|   |- data.json                  # write-once -- sealed at task.complete NATS event ONLY
-|   |- ledger.json                # append-only state log -- all mutations via NATS
-|   +- conversation/              # operate-type: append-only session records
-|       |- c-{conv_id_1}.jsonl    #   first session
-|       +- c-{conv_id_2}.jsonl    #   resumed session
-
-# -- PROJECT-INSTANCE DATA (per-project, per-version) --
 |- proof/                          # verification evidence
 |- ledger/                         # audit trail
 |   +- audit.jsonl
@@ -53,15 +52,22 @@ data/                              # DATA loop root (v3.7: renamed from data/)
 |   |- context.jsonl
 |   |- memory.json
 |   +- embeddings/
-+- web/                            # runtime web data (uploads, generated pages)
+|- web/                            # runtime web data (uploads, generated pages)
++- logs/                           # process / runtime logs (stdout, stderr, structured)
+    |- runtime.jsonl
+    +- audit.log
 ```
+
+::: tip All metadata under `data/`
+Everything the kernel writes at runtime lives under the `data/` folder — `instances/` is the parent for typed and task instance records, and `proof/`, `ledger/`, `index/`, `llm/`, `web/`, `logs/` (and any future metadata kind) are siblings inside `data/`. There is no metadata at `<version>/` directly; that level is reserved for organ folders.
+:::
 
 ::: tip Instances vs Project Data (v3.7)
 **Instances** (`instance-<tx>/`, `i-task-{guid}/`) are the kernel's typed output — they ARE the data type defined in `ontology.yaml`. They are direct children of the DATA loop root.
 
-**Project data** (`proof/`, `ledger/`, `index/`, `llm/`, `web/`) is operational state specific to this project deployment. It supports the kernel's operation but is not the kernel's typed output.
+**Project data** (`proof/`, `ledger/`, `index/`, `llm/`, `web/`, `logs/`) is operational state specific to this project deployment. It supports the kernel's operation but is not the kernel's typed output.
 
-Both live in the DATA loop at `/ck-data/{hostname}/{kernel}/{version}/`, mounted at `/ck/{kernel}/data/` in the pod.
+Both live in the DATA loop at `/ck-data/{hostname}/{kernel}/{version}/data/`, mounted at `/ck/{kernel}/data/` in the pod.
 :::
 
 ### Sealed Instances vs Task Instances

@@ -155,8 +155,8 @@ Commit frequency per file is a first-class observable in CKP. Commit frequency m
 | Frequency Band | Files | Loop | If Violated |
 |---------------|-------|------|-------------|
 | **High** -- runtime accumulation | `data/ledger.json`, `data/llm/context.jsonl`, `data/index/*` | DATA | Expected -- these are append-only logs |
-| **Medium** -- developer-paced | `CLAUDE.md`, `SKILL.md`, `CHANGELOG.md` | CK | Expected -- identity evolves gradually |
-| **Low** -- stable foundation | `conceptkernel.yaml`, `ontology.yaml`, `rules.shacl`, `README.md` | CK | Flag if >20 commits -- schema churn is a smell |
+| **Medium** -- developer-paced | `README.md`, `SKILL.md`, `CLAUDE.md`, `CHANGELOG.md` (companion artefacts) | CK | Expected -- documentation evolves gradually; not load-bearing for awakening |
+| **Low** -- stable foundation | `conceptkernel.yaml`, `ontology.yaml` (LinkML source), `cktype/` (generated), `rules.shacl` (generated) | CK | Flag if >20 commits -- ontological churn is a smell |
 | **Variable** -- tool development | `tool/*` -- all tool source files | TOOL | Expected during active dev; low in production |
 | **Near-zero** -- sealed outputs | `data/i-*/data.json` (sealed instances) | DATA | Flag if >1-3 commits -- mutation policy may be violated |
 

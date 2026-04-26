@@ -17,57 +17,73 @@ The CK loop exists because a computational entity that cannot describe itself ca
 
 ## Awakening Sequence
 
-When a Concept Kernel wakes, it MUST read its identity files in **strict order**. Each file answers a progressively more specific question about the kernel's existence. The sequence is normative -- implementations MUST NOT reorder these steps. If any step fails, the kernel MUST NOT proceed to subsequent steps.
+When a Concept Kernel wakes, it MUST load its **ontological identity** in strict order. The sequence is normative -- implementations MUST NOT reorder these steps. If any step fails, the kernel MUST NOT proceed.
 
-| Order | File / Action | Question Answered | Failure Behaviour |
-|-------|--------------|-------------------|-------------------|
-| 1 | `conceptkernel.yaml` | Who am I? | **Fatal** -- kernel MUST NOT start |
-| 2 | `README.md` | Why do I exist? | Warning -- kernel MAY start with degraded identity |
-| 3 | `CLAUDE.md` | How do I behave? | Warning -- kernel MAY start without agent instructions |
-| 4 | `SKILL.md` | What can I do? | **Fatal** -- kernel has no action catalogue |
-| 5 | `CHANGELOG.md` | What have I become? | Warning -- kernel MAY start without history |
-| 5a | **SPIRE agent** | Am I cryptographically who I claim? | **Fatal** for non-LOCAL kernels; skip for `LOCAL.*` prefix |
-| 6 | `ontology.yaml` | How is my world shaped? | **Fatal** -- kernel has no data schema |
-| 7 | `rules.shacl` | What constraints bind me? | Warning -- permissive stub mode (all writes accepted) |
-| 8 | ~~`serving.json`~~ | ~~Which version am I?~~ | **Retired (v3.7)** -- version pins live in the project's `.ckproject` manifest |
-| 8a | `.ck-guid` | What is my canonical SPID? | Warning -- fallback to `kernel_id` from YAML |
+The awakening sequence covers the **ontological** artefacts only -- the files that determine what the kernel IS as a typed, validated Material Entity. Human-facing artefacts (`README.md`, `SKILL.md`, `CLAUDE.md`, `CHANGELOG.md`) are companions, not awakening dependencies; see [Companion Human-Facing Artefacts](#companion-human-facing-artefacts) below.
+
+The whole typed bundle (`cktype/models.py`, `cktype/rdf.ttl`, `rules.shacl`) is **regenerated from `ontology.yaml`** by the LinkML generator (`ck regenerate <kernel>`). `ontology.yaml` is the single authored source; the rest is derived. The awakening checks (`check.cktype`, `check.shacl`) verify the generated bundle is in sync with the source.
+
+| Order | Artefact | Question Answered | Failure Behaviour |
+|-------|----------|-------------------|-------------------|
+| 1 | `conceptkernel.yaml` | Who am I? (URN, type, governance) | **Fatal** -- kernel MUST NOT start |
+| 2 | `ontology.yaml` (LinkML) | What types do I produce? | **Fatal** -- no schema, no kernel |
+| 3 | `cktype/models.py` (LinkML-generated Pydantic) | Are my types loadable? | **Fatal** -- runs `check.cktype` against `ontology.yaml`; rebuild via `ck regenerate <kernel>` |
+| 4 | `cktype/rdf.ttl` (LinkML-generated triples) | Are my triples publishable to the fleet graph? | **Fatal** if absent or stale |
+| 5 | `rules.shacl` (LinkML-generated SHACL) | What constraints validate writes? | **Fatal** -- runs `check.shacl` |
+| 6 | SPIFFE/SPIRE SVID | Am I cryptographically who I claim? | **Fatal** for non-LOCAL kernels; skip for `LOCAL.*` prefix |
+| -- | ~~`serving.json`~~ | ~~Which version am I?~~ | **Retired (v3.7)** -- version pins live in the project's `.ckproject` manifest |
 
 ::: danger Fatal Failure Points
-Two steps are universally fatal: **Step 5a (SPIFFE/SPIRE)** for all non-LOCAL kernels, and **Step 6 (ontology.yaml)**. The SPIFFE verification at position 5a MUST occur after reading `CHANGELOG.md` and before loading `ontology.yaml`. Identity verification precedes ontology and rule loading. Implementations that place SPIFFE verification at any other position are non-conformant.
+Steps 1-5 are universally fatal -- they ARE the kernel's ontological identity. Step 6 (SPIFFE) is fatal for any kernel whose URN is not in the `LOCAL.*` namespace. Implementations that place SPIFFE verification anywhere other than after the typed bundle is loaded are non-conformant.
 :::
 
 ```mermaid
 graph TD
     S1["1. conceptkernel.yaml<br/><em>Who am I?</em>"]
-    S2["2. README.md<br/><em>Why do I exist?</em>"]
-    S3["3. CLAUDE.md<br/><em>How do I behave?</em>"]
-    S4["4. SKILL.md<br/><em>What can I do?</em>"]
-    S5["5. CHANGELOG.md<br/><em>What have I become?</em>"]
-    S5a["5a. SPIRE Agent<br/><em>Am I who I claim?</em>"]
-    S6["6. ontology.yaml<br/><em>How is my world shaped?</em>"]
-    S7["7. rules.shacl<br/><em>What constraints bind me?</em>"]
-    S8["8. (retired v3.7)<br/><em>serving.json removed</em>"]
-    S8a["8a. .ck-guid<br/><em>Canonical SPID</em>"]
+    S2["2. ontology.yaml<br/><em>What types do I produce?</em><br/>(LinkML source)"]
+    S3["3. cktype/models.py<br/><em>Are my types loadable?</em><br/>(generated Pydantic)"]
+    S4["4. cktype/rdf.ttl<br/><em>Triples publishable?</em><br/>(generated RDF)"]
+    S5["5. rules.shacl<br/><em>What constraints bind me?</em><br/>(generated SHACL)"]
+    S6["6. SPIFFE/SPIRE SVID<br/><em>Am I who I claim?</em>"]
     FAIL["HALT -- Kernel does not start"]
     READY["Kernel READY"]
 
     S1 -->|OK| S2
     S1 -->|FAIL| FAIL
-    S2 -->|OK or WARN| S3
-    S3 -->|OK or WARN| S4
+    S2 -->|OK| S3
+    S2 -->|FAIL| FAIL
+    S3 -->|OK| S4
+    S3 -->|FAIL| FAIL
     S4 -->|OK| S5
     S4 -->|FAIL| FAIL
-    S5 -->|OK or WARN| S5a
-    S5a -->|OK| S6
-    S5a -->|FAIL non-LOCAL| FAIL
-    S6 -->|OK| S7
-    S6 -->|FAIL| FAIL
-    S7 -->|OK or WARN| S8a
-    S8a -->|OK or WARN| READY
+    S5 -->|OK| S6
+    S5 -->|FAIL| FAIL
+    S6 -->|OK| READY
+    S6 -->|FAIL non-LOCAL| FAIL
+    S6 -->|skip LOCAL.*| READY
 
     style FAIL fill:#cc3333,color:#fff
     style READY fill:#339933,color:#fff
 ```
+
+## Companion Human-Facing Artefacts
+
+Alongside the ontological identity, four human-facing artefacts live in `ck/`. They are **not** part of the awakening sequence. A kernel with all five ontological steps green is ready to run; the artefacts below are addressed to humans, agent prompts, and orchestrators.
+
+| Artefact | Audience | Purpose | Required? |
+|----------|----------|---------|-----------|
+| `README.md` | humans, agents | Crucial usage instructions -- how to invoke, configure, and reason about the kernel | SHOULD be present (operationally critical even if not load-bearing) |
+| `SKILL.md` | orchestrators, agents | Repeatable execution patterns -- how to drive the kernel through a task | SHOULD be present for any kernel that exposes meaningful actions |
+| `CLAUDE.md` | agent runtime | Agent-mode prompt -- present only on kernels intended to be launched as a Claude (or compatible LLM) instance | Only on agent-type kernels |
+| `CHANGELOG.md` | developers | Cosmetic dev log -- a readable record of edits | OPTIONAL |
+
+::: tip Provenance lives in `data/proof/`, not `CHANGELOG.md`
+Authoritative provenance for what a kernel has produced lives in the [DATA loop](./data-loop)'s `data/proof/` folder -- PROV-O-grounded, hash-chained, and append-only. `CHANGELOG.md` is a cosmetic developer convenience and carries no weight in compliance, audit, or reconciliation. Treat it as a README sibling, not as a record.
+:::
+
+::: warning Don't conflate the two layers
+The companion artefacts here are **not** to be confused with the ontological approach. Identity, types, and constraints come from `conceptkernel.yaml` + `ontology.yaml` + `cktype/` + `rules.shacl`. Documentation, skills, and agent prompts come from the four files above. A kernel can change its README without affecting its ontology, and vice versa. The boundary is enforced by `check.cktype` / `check.shacl` running only against the ontological layer.
+:::
 
 ## conceptkernel.yaml -- The Identity Document
 

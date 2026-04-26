@@ -97,7 +97,7 @@ The TBox and ABox mappings are rigorous. The RBox mapping is approximate -- the 
 
 | DL Box | CKP Loop | Contents | Physical Realisation | DL Rigour |
 |--------|----------|----------|---------------------|-----------|
-| TBox | CK Loop | `conceptkernel.yaml`, `ontology.yaml`, `rules.shacl` | Volume `ck-{guid}-ck`, ReadOnly | Rigorous |
+| TBox | CK Loop | `conceptkernel.yaml`, `ontology.yaml` (LinkML source), `cktype/models.py` (generated Pydantic), `cktype/rdf.ttl` (generated triples), `rules.shacl` (generated SHACL) | Volume `ck-{guid}-ck`, ReadOnly | Rigorous |
 | RBox | TOOL Loop | `tool/processor.py`, scripts, services, build artifacts | Volume `ck-{guid}-tool`, ReadOnly | Approximate |
 | ABox | DATA Loop | `data/instances/`, `data/proof/`, `data/ledger/`, `data/index/`, `data/llm/`, `data/web/`, `data/logs/` | Volume `ck-{guid}-storage`, ReadWrite | Rigorous |
 

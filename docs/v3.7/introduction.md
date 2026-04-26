@@ -98,7 +98,7 @@ The following table summarises the implementation status of major protocol featu
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Three-loop separation (volume-enforced) | **Implemented** | CK.Operator materialises ReadOnly PVCs |
-| Nine-file awakening sequence | **Implemented** | CK.Lib.Py, CK.Lib.Js |
+| Six-step ontological awakening sequence (`conceptkernel.yaml`, `ontology.yaml`, `cktype/`, `rules.shacl`, SPIFFE) | **Implemented** | CK.Lib.Py, CK.Lib.Js |
 | PROV-O provenance in instances | **Implemented** | MUST -- all instances |
 | NATS topic topology | **Implemented** | 22 topics across three loops |
 | SPIFFE workload identity | **Implemented** | SPIRE integration |

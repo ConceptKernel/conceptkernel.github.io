@@ -7,10 +7,28 @@ description: CKP uses per-kernel master clones plus per-project worktrees on the
 
 CKP's three-loop model gives each kernel three independently-versioned concerns: CK (identity), TOOL (capability), and DATA (knowledge). v3.7's design:
 
-- **Per-kernel master clones** on the SeaweedFS filer -- one regular (non-bare) clone per kernel-organ that tracks the registry's master.
-- **Per-project worktrees** off each master clone, on `<project>/<version>` branches, materialised at version-keyed paths.
+- **Per-kernel master clones** on the SeaweedFS filer (cluster) or the developer's filesystem (dev workstation) -- one regular (non-bare) clone per kernel-organ that tracks the registry's master.
+- **Version-keyed materialisations** off each master clone, sibling to it under the kernel's directory.
 - **Three sibling directories** (`ck/`, `tool/`, `data/`) inside the pod, mounted as independent PVs.
 - **`.ckproject` manifest-driven materialisation** -- held in [CK.Project](./project)'s DATA organ, reflected onto the cluster as a `CKProject` CR.
+
+## Two Root Conventions
+
+The same path shape applies in two places, with two different roots:
+
+| Context | CK + TOOL root | DATA root | Source |
+|---------|----------------|-----------|--------|
+| **Container / cluster** | `/ck/` | `/ck-data/` | SeaweedFS filer, mounted into pods via the SeaweedFS CSI driver. Normative. |
+| **Dev workstation** | `~/.config/conceptkernel/ck/` | `~/.config/conceptkernel/ck-data/` | Recommended convention for the `ck` CLI and locally-running kernels; configurable per developer preference. |
+
+Paths in this page (and elsewhere in the spec) are shown with the cluster `/ck/` and `/ck-data/` roots for normative clarity. On a developer workstation, the same path shapes apply under whichever root that workstation is configured for -- by convention `~/.config/conceptkernel/ck/` and `~/.config/conceptkernel/ck-data/`. For example, a CK organ materialised at:
+
+```
+/ck/<Kernel>/<sha>/ck/                                    # cluster (filer; normative)
+~/.config/conceptkernel/ck/<Kernel>/<sha>/ck/             # dev workstation (default convention)
+```
+
+The `ck` CLI and CK.Operator share the same materialisation logic ([CK.Lib.Py](./project) `cklib.materialiser`); the only thing that differs between dev and cluster is which root the operations run against.
 
 ## Per-Kernel Master Clones
 

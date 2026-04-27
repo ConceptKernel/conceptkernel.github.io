@@ -19,9 +19,9 @@ description: How CK.Operator reconciles ontological declarations into cluster re
 
 ## The Operator Principle
 
-CK.Operator enforces a single rule: **if it is not in the ontology, it does not exist in the cluster.** The operator reads `conceptkernel.yaml` (CK loop, TBox) and materialises the cluster state. It never reads `tool/processor.py` or `data/` -- those are TOOL loop and DATA loop concerns.
+CK.Operator enforces a single rule: **if it is not in the ontology, it does not exist in the cluster.** The operator reads `conceptkernel.yaml` (CK loop, TBox) and materialises the cluster state from it. TOOL and DATA organs are out of scope -- they belong to their own loops.
 
-This matters because it closes the gap between declaration and reality. A developer declares a kernel in `conceptkernel.yaml`. The operator creates the namespace, volumes, deployment, routes, auth, and CRD. If the declaration changes, the operator reconciles. If the kernel is removed from the declaration, the operator deletes the compute resources (but retains data -- identity outlives compute).
+A developer declares a kernel in `conceptkernel.yaml`; the operator creates the namespace, volumes, deployment, routes, auth, and CRD. When the declaration changes, the operator reconciles. When a kernel leaves the declaration, the operator removes the compute resources and retains the data -- identity outlives compute.
 
 ## Dual Entry Architecture
 
@@ -576,7 +576,7 @@ The v3.5.7 `patch` addition was necessary for idempotent updates. Without it, `k
 
 **Contradiction identified:** The v3.5.2 delta spec says "13 checks" for the initial deployment, but the v3.5.5 changelog says "13 infra + 2 auth" totaling 15. The v3.5.2 deployment output shows 13/13 checks passing (before auth existed). After v3.5.5, the count became 15/15. The documentation is consistent -- the count increased when auth was added. Not a contradiction, but worth noting for readers comparing version outputs.
 
-**Gap resolved (v3.7):** The operator now supports multi-version deployments via `spec.versions` in the CK.Project CR. `serving.json` has been retired. Each named version gets its own deployment, PV, and HTTPRoute rule. Weighted canary routing is not yet supported -- versions are routed by URL path prefix, not traffic weight.
+Multi-version deployments are supported via `spec.versions` in the CK.Project CR. Each named version gets its own deployment, PV, and HTTPRoute rule, routed by URL path prefix. (Weighted/canary traffic-split routing is on the roadmap.)
 :::
 
 ## Conformance Requirements

@@ -5,15 +5,15 @@ description: How the EXTENDS edge predicate mounts a capability provider's runti
 
 # EXTENDS Predicate
 
-## The Design Problem: Capability Mounting
+## Capability Mounting via EXTENDS
 
-Some capabilities — LLM inference, search, transcoding, simulation — are too heavy or too specialised to embed in every kernel that wants to use them. A naive approach is to import a provider's library into every consumer's processor. That breaks three desirable properties of a concept kernel system:
+`EXTENDS` is the edge predicate that **mounts** a capability from a provider kernel onto a source kernel. The source declares the edge and the new actions it gains; the provider's runtime executes those actions on the source's behalf. The source's identity stays sovereign while gaining new behaviour, and the provider is just another concept kernel — nothing protocol-level ties EXTENDS to a particular vendor or runtime.
 
-1. **Not every kernel needs the capability.** A kernel that calculates checksums or routes NATS messages should not carry the inference runtime of an LLM-backed provider just because some sibling kernel does.
-2. **Different consumers need different shapes of the same capability.** An analytical reviewer and a friendly assistant might both call the same LLM provider but with different system prompts, tool permissions, and output formats. The shape belongs to the consumer; the engine belongs to the provider.
-3. **Capability should be composable.** If Kernel A gains a `summarise` action by EXTENDing a provider, and Kernel B COMPOSES Kernel A, then Kernel B should see `summarise` as a first-class action of A — without needing to know which provider implements it.
+Three properties make EXTENDS the right primitive for capabilities like LLM inference, search, transcoding, or simulation:
 
-The v3.7 answer is the `EXTENDS` edge predicate. A source kernel declares an EXTENDS edge to a *capability provider* kernel and lists the new actions it gains from that provider. The capability is mounted, not inherited; the source kernel's identity stays sovereign while gaining new behaviour. The provider is just another concept kernel — there is nothing protocol-level that ties EXTENDS to a particular vendor or runtime.
+1. **Selective adoption.** A kernel mounts a capability only when it declares the edge. Kernels that route NATS messages or compute checksums carry no LLM runtime simply because a sibling does.
+2. **Per-consumer shape.** Different consumers can adopt the same capability with different shapes: an analytical reviewer and a friendly assistant both EXTEND the same LLM provider but with distinct system prompts, tool permissions, and output formats. The shape belongs to the consumer; the engine belongs to the provider.
+3. **Composability.** When Kernel A gains a `summarise` action by EXTENDing a provider, any Kernel B that COMPOSES A sees `summarise` as a first-class action of A — without knowing which provider implements it.
 
 ## EXTENDS vs COMPOSES vs TRIGGERS
 

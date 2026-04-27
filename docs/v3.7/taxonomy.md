@@ -9,7 +9,7 @@ description: The five system kernel archetypes — Materialiser, Validator, Decl
 
 CKP treats its own runtime as ontologically equal to the applications it hosts. System kernels are platform-level Material Entities in the `CK.*` namespace that provide the infrastructure on which domain kernels operate. The platform itself is a fleet of typed kernels, subject to the same compliance checks, provenance tracking, and governance rules as any domain kernel.
 
-This self-referential design eliminates the gap between "platform code" and "application code" -- both are CKP citizens.
+In this self-referential design, "platform code" and "application code" are both CKP citizens, governed by the same rules.
 
 Every system kernel conforms to the same structural requirements as domain kernels: three-loop separation, eight awakening files, NATS topic topology, URN identity, and PROV-O attribution. The `CK.*` namespace prefix is reserved exclusively for platform kernels; domain kernels MUST NOT use this prefix.
 

@@ -16,7 +16,7 @@ CKP grounds its ontology in the Basic Formal Ontology (BFO) 2020, published as I
 3. **Governance stability.** BFO is maintained by an ISO committee and changes rarely. CKP can depend on BFO's categories without risk of upstream churn.
 
 :::info Why This Matters
-Grounding in BFO is not academic decoration. It means every Concept Kernel can interoperate with thousands of existing ontologies in healthcare, defence, manufacturing, and finance -- all without custom bridging. The 36-class upper ontology gives CKP a shared vocabulary with the broader Semantic Web ecosystem.
+Grounding in BFO gives every Concept Kernel a shared vocabulary with thousands of existing ontologies in healthcare, defence, manufacturing, and finance -- interoperability without custom bridging. The 36-class upper ontology connects CKP directly to the broader Semantic Web ecosystem.
 :::
 
 ## The Concept Kernel as Material Entity

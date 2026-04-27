@@ -13,15 +13,19 @@ A Concept Kernel is a persistently-identified computational entity -- a Material
 
 ## Why CKP Exists
 
-Distributed systems today lack a formal identity model for computational components. Containers have no persistent self-knowledge. Microservices have no ontological grounding. Data pipelines have no provenance chain linking output to the process that created it. CKP closes these gaps by treating every computational unit as a Material Entity with:
+CKP gives every computational entity an **ontological identity** -- a typed place in a graph of meaning. From that identity, computational capability scaffolds upward: a kernel's connections to other kernels and concepts, the constraints it satisfies, and the governance it operates under collectively shape what it does and how the fleet behaves.
 
-1. **Persistent identity** -- a GUID that survives restarts, upgrades, and data accumulation.
-2. **Formal typing** -- grounded in BFO 2020 (ISO 21838-2), the same upper ontology used in biomedical informatics, defence, and manufacturing.
-3. **Three-loop separation** -- identity (CK), capability (TOOL), and knowledge (DATA) are physically isolated, independently versioned, and governed by distinct write authorities.
-4. **Mandatory provenance** -- every instance links to the action, agent, and time that created it via W3C PROV-O.
-5. **Message-native communication** -- all inter-kernel interaction occurs over NATS messaging with JWT authentication, not ad-hoc HTTP calls.
+CKP defines this for every computational unit by treating it as a Material Entity with:
 
-The result is a protocol where every kernel can answer: *Who am I? What can I do? What have I produced? Who authorised it?*
+1. **Ontological identity** -- each kernel inhabits a typed graph of meaning. Its identity is the URN, BFO classification, declared edges to other kernels, capability advertisement, and governance posture taken together. The GUID is one attribute among these; the identity itself is the kernel's curated position in its ontological universe.
+2. **Computational capability scaffolded by ontology** -- LinkML-typed schemas (`ontology.yaml`) generate the kernel's Pydantic types, SHACL constraints, and RDF triples. What the kernel can produce, what writes it accepts, and what other kernels it can compose with all derive from this curated ontology.
+3. **Formal typing** -- grounded in BFO 2020 (ISO 21838-2), the same upper ontology used in biomedical informatics, defence, and manufacturing.
+4. **Three-loop separation** -- identity (CK), capability (TOOL), and knowledge (DATA) are physically isolated, independently versioned, and governed by distinct write authorities.
+5. **Forward-acting governance** -- enforcement (SHACL validation, grants, edge predicates) shapes runtime behaviour: writes that violate the kernel's typed contracts are rejected at the boundary, and edges declared in the ontology determine which inter-kernel actions are reachable. Governance is an active part of execution, not a retrospective audit.
+6. **Mandatory provenance** -- every instance links to the action, agent, and time that created it via W3C PROV-O.
+7. **Message-native communication** -- all inter-kernel interaction occurs over NATS messaging with JWT authentication.
+
+Each kernel can answer: *Who am I? What types do I produce? What constraints bind me? What can I compose with? What have I produced, and under whose authority?*
 
 ## Scope
 
@@ -128,13 +132,9 @@ CKP v3.7 is organised into nine parts:
 | VIII | Infrastructure: [ConceptKernel + CKProject CRDs](./crd), [evidence-based proof](./proof), [reconciliation](./reconciliation), [versioning](./versioning) |
 | IX | Governance & Accumulation: [CK.Consensus](./consensus), [task engine](./task-engine), [ontological graph](./graph), [sessions](./sessions), [PROV-O provenance](./provenance) |
 
-## The Shift: From Specification to Runtime
+## What v3.7 Provides
 
-CKP v3.5 defined the foundation: the three-loop model, BFO 2020 grounding, and Description Logic box mapping. It answered the question "what IS a concept kernel?"
-
-v3.7 answers a different question: **how do you operate one?**
-
-v3.5 gives you the ontology. v3.7 gives you the operator, the auth, the CRDs, the reconciliation lifecycle, the consensus loop, and the graph store. v3.5 is the constitution; v3.7 is the government.
+v3.7 is the operational specification. It defines how a concept kernel is materialised, governed, authenticated, and reconciled across the fleet. The operator, auth, CRDs, reconciliation lifecycle, consensus loop, and graph store are all part of this surface — together they take an ontology declaration and turn it into running, governed compute.
 
 | Concern | v3.5 (Foundation) | v3.7 (Runtime) |
 |---------|-------------------|----------------|
@@ -177,7 +177,7 @@ v3.7  serving-multiversion-unpack (CK.Operator v1.3.0)       PROVEN
         kopf + NATS dual control plane
         Per-version deployments, 3 PVs per kernel per version
         Quick setup mode (no git required)
-        serving.json retired; version pins in .ckproject manifest + CKProject CR
+        Version pins in .ckproject manifest + CKProject CR
         Proven: hello-v1-0-0-proc Running with three sibling PVs
 ```
 

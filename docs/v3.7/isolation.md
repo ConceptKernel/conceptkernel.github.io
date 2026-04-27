@@ -67,11 +67,9 @@ Every row in the table below represents a class of bugs or security vulnerabilit
 A tool that can rewrite `ontology.yaml` can change the validation rules that govern its own output. A kernel that can write to another kernel's CK loop can impersonate it. These are not theoretical risks -- they are the failure modes that the protocol exists to prevent.
 :::
 
-## No Write-Through Exception (v3.7)
+## CK Loop Is Purely ReadOnly
 
-Prior to v3.7, a single file (`serving.json`) was mutated at runtime inside each CK loop to track the active version. That exception is retired. In v3.7 the CK loop volume is ReadOnlyMany with **no exceptions** — there is no sub-path write mount, no sidecar, no CSI per-file rule.
-
-Version state is externalized to the project's `.ckproject` manifest, which lives in [CK.Project](./project)'s DATA organ (per-hostname, per-project) and is symlinked from the project root. The manifest records SHA1 commit pins for each of the 3 organs (`ck/`, `tool/`, `data/`) per kernel version. [CK.Operator](./operator) reads it to materialize kernels at frozen versions — no CK-loop write is ever required.
+The CK loop volume is `ReadOnlyMany` end to end — sub-path mounts, sidecars, and CSI per-file rules all stay out of it. Version state lives in the project's `.ckproject` manifest, an instance record in [CK.Project](./project)'s DATA organ (project-scoped), symlinked from the project root. The manifest records SHA1 commit pins for each of the three organs (`ck/`, `tool/`, `data/`) per kernel version, and [CK.Operator](./operator) reads it to materialise kernels at the pinned versions.
 
 ## Container Sealing
 

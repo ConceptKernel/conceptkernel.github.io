@@ -31,7 +31,6 @@ The whole typed bundle (`cktype/models.py`, `cktype/rdf.ttl`, `rules.shacl`) is 
 | 4 | `cktype/rdf.ttl` (LinkML-generated triples) | Are my triples publishable to the fleet graph? | **Fatal** if absent or stale |
 | 5 | `rules.shacl` (LinkML-generated SHACL) | What constraints validate writes? | **Fatal** -- runs `check.shacl` |
 | 6 | SPIFFE/SPIRE SVID | Am I cryptographically who I claim? | **Fatal** for non-LOCAL kernels; skip for `LOCAL.*` prefix |
-| -- | ~~`serving.json`~~ | ~~Which version am I?~~ | **Retired (v3.7)** -- version pins live in the project's `.ckproject` manifest |
 
 ::: danger Fatal Failure Points
 Steps 1-5 are universally fatal -- they ARE the kernel's ontological identity. Step 6 (SPIFFE) is fatal for any kernel whose URN is not in the `LOCAL.*` namespace. Implementations that place SPIFFE verification anywhere other than after the typed bundle is loaded are non-conformant.
@@ -210,4 +209,4 @@ Cross-project access from `LOCAL.*` to non-`LOCAL.*` still REQUIRES SPIFFE. Loca
 | L-2 | Kernel MUST NOT proceed past a failed fatal awakening step | Core |
 | L-3 | SPIFFE verification MUST occur at position 5a in the awakening sequence | Core |
 | L-4 | `conceptkernel.yaml` MUST pass the five validation rules | Core |
-| L-5 | CK loop volume is purely ReadOnlyMany — no writable exceptions (v3.7: `serving.json` retired) | Core |
+| L-5 | CK loop volume is purely ReadOnlyMany — no writable exceptions | Core |

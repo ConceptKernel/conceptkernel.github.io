@@ -10,7 +10,7 @@ CKP's three-loop model gives each kernel three independently-versioned concerns:
 - **Per-kernel master clones** on the SeaweedFS filer -- one regular (non-bare) clone per kernel-organ that tracks the registry's master.
 - **Per-project worktrees** off each master clone, on `<project>/<version>` branches, materialised at version-keyed paths.
 - **Three sibling directories** (`ck/`, `tool/`, `data/`) inside the pod, mounted as independent PVs.
-- **`.ckproject` manifest-driven materialisation** -- held in [CK.Project](./project)'s DATA organ, reflected onto the cluster as a `CKProject` CR. Replaces the retired `serving.json`.
+- **`.ckproject` manifest-driven materialisation** -- held in [CK.Project](./project)'s DATA organ, reflected onto the cluster as a `CKProject` CR.
 
 ## Per-Kernel Master Clones
 
@@ -123,7 +123,7 @@ The DATA organ root is `/ck-data/<project>/<Kernel>/<version>/data/`. Every meta
 
 - `/ck/{ConceptKernel}/{version}/ck/` is the CK loop materialisation path. `/ck/{ConceptKernel}/{version}/tool/` is the TOOL loop materialisation path. `/ck-data/<project>/{ConceptKernel}/{version}/data/` is the DATA loop path — everything below `data/` is metadata folders (`instances/`, `proof/`, `ledger/`, `index/`, `llm/`, `web/`, `logs/`, …).
 - Each concept kernel has its own master clone under `/ck/{kernel}/` -- no monorepo. CK and TOOL each have their own master clone under `/ck/{kernel}/master/{ck,tool}/`. Materialised version paths are added off those clones via `git worktree add` (writable, branched) or extracted via `git archive` (read-only).
-- Bare repo git internals (`HEAD`, `objects/`, `refs/`) and materialised version directories coexist under the same kernel directory. PVs mount `ck/` and `tool/` within version subdirectories -- pods never see git internals.
+- Master clones live at `/ck/{kernel}/master/{ck,tool}/` with their git internals inside `.git/`. Version-keyed materialisations sit alongside as siblings. PVs mount `ck/` and `tool/` from the version directories only -- pods never see `.git/` or the master clones.
 - `.git-ref` in each loop directory (`ck/` and `tool/`) contains the commit hash for verification.
 - No files exist at the version root (`/ck/{kernel}/{version}/`). The version root is a namespace containing only `ck/` and `tool/` subdirectories.
 - The flat `/ck/{KernelName}/` layout (without version subdirs) is NOT the materialisation target.

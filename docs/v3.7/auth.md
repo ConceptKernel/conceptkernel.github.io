@@ -5,11 +5,11 @@ description: How CKP v3.7 provisions OIDC identity as infrastructure through the
 
 # Authentication
 
-## Why Authentication Needed an Ontology Class
+## Authentication as a First-Class Ontological Concept
 
-v3.5 kernels had no concept of user identity. Every NATS message was anonymous. The web shell (when it arrived) had no way to distinguish users or restrict actions. This created a fundamental gap: the `access: auth` field on actions had no enforcement mechanism.
+Authentication is declared in the same `ontology.yaml` that declares kernel types, actions, and edges. The `access:` field on each action (`anon`, `auth`, `owner`) is the ontological enforcement point: a JWT verified at message ingress is what makes `access: auth` actions reachable, and the verification rules themselves derive from the project's `AuthConfig` declaration.
 
-The v3.7 answer is not to bolt on auth as middleware. It is to make authentication a **first-class ontological concept** -- declared in the same `ontology.yaml` that declares kernel types, actions, and edges. If auth is not in the ontology, it does not exist in the cluster.
+This places identity inside the same governance regime as types and constraints. A kernel's auth posture is part of its declared shape, validated by the same machinery that validates writes against `rules.shacl`.
 
 ## Three Authentication Levels
 
@@ -145,7 +145,7 @@ auth:
   web_origins: []          # required if create_realm
 ```
 
-The schema is deliberately minimal. CKP is not an auth framework -- it delegates to Keycloak for the actual OIDC machinery. What CKP controls is the **declaration** (what auth exists) and the **provisioning** (how auth reaches the cluster).
+The schema is deliberately minimal. CKP delegates the OIDC machinery to Keycloak; what CKP owns is the **declaration** (what auth exists) and the **provisioning** (how auth reaches the cluster).
 
 ### Two Modes
 

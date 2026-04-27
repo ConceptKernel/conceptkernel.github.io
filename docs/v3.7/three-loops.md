@@ -116,17 +116,19 @@ Every Concept Kernel presents a single unified filesystem tree to all processes 
 ```
 {ns}/{project}/concepts/{KernelName}/{guid}/
 |
-|  -- IDENTITY & AWAKENING FILES (CK loop volume: ck-{guid}-ck) --
+|  -- IDENTITY (CK loop volume: ck-{guid}-ck) --
 |
-|- conceptkernel.yaml          <- I am
-|- .ck-guid                    <- Canonical SPID UUID
-|- README.md                   <- Why I am
-|- CLAUDE.md                   <- How I am (OPS root)
-|- SKILL.md                    <- What I can do
-|- CHANGELOG.md                <- What I have become
-|- ontology.yaml               <- Shape of my world
-|- rules.shacl                 <- My constraints
-+- .policy                     <- Local governance rules
+|  Ontological identity (loaded by the awakening sequence):
+|- conceptkernel.yaml          <- URN, type, governance
+|- ontology.yaml               <- LinkML schema (the kernel's world)
+|- cktype/                     <- Generated Pydantic + RDF (from ontology.yaml)
+|- rules.shacl                 <- Generated SHACL constraints (from ontology.yaml)
+|
+|  Companion human-facing artefacts (alongside, not awakening dependencies):
+|- README.md                   <- Usage instructions
+|- SKILL.md                    <- Repeatable execution patterns
+|- CLAUDE.md                   <- Agent-mode prompt (agent-type kernels only)
++- CHANGELOG.md                <- Developer log
 |
 |  -- TOOL (sibling mount: ck-{project}-{kernel}-{version}-tool) --
 |
@@ -145,7 +147,7 @@ Every Concept Kernel presents a single unified filesystem tree to all processes 
 ```
 
 ::: tip Platform Convention (v3.7)
-This filesystem layout is applied identically to every kernel. Three PVs mount as **sibling directories** under `/ck/{kernel}/`: `ck/` (ReadOnly), `tool/` (ReadOnly), `data/` (ReadWrite). The kernel name directory is not a volume — it is a namespace created by the kubelet. No volume is nested inside another volume. Version state is externalized to the project's `.ckproject` manifest (SHA1 pins per organ, lives in [CK.Project](./project)'s DATA organ, symlinked from the project root). `serving.json` is retired (v3.7).
+This filesystem layout is applied identically to every kernel. Three PVs mount as **sibling directories** under `/ck/{kernel}/`: `ck/` (ReadOnly), `tool/` (ReadOnly), `data/` (ReadWrite). The kernel name directory is not a volume — it is a namespace created by the kubelet. No volume is nested inside another volume. Version state is externalized to the project's `.ckproject` manifest (SHA1 pins per organ, lives in [CK.Project](./project)'s DATA organ, symlinked from the project root).
 :::
 
 ## Commit Frequency as Governance Signal

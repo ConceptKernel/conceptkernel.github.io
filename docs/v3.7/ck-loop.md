@@ -182,7 +182,7 @@ spec:
           tool_ref: def4567    # commit hash from TOOL repo
 ```
 
-The operator materialises each version by streaming `git archive` from per-kernel bare repositories to the filer. Each loop has its own bare repo — full-tree archive produces the loop content directly. No subtree filtering.
+The operator materialises each version by streaming `git archive` from per-kernel master clones to the filer. Each loop has its own master clone — full-tree archive produces the loop content directly. No subtree filtering.
 
 ## CK Loop NATS Topics
 

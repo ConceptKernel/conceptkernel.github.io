@@ -15,69 +15,49 @@ The DATA loop exists because knowledge must outlive any individual process execu
 
 In Description Logic terms, the DATA loop is the **ABox**. Its contents are individuals -- specific instances of the types defined in the TBox ([CK loop](./ck-loop)).
 
-## The Instance Tree
+## The Standard Subfolders
 
-Every tool execution that produces an output creates one instance folder. CKP distinguishes two instance kinds: **sealed instances** (write-once from first write) and **task instances** (lifecycle state tracked in `ledger.json` via NATS; `data.json` sealed at completion).
+The DATA organ root is `data/`. Inside it are seven standard subfolders that every kernel's runtime accumulates into. **Only the names and roles below are normative** -- the internal layout of each subfolder is the kernel's own convention, not part of this spec.
 
 ```
 data/                              # DATA loop root — every metadata folder lives here
                                    # Mounted at /ck/{kernel}/data/ in pod
-                                   # Sourced from /ck-data/{hostname}/{kernel}/{version}/data/
+                                   # Sourced from /ck-data/<project>/{kernel}/{version}/data/
 
-|- instances/                      # parent for all instance records
-|   |
-|   |- instance-<short-tx>/        # sealed instance — the kernel's typed output
-|   |   |- manifest.json          # who, what, when, bindings
-|   |   |- data.json              # write-once output sealed on first write
-|   |   |- proof.json             # validation result (check-type actions)
-|   |   +- ledger.json            # before/after for mutate-type actions
-|   |
-|   +- i-task-{conv_guid}/         # task instance (task kernel)
-|       |- manifest.json          # status, target_ck, goal_id, priority, order
-|       |- conversation_ref.json  # { conv_guid, path } pointer to agent session
-|       |- data.json              # write-once -- sealed at task.complete NATS event ONLY
-|       |- ledger.json            # append-only state log -- all mutations via NATS
-|       +- conversation/          # operate-type: append-only session records
-|           |- c-{conv_id_1}.jsonl  #   first session
-|           +- c-{conv_id_2}.jsonl  #   resumed session
-
-|- proof/                          # verification evidence
-|- ledger/                         # audit trail
-|   +- audit.jsonl
+|- instances/                      # parent for all instance records the kernel produces
+|- proof/                          # verification evidence (PROV-O, hash chain)
+|- ledger/                         # append-only audit trail of writes
 |- index/                          # derived search indices
-|   |- by_timestamp.json
-|   |- by_task_id.json
-|   +- by_confidence.json
-|- llm/                            # LLM interaction logs
-|   |- context.jsonl
-|   |- memory.json
-|   +- embeddings/
+|- llm/                            # LLM interaction logs (if applicable)
 |- web/                            # runtime web data (uploads, generated pages)
 +- logs/                           # process / runtime logs (stdout, stderr, structured)
-    |- runtime.jsonl
-    +- audit.log
 ```
 
+| Subfolder | Role | Required? |
+|-----------|------|-----------|
+| `instances/` | Parent directory for instance records the kernel produces. Each instance is a folder whose name and shape is the kernel's own decision. | **REQUIRED** -- every kernel that produces typed output uses this folder. |
+| `proof/` | Verification evidence -- PROV-O records, hash chains, check outcomes. | **REQUIRED** -- every conformant kernel emits proofs here. |
+| `ledger/` | Append-only audit trail of writes. | **REQUIRED** -- runtime drift is traceable through this. |
+| `index/` | Derived search indices computed from `instances/`. Format is the kernel's choice. | OPTIONAL |
+| `llm/` | LLM interaction logs, context windows, embeddings. | OPTIONAL -- only kernels that use LLMs. |
+| `web/` | Runtime web data (uploads, generated pages, static cache). | OPTIONAL -- only kernels that serve web content. |
+| `logs/` | Process/runtime logs. | OPTIONAL -- in addition to stdout/stderr captured by Kubernetes. |
+
+::: tip Kernels are free to organise their own subfolders
+The contents inside `instances/`, `proof/`, `ledger/`, etc. are the kernel's perogative. A task kernel like CK.Task may organise `instances/i-task-<guid>/` with its own files (`conversation_ref.json`, `conversation/c-<id>.jsonl`, …); a sealed-instance kernel may use `instances/instance-<tx>/data.json`. Both are valid. The spec does not enforce one kernel's convention as a global standard.
+:::
+
 ::: tip All metadata under `data/`
-Everything the kernel writes at runtime lives under the `data/` folder — `instances/` is the parent for typed and task instance records, and `proof/`, `ledger/`, `index/`, `llm/`, `web/`, `logs/` (and any future metadata kind) are siblings inside `data/`. There is no metadata at `<version>/` directly; that level is reserved for organ folders.
+Everything the kernel writes at runtime lives under the `data/` folder. There is no metadata at `<version>/` directly; that level is reserved for organ folders. Inside `data/`, the seven subfolders above are the namespaces in which kernels organise their accumulated state.
 :::
 
-::: tip Instances vs Project Data (v3.7)
-**Instances** (`instance-<tx>/`, `i-task-{guid}/`) are the kernel's typed output — they ARE the data type defined in `ontology.yaml`. They are direct children of the DATA loop root.
+::: tip Instances vs Operational Data (v3.7)
+**Instances** (`data/instances/...`) are the kernel's typed output -- they ARE the data type defined in `ontology.yaml`. The directory structure inside `instances/` is the kernel's own convention.
 
-**Project data** (`proof/`, `ledger/`, `index/`, `llm/`, `web/`, `logs/`) is operational state specific to this project deployment. It supports the kernel's operation but is not the kernel's typed output.
+**Operational data** (`proof/`, `ledger/`, `index/`, `llm/`, `web/`, `logs/`) is runtime state that supports the kernel's operation but is not the kernel's typed output.
 
-Both live in the DATA loop at `/ck-data/{hostname}/{kernel}/{version}/data/`, mounted at `/ck/{kernel}/data/` in the pod.
+Both live at `/ck-data/<project>/{kernel}/{version}/data/`, mounted at `/ck/{kernel}/data/` in the pod.
 :::
-
-### Sealed Instances vs Task Instances
-
-| Aspect | Sealed Instance | Task Instance |
-|--------|----------------|---------------|
-| Directory pattern | `instance-<short-tx>/` | `i-task-{conv_guid}/` |
-| `data.json` sealed | On first write | At `task.complete` NATS event only |
-| State tracking | None (atomic write) | `ledger.json` via NATS lifecycle events |
-| Conversation records | Not present | `conversation/` subdirectory (append-only) |
 
 ## PROV-O Provenance
 

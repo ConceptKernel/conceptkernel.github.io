@@ -172,7 +172,7 @@ v3.7    Full release -- sum of all above
 
 v3.7  serving-multiversion-unpack (CK.Operator v1.3.0)       PROVEN
         Option A: three sibling dirs (runc constraint discovery)
-        Per-kernel bare repos (no monorepo, no /ck-tool/ root)
+        Per-kernel master clones (no monorepo, no /ck-tool/ root)
         CKProject CRD with per-kernel ck_ref/tool_ref
         kopf + NATS dual control plane
         Per-version deployments, 3 PVs per kernel per version
@@ -278,7 +278,7 @@ The v3.7 docs are organized by capability, not by version number. Each page expl
 | [Graph](/v3.7/graph) | Jena Fuseki, /ckp dataset, SPARQL queries |
 | [Sessions](/v3.7/sessions) | Multi-user NATS sessions |
 | [Task Engine](/v3.7/task-engine) | Consensus-driven executor dispatch |
-| [Versioning](/v3.7/versioning) | Per-kernel bare repos, three sibling dirs, .git-ref provenance |
+| [Versioning](/v3.7/versioning) | Per-kernel master clones, three sibling dirs, .git-ref provenance |
 | [Changelog](/v3.7/changelog) | Full version-by-version changelog |
 
 ::: info Logical Analysis Note

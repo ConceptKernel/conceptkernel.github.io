@@ -1,91 +1,85 @@
 ---
-title: Versioning -- Per-Kernel Repos, Three Sibling Dirs, and Provenance
-description: How CKP uses per-kernel bare git repositories on the SeaweedFS filer, three sibling directories per kernel (ck/, tool/, data/), the runc constraint that drives this design, and ontological grounding via Git2PROV and DOAP.
+title: Versioning -- Per-Kernel Master Clones, Per-Project Worktrees, Three Sibling Dirs
+description: CKP uses per-kernel master clones plus per-project worktrees on the SeaweedFS filer, three sibling directories per kernel (ck/, tool/, data/), the runc constraint that drives this design, and ontological grounding via Git2PROV and DOAP.
 ---
 
 # Versioning
 
-## The Problem
+CKP's three-loop model gives each kernel three independently-versioned concerns: CK (identity), TOOL (capability), and DATA (knowledge). v3.7's design:
 
-CKP's three-loop model gives each kernel three independently-versioned concerns: CK (identity), TOOL (capability), and DATA (knowledge). The question is: how do you version CK and TOOL without creating a compatibility nightmare, and how do you mount three independent loops into a container without hitting container runtime constraints?
+- **Per-kernel master clones** on the SeaweedFS filer -- one regular (non-bare) clone per kernel-organ that tracks the registry's master.
+- **Per-project worktrees** off each master clone, on `<project>/<version>` branches, materialised at version-keyed paths.
+- **Three sibling directories** (`ck/`, `tool/`, `data/`) inside the pod, mounted as independent PVs.
+- **`.ckproject` manifest-driven materialisation** -- held in [CK.Project](./project)'s DATA organ, reflected onto the cluster as a `CKProject` CR. Replaces the retired `serving.json`.
 
-v3.7 answers both questions with a single design: **per-kernel bare repositories** on the SeaweedFS filer, **three sibling directories** inside the pod, and **`.ckproject` manifest-driven materialisation** (held in [CK.Project](./project)'s DATA organ, reflected onto the cluster as a `CKProject` CR) replacing the retired `serving.json`.
+## Per-Kernel Master Clones (Not Monorepo, Not Bare)
 
-## Per-Kernel Bare Repositories (Not Monorepo)
-
-Each concept kernel has its own isolated bare git repository on the SeaweedFS filer. There is no monorepo. The bare repo lives alongside the materialised versions under the kernel directory:
+Each concept kernel has its own isolated git repository per organ on the SeaweedFS filer. There is no monorepo. The clone is **not** bare -- it is a regular master clone of the registry's `<Kernel>/{ck,tool}.git` upstream:
 
 ```
-/ck/{ConceptKernel}/             bare repo (HEAD, objects/, refs/)
+/ck/{ConceptKernel}/master/ck/      master clone of ck.git on master branch (.git inside)
+/ck/{ConceptKernel}/master/tool/    master clone of tool.git on master branch (.git inside)
 ```
 
-Materialised version directories sit as siblings to the git internals under the same kernel directory. Each version directory contains `ck/` and `tool/` subdirectories. PVs mount the version's `ck/` and `tool/` paths independently -- pods never see git internals.
+Materialised version paths sit alongside the master clone, populated from it via `git worktree add` (per-project, branched) or `git archive` (read-only, version-pinned). Pods only ever mount materialised version paths -- never the master clone, never any `.git` directory.
 
-### Why Per-Kernel Repos
+### Why Per-Kernel Master Clones
 
-| Concern | Per-Kernel Repos | Monorepo |
-|---------|-----------------|----------|
+| Concern | Per-Kernel Master Clones | Monorepo |
+|---------|--------------------------|----------|
 | Independent versioning | Each kernel versioned independently by design | Requires subtree gymnastics |
 | Storage isolation | Each kernel's git objects isolated | Shared object store |
-| Quick setup | Can init git per-kernel incrementally | All-or-nothing |
-| Filer path consistency | Bare repo + versions under same path | Separate repo path vs materialised path |
-| `git archive` | `git -C /ck/{kernel} archive {ref}` -- direct extraction | `git archive {ref}:{kernel}/` -- subtree extraction |
+| Quick setup | Can clone per-kernel incrementally | All-or-nothing |
+| Filer path consistency | Master clone + version checkouts under same kernel path | Separate repo path vs materialised path |
+| Materialisation | `git worktree add` from master clone (writable, branched), or `git archive` (read-only) | Subtree extraction gymnastics |
 
 ## Filer Layout -- Two Roots, Three Sibling Dirs
 
-The filer uses two roots (`/ck/` and `/ck-data/`) with per-kernel bare repos and version subdirectories. Each version directory contains `ck/` and `tool/` as sibling subdirectories. There is **no separate `/ck-tool/` filer root**.
+The filer uses two roots (`/ck/` and `/ck-data/`). `/ck/` holds the master clones plus version-keyed CK and TOOL materialisations as siblings. `/ck-data/` holds project-keyed DATA. There is **no separate `/ck-tool/` filer root**.
 
 ```
 /ck/                                       CK + TOOL filer root
-├── Hello.Greeter/                         bare repo + versions
-│   ├── HEAD                               ┐
-│   ├── objects/                            │ git internals
-│   │   └── pack/                           │ never mounted
-│   │       ├── pack-<hash>.pack            │ into pods
-│   │       └── pack-<hash>.idx             │
-│   ├── refs/                               ┘
-│   ├── v1.3.2/                            materialised version
-│   │   ├── ck/                            CK loop files
+├── Hello.Greeter/
+│   ├── master/                            master clones (one per organ)
+│   │   ├── ck/                            regular clone of ck.git, master branch checked out
+│   │   │   ├── .git/                      git internals (HEAD, objects/, refs/) live INSIDE .git
 │   │   │   ├── conceptkernel.yaml
-│   │   │   ├── .ck-guid
-│   │   │   └── .git-ref                   contains "abc123f"
-│   │   └── tool/                          TOOL loop files
+│   │   │   └── ontology.yaml
+│   │   └── tool/                          regular clone of tool.git, master branch checked out
+│   │       ├── .git/
+│   │       └── greet.py
+│   ├── <ck-sha-abc123>/                   CK organ at this SHA (project-agnostic; shared by any project pinning this SHA)
+│   │   └── ck/
+│   │       ├── conceptkernel.yaml
+│   │       └── .git-ref                   contains "abc123"
+│   ├── <tool-sha-aaa111>/                 TOOL organ at this SHA (project-agnostic)
+│   │   └── tool/
 │   │       ├── greet.py
 │   │       └── .git-ref                   contains "aaa111"
-│   └── v1.3.19/                           materialised version
-│       ├── ck/                            CK loop files
-│       │   ├── conceptkernel.yaml         ← changed from v1.3.2
-│       │   ├── .ck-guid
-│       │   └── .git-ref
-│       └── tool/                          TOOL loop files
+│   ├── <ck-sha-def456>/                   another CK SHA
+│   │   └── ck/
+│   │       ├── conceptkernel.yaml         ← changed
+│   │       └── .git-ref
+│   └── <tool-sha-bbb222>/                 another TOOL SHA
+│       └── tool/
 │           ├── greet.py                   ← changed
 │           ├── greet_v2.py                ← new file
 │           └── .git-ref
 │
-├── Delvinator.Core/                       bare repo + versions
-│   ├── HEAD
-│   ├── objects/
-│   ├── refs/
-│   ├── v1.3.2/
-│   │   ├── ck/
-│   │   │   ├── conceptkernel.yaml
-│   │   │   ├── .ck-guid
-│   │   │   └── .git-ref
-│   │   └── tool/
-│   │       ├── app.py
-│   │       ├── utils.py
-│   │       └── .git-ref
-│   └── v1.3.19/                           ← same refs as v1.3.2
-│       ├── ck/
-│       │   └── .git-ref                   operator skips extraction
-│       └── tool/
-│           └── .git-ref
+├── Delvinator.Core/
+│   ├── master/
+│   │   ├── ck/   (.git inside)
+│   │   └── tool/ (.git inside)
+│   ├── <ck-sha-…>/ck/
+│   └── <tool-sha-…>/tool/
 │
 ├── CK.Lib.Py/
-│   ├── ...
+│   ├── master/{ck,tool}/
+│   └── …
 │
 └── CK.Lib.Js/
-    ├── ...
+    ├── master/{ck,tool}/
+    └── …
 
 /ck-data/                                  DATA loop filer root
 ├── hello.tech.games/                      project: hello
@@ -123,13 +117,13 @@ The filer uses two roots (`/ck/` and `/ck-data/`) with per-kernel bare repos and
 ```
 
 ::: tip All metadata lives under `data/`
-The DATA organ root is `/ck-data/<host>/<Kernel>/<version>/data/`. Every metadata folder — instances, proof, ledger, index, llm, web, logs, and any future kind — is a child of that single `data/` directory. Nothing metadata-related lives at `<version>/` directly; that level is reserved for organ folders (`data/` here, with `ck/`/`tool/` materialised under `/ck/<Kernel>/<version>/` on the other filer root).
+The DATA organ root is `/ck-data/<project>/<Kernel>/<version>/data/`. Every metadata folder — instances, proof, ledger, index, llm, web, logs, and any future kind — is a child of that single `data/` directory. Nothing metadata-related lives at `<version>/` directly; that level is reserved for organ folders (`data/` here, with `ck/`/`tool/` materialised under `/ck/<Kernel>/<version>/` on the other filer root).
 :::
 
 ### Key Rules
 
-- `/ck/{ConceptKernel}/{version}/ck/` is the CK loop materialisation path. `/ck/{ConceptKernel}/{version}/tool/` is the TOOL loop materialisation path. `/ck-data/{hostname}/{ConceptKernel}/{version}/data/` is the DATA loop path — everything below `data/` is metadata folders (`instances/`, `proof/`, `ledger/`, `index/`, `llm/`, `web/`, `logs/`, …).
-- Each concept kernel has its own bare repo under `/ck/{kernel}/` -- no monorepo. CK and TOOL loops share the same bare repo root but extract to separate sibling directories.
+- `/ck/{ConceptKernel}/{version}/ck/` is the CK loop materialisation path. `/ck/{ConceptKernel}/{version}/tool/` is the TOOL loop materialisation path. `/ck-data/<project>/{ConceptKernel}/{version}/data/` is the DATA loop path — everything below `data/` is metadata folders (`instances/`, `proof/`, `ledger/`, `index/`, `llm/`, `web/`, `logs/`, …).
+- Each concept kernel has its own master clone under `/ck/{kernel}/` -- no monorepo. CK and TOOL each have their own master clone under `/ck/{kernel}/master/{ck,tool}/`. Materialised version paths are added off those clones via `git worktree add` (writable, branched) or extracted via `git archive` (read-only).
 - Bare repo git internals (`HEAD`, `objects/`, `refs/`) and materialised version directories coexist under the same kernel directory. PVs mount `ck/` and `tool/` within version subdirectories -- pods never see git internals.
 - `.git-ref` in each loop directory (`ck/` and `tool/`) contains the commit hash for verification.
 - No files exist at the version root (`/ck/{kernel}/{version}/`). The version root is a namespace containing only `ck/` and `tool/` subdirectories.
@@ -144,7 +138,7 @@ Version provenance is carried by two files working in tandem:
 | `.ckproject` manifest | [CK.Project](./project)'s DATA organ (`/ck-data/<project>/CK.Project/<version>/data/instances/.ckproject`), symlinked from `<project-root>/.ckproject` and `/ck-data/<project>/.ckproject` | The operator / developer / governance process | **Intent**: "this project should deploy kernel X at version vN.M.P, with organ `ck/` pinned to SHA1 abc123, `tool/` to bbb222, `data/` to ccc333" |
 | `.git-ref` (per organ) | Inside each materialised organ dir (`/ck/<kernel>/<version>/ck/.git-ref`, `.../tool/.git-ref`, and the DATA organ equivalent) | Written by CK.Operator at materialisation | **Outcome**: "this directory was extracted from SHA1 abc123" |
 
-CK.Operator materialises a kernel by (1) reading the `.ckproject` pins, (2) running `git archive <pin>` from the bare repo to populate the version directory, and (3) writing the SHA1 into that directory's `.git-ref`. A conformant cluster can verify frozen deployment at any time: for every kernel-organ mounted, the `.git-ref` contents MUST equal the matching pin in the project's `.ckproject`. If they disagree, the deployment has drifted and the kernel MUST NOT serve traffic.
+CK.Operator materialises a kernel by (1) reading the `.ckproject` pins, (2) running `git archive <pin>` from the master clone to populate the version directory, and (3) writing the SHA1 into that directory's `.git-ref`. A conformant cluster can verify frozen deployment at any time: for every kernel-organ mounted, the `.git-ref` contents MUST equal the matching pin in the project's `.ckproject`. If they disagree, the deployment has drifted and the kernel MUST NOT serve traffic.
 
 ## In-Container Mount Layout -- Three Sibling Dirs (Option A)
 
@@ -233,7 +227,7 @@ Three PVs per kernel per version:
 ```
 ck-{project}-{kernel}-{version}-ck       CK loop     → /ck/{kernel}/{version}/ck/
 ck-{project}-{kernel}-{version}-tool     TOOL loop   → /ck/{kernel}/{version}/tool/
-ck-{project}-{kernel}-{version}-data     DATA loop   → /ck-data/{hostname}/{kernel}/{version}/data/
+ck-{project}-{kernel}-{version}-data     DATA loop   → /ck-data/<project>/{kernel}/{version}/data/
 ```
 
 ### PV Definitions
@@ -306,7 +300,7 @@ volumeMounts:
 
 ## Quick Setup Mode -- No Git Required
 
-During initial development or quick setup, a bare repository is NOT required. The operator can serve files dropped directly into a materialised version directory on the filer:
+During initial development or quick setup, no master clone is required either. The operator can serve files dropped directly into a materialised version directory on the filer:
 
 ```
 /ck/Hello.Greeter/v1.0.0/ck/conceptkernel.yaml
@@ -314,7 +308,7 @@ During initial development or quick setup, a bare repository is NOT required. Th
 /ck-data/hello.tech.games/Hello.Greeter/v1.0.0/data/   (scaffolded by operator)
 ```
 
-If no bare repo exists under the kernel directory, the operator treats the version folder as manually managed. It mounts whatever is there. The `.git-ref` file is absent, indicating no git provenance. Integrity verification and commit traceability are unavailable in this mode.
+If no master clone exists under the kernel directory, the operator treats the version folder as manually managed. It mounts whatever is there. The `.git-ref` file is absent, indicating no git provenance. Integrity verification and commit traceability are unavailable in this mode.
 
 ### CK.Project Declaration for Quick Setup
 
@@ -342,7 +336,7 @@ spec:
 1. Quick setup:  Upload files to /ck/Hello.Greeter/v1.0.0/ck/ and
                  /ck/Hello.Greeter/v1.0.0/tool/ manually via filer HTTP API.
 
-2. Git init:     Create bare repo at /ck/Hello.Greeter/
+2. Git clone:    Clone master at /ck/Hello.Greeter/master/{ck,tool}/ from the registry
                  (HEAD, objects/, refs/).
 
 3. First commit: Push files into the repo.
@@ -395,7 +389,7 @@ CKP does not invent its own vocabulary for git concepts. It grounds them in two 
 
 | Git Concept | DOAP Term | CKP Usage |
 |-------------|-----------|-----------|
-| Repository | `doap:GitRepository` | Per-kernel bare repos at `/ck/{kernel}/` |
+| Repository | `doap:GitRepository` | Per-kernel master clones at `/ck/{kernel}/` |
 | Release | `doap:release` | Version tags |
 
 ### Git2PROV for Commit Provenance
@@ -432,14 +426,74 @@ The `.git-ref` stamp serves three purposes:
 
 3. **Audit** -- the `.git-ref` file is part of the ReadOnlyMany volume. It cannot be modified by the runtime. If the materialised files have been tampered with, the `.git-ref` will not match a `git archive` of the same commit.
 
-## DATA Loop: Not in Git
+## DATA Loop: SeaweedFS Volume Is the Persistence; Git Is the Snapshot Layer
 
-The DATA loop is deliberately excluded from git. DATA accumulates continuously at runtime -- instances, proofs, ledger entries -- and has fundamentally different versioning semantics:
+DATA spans **two coexisting layers**. They are not subordinate to each other -- they hold different things at different cadences. Both are valid, both are durable, neither replaces the other.
 
-- CK and TOOL are **point-in-time snapshots** (a commit represents a complete state)
-- DATA is **append-only accumulation** (versioned by its own proof chain, not by commits)
+| Layer | What it IS | Path | Cadence |
+|-------|------------|------|---------|
+| **SeaweedFS volume** | The **persistence layer** -- the live state of the kernel. Where every instance write, proof entry, ledger append, and log line is durably stored. The volume itself provides the durability via SeaweedFS replication; nothing else is required. | `/ck-data/<project>/<Kernel>/<data-seed-sha>/data/` (mounted into pods at `/ck/<Kernel>/data/`) | Continuous. Persists across pod restarts. |
+| **Git** -- referenced by `pins.data` SHA1 | The **snapshot layer** -- discrete commit-boundary records. Captures the SEED state a kernel-version is born with, plus any deliberate checkpoint promoted into a new pin. | `<registry>/<Kernel>/data.git` (or equivalent), referenced by SHA1 in `.ckproject` | Commit-driven. Bumped at boundaries (initial seed, schema migration, archived checkpoint). |
 
-Putting DATA in git would mean either committing on every instance creation (impractical for a real-time system) or periodically snapshotting (losing the append-only invariant). The ReadWriteMany volume with ledger-based versioning is the correct abstraction for DATA.
+Concretely:
+
+- **The SeaweedFS volume IS the database disk.** Like a Postgres data directory or an EBS-backed PV. The kernel writes to it; SeaweedFS persists it; restarts don't lose it.
+- **The git snapshot is the migration record.** Like a Postgres `pg_dump` or a schema-migration commit -- a discrete artefact captured at a chosen moment, not the live state.
+- **`data/ledger/audit.jsonl` and `data/proof/` are content ON the volume**, not the durability mechanism. They are audit and provenance records the kernel writes alongside its instances. Their durability comes from the volume, exactly like every other file in `data/`. They are append-only by convention, hash-chained for integrity, replayable for audit -- but the volume is what keeps them around.
+
+CK and TOOL behave differently because they ARE git -- a CK or TOOL commit IS the complete state. DATA cannot work that way:
+
+- Committing on every instance creation is impractical for a real-time system.
+- Periodically snapshotting would lose the append-only invariant.
+
+So the live tail lives on the volume; the snapshot points live in git. They coexist.
+
+::: tip The pin is the snapshot point; the tail is whatever the volume holds
+`pins.data` answers "what did this kernel-version START with?" The SeaweedFS volume answers "what is it RIGHT NOW?" Two questions, two layers, both authoritative for their own cadence.
+:::
+
+## Kernel Version as Three-SHA Combination Lock
+
+A kernel's deployed version is a **combination lock of three SHA1s** -- one per organ. The three axes are independent:
+
+```
+kernel-version = (ck-sha, tool-sha, data-seed-sha)
+```
+
+Bumping any single SHA produces a new combination. `.ckproject` records all three per kernel (see [Project](./project) §Manifest Contents).
+
+| Pin | What changing this SHA means | Bumped when |
+|-----|-----------------------------|-------------|
+| `pins.ck` | New schema -- new types, new SHACL constraints, new ontology | On a CK organ commit |
+| `pins.tool` | New behaviour -- new processor code, new entrypoints | On a TOOL organ commit |
+| `pins.data` | New SEED -- new initial fixtures, new migration baseline, archived volume checkpoint promoted to seed | On a deliberate seed checkpoint -- never per-instance-write |
+
+A typical project will see `pins.ck` and `pins.tool` move on developer commits, while `pins.data` stays stable for long stretches and is bumped only at migration boundaries. Runtime DATA accumulates continuously on the SeaweedFS volume during the gap; that accumulation is the kernel's normal operation, not a version event.
+
+### What Changes a Pin
+
+| Event | `pins.ck` | `pins.tool` | `pins.data` |
+|-------|-----------|-------------|-------------|
+| Edit `ontology.yaml` and commit | ✅ new SHA | -- | -- |
+| Run `ck regenerate <kernel>` (rebuilds `cktype/` + `rules.shacl` from ontology.yaml) | ✅ new SHA (bundle changes) | -- | -- |
+| Commit a `tool/processor.py` change | -- | ✅ new SHA | -- |
+| Kernel writes 10 000 instances at runtime | -- | -- | -- (volume grows; pin unchanged) |
+| Operator promotes a checkpoint of the volume to a new seed | -- | -- | ✅ new SHA |
+
+The first three rows are **commit-driven** -- normal developer flow. The fourth row is **runtime accumulation on the volume** -- normal operational flow, no version impact. The fifth row is **deliberate checkpointing from the volume into a new git seed** -- rare, governance-bounded.
+
+The database analogy lines up cleanly:
+
+| RDBMS concept | CKP analogue |
+|---------------|--------------|
+| Schema version / migration commit | `pins.data` -- bumped at commit boundaries only |
+| Database data directory on disk | SeaweedFS volume at `/ck-data/<project>/<Kernel>/<data-seed-sha>/data/` -- the actual persistence |
+| Rows on disk (inserts/updates) | `data/instances/`, `data/proof/`, `data/ledger/`, `data/logs/` -- files on the volume |
+| WAL / audit log file (also on disk) | `data/ledger/audit.jsonl` -- append-only file on the same volume |
+| Cluster replication (durability mechanism) | SeaweedFS replication of the volume |
+| `pg_dump` / scheduled snapshot (separate artefact) | Promoting a volume checkpoint into a new `pins.data` SHA1 |
+
+You don't bump the schema version per `INSERT`; you bump it per `ALTER TABLE`. You don't back up the database after every row write; you let the storage layer persist it and snapshot deliberately. Same here.
 
 ## Shared Kernel Optimisation
 
@@ -494,7 +548,7 @@ v3.7 has been proven on a live AKS cluster with SeaweedFS 3.93 and the SeaweedFS
 
 ## Conformance
 
-- Each concept kernel SHOULD have its own bare git repository at `/ck/{ConceptKernel}/` (containing `HEAD`, `objects/`, `refs/`)
+- Each concept kernel SHOULD have its own master clone at `/ck/{ConceptKernel}/` (containing `HEAD`, `objects/`, `refs/`)
 - CK loop files are materialised to `/ck/{kernel}/{version}/ck/`
 - TOOL loop files are materialised to `/ck/{kernel}/{version}/tool/`
 - There MUST NOT be a separate `/ck-tool/` filer root -- CK and TOOL are sibling subdirectories under the version directory

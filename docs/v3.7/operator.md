@@ -134,7 +134,7 @@ spec:
             tool: "fff666..."    # same as v1.3.2
 ```
 
-The operator reads `spec.versions`, materialises each version from per-kernel bare repositories on the SeaweedFS filer, and creates per-version deployments, PVs, and HTTPRoute rules. A version promotion is a CKProject resource update -- `kubectl patch`, NATS command, or operator API. Standard Kubernetes-native workflow with etcd history. The CR is the cluster-side projection of the project's `.ckproject` manifest (see [CK.Project](./project) for the manifest itself).
+The operator reads `spec.versions`, materialises each version from per-kernel master clones on the SeaweedFS filer, and creates per-version deployments, PVs, and HTTPRoute rules. A version promotion is a CKProject resource update -- `kubectl patch`, NATS command, or operator API. Standard Kubernetes-native workflow with etcd history. The CR is the cluster-side projection of the project's `.ckproject` manifest (see [CK.Project](./project) for the manifest itself).
 
 ### Per-Version Deployments
 
@@ -154,7 +154,7 @@ Each kernel in each version gets three independent PVs:
 ```
 ck-{project}-{kernel}-{version}-ck       → /ck/{kernel}/{version}/ck/         ReadOnlyMany
 ck-{project}-{kernel}-{version}-tool     → /ck/{kernel}/{version}/tool/       ReadOnlyMany
-ck-{project}-{kernel}-{version}-data     → /ck-data/{hostname}/{kernel}/{version}/data/  ReadWriteMany
+ck-{project}-{kernel}-{version}-data     → /ck-data/<project>/{kernel}/{version}/data/  ReadWriteMany
 ```
 
 Inside the pod, these mount as three sibling directories under the kernel name:
@@ -309,7 +309,7 @@ If `spec.versions` is absent from a CK.Project resource, the operator falls back
 
 **deploy.storage.ck**: PersistentVolume for the CK loop with `ReadOnlyMany` access mode. Filer path: `/ck/{project}/concepts/{kernel}/`. This volume holds identity files -- the runtime process cannot modify them.
 
-**deploy.storage.data**: PersistentVolume for the DATA loop with `ReadWriteMany` access mode. Filer path: `/ck-data/{hostname}/{kernel}/{version}/data/`. This is where instances, proofs, ledger entries, indices, llm context, web data, and logs accumulate — every metadata folder lives under `data/`.
+**deploy.storage.data**: PersistentVolume for the DATA loop with `ReadWriteMany` access mode. Filer path: `/ck-data/<project>/{kernel}/{version}/data/`. This is where instances, proofs, ledger entries, indices, llm context, web data, and logs accumulate — every metadata folder lives under `data/`.
 
 **deploy.processors**: For each `node:hot` kernel, a Deployment with the processor container, volume mounts for CK (ReadOnly), TOOL (ReadOnly), and DATA (ReadWrite), and a Service for internal communication.
 

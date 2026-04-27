@@ -29,7 +29,7 @@ The `.ckproject` manifest is the authoritative record of the project's frozen de
 **Canonical path** (inside CK.Project's DATA organ on the SeaweedFS filer):
 
 ```
-/ck-data/<project-hostname>/CK.Project/<version>/data/instances/.ckproject
+/ck-data/<project>/CK.Project/<version>/data/instances/.ckproject
 ```
 
 `.ckproject` is itself an instance of `ckp:Project`, so it lives under CK.Project's `data/instances/` folder — the canonical location for any kernel's instance records.
@@ -38,7 +38,7 @@ The `.ckproject` manifest is the authoritative record of the project's frozen de
 
 | Location | Typical use |
 |---|---|
-| `/ck-data/<project-hostname>/.ckproject` | Convenience entry point at the project's DATA root on the filer |
+| `/ck-data/<project>/.ckproject` | Convenience entry point at the project's DATA root on the filer |
 | `<project-root>/.ckproject` | Symlinked into the project's git working tree (via filer-backed volume mount) so developers and CI see the same manifest the cluster does |
 
 The symlink contract means there is exactly one authoritative manifest; the other paths are readable views of the same file.
@@ -89,13 +89,13 @@ Rolling back a kernel means editing its pin in the manifest and re-reconciling -
 
 ### Pin Semantics (`pins.ck`, `pins.tool`, `pins.data`)
 
-Each pin is a SHA1 commit hash from the kernel's per-organ bare repository on the SeaweedFS filer (see [Versioning](./versioning) for the per-kernel bare-repo layout). The three pins are not symmetric:
+Each pin is a SHA1 commit hash from the kernel's per-organ master clone on the SeaweedFS filer (see [Versioning](./versioning) for the per-kernel master-clone layout). The three pins are not symmetric:
 
 | Pin | Role | Lifetime on DATA organ | Required |
 |---|---|---|---|
 | `pins.ck` | Identity materialisation — CK.Operator runs `git archive <pin>` from `/ck/{kernel}/` to produce `/ck/{kernel}/{version}/ck/`. The commit is stamped into `.git-ref`. | Immutable at runtime (CK organ is ReadOnlyMany). | **REQUIRED** |
 | `pins.tool` | Capability materialisation — same mechanism, extracts to `/ck/{kernel}/{version}/tool/`. | Immutable at runtime (TOOL organ is ReadOnlyMany). | **REQUIRED** |
-| `pins.data` | Initial seed — records the commit that populates `/ck-data/{hostname}/{kernel}/{version}/data/` at first reconcile. Kernels that start from an empty DATA organ can omit this. | The pin captures *seed* state. Runtime drift is expected and correct — DATA is ReadWriteMany. The seed `.git-ref` stays stamped as provenance of where the data organ started, not what it contains now. | OPTIONAL |
+| `pins.data` | Initial seed — records the commit that populates `/ck-data/<project>/{kernel}/{version}/data/` at first reconcile. Kernels that start from an empty DATA organ can omit this. | The pin captures *seed* state. Runtime drift is expected and correct — DATA is ReadWriteMany. The seed `.git-ref` stays stamped as provenance of where the data organ started, not what it contains now. | OPTIONAL |
 
 At materialisation time, `deploy.materialise` verifies that each extracted organ's `.git-ref` matches its declared pin. If it doesn't, the reconcile fails and the kernel is not promoted.
 

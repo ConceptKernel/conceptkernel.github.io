@@ -19,7 +19,7 @@ project.deploy lifecycle:
   1. deploy.namespace          -- Create namespace ck-{subdomain}
   2. deploy.security           -- ServiceAccount, NetworkPolicies
   3. deploy.materialise        -- git archive each kernel's organs from per-kernel
-                                  bare repos to /ck/{kernel}/{version}/{ck,tool}/
+                                  master clone via worktree to /ck/{kernel}/<sha>/{ck,tool}/
   4. deploy.storage            -- PV/PVC per three-loop spec, mounting the
                                   materialised organ paths
   5. deploy.processors         -- ConfigMap (boot.py) + Deployment
@@ -57,7 +57,7 @@ Creates per-project security resources. The rationale for default-deny is defenc
 
 ### 3. deploy.materialise
 
-Extracts each kernel's `ck/` and `tool/` organs from per-kernel bare repositories on the SeaweedFS filer to versioned materialisation paths under `/ck/{kernel}/{version}/`. Implementation: `git archive <pin>` for each organ, where the pin is the SHA1 declared in the project's `.ckproject` manifest (see [Versioning](./versioning)).
+Extracts each kernel's `ck/` and `tool/` organs from per-kernel master clones on the SeaweedFS filer to versioned materialisation paths under `/ck/{kernel}/{version}/`. Implementation: `git archive <pin>` for each organ, where the pin is the SHA1 declared in the project's `.ckproject` manifest (see [Versioning](./versioning)).
 
 | Output | Location | Content |
 |---|---|---|

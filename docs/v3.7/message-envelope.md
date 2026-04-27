@@ -165,20 +165,30 @@ Edge predicates in `conceptkernel.yaml` are not just metadata -- they materialis
 | `EXTENDS` | Subscribe to `result.{child}` | Parent forwards unknown actions to child |
 | `LOOPS_WITH` | Subscribe to `event.{peer}` (both directions) | Bidirectional invocation with circular guard |
 
+Each `ckp:RelationshipType` declares its own subscription contract on the typed predicate (the table above is its prose form). At startup, the loop walks the kernel's outbound edges as typed Pydantic models -- generated from `ontology.yaml` via LinkML -- and asks each edge's predicate for the subject to subscribe to. Dispatch is by type, not by string.
+
 ```python
-# Pseudocode: edge subscription materialisation at startup
-for edge in kernel.edges.outbound:
-    if edge.predicate == "COMPOSES":
-        await nats.subscribe(f"result.{edge.target_kernel}")
-    elif edge.predicate == "TRIGGERS":
-        await nats.subscribe(f"event.{edge.source_kernel}")
-    elif edge.predicate == "PRODUCES":
-        await nats.subscribe(f"event.{edge.source_kernel}")
-    elif edge.predicate == "EXTENDS":
-        await nats.subscribe(f"result.{edge.target_kernel}")
-    elif edge.predicate == "LOOPS_WITH":
-        await nats.subscribe(f"event.{edge.target_kernel}")
+from cklib.ontology import Edge, Kernel, NatsKernelLoop
+
+
+async def materialise_edge_subscriptions(
+    kernel: Kernel,
+    loop: NatsKernelLoop,
+) -> None:
+    """Subscribe to every NATS subject implied by the kernel's outbound edges.
+
+    Each `ckp:RelationshipType` (COMPOSES, EXTENDS, TRIGGERS, PRODUCES,
+    LOOPS_WITH) declares `subscription_subjects(edge)` -- the subjects it
+    needs the source kernel to subscribe to. The loop walks typed edges
+    and yields to that contract.
+    """
+    edge: Edge
+    for edge in kernel.edges.outbound:
+        for subject in edge.predicate.subscription_subjects(edge):
+            await loop.subscribe(subject)
 ```
+
+`Edge`, `Kernel`, and the `RelationshipType` instances are LinkML-generated Pydantic classes, validated against `rules.shacl`. `subscription_subjects()` is declared on the predicate type itself, so adding a new edge predicate means adding a typed implementation -- no `if/elif` chain to update at the call site.
 
 :::tip
 Declarative edge subscriptions eliminate a class of bugs where a developer forgets to subscribe to a topic that the ontology declares. If the edge exists in `conceptkernel.yaml`, the subscription exists at runtime. If the edge is removed, the subscription disappears. No code change is required.

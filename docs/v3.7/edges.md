@@ -140,17 +140,30 @@ LOOPS_WITH declares that two kernels can invoke each other. Both subscribe to ea
 **Circular guard:** When assembling context for an action that follows a LOOPS_WITH edge, implementations MUST mark the source kernel as visited before walking the edge. The same `SKILL.md` MUST NOT be loaded twice. A visited set prevents infinite context recursion.
 
 ```python
-def get_effective_actions(kernel, visited=None):
-    if visited is None:
-        visited = set()
-    if kernel.name in visited:
-        return {}  # circular guard
-    visited.add(kernel.name)
-    actions = kernel.own_actions.copy()
+from cklib.ontology import ActionCatalogue, Edge, Kernel, KernelUrn
+
+
+def effective_actions(
+    kernel: Kernel,
+    visited: set[KernelUrn] | None = None,
+) -> ActionCatalogue:
+    """Walk outbound edges, accumulating actions from predicates that contribute them.
+
+    Per `ckp:RelationshipType.contributes_actions` declared in core.ttl:
+    COMPOSES and EXTENDS contribute the target's catalogue; TRIGGERS and
+    PRODUCES activate the target independently and do not.
+    """
+    visited = visited or set()
+    if kernel.urn in visited:
+        return ActionCatalogue.empty()
+    visited.add(kernel.urn)
+
+    catalogue = ActionCatalogue.from_kernel(kernel)
+    edge: Edge
     for edge in kernel.edges.outbound:
-        target_actions = get_effective_actions(edge.target, visited)
-        actions.update(target_actions)
-    return actions
+        if edge.predicate.contributes_actions:
+            catalogue.merge(effective_actions(edge.target, visited))
+    return catalogue
 ```
 
 ## Effective Actions Formula

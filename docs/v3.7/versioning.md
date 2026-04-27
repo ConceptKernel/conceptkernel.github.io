@@ -12,30 +12,29 @@ CKP's three-loop model gives each kernel three independently-versioned concerns:
 - **Three sibling directories** (`ck/`, `tool/`, `data/`) inside the pod, mounted as independent PVs.
 - **`.ckproject` manifest-driven materialisation** -- held in [CK.Project](./project)'s DATA organ, reflected onto the cluster as a `CKProject` CR. Replaces the retired `serving.json`.
 
-## Per-Kernel Master Clones (Not Monorepo, Not Bare)
+## Per-Kernel Master Clones
 
-Each concept kernel has its own isolated git repository per organ on the SeaweedFS filer. There is no monorepo. The clone is **not** bare -- it is a regular master clone of the registry's `<Kernel>/{ck,tool}.git` upstream:
+Each concept kernel has its own isolated git repository per organ on the SeaweedFS filer -- a regular clone of the registry's `<Kernel>/{ck,tool}.git` upstream, with `master` checked out:
 
 ```
-/ck/{ConceptKernel}/master/ck/      master clone of ck.git on master branch (.git inside)
-/ck/{ConceptKernel}/master/tool/    master clone of tool.git on master branch (.git inside)
+/ck/{ConceptKernel}/master/ck/      clone of ck.git, master branch checked out (.git inside)
+/ck/{ConceptKernel}/master/tool/    clone of tool.git, master branch checked out (.git inside)
 ```
 
-Materialised version paths sit alongside the master clone, populated from it via `git worktree add` (per-project, branched) or `git archive` (read-only, version-pinned). Pods only ever mount materialised version paths -- never the master clone, never any `.git` directory.
+Materialised version paths sit alongside the master clone, populated from it via `git worktree add` (writable, branched, per-project) or `git archive` (read-only, version-pinned). Pods mount only the materialised version paths.
 
-### Why Per-Kernel Master Clones
+### Properties
 
-| Concern | Per-Kernel Master Clones | Monorepo |
-|---------|--------------------------|----------|
-| Independent versioning | Each kernel versioned independently by design | Requires subtree gymnastics |
-| Storage isolation | Each kernel's git objects isolated | Shared object store |
-| Quick setup | Can clone per-kernel incrementally | All-or-nothing |
-| Filer path consistency | Master clone + version checkouts under same kernel path | Separate repo path vs materialised path |
-| Materialisation | `git worktree add` from master clone (writable, branched), or `git archive` (read-only) | Subtree extraction gymnastics |
+| Property | How it is satisfied |
+|----------|---------------------|
+| Independent versioning per kernel | Each kernel has its own clone; SHAs in one kernel never affect another |
+| Storage isolation per kernel | Each kernel's git objects live under its own filer path |
+| Per-organ versioning | CK and TOOL each have their own clone, each with independent SHAs |
+| Materialisation flexibility | `git worktree add` for branched/writable checkouts; `git archive` for read-only version-pinned extraction |
 
 ## Filer Layout -- Two Roots, Three Sibling Dirs
 
-The filer uses two roots (`/ck/` and `/ck-data/`). `/ck/` holds the master clones plus version-keyed CK and TOOL materialisations as siblings. `/ck-data/` holds project-keyed DATA. There is **no separate `/ck-tool/` filer root**.
+The filer uses two roots: `/ck/` holds master clones plus version-keyed CK and TOOL materialisations as siblings; `/ck-data/` holds project-keyed DATA.
 
 ```
 /ck/                                       CK + TOOL filer root

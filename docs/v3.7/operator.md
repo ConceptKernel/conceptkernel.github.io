@@ -78,23 +78,13 @@ The `project.deploy` action follows a deterministic 10-step sequence. Each step 
 
 For the full step-by-step breakdown, see [Reconciliation Lifecycle](./reconciliation).
 
-## Version Materialisation (v3.7)
-
-::: info v3.7 -- serving-multiversion-unpack
-This section documents the version materialisation model introduced in v3.7, implemented in CK.Operator v1.3.0. See [Versioning](./versioning) for the full storage layout and runc constraint analysis.
-:::
-
-### serving.json Is Retired
-
-Prior to v3.7, `serving.json` was the sole exception to the CK loop's read-only policy. It declared which version was active via `ck_ref` and `tool_ref` fields. This created three problems that could not be cleanly solved:
-
-1. **Write-through hack** -- the CK volume had to be writable for one file, breaking the separation axiom.
-2. **Inert file** -- `serving.json` existed on disk but was not enforced by the runtime, making it decorative.
-3. **Decorative refs** -- the git branch names in `serving.json` had no mechanism to resolve to actual commit hashes.
-
-v3.7 dissolves all three problems by moving version state into the project's `.ckproject` manifest (an instance record in [CK.Project](./project)'s DATA organ, reflected to the cluster as a `CKProject` custom resource). `serving.json` no longer exists on disk, and the CK volume is purely ReadOnlyMany with no exceptions.
+## Version Materialisation
 
 ### Version State: `.ckproject` Manifest and `CKProject` CR
+
+Authoritative version declarations live in the project's `.ckproject` manifest -- an instance record in [CK.Project](./project)'s DATA organ. The cluster-side `CKProject` custom resource is the manifest projected into the Kubernetes control plane, where the operator and `kubectl` clients can read and patch it. The CK loop volume is purely ReadOnlyMany; version state is governance metadata, not file-on-volume state.
+
+Each version specifies per-kernel SHA1 commit pins for each organ (`ck`, `tool`, `data`):
 
 The authoritative version declarations live in the project's `.ckproject` manifest; the cluster-side `CKProject` custom resource is the manifest projected into the Kubernetes control plane so the operator and kubectl clients can read and patch it. Each version specifies per-kernel SHA1 commit pins for each organ (`ck`, `tool`, `data`):
 

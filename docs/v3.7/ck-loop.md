@@ -77,12 +77,12 @@ Alongside the ontological identity, four human-facing artefacts live in `ck/`. T
 | `CLAUDE.md` | agent runtime | Agent-mode prompt -- present only on kernels intended to be launched as a Claude (or compatible LLM) instance | Only on agent-type kernels |
 | `CHANGELOG.md` | developers | Cosmetic dev log -- a readable record of edits | OPTIONAL |
 
-::: tip Provenance lives in `data/proof/`, not `CHANGELOG.md`
-Authoritative provenance for what a kernel has produced lives in the [DATA loop](./data-loop)'s `data/proof/` folder -- PROV-O-grounded, hash-chained, and append-only. `CHANGELOG.md` is a cosmetic developer convenience and carries no weight in compliance, audit, or reconciliation. Treat it as a README sibling, not as a record.
+::: tip Provenance lives in `data/proof/`
+Authoritative provenance for what a kernel has produced lives in the [DATA loop](./data-loop)'s `data/proof/` folder -- PROV-O-grounded, hash-chained, and append-only. `CHANGELOG.md` sits alongside `README.md` as a developer convenience.
 :::
 
-::: warning Don't conflate the two layers
-The companion artefacts here are **not** to be confused with the ontological approach. Identity, types, and constraints come from `conceptkernel.yaml` + `ontology.yaml` + `cktype/` + `rules.shacl`. Documentation, skills, and agent prompts come from the four files above. A kernel can change its README without affecting its ontology, and vice versa. The boundary is enforced by `check.cktype` / `check.shacl` running only against the ontological layer.
+::: tip Two layers, two governance regimes
+Identity, types, and constraints are governed by `conceptkernel.yaml` + `ontology.yaml` + `cktype/` + `rules.shacl`. Documentation, skills, and agent prompts are described by the four companion artefacts above. Each layer evolves independently: `check.cktype` and `check.shacl` validate the ontological layer; the companion artefacts have no compliance check beyond their presence.
 :::
 
 ## conceptkernel.yaml -- The Identity Document
@@ -162,13 +162,11 @@ ckp://Kernel#{namespace_prefix}.{kernel_class}:v{major}.{minor}
 
 Example: `ckp://Kernel#ACME.Finance.Employee:v1.0`
 
-## Version Materialisation (v3.7)
+## Version Materialisation
 
-::: info serving.json Retired
-`serving.json` was retired in v3.7. Version state now lives in the project's **`.ckproject` manifest** -- an instance record in [CK.Project](./project)'s DATA organ at `/ck-data/<project>/CK.Project/<version>/data/instances/.ckproject`, symlinked from `<project-root>/.ckproject` and reflected to the cluster via the `CKProject` custom resource's `spec.versions`. The CK loop volume is purely ReadOnlyMany with **no exceptions**. No write-through hack, no sidecar mechanism. See [Version Materialisation](./versioning) for the full model.
-:::
+Version state lives in the project's **`.ckproject` manifest** -- an instance record in [CK.Project](./project)'s DATA organ at `/ck-data/<project>/CK.Project/<version>/data/instances/.ckproject`. A symlink at `<project-root>/.ckproject` mirrors it into the working tree, and the cluster-side `CKProject` custom resource's `spec.versions` projects it onto the Kubernetes control plane. The CK loop volume itself is purely ReadOnlyMany. See [Version Materialisation](./versioning) for the full model.
 
-Version declarations are part of the CK.Project custom resource. Each version specifies per-kernel git commit hashes for CK and TOOL loops independently:
+Version declarations are part of the `CKProject` custom resource. Each version specifies per-kernel git commit hashes for CK and TOOL loops independently:
 
 ```yaml
 spec:

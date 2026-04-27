@@ -33,9 +33,10 @@ export default withMermaid(defineConfig({
       },
       {
         text: 'Ontology',
+        link: '/ontology/v3.7/',
         items: [
           { text: 'Browse Ontology', link: '/browse/index.html' },
-          { text: 'v3.7 (TTL)', link: '/ontology/v3.7/' },
+          { text: 'v3.7 (TTL) — Current', link: '/ontology/v3.7/' },
           { text: 'v3.6 (TTL)', link: '/ontology/v3.6/' },
           { text: 'v3.5-alpha6 (TTL)', link: '/ontology/v3.5-alpha6/' },
           { text: 'v3.5-alpha3 (TTL)', link: '/ontology/v3.5-alpha3/' },

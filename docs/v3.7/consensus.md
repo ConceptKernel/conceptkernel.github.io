@@ -228,11 +228,7 @@ The governance mode is declared in `conceptkernel.yaml` -- the developer sets th
 
 **Question:** How does task execution work in practice?
 
-**Answer:** Tasks are executed by an authorized executor — typically a capability-provider kernel reached via EXTENDS. The task instruction defines the work; the constraints declared in the consensus decision bound it; the output is validated against the target kernel's ontology before sealing. The Task Execution Engine specifies this dispatch contract; concrete executors are deployment-specific. This is the v3.5.15 feature — currently at the design stage.
-
-**Gap identified:** The evaluate step checks against the target kernel's current ontology. But if the proposal includes an `ontology_update`, the new ontology does not exist yet at evaluation time. The evaluator must speculatively validate against the proposed ontology -- a form of dry-run that is not yet implemented. Currently, ontology_update proposals are evaluated only for structural validity (valid YAML, valid LinkML), not for semantic consistency with the fleet.
-
-**Gap identified:** CK.Consensus is specified but the task execution pipeline (v3.5.15) is not yet implemented. Proposals can be evaluated and approved, but tasks currently accumulate rather than executing automatically. This is the next major planned feature.
+**Answer:** Tasks are executed by an authorised executor — typically a capability-provider kernel reached via EXTENDS. The task instruction defines the work; the constraints declared in the consensus decision bound it; the output is validated against the target kernel's ontology before sealing. The [Task Execution Engine](./task-engine) specifies this dispatch contract; concrete executors are deployment-specific.
 :::
 
 ## Conformance Requirements

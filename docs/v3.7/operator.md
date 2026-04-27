@@ -406,10 +406,6 @@ v3.7 extends the v3.5 proof model from a "record that a step was executed" to **
 | 14 | deploy.auth | `oidc_discovery` | HTTP 200 |
 | 15 | deploy.auth | `jwks_reachable` | HTTP 200 + keys |
 
-::: info Evolution of the Check Count
-v3.5.2 deployed with 13 checks (no auth). v3.5.5 added checks 14 and 15 when AuthConfig was implemented. Both `delvinator.tech.games` and `hello.tech.games` pass 15/15 in the current deployment.
-:::
-
 ### Halt-on-Failure
 
 If ANY check fails:
@@ -433,7 +429,7 @@ If any volume has the wrong access mode, the deployment fails. This is not a con
 
 ## ConceptKernel CRD
 
-v3.5.2 introduced the ConceptKernel Custom Resource Definition. Each kernel in the fleet is a first-class Kubernetes object:
+The ConceptKernel Custom Resource Definition makes each kernel in the fleet a first-class Kubernetes object:
 
 ```bash
 kubectl get ck -A
@@ -545,17 +541,14 @@ Required fields on every line:
 
 This format enables `kubectl logs` to show meaningful kernel activity and allows log aggregation via Loki, Fluentd, or any standard k8s tooling without configuration.
 
-## RBAC Accumulation
+## RBAC
 
-The operator's RBAC grew across versions as capabilities were added:
+The operator holds these cluster permissions:
 
-| Version | Added RBAC |
-|---------|-----------|
-| v3.5.2 | namespaces, PVs, PVCs, deployments, services, configmaps, httproutes, conceptkernels |
-| v3.5.5 | keycloakrealmimports (get, list, create) |
-| v3.5.7 | patch verb for namespaces, PVs, PVCs, keycloakrealmimports |
+- namespaces, persistentvolumes, persistentvolumeclaims, deployments, services, configmaps, httproutes, conceptkernels (full lifecycle: get, list, create, patch)
+- keycloakrealmimports (get, list, create, patch)
 
-The v3.5.7 `patch` addition was necessary for idempotent updates. Without it, `kubectl apply --server-side --force-conflicts` could not update resources on re-deployment.
+The `patch` verb is required for idempotent updates -- without it, `kubectl apply --server-side --force-conflicts` cannot reconcile resources on re-deployment.
 
 ## Architectural Consistency Check
 
@@ -572,8 +565,6 @@ The v3.5.7 `patch` addition was necessary for idempotent updates. Without it, `k
 **Question:** The kopf timer re-verifies every 60 seconds. Is this expensive?
 
 **Answer:** Each verification cycle runs kubectl queries against the API server. For a fleet of 7 kernels with 15 checks each, that is 105 API calls per minute. This is well within Kubernetes API server capacity. The timer is configurable -- larger fleets can increase the interval.
-
-**Contradiction identified:** The v3.5.2 delta spec says "13 checks" for the initial deployment, but the v3.5.5 changelog says "13 infra + 2 auth" totaling 15. The v3.5.2 deployment output shows 13/13 checks passing (before auth existed). After v3.5.5, the count became 15/15. The documentation is consistent -- the count increased when auth was added. Not a contradiction, but worth noting for readers comparing version outputs.
 
 Multi-version deployments are supported via `spec.versions` in the CK.Project CR. Each named version gets its own deployment, PV, and HTTPRoute rule, routed by URL path prefix. (Weighted/canary traffic-split routing is on the roadmap.)
 :::

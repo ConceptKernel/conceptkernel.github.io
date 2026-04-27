@@ -267,7 +267,7 @@ Auth verification adds checks to the proof chain. All checks must pass before th
 | `env_injected` | Inspect processor deployment env vars | `KEYCLOAK_ISSUER` and `KEYCLOAK_CLIENT_ID` present |
 | `web_config_injected` | Inspect web ConfigMap | Auth config present in `window.__CK_CONFIG` |
 
-The first two checks (`oidc_discovery` and `jwks_reachable`) bring the total from 13 (v3.5.2) to 15 (v3.5.5+). The latter two are internal consistency checks.
+The first two checks (`oidc_discovery` and `jwks_reachable`) verify the project's OIDC issuer is reachable; the latter two confirm auth configuration was injected correctly into the processor deployment and the web ConfigMap.
 
 ::: warning Verification Order Matters
 `oidc_discovery` runs before `jwks_reachable`. If OIDC discovery fails, the JWKS check is skipped -- there is no point validating keys if the issuer endpoint is unreachable. This is the same halt-on-failure principle used throughout the proof chain.
@@ -313,7 +313,7 @@ Granting `update` or `delete` on realms would allow the operator to destroy user
 
 ## Multi-Project Auth: The Hello.Greeter Test
 
-v3.5.7 deployed `Hello.Greeter` to `hello.tech.games` as a proof that auth works across multiple projects with different realm strategies:
+`Hello.Greeter` at `hello.tech.games` demonstrates auth working across multiple projects with different realm strategies:
 
 | Project | Hostname | Realm | Mode | Namespace |
 |---------|----------|-------|------|-----------|

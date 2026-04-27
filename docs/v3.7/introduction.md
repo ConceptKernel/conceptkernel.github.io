@@ -148,59 +148,6 @@ v3.7 is the operational specification. It defines how a concept kernel is materi
 | Proof | Defined in spec | 15-check evidence-based verification, SHA-256 hashed |
 | Logging | (not specified) | Structured JSON stdout, `stream.{kernel}` topic |
 
-## Release Train Model
-
-v3.7 is not a single release. It is the **sum of v3.5.5 through v3.5.16** -- twelve independently shippable increments that each add one operational capability. The versions compose: each builds on all previous, and the full v3.7 release is the composition of all twelve.
-
-```
-v3.5.0  Foundation (spec, three-loop, BFO ontology)              RELEASED
-v3.5.1  Full 50-chapter specification                            RELEASED
-v3.5.2  CRD, namespace isolation, evidence-based proof           DEPLOYED
-v3.5.3  AuthConfig + deploy.auth (delta spec)                    SPEC
-v3.5.4  Subagent, streaming, consensus, EXTENDS (delta)          SPEC
-v3.5.5  AuthConfig implementation + Keycloak integration         DEPLOYED
-v3.5.6  Web client (deferred from v3.7 spec)                     DEPLOYED
-v3.5.7  Hello.Greeter kernel + multi-project deploy              DEPLOYED
-v3.5.10 EXTENDS predicate (capability mounting)                  DEPLOYED
-v3.5.11 CK.Consensus kernel                                      DEPLOYED
-v3.5.12 Jena Fuseki /ckp ontology dataset                        DEPLOYED
-v3.5.13 Ontological graph materialisation                        PLANNED
-v3.5.14 Multi-user NATS sessions                                 PLANNED
-v3.5.15 Task execution engine                                    PLANNED
----------------------------------------------------------------------
-v3.7    Full release -- sum of all above
-
-v3.7  serving-multiversion-unpack (CK.Operator v1.3.0)       PROVEN
-        Option A: three sibling dirs (runc constraint discovery)
-        Per-kernel master clones (no monorepo, no /ck-tool/ root)
-        CKProject CRD with per-kernel ck_ref/tool_ref
-        kopf + NATS dual control plane
-        Per-version deployments, 3 PVs per kernel per version
-        Quick setup mode (no git required)
-        Version pins in .ckproject manifest + CKProject CR
-        Proven: hello-v1-0-0-proc Running with three sibling PVs
-```
-
-### Why This Model
-
-Each version is independently deployable and testable. This means:
-
-1. **No big-bang releases.** Each increment ships when ready.
-2. **Each version has proof.** The 15-check verification runs after every deploy -- if it passes, the version is live.
-3. **Rollback is per-version.** If v3.5.9 (streaming) breaks something, roll back streaming without losing v3.5.8 (subagent).
-4. **The spec evolves with the code.** Delta specifications (v3.5.2, v3.5.3, v3.5.4) were written BEFORE implementation. The implementation validates the spec.
-
-### Spec-First, Then Code
-
-The implementation order follows a deliberate pattern:
-
-1. **Delta spec written** (v3.5.2 through v3.5.4) -- defines WHAT and WHY
-2. **Implementation** (v3.5.5 through v3.5.12) -- builds the WHAT
-3. **Proof verification** -- every deploy runs 13-15 checks to confirm the WHAT matches the spec
-4. **Documentation** (this site) -- explains HOW it works architecturally
-
-This is why v3.5.3 (AuthConfig spec) was written before v3.5.5 (AuthConfig implementation), and why v3.5.4 D7 (Consensus spec) was written before v3.5.11 (Consensus implementation).
-
 ## What v3.7 Adds: The Operational Stack
 
 v3.7 builds five layers of operational capability on top of the v3.5 foundation:

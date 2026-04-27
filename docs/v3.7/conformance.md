@@ -54,7 +54,7 @@ There is no "partial Core" conformance. An implementation either satisfies all 1
 
 ## Compliance Check Categories
 
-Conformance is verified by the CK.ComplianceCheck system kernel. It implements 13 check types that validate structural, ontological, and operational conformance. Each check produces a proof record with pass/fail outcome, expected value, and actual value.
+Conformance is verified by the CK.Compliance system kernel. It implements 13 check types that validate structural, ontological, and operational conformance. Each check produces a proof record with pass/fail outcome, expected value, and actual value.
 
 | Category | Checks | What Is Validated |
 |----------|--------|-------------------|

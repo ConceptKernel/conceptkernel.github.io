@@ -109,7 +109,7 @@ The chain is unbroken from data to intent.
 
 ## Enforcement via check.provenance
 
-Enforcement is through the `check.provenance` compliance check in [CK.ComplianceCheck](./consensus). A kernel that produces instances without PROV-O fields MUST fail compliance.
+Enforcement is through the `check.provenance` compliance check in [CK.Compliance](./consensus). A kernel that produces instances without PROV-O fields MUST fail compliance.
 
 ### What check.provenance Validates
 

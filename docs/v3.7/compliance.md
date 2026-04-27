@@ -1,19 +1,19 @@
 ---
 title: Compliance Checking
-description: CK.ComplianceCheck — the fleet validator with 20 check types covering identity, structure, edges, ontology, provenance, and more.
+description: CK.Compliance — the fleet validator with 20 check types covering identity, structure, edges, ontology, provenance, and more.
 ---
 
 # Compliance Checking
 
 ## Purpose
 
-A distributed system with ontological governance needs a kernel that can answer: "Does this fleet conform to its own declared rules?" `CK.ComplianceCheck` is that kernel. It validates every kernel in the fleet -- including itself -- against the CKP specification, producing compliance reports as sealed instances with PROV-O provenance.
+A distributed system with ontological governance needs a kernel that can answer: "Does this fleet conform to its own declared rules?" `CK.Compliance` is that kernel. It validates every kernel in the fleet -- including itself -- against the CKP specification, producing compliance reports as sealed instances with PROV-O provenance.
 
 The validator exists as a separate kernel (rather than a library function) because validation is an occurrent process that produces evidence, takes time, and must itself be auditable. Making it a kernel means its own compliance can be checked, its results are sealed instances, and other kernels can TRIGGER it via standard [edges](./edges).
 
 | Property | Value |
 |----------|-------|
-| URN | `ckp://Kernel#CK.ComplianceCheck:v1.0` |
+| URN | `ckp://Kernel#CK.Compliance:v1.0` |
 | Type | `node:hot` |
 | Governance | `STRICT` |
 | Entrypoint | `tool/processor.py` |
@@ -21,7 +21,7 @@ The validator exists as a separate kernel (rather than a library function) becau
 
 ## The 20 Check Types
 
-CK.ComplianceCheck defines 20 check types, each grounded in BFO. Every check type produces an `IdentityCheck` occurrent (BFO:0000015) with pass/fail verdict and evidence.
+CK.Compliance defines 20 check types, each grounded in BFO. Every check type produces an `IdentityCheck` occurrent (BFO:0000015) with pass/fail verdict and evidence.
 
 ### Core Checks (1-8)
 
@@ -66,7 +66,7 @@ Core checks (1-8) validate structural correctness -- these can run without acces
 Each check type is invoked as a fleet-wide scan. For every kernel in the fleet, the check produces a per-kernel verdict. The aggregate is a compliance report.
 
 ```
-CK.ComplianceCheck receives check.all
+CK.Compliance receives check.all
   for each kernel in fleet:
     for each check_type in [check.identity ... check.provenance]:
       verdict = run_check(kernel, check_type)
@@ -81,17 +81,17 @@ Each check produces:
 
 ## Bootstrap Self-Validation
 
-CK.ComplianceCheck MUST validate itself as part of every fleet scan. This creates a self-referential loop that is intentional: if the validator fails its own checks, the fleet report reflects that failure. The validator does not skip itself.
+CK.Compliance MUST validate itself as part of every fleet scan. This creates a self-referential loop that is intentional: if the validator fails its own checks, the fleet report reflects that failure. The validator does not skip itself.
 
 ::: warning Self-Reference
-This means a broken CK.ComplianceCheck will report its own failures. If the validator's `ontology.yaml` is missing, `check.ontology_types` will fail for CK.ComplianceCheck itself, and the fleet report will include that failure.
+This means a broken CK.Compliance will report its own failures. If the validator's `ontology.yaml` is missing, `check.ontology_types` will fail for CK.Compliance itself, and the fleet report will include that failure.
 :::
 
 ## Compliance Output
 
 ```
 $ ckp compliance
-  Running CK.ComplianceCheck against fleet...
+  Running CK.Compliance against fleet...
   check.identity            12/12  PASS
   check.awakening           12/12  PASS
   check.structure           12/12  PASS
@@ -132,10 +132,10 @@ The output shows `{passing_kernels}/{total_kernels}` for each check type. A flee
 
 ## Edge Integration
 
-CK.ComplianceCheck is triggered by other system kernels via [edge predicates](./edges):
+CK.Compliance is triggered by other system kernels via [edge predicates](./edges):
 
-- **CK.Operator** `TRIGGERS` CK.ComplianceCheck after every `project.deploy`
-- **CK.Consensus** `TRIGGERS` CK.ComplianceCheck after every approval decision
+- **CK.Operator** `TRIGGERS` CK.Compliance after every `project.deploy`
+- **CK.Consensus** `TRIGGERS` CK.Compliance after every approval decision
 
 This means compliance validation runs automatically as part of the platform lifecycle, not as a manual step.
 
@@ -145,6 +145,6 @@ This means compliance validation runs automatically as part of the platform life
 |-----------|-------|
 | Implementations MUST implement all 20 check types | REQUIRED |
 | `check.provenance` MUST enforce PROV-O field presence | REQUIRED |
-| CK.ComplianceCheck MUST validate itself during fleet scans | REQUIRED |
+| CK.Compliance MUST validate itself during fleet scans | REQUIRED |
 | `ontology.yaml` MUST be treated as REQUIRED (not OPTIONAL) | REQUIRED |
 | Compliance reports MUST be sealed instances with PROV-O | REQUIRED |

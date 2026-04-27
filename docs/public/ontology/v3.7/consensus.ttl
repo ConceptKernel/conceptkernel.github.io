@@ -167,7 +167,7 @@ ckpc:ValidationLayer-TOPOLOGY a owl:NamedIndividual , ckpc:ValidationLayer ;
 
 ckpc:ValidationLayer-COMPLIANCE a owl:NamedIndividual , ckpc:ValidationLayer ;
     rdfs:label "CKP Compliance"@en ;
-    rdfs:comment "Does the change pass CK.ComplianceCheck's 20 check types? Triggered via the TRIGGERS edge."@en .
+    rdfs:comment "Does the change pass CK.Compliance's 20 check types? Triggered via the TRIGGERS edge."@en .
 
 #################################################################
 #    Consensus Decision — PROV-O grounded

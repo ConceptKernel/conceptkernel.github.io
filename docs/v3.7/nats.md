@@ -81,7 +81,7 @@ result.CK.Task
 event.CK.Task
 stream.CK.Task
 input.TG.Cymatics          # domain kernel
-input.CK.ComplianceCheck   # compliance kernel
+input.CK.Compliance   # compliance kernel
 ```
 
 | Direction | Publisher | Subscriber | Purpose |

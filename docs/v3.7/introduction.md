@@ -1,6 +1,6 @@
 ---
 title: Introduction to CKP v3.7
-description: Purpose, scope, design principles, protocol status, and the architectural shift from specification to runtime.
+description: Purpose, scope, design principles, and protocol feature status for CKP v3.7.
 ---
 
 # Introduction to CKP v3.7
@@ -128,7 +128,7 @@ CKP v3.7 is organised into nine parts:
 | IV | Messaging: [NATS transport and topics](./nats), [message envelope](./message-envelope) |
 | V | Security: [loop isolation](./isolation), [authentication](./auth), [namespace security](./namespace-security) |
 | VI | Edges & Composition: [edge predicates](./edges), [EXTENDS](./extends) |
-| VII | System Kernels: [taxonomy](./taxonomy), [CK.ComplianceCheck](./compliance), [CK.Operator](./operator), [CK.Project & Libraries](./project) |
+| VII | System Kernels: [taxonomy](./taxonomy), [CK.Compliance](./compliance), [CK.Operator](./operator), [CK.Project & Libraries](./project) |
 | VIII | Infrastructure: [ConceptKernel + CKProject CRDs](./crd), [evidence-based proof](./proof), [reconciliation](./reconciliation), [versioning](./versioning) |
 | IX | Governance & Accumulation: [CK.Consensus](./consensus), [task engine](./task-engine), [ontological graph](./graph), [sessions](./sessions), [PROV-O provenance](./provenance) |
 
@@ -235,7 +235,7 @@ Each layer depends on the layers below it. Auth needs the operator. EXTENDS need
 | `conceptkernel` | Python | Full runtime library (CK.Lib.Py) | PyPI |
 | `@conceptkernel/cklib` | JavaScript | Browser client library (CK.Lib.Js) | npm |
 | CK.Operator | Python/Kubernetes | Kubernetes materialiser | Internal |
-| CK.ComplianceCheck | Python | Fleet validator | Internal |
+| CK.Compliance | Python | Fleet validator | Internal |
 
 This specification is the authoritative reference for all implementations. Where an implementation diverges from this specification, the specification is normative.
 

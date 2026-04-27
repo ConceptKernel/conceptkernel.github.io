@@ -161,7 +161,7 @@ Each kernel becomes a `ckp:Kernel` individual typed as `bfo:0000040` Material En
     ckp:belongsToProject <ckp://Project#delvinator.tech.games> .
 
 <ckp://Kernel#Delvinator.Core:v1.0> ckp:composes
-    <ckp://Kernel#CK.ComplianceCheck:v1.0> .
+    <ckp://Kernel#CK.Compliance:v1.0> .
 ```
 
 **Named graphs:** Each project's fleet is stored in a named graph `urn:ckp:fleet:{hostname}` for per-project SPARQL queries.

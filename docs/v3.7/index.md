@@ -27,7 +27,7 @@ features:
     details: "COMPOSES, TRIGGERS, PRODUCES, CONSUMES, EXTENDS -- the five relationships that connect kernels into a typed fleet graph."
   - icon: "\U00002705"
     title: 20 Compliance Checks
-    details: "CK.ComplianceCheck validates identity, ontology, SHACL, edges, NATS, provenance, and more. Every kernel carries a proof record."
+    details: "CK.Compliance validates identity, ontology, SHACL, edges, NATS, provenance, and more. Every kernel carries a proof record."
   - icon: "\U0001F3DB\uFE0F"
     title: CK.Consensus Governance
     details: "Propose, evaluate, approve. Four validation layers. Tasks generated for downstream execution. Every decision is a prov:Activity."

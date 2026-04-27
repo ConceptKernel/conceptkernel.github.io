@@ -29,7 +29,7 @@ v3.7 introduces EXTENDS as the fifth edge predicate. Understanding it requires c
 
 The critical distinction between COMPOSES and EXTENDS:
 
-- **COMPOSES** exposes the target's EXISTING actions on the source. `check.all` already exists on CK.ComplianceCheck; COMPOSES makes it available on Core.
+- **COMPOSES** exposes the target's EXISTING actions on the source. `check.all` already exists on CK.Compliance; COMPOSES makes it available on Core.
 - **EXTENDS** creates ENTIRELY NEW actions on the source, backed by the target's capability. `analyze` does NOT exist on the provider as a discrete action — the source kernel declares it in its edge config, and the provider supplies the execution engine.
 
 ## Edge Declaration
@@ -239,14 +239,14 @@ After successful deployment, [CK.Operator](./operator) SHOULD publish kernel met
     ckp:belongsToProject <ckp://Project#delvinator.tech.games> .
 
 <ckp://Kernel#Delvinator.Core:v1.0> ckp:composes
-    <ckp://Kernel#CK.ComplianceCheck:v1.0> .
+    <ckp://Kernel#CK.Compliance:v1.0> .
 ```
 
 Named graphs per project (`urn:ckp:fleet:{hostname}`) enable per-project SPARQL queries. Graph materialisation is best-effort; deploy MUST succeed even if SPARQL endpoint is unreachable.
 
 ### Compliance Validation
 
-[CK.ComplianceCheck](./compliance) validates edges and actions using the registries:
+[CK.Compliance](./compliance) validates edges and actions using the registries:
 
 - **`check.edges`:** Every edge target MUST exist. Every predicate MUST be in the registry. No duplicate edges. EXTENDS edges MUST define `config.actions`.
 - **`check.nats`:** Every kernel MUST declare `spec.nats` with input/result/event topics. Edge subscriptions MUST be derivable from declared edges.

@@ -86,7 +86,6 @@ Authoritative version declarations live in the project's `.ckproject` manifest -
 
 Each version specifies per-kernel SHA1 commit pins for each organ (`ck`, `tool`, `data`):
 
-The authoritative version declarations live in the project's `.ckproject` manifest; the cluster-side `CKProject` custom resource is the manifest projected into the Kubernetes control plane so the operator and kubectl clients can read and patch it. Each version specifies per-kernel SHA1 commit pins for each organ (`ck`, `tool`, `data`):
 
 ```yaml
 apiVersion: ck.tech.games/v1
@@ -358,7 +357,7 @@ CK.Operator declares outbound [edges](./edges) to other system kernels:
 
 | Target Kernel | Predicate | Semantics |
 |---------------|-----------|-----------|
-| `CK.ComplianceCheck` | `TRIGGERS` | After deploy, trigger fleet compliance validation |
+| `CK.Compliance` | `TRIGGERS` | After deploy, trigger fleet compliance validation |
 | `CK.Project` | `COMPOSES` | Inherit project declaration actions |
 
 ## Lifecycle Events
@@ -446,7 +445,7 @@ ck-delvinator    delvinator-core            node:cold   Running   15       2d
 ck-delvinator    delvinator-exchangeparser  node:cold   Running   15       2d
 ck-delvinator    delvinator-intentmapper    node:cold   Running   15       2d
 ck-delvinator    delvinator-threadscout     node:cold   Running   15       2d
-ck-delvinator    ck-compliancecheck         node:hot    Running   15       2d
+ck-delvinator    ck-compliance         node:hot    Running   15       2d
 ck-delvinator    ck-operator                node:hot    Running   15       2d
 ck-hello         hello-greeter              node:hot    Running   15       1d
 ```
@@ -464,7 +463,7 @@ spec:
   type: "node:cold"
   governance: STRICT
   edges:
-    - target: CK.ComplianceCheck
+    - target: CK.Compliance
       predicate: COMPOSES
     - target: Delvinator.TaxonomySynthesis
       predicate: PRODUCES

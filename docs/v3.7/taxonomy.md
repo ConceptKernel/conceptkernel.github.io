@@ -1,6 +1,6 @@
 ---
 title: System Kernel Taxonomy
-description: The five system kernel archetypes — Materialiser, Validator, Declarator, Capability, Governor — their identities, and the edge topology that connects them.
+description: System kernel archetypes — Materialiser, Validator, Declarator, Capability Provider, and the governance triad (Goal-Holder, Governor, Executor) — their identities and edge topology.
 ---
 
 # System Kernel Taxonomy
@@ -20,7 +20,7 @@ System kernels map to functional archetypes. Each archetype corresponds to a dis
 | Archetype | System Kernel | `qualities.type` | Governance | Role |
 |-----------|--------------|-------------------|------------|------|
 | **Materialiser** | `CK.Operator` | `node:hot` | `AUTONOMOUS` | Converts ontological declarations into running infrastructure; reconciles desired state against actual cluster state |
-| **Validator** | `CK.ComplianceCheck` | `node:hot` | `STRICT` | Validates fleet against the CKP specification; produces compliance reports as sealed instances |
+| **Validator** | `CK.Compliance` | `node:hot` | `STRICT` | Validates fleet against the CKP specification; produces compliance reports as sealed instances |
 | **Declarator** | `CK.Project` | `static` | `STRICT` | Declares projects (kernel collections under a shared domain); provides AuthConfig and storage configuration |
 | **Capability Provider** | (project-specific) | `agent` | `AUTONOMOUS` | A kernel that provides a capability (LLM inference, search, transcoding, etc.) to other kernels via the [EXTENDS](./extends) predicate; maintains its own behavioural-template registry. Concrete provider kernels are project-specific and not part of the protocol specification. |
 | **Goal-Holder** | `CK.Goal` | `node:hot` | `STRICT` | Records the fleet's intent as goal instances -- desired outcomes that drive what changes get proposed. Goals are the WHAT |
@@ -38,7 +38,7 @@ Each system kernel has a stable URN and kernel_id that persists across versions.
 | Kernel | URN | BFO Type | NATS Input Topic |
 |--------|-----|----------|------------------|
 | `CK.Operator` | `ckp://Kernel#CK.Operator:v1.0` | `BFO:0000040` | `input.CK.Operator` |
-| `CK.ComplianceCheck` | `ckp://Kernel#CK.ComplianceCheck:v1.0` | `BFO:0000040` | `input.CK.ComplianceCheck` |
+| `CK.Compliance` | `ckp://Kernel#CK.Compliance:v1.0` | `BFO:0000040` | `input.CK.Compliance` |
 | `CK.Project` | `ckp://Kernel#CK.Project:v1.0` | `BFO:0000040` | `input.CK.Project` |
 | `CK.Goal` | `ckp://Kernel#CK.Goal:v1.0` | `BFO:0000040` | `input.CK.Goal` |
 | `CK.Consensus` | `ckp://Kernel#CK.Consensus:v1.0` | `BFO:0000040` | `input.CK.Consensus` |
@@ -54,12 +54,12 @@ System kernels form a connected graph. The edges encode the platform's own opera
 CK.Goal  ---- PRODUCES ----> CK.Consensus     (active goals motivate proposals)
 CK.Consensus ---- PRODUCES ----> CK.Task      (approval generates executable tasks)
 CK.Task  ---- TRIGGERS ----> CK.Operator      (completed tasks reconcile)
-CK.Task  ---- TRIGGERS ----> CK.ComplianceCheck (completed tasks revalidate)
+CK.Task  ---- TRIGGERS ----> CK.Compliance (completed tasks revalidate)
 CK.Task  ---- PRODUCES ----> CK.Goal          (completion updates goal progress)
 CK.Consensus ---- EXTENDS ----> {capability provider}   # project-specific
 
 CK.Operator
-  |--- TRIGGERS ---> CK.ComplianceCheck
+  |--- TRIGGERS ---> CK.Compliance
   |--- COMPOSES ---> CK.Project
 ```
 
@@ -68,10 +68,10 @@ CK.Operator
 | `CK.Goal` | `PRODUCES` | `CK.Consensus` | Active goals motivate proposals that consensus evaluates |
 | `CK.Consensus` | `PRODUCES` | `CK.Task` | Each approved decision produces one or more executable tasks |
 | `CK.Task` | `TRIGGERS` | `CK.Operator` | Completed task triggers reconciliation of changed declarations |
-| `CK.Task` | `TRIGGERS` | `CK.ComplianceCheck` | Completed task triggers revalidation of the affected kernel |
+| `CK.Task` | `TRIGGERS` | `CK.Compliance` | Completed task triggers revalidation of the affected kernel |
 | `CK.Task` | `PRODUCES` | `CK.Goal` | Task completion produces progress updates on the originating goal |
 | `CK.Consensus` | `EXTENDS` | (capability provider) | Project-specific; deployments declare their own AI-assisted reviewer if any |
-| `CK.Operator` | `TRIGGERS` | `CK.ComplianceCheck` | After deploy, trigger fleet validation |
+| `CK.Operator` | `TRIGGERS` | `CK.Compliance` | After deploy, trigger fleet validation |
 | `CK.Operator` | `COMPOSES` | `CK.Project` | Inherit project declaration actions |
 
 ::: tip Reading Edges
@@ -90,12 +90,12 @@ CK.Operator is the bridge between ontological declaration and physical infrastru
 
 See [CK.Operator](./operator) for the full specification.
 
-### Validator: CK.ComplianceCheck
+### Validator: CK.Compliance
 
-CK.ComplianceCheck validates every kernel in the fleet -- including itself -- against the CKP specification, producing compliance reports as sealed instances with PROV-O provenance.
+CK.Compliance validates every kernel in the fleet -- including itself -- against the CKP specification, producing compliance reports as sealed instances with PROV-O provenance.
 
 - **20 check types** covering identity, structure, edges, tools, web, grants, integrity, LLM, versions, NATS, ontology, instances, isolation, materialisation, SHACL, consensus, and provenance
-- **Self-validating:** CK.ComplianceCheck validates itself during every fleet scan
+- **Self-validating:** CK.Compliance validates itself during every fleet scan
 
 See [Compliance Checking](./compliance) for the full specification.
 
@@ -143,7 +143,7 @@ CK.Task receives approved tasks, dispatches each one to the executor named in th
 
 - **Task lifecycle:** `pending` -> `executing` -> `completed` or `failed`
 - **Validation pipeline:** structural -> ontology -> SHACL -> task constraints
-- **Triggers downstream:** Completed tasks trigger CK.Operator (reconcile) and CK.ComplianceCheck (revalidate); progress updates flow back to CK.Goal
+- **Triggers downstream:** Completed tasks trigger CK.Operator (reconcile) and CK.Compliance (revalidate); progress updates flow back to CK.Goal
 
 See [Task Execution Engine](./task-engine) for the full specification.
 
@@ -152,7 +152,7 @@ See [Task Execution Engine](./task-engine) for the full specification.
 | Criterion | Level |
 |-----------|-------|
 | System kernels MUST use the `CK.*` namespace prefix | REQUIRED |
-| System kernels MUST pass all applicable CK.ComplianceCheck check types | REQUIRED |
+| System kernels MUST pass all applicable CK.Compliance check types | REQUIRED |
 | Domain kernels MUST NOT use the `CK.*` namespace prefix | REQUIRED |
 | System kernels MUST follow the same three-loop separation as domain kernels | REQUIRED |
 | Each system kernel MUST have a stable URN and kernel_id across versions | REQUIRED |

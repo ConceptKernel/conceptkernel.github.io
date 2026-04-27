@@ -68,7 +68,7 @@ Each declared outbound edge in `conceptkernel.yaml` becomes an RDF object-proper
 
 ```turtle
 <ckp://Kernel#Delvinator.Core:v1.0>
-    ckp:composes <ckp://Kernel#CK.ComplianceCheck:v1.0> ;
+    ckp:composes <ckp://Kernel#CK.Compliance:v1.0> ;
     ckp:produces <ckp://Kernel#Delvinator.TaxonomySynthesis:v1.0> ;
     ckp:extends  <ckp://Kernel#Provider.LLM:v1.0> .
 ```

@@ -34,7 +34,7 @@ edges:
   outbound:
     - target_kernel: Acme.UI.Layout
       predicate: COMPOSES
-    - target_kernel: CK.ComplianceCheck
+    - target_kernel: CK.Compliance
       predicate: TRIGGERS
       trigger_action: check.identity
     - target_kernel: {provider-kernel}
@@ -88,10 +88,10 @@ TRIGGERS fires the target kernel's specified action after the source kernel comp
 - Sequential -- target context loaded after source completes
 - Each kernel writes its own instances
 
-**Use case:** Compliance checking after deployment. After `CK.Operator` completes `deploy.ready`, it triggers `CK.ComplianceCheck` to validate the fleet.
+**Use case:** Compliance checking after deployment. After `CK.Operator` completes `deploy.ready`, it triggers `CK.Compliance` to validate the fleet.
 
 ```yaml
-- target_kernel: CK.ComplianceCheck
+- target_kernel: CK.Compliance
   predicate: TRIGGERS
   trigger_action: check.identity
 ```

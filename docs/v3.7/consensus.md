@@ -63,7 +63,7 @@ CK.Consensus declares (at minimum) two outbound edges; deployments MAY declare a
 
 | Target | Predicate | Rationale |
 |---|---|---|
-| `CK.ComplianceCheck` | `TRIGGERS` | Validate proposals against CKP compliance (20 check types) |
+| `CK.Compliance` | `TRIGGERS` | Validate proposals against CKP compliance (20 check types) |
 | `CK.Operator` | `TRIGGERS` | Reconcile changes after tasks complete |
 | (capability provider) | `EXTENDS` | OPTIONAL: AI review of proposals via a `strict-auditor`-style template; provider is project-specific. |
 
@@ -119,7 +119,7 @@ Does the change create orphan references, circular dependencies, or broken edge 
 
 ### 4. CKP Compliance (20 Check Types)
 
-The proposal is validated against the full compliance suite via the TRIGGERS edge to CK.ComplianceCheck. This catches issues that the first three layers miss:
+The proposal is validated against the full compliance suite via the TRIGGERS edge to CK.Compliance. This catches issues that the first three layers miss:
 - Missing awakening files
 - Invalid NATS topic declarations
 - Version conflicts
@@ -171,7 +171,7 @@ prov:Activity:
   prov:wasGeneratedBy: "ckp://Action#CK.Consensus/evaluate"
   prov:used:
     - "ckp://Kernel#Delvinator.Core:v1.0/ontology.yaml"
-    - "ckp://Kernel#CK.ComplianceCheck:v1.0/check.all"
+    - "ckp://Kernel#CK.Compliance:v1.0/check.all"
   decision:
     verdict: pass
     target_kernel: Delvinator.Core
@@ -210,7 +210,7 @@ Consensus behavior depends on the target kernel's governance mode:
 | **RELAXED** | Structural changes (actions, edges, ontology) MUST go through consensus; documentation changes (SKILL.md, CLAUDE.md) MAY be direct |
 | **AUTONOMOUS** | MAY bypass consensus; SHOULD still produce [PROV-O](./provenance) records |
 
-This means CK.ComplianceCheck (STRICT governance) requires consensus for every change, while a development kernel with RELAXED governance can iterate faster on documentation without governance overhead. Even AUTONOMOUS kernels should record provenance -- the audit trail matters even when governance is relaxed.
+This means CK.Compliance (STRICT governance) requires consensus for every change, while a development kernel with RELAXED governance can iterate faster on documentation without governance overhead. Even AUTONOMOUS kernels should record provenance -- the audit trail matters even when governance is relaxed.
 
 The governance mode is declared in `conceptkernel.yaml` -- the developer sets the rules, consensus enforces them.
 

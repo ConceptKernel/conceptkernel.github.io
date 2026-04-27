@@ -123,7 +123,7 @@ The `additionalPrinterColumns` provide at-a-glance fleet status via `kubectl`:
 $ kubectl get ck -n ck-delvinator
 NAME                TYPE        PHASE     CHECKS   AGE
 delvinator-core     node:cold   Running   7        3d
-ck-compliancecheck  node:hot    Running   7        3d
+ck-compliance  node:hot    Running   7        3d
 ck-operator         node:hot    Running   7        3d
 ```
 
@@ -170,7 +170,7 @@ spec:
   type: "node:cold"
   governance: STRICT
   edges:
-    - target: CK.ComplianceCheck
+    - target: CK.Compliance
       predicate: COMPOSES
     - target: Delvinator.TaxonomySynthesis
       predicate: PRODUCES

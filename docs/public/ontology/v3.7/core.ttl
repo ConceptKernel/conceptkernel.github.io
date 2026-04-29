@@ -678,5 +678,43 @@ ckp:authSecret a owl:DatatypeProperty ;
     rdfs:comment "Overall BFO alignment: Continuants (88%), Occurrents (55%), v3.7 additions (65%)"@en .
 
 #################################################################
+#    v3.7.6 additions — Lock state for project-kernel attachments
+#    (added in place per SPEC.CK.NEW.v3.7.6 §7; the v3.7 namespace
+#     is patched, no v3.7.6 ontology folder is introduced)
+#################################################################
+
+ckp:LockState a owl:Class ;
+    rdfs:label "Lock State"@en ;
+    rdfs:comment "Read/write access state for a kernel organ attached to a project. v3.7.6 addition. Persists declaratively in .ckproject under kernels[].locks.{ck,tool,data}; the ck CLI refuses mutating verbs (attach, pin, push) on locked organs. Materialised worktrees remain content-addressable and verifiable when locked; only the ck-mediated mutation surface is closed."@en ;
+    owl:oneOf ( ckp:RW ckp:RO ) ;
+    dc:description "v3.7.6 addition." .
+
+ckp:RW a ckp:LockState ;
+    rdfs:label "rw"@en ;
+    rdfs:comment "Read-write — mutating ck verbs are permitted. Default state when no lock is declared in .ckproject."@en .
+
+ckp:RO a ckp:LockState ;
+    rdfs:label "ro"@en ;
+    rdfs:comment "Read-only — mutating ck verbs are refused."@en .
+
+ckp:ckLockState a owl:ObjectProperty ;
+    rdfs:label "ck organ lock state"@en ;
+    rdfs:range ckp:LockState ;
+    rdfs:comment "Lock state of the CK organ for a kernel attached to a project. v3.7.6 addition. Default: ckp:RW."@en ;
+    dc:description "v3.7.6 addition." .
+
+ckp:toolLockState a owl:ObjectProperty ;
+    rdfs:label "tool organ lock state"@en ;
+    rdfs:range ckp:LockState ;
+    rdfs:comment "Lock state of the TOOL organ for a kernel attached to a project. v3.7.6 addition. Default: ckp:RW."@en ;
+    dc:description "v3.7.6 addition." .
+
+ckp:dataLockState a owl:ObjectProperty ;
+    rdfs:label "data organ lock state"@en ;
+    rdfs:range ckp:LockState ;
+    rdfs:comment "Lock state of the DATA organ for a kernel attached to a project. v3.7.6 addition. Default: ckp:RW. ck project lock <hostname> without --include-data leaves dataLockState unchanged."@en ;
+    dc:description "v3.7.6 addition." .
+
+#################################################################
 # End of ConceptKernel Base BFO Ontology v3.7
 #################################################################

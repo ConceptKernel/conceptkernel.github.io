@@ -462,8 +462,8 @@ ckp:hasOntology a owl:ObjectProperty , owl:FunctionalProperty ;
 ckp:Project a owl:Class ;
     rdfs:subClassOf cco:Organization ;  # cco:Organization
     rdfs:label "Project"@en ;
-    rdfs:comment "Organizes kernels into a coherent deployment unit: a pinned set of frozen versions, the edges between them, and project-scoped configuration. Formally grounded in cco:Organization."@en ;
-    dc:description "Each Project instance is materialized by a .ckproject manifest. The manifest is the authoritative record of the project's frozen deployment — SHA1 commit pins for each of the 3 organs (ck, tool, data) per kernel. The instance lives in CK.Project's DATA organ at /ck-data/<project>/CK.Project/<version>/data/instances/.ckproject on the SeaweedFS filer; a convenience symlink at /ck-data/<project>/.ckproject and a working-tree symlink at <project-root>/.ckproject both point at the same authoritative instance. All metadata folders (instances, proof, ledger, index, llm, web, logs) live under each kernel's DATA organ root at /ck-data/<host>/<Kernel>/<version>/data/. CK.Operator reads the manifest to materialize kernels at their pinned versions."@en ;
+    rdfs:comment "Organizes kernels into a coherent deployment unit: a locked set of frozen organ versions, the edges between them, and project-scoped configuration. Formally grounded in cco:Organization."@en ;
+    dc:description "Each Project instance is materialized by a .ckproject manifest. The manifest is the authoritative record of the project's frozen deployment — for each kernel, three organ locks (ck, tool, data) declaring the mode (ro|rw) and the 40-character lock SHA (the git commit ID on the corresponding organ's bare repo). The instance lives in CK.Project's DATA organ at /ck-data/<project>/CK.Project/<version>/data/instances/.ckproject on the SeaweedFS filer; a convenience symlink at /ck-data/<project>/.ckproject and a working-tree symlink at <project-root>/.ckproject both point at the same authoritative instance. All metadata folders (instances, proof, ledger, index, llm, web, logs) live under each kernel's DATA organ root at /ck-data/<host>/<Kernel>/<version>/data/. CK.Operator reads the manifest to materialize kernels at the locked organ commit IDs."@en ;
     ckp:implementationStatus "PARTIAL"^^xsd:string .
 
 #################################################################
@@ -685,7 +685,7 @@ ckp:authSecret a owl:DatatypeProperty ;
 
 ckp:LockState a owl:Class ;
     rdfs:label "Lock State"@en ;
-    rdfs:comment "Read/write access state for a kernel organ attached to a project. v3.7.6 addition. Persists declaratively in .ckproject under kernels[].locks.{ck,tool,data}; the ck CLI refuses mutating verbs (attach, pin, push) on locked organs. Materialised worktrees remain content-addressable and verifiable when locked; only the ck-mediated mutation surface is closed."@en ;
+    rdfs:comment "Read/write access state for a kernel organ attached to a project. v3.7.6 addition. Persists declaratively in .ckproject under each KernelMounting's organs[]/locks block (per ckp:OrganLock); the ck CLI refuses mutating verbs (attach, lock-advance, push) on ro-locked organs. Materialised worktrees remain content-addressable and verifiable when locked; only the ck-mediated mutation surface is closed."@en ;
     owl:oneOf ( ckp:RW ckp:RO ) ;
     dc:description "v3.7.6 addition." .
 
@@ -698,23 +698,80 @@ ckp:RO a ckp:LockState ;
     rdfs:comment "Read-only — mutating ck verbs are refused."@en .
 
 ckp:ckLockState a owl:ObjectProperty ;
-    rdfs:label "ck organ lock state"@en ;
+    owl:deprecated true ;
+    rdfs:label "ck organ lock state (DEPRECATED v3.7.6)"@en ;
     rdfs:range ckp:LockState ;
-    rdfs:comment "Lock state of the CK organ for a kernel attached to a project. v3.7.6 addition. Default: ckp:RW."@en ;
-    dc:description "v3.7.6 addition." .
+    rdfs:comment "DEPRECATED v3.7.6: superseded by ckp:locks → ckp:OrganLock with ckp:organKey \"ck\". The new shape carries lockMode + lockSha + (rw-only) taskId per organ; this predicate carried only the mode. Readers accept until v3.7.7; writers emit the new shape from v3.7.6."@en .
 
 ckp:toolLockState a owl:ObjectProperty ;
-    rdfs:label "tool organ lock state"@en ;
+    owl:deprecated true ;
+    rdfs:label "tool organ lock state (DEPRECATED v3.7.6)"@en ;
     rdfs:range ckp:LockState ;
-    rdfs:comment "Lock state of the TOOL organ for a kernel attached to a project. v3.7.6 addition. Default: ckp:RW."@en ;
-    dc:description "v3.7.6 addition." .
+    rdfs:comment "DEPRECATED v3.7.6: superseded by ckp:locks → ckp:OrganLock with ckp:organKey \"tool\". See ckp:ckLockState."@en .
 
 ckp:dataLockState a owl:ObjectProperty ;
-    rdfs:label "data organ lock state"@en ;
+    owl:deprecated true ;
+    rdfs:label "data organ lock state (DEPRECATED v3.7.6)"@en ;
     rdfs:range ckp:LockState ;
-    rdfs:comment "Lock state of the DATA organ for a kernel attached to a project. v3.7.6 addition. Default: ckp:RW. ck project lock <hostname> without --include-data leaves dataLockState unchanged."@en ;
-    dc:description "v3.7.6 addition." .
+    rdfs:comment "DEPRECATED v3.7.6: superseded by ckp:locks → ckp:OrganLock with ckp:organKey \"data\". See ckp:ckLockState."@en .
+
 
 #################################################################
-# End of ConceptKernel Base BFO Ontology v3.7
+#    v3.7.6 LOCKS contract — KernelMounting + OrganLock + locks property
+#    (per SPEC.CK.LOCKS.v3.7.6.md and SPEC.CK.LOCKS.v3.7.6.ontology-delta.ttl;
+#     supersedes the per-organ LockState predicates above)
+#################################################################
+
+ckp:KernelMounting a owl:Class ;
+    rdfs:label "Kernel Mounting"@en ;
+    rdfs:comment "A kernel attached to a project at a route. Carries three OrganLock instances (one per organ: ck, tool, data) describing how each organ is locked into the project's frozen deployment. v3.7.6 introduction; corresponds to a single entry under .ckproject spec.versions[].kernels[]."@en ;
+    dc:description "v3.7.6 addition. Authoritatively specified by SPEC.CK.LOCKS.v3.7.6 §3."@en .
+
+
+ckp:OrganLock a owl:Class ;
+    rdfs:label "Organ Lock"@en ;
+    rdfs:comment "Per-organ lock declaration on a KernelMounting. Three required fields: lockMode (ro|rw), lockSha (40-char git commit ID), and — when lockMode is rw — taskId (the CK.Task identifier scoping the read-write branch). v3.7.6 introduction. Supersedes the simpler v3.7-internal LockState predicates (ckp:ckLockState etc.) which only carried the ro/rw mode without sha or task."@en ;
+    dc:description "v3.7.6 addition. Authoritatively specified by SPEC.CK.LOCKS.v3.7.6 §2 and §3."@en .
+
+
+ckp:locks a owl:ObjectProperty ;
+    rdfs:label "locks"@en ;
+    rdfs:domain ckp:KernelMounting ;
+    rdfs:range ckp:OrganLock ;
+    rdfs:comment "Each KernelMounting carries exactly three OrganLock instances (one per organ: ck, tool, data). The owning organ is identified by the ckp:organKey field on the OrganLock. Non-functional ObjectProperty — multiple OrganLock instances per KernelMounting is the contract. v3.7.6 addition."@en ;
+    dc:description "v3.7.6 addition. SHACL shape in SPEC.CK.LOCKS.v3.7.6.shacl.ttl §KernelMountingLocksShape. YAML serialization is list-of-dicts under `organs:` per ontology-delta §7."@en .
+
+
+ckp:organKey a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "organ key"@en ;
+    rdfs:domain ckp:OrganLock ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Which organ this lock applies to. One of {ck, tool, data}. v3.7.6 addition."@en .
+
+
+ckp:lockMode a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "lock mode"@en ;
+    rdfs:domain ckp:OrganLock ;
+    rdfs:range ckp:LockState ;
+    rdfs:comment "Read or write mode for this organ lock. Reuses the v3.7-shipped ckp:LockState enum (ckp:RW | ckp:RO). v3.7.6 promotes this from a per-organ predicate on the kernel-mounting (ckp:ckLockState etc.) to a field of OrganLock."@en .
+
+
+ckp:lockSha a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "lock SHA"@en ;
+    rdfs:domain ckp:OrganLock ;
+    rdfs:range xsd:string ;
+    rdfs:comment "The 40-character lowercase hex git commit ID identifying the organ's frozen content. The literal output of `git rev-parse HEAD` against the organ's bare repo. SHACL constrains the pattern to ^[0-9a-f]{40}$. v3.7.6 addition."@en ;
+    dc:description "Authoritative identity for the locked organ content. Display surfaces (CLI columns, branch names) may render the first 8 hex chars; comparison logic uses the full 40 always."@en .
+
+
+ckp:taskId a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "task ID"@en ;
+    rdfs:domain ckp:OrganLock ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Identifier of the CK.Task scoping the read-write branch on this organ. Required when lockMode is ckp:RW; absent when lockMode is ckp:RO. The branch name on the materialised worktree is derived as <project-slug>.task.<taskId>. v3.7.6 addition."@en ;
+    dc:description "v3.7.6 addition. SHACL constraint MISSING_TASK_ON_RW: rw locks must declare this; ro locks must not."@en .
+
+
+#################################################################
+# End of ConceptKernel Base BFO Ontology v3.7 (with v3.7.6 LOCKS additions)
 #################################################################

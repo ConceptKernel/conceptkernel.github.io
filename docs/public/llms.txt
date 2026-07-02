@@ -2,12 +2,29 @@
 # https://conceptkernel.org
 
 ## What is this?
-An open protocol for autonomous concept governance. Every entity is a Material Entity (BFO:0000040) with three independently-versioned loops mapped to Description Logic boxes: CK Loop → TBox (what CAN exist), TOOL Loop → RBox (how things RELATE), DATA Loop → ABox (what DOES exist).
+An open protocol for sovereign, semantic, self-governing state. Every kernel is a Material Entity (BFO:0000040) whose types are ontology (RDF/OWL/SHACL), whose every change is shape-gated, sealed, and proof-chained (validate → seal → HMAC-chained ledger → verifiable proof, in one transaction), and whose only interface is a single typed verb: ckp.dispatch(verb, urn, payload, identity) over NATS-WSS. A kernel changes its own types by consensus (propose → vote → apply); each applied change advances its epoch ε.
 
 ## Current version
-CKP v3.7 is the current specification. v3.6 is frozen and remains browseable; older versions (v3.5-alpha6, v3.5-alpha3, v3.4) are historical.
+CKP v3.9.1 (Critical Isolation) is the current protocol epoch, implemented and shipped: the pgCK runtime (PostgreSQL extension, https://github.com/styk-tv/pgCK, extension v0.4.15, attested) and the dispatch-only client cklib (https://github.com/ConceptKernel/CK.Lib.Js, v1.5.3). The v3.7 set below is the last fully published narrative specification on this site; the v3.9.1 documentation set is in progress (tracked at https://github.com/ConceptKernel/conceptkernel.github.io/milestone/1). CKN — Concept Kernel Notation, CK(K) ≜ ⟪ χ · ρ · σ · α · γ · π · δ · φ ⟫ε — is the v3.10 design direction: https://conceptkernel.org/#notation
 
-## Key pages (v3.7)
+## Runtime core vocabulary (stable namespace, enforced at every sealed write)
+- Namespace: https://conceptkernel.org/ontology/v3.8/core#
+- Turtle: https://conceptkernel.org/ontology/v3.8/core.ttl
+- Index: https://conceptkernel.org/ontology/v3.8/
+- 11 classes (Kernel, Organ, Affordance, LedgerEntry, Proof, Provenance, Proposal, Vote, QuorumLevel, Grant, Transition) + 8 SHACL seal-gate shapes
+- Domain kernels are project-scoped URNs: urn:ckp:<project>/type/<Name>, /prop/<name>, /shape/<Name>
+
+## Epochs (self-progression, measured)
+- v3.4 (2026 Q1): 79 classes, 4 pages — the grounding
+- v3.5 (2026 Q1): 97 classes, 21 pages — three loops as Description Logic boxes
+- v3.6 (2026 Q2): 119 classes, 37 pages — the full specification
+- v3.7 (2026 Q2): 120 classes, 9 shapes, 31 pages, 20 checks, 5 edge predicates — the refined canon
+- v3.8: the core vocabulary's permanent namespace (see above)
+- v3.9 (2026 Q2): Critical Isolation — the kernel moves into PostgreSQL; 1 door; 31 attested runtime releases in 34 days (v0.1.0 → v0.4.15)
+- v3.9.1 (2026 Q2): the client meets the server — 17 verbs, 0 query surfaces, urn:ckp: naming proven live
+- v3.10 (in design): CKN, the notation; the scoring loop (signal.cast, concept.score) — tracked in public issues
+
+## Key pages (v3.7 published set)
 - Introduction: https://conceptkernel.org/v3.7/introduction
 - Conformance & Terminology: https://conceptkernel.org/v3.7/conformance
 - Three Loops as One System: https://conceptkernel.org/v3.7/three-loops
@@ -38,7 +55,7 @@ CKP v3.7 is the current specification. v3.6 is frozen and remains browseable; ol
 - PROV-O Provenance: https://conceptkernel.org/v3.7/provenance
 - Full Changelog: https://conceptkernel.org/v3.7/changelog
 
-## Ontology files (Turtle)
+## Ontology files (Turtle, v3.7 documented corpus)
 - Core: https://conceptkernel.org/ontology/v3.7/core.ttl
 - Kernel Metadata: https://conceptkernel.org/ontology/v3.7/kernel-metadata.ttl
 - Processes: https://conceptkernel.org/ontology/v3.7/processes.ttl
@@ -69,6 +86,13 @@ CKP v3.7 is the current specification. v3.6 is frozen and remains browseable; ol
 
 ## Frozen previous spec
 - v3.6 (frozen): https://conceptkernel.org/v3.6/introduction
+
+## Run it now
+- Runtime (PostgreSQL extension, attested releases): https://github.com/styk-tv/pgCK
+- Client (dispatch-only, zero-dependency): https://github.com/ConceptKernel/CK.Lib.Js
+- hello-kernel (zero to sealed state, Docker only): https://github.com/sporaxis-com/oci-germination/tree/main/examples/hello-kernel
+- Semantic substrate (RDF/SPARQL/SHACL/OWL-RL in PostgreSQL): https://github.com/styk-tv/pgRDF
+- Ontology-first OCI composition: https://github.com/sporaxis-com/sporaxis
 
 ## Community
 - GitHub: https://github.com/ConceptKernel

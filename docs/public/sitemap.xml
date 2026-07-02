@@ -8,6 +8,10 @@
   <!-- Ontology Browser -->
   <url><loc>https://conceptkernel.org/browse/</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
 
+  <!-- Runtime core vocabulary (stable namespace) -->
+  <url><loc>https://conceptkernel.org/ontology/v3.8/</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.8/core.ttl</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+
   <!-- Spec: v3.7 (current) -->
   <url><loc>https://conceptkernel.org/v3.7/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://conceptkernel.org/v3.7/introduction</loc><priority>1.0</priority></url>

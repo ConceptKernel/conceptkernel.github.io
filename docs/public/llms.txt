@@ -5,7 +5,35 @@
 An open protocol for sovereign, semantic, self-governing state. Every kernel is a Material Entity (BFO:0000040) whose types are ontology (RDF/OWL/SHACL), whose every change is shape-gated, sealed, and proof-chained (validate → seal → HMAC-chained ledger → verifiable proof, in one transaction), and whose only interface is a single typed verb: ckp.dispatch(verb, urn, payload, identity) over NATS-WSS. A kernel changes its own types by consensus (propose → vote → apply); each applied change advances its epoch ε.
 
 ## Current version
-CKP v3.9.1 (Critical Isolation) is the current protocol epoch, implemented and shipped: the pgCK runtime (PostgreSQL extension, https://github.com/styk-tv/pgCK, extension v0.4.15, attested) and the dispatch-only client cklib (https://github.com/ConceptKernel/CK.Lib.Js, v1.5.3). The v3.7 set below is the last fully published narrative specification on this site; the v3.9.1 documentation set is in progress (tracked at https://github.com/ConceptKernel/conceptkernel.github.io/milestone/1). CKN — Concept Kernel Notation, CK(K) ≜ ⟪ χ · ρ · σ · α · γ · π · δ · φ ⟫ε — is the v3.10 design direction: https://conceptkernel.org/#notation
+CKP v3.9.1 (Critical Isolation) is the current protocol epoch, implemented and shipped: the pgCK runtime (PostgreSQL extension, https://github.com/styk-tv/pgCK, extension v0.4.17, attested) and the dispatch-only client cklib (https://github.com/ConceptKernel/CK.Lib.Js, v1.5.3). The v3.9.1 documentation set is published (key pages below); the v3.7 set remains browseable as a previous epoch. CKN — Concept Kernel Notation, CK(K) ≜ ⟪ χ · ρ · σ · α · γ · π · δ · φ ⟫ε — is the v3.10 design direction (in design): https://conceptkernel.org/v3.10/
+
+## The distinction the protocol rests on
+A caller reaches a kernel through a VERB, not a query surface. A query surface (SQL/SPARQL/GraphQL/ORM) lets the caller author logic the engine runs — unbounded, unenumerable. A verb is a finite, named, pre-declared operation with a typed payload the engine knows before it runs. CKP ships a closed set of ~17 verbs and no query surface; even query-shaped verbs (instance.query, concept.match) bind typed parameters into logic sealed at germination. This is the precondition that makes grants enumerable and shapes unbypassable — the whole of Critical Isolation. https://conceptkernel.org/v3.9/verb-vs-query-surface
+
+## Key pages (v3.9.1 — current set)
+- Introduction: https://conceptkernel.org/v3.9/introduction
+- A Verb, Not a Query Surface: https://conceptkernel.org/v3.9/verb-vs-query-surface
+- Critical Isolation (the three-ring architecture): https://conceptkernel.org/v3.9/critical-isolation
+- What a Concept Kernel Is: https://conceptkernel.org/v3.9/concept-kernel
+- The One Door (ckp.dispatch): https://conceptkernel.org/v3.9/the-door
+- Seal, Ledger, Proof: https://conceptkernel.org/v3.9/seal-and-proof
+- Shapes (σ): https://conceptkernel.org/v3.9/shapes
+- Affordances — the closed verb vocabulary (α): https://conceptkernel.org/v3.9/affordances
+- Governance (propose → vote → apply): https://conceptkernel.org/v3.9/governance
+- Grants (γ): https://conceptkernel.org/v3.9/grants
+- Epochs (ε): https://conceptkernel.org/v3.9/epochs
+- Naming — the developer writes URN: https://conceptkernel.org/v3.9/naming
+- The Core Vocabulary: https://conceptkernel.org/v3.9/ontology
+- The Client (cklib): https://conceptkernel.org/v3.9/client
+- Quickstart — zero to sealed state: https://conceptkernel.org/v3.9/quickstart
+- The Fleet (ecosystem): https://conceptkernel.org/v3.9/ecosystem
+- Changelog: https://conceptkernel.org/v3.9/changelog
+
+## v3.10 — CKN (in design)
+- Overview: https://conceptkernel.org/v3.10/
+- Concept Kernel Notation: https://conceptkernel.org/v3.10/concept-kernel-notation
+- Notation In, Construct Out: https://conceptkernel.org/v3.10/assembled-constructs
+- The Scoring Loop: https://conceptkernel.org/v3.10/scoring-loop
 
 ## Runtime core vocabulary (stable namespace, enforced at every sealed write)
 - Namespace: https://conceptkernel.org/ontology/v3.8/core#
@@ -20,7 +48,7 @@ CKP v3.9.1 (Critical Isolation) is the current protocol epoch, implemented and s
 - v3.6 (2026 Q2): 119 classes, 37 pages — the full specification
 - v3.7 (2026 Q2): 120 classes, 9 shapes, 31 pages, 20 checks, 5 edge predicates — the refined canon
 - v3.8: the core vocabulary's permanent namespace (see above)
-- v3.9 (2026 Q2): Critical Isolation — the kernel moves into PostgreSQL; 1 door; 31 attested runtime releases in 34 days (v0.1.0 → v0.4.15)
+- v3.9 (2026 Q2): Critical Isolation — the kernel takes root in pgRDF (native PostgreSQL extension), proven at the 8.2B-triple Wikidata scale; 1 door; 33 attested runtime releases (v0.1.0 → v0.4.17)
 - v3.9.1 (2026 Q2): the client meets the server — 17 verbs, 0 query surfaces, urn:ckp: naming proven live
 - v3.10 (in design): CKN, the notation; the scoring loop (signal.cast, concept.score) — tracked in public issues
 

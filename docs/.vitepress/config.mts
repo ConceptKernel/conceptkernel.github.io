@@ -24,7 +24,9 @@ export default withMermaid(defineConfig({
       {
         text: 'Docs',
         items: [
-          { text: 'v3.7 (Current)', link: '/v3.7/introduction' },
+          { text: 'v3.9.1 (Current)', link: '/v3.9/introduction' },
+          { text: 'v3.10 (In design) — CKN', link: '/v3.10/' },
+          { text: 'v3.7', link: '/v3.7/introduction' },
           { text: 'v3.6 (Frozen)', link: '/v3.6/introduction' },
           { text: 'v3.5-alpha6', link: '/v3.5-alpha6/introduction' },
           { text: 'v3.5-alpha3', link: '/v3.5-alpha3/introduction' },
@@ -33,13 +35,13 @@ export default withMermaid(defineConfig({
       },
       {
         text: 'Ontology',
-        link: '/ontology/v3.7/',
+        link: '/ontology/v3.8/',
         items: [
           { text: 'Browse Ontology', link: '/browse/index.html' },
-          { text: 'v3.7 (TTL) — Current', link: '/ontology/v3.7/' },
+          { text: 'v3.8 core (TTL) — Runtime', link: '/ontology/v3.8/' },
+          { text: 'v3.7 (TTL)', link: '/ontology/v3.7/' },
           { text: 'v3.6 (TTL)', link: '/ontology/v3.6/' },
           { text: 'v3.5-alpha6 (TTL)', link: '/ontology/v3.5-alpha6/' },
-          { text: 'v3.5-alpha3 (TTL)', link: '/ontology/v3.5-alpha3/' },
           { text: 'v3.4 (TTL)', link: '/ontology/v3.4/' },
         ]
       },
@@ -53,6 +55,110 @@ export default withMermaid(defineConfig({
     ],
 
     sidebar: {
+      '/v3.9/': [
+        {
+          text: 'Part I: Foundations',
+          items: [
+            { text: 'Introduction', link: '/v3.9/introduction' },
+            { text: 'Critical Isolation', link: '/v3.9/critical-isolation' },
+            { text: 'A Verb, Not a Query Surface', link: '/v3.9/verb-vs-query-surface' },
+          ]
+        },
+        {
+          text: 'Part II: The Kernel',
+          items: [
+            { text: 'What a Concept Kernel Is', link: '/v3.9/concept-kernel' },
+            { text: 'The One Door: ckp.dispatch', link: '/v3.9/the-door' },
+            { text: 'Seal, Ledger, Proof', link: '/v3.9/seal-and-proof' },
+            { text: 'Shapes (σ)', link: '/v3.9/shapes' },
+          ]
+        },
+        {
+          text: 'Part III: Capability & Governance',
+          items: [
+            { text: 'Affordances (α)', link: '/v3.9/affordances' },
+            { text: 'Governance', link: '/v3.9/governance' },
+            { text: 'Grants (γ)', link: '/v3.9/grants' },
+            { text: 'Epochs (ε)', link: '/v3.9/epochs' },
+          ]
+        },
+        {
+          text: 'Part IV: Naming & Ontology',
+          items: [
+            { text: 'Naming — the developer writes URN', link: '/v3.9/naming' },
+            { text: 'The Core Vocabulary', link: '/v3.9/ontology' },
+          ]
+        },
+        {
+          text: 'Part V: Build',
+          items: [
+            { text: 'The Client: cklib', link: '/v3.9/client' },
+            { text: 'Quickstart', link: '/v3.9/quickstart' },
+            { text: 'The Fleet', link: '/v3.9/ecosystem' },
+          ]
+        },
+        {
+          text: 'Reference',
+          collapsed: true,
+          items: [
+            { text: 'Changelog', link: '/v3.9/changelog' },
+          ]
+        },
+        {
+          text: 'Toward v3.10',
+          items: [
+            { text: 'CKN — the notation', link: '/v3.10/' },
+          ]
+        },
+        {
+          text: 'Ontology Files',
+          items: [
+            { text: 'Browse Ontology', link: '/browse/index.html' },
+            { text: 'v3.8 core (Turtle)', link: '/ontology/v3.8/' },
+          ]
+        },
+        {
+          text: 'Previous Versions',
+          collapsed: true,
+          items: [
+            { text: 'v3.7', link: '/v3.7/introduction' },
+            { text: 'v3.6 (Frozen)', link: '/v3.6/introduction' },
+            { text: 'v3.5-alpha6', link: '/v3.5-alpha6/introduction' },
+            { text: 'v3.4', link: '/v3.4/introduction' },
+          ]
+        },
+        {
+          text: 'Community',
+          items: [
+            { text: 'Discord', link: 'https://discord.gg/sTbfxV9xyU' },
+            { text: 'GitHub', link: 'https://github.com/ConceptKernel' },
+          ]
+        }
+      ],
+      '/v3.10/': [
+        {
+          text: 'CKN — Concept Kernel Notation',
+          items: [
+            { text: 'Overview (in design)', link: '/v3.10/' },
+            { text: 'Concept Kernel Notation', link: '/v3.10/concept-kernel-notation' },
+            { text: 'Notation In, Construct Out', link: '/v3.10/assembled-constructs' },
+            { text: 'The Scoring Loop', link: '/v3.10/scoring-loop' },
+          ]
+        },
+        {
+          text: 'Current runtime',
+          items: [
+            { text: '← v3.9.1 (shipped)', link: '/v3.9/introduction' },
+          ]
+        },
+        {
+          text: 'Community',
+          items: [
+            { text: 'Discord', link: 'https://discord.gg/sTbfxV9xyU' },
+            { text: 'GitHub', link: 'https://github.com/ConceptKernel' },
+          ]
+        }
+      ],
       '/v3.7/': [
         {
           text: 'Part I: Foundations',

@@ -5,9 +5,9 @@ description: "Sovereign, semantic, self-governing state reached through one type
 
 # Introduction to CKP v3.9.1
 
-A Concept Kernel is a unit of meaning that keeps its own counsel. Its types are ontology — RDF classes, SHACL shapes, OWL-RL rules, not hand-rolled columns. Its every change is **shape-gated, sealed, and proof-chained** the moment it lands. And it answers the world through a single typed word, carried over NATS-WSS. *Meaning is the schema; the seal is the law; the door is the whole surface.*
+A Concept Kernel is a self-governing unit of meaning. Its types are ontology — RDF classes, SHACL shapes, OWL-RL rules, not hand-rolled columns. Every change it makes is **shape-gated, sealed, and proof-chained** the moment it lands, and it answers the world through a single typed verb carried over NATS-WSS. Meaning is the schema; the door is the whole surface.
 
-It lives inside PostgreSQL, and you would never know it. The engine that stores and reasons is invisible — no REST endpoint, no SQL handle, no query surface reaches it. What is sovereign is the meaning; what is provable is every step it has ever taken; what crosses the boundary is one verb and its typed payload. This is **CKP v3.9.1 — Critical Isolation**: the engine stays invisible, the meaning stays sovereign, and the proof chain stays whole.
+It runs inside PostgreSQL, but the engine stays out of sight: no REST endpoint, no SQL handle, no query surface is exposed. The meaning is sovereign, every step it has taken is provable, and the only thing that crosses the boundary is one verb and its typed payload. This is **CKP v3.9.1 — Critical Isolation**: the engine stays invisible, the meaning stays sovereign, and the proof chain stays whole.
 
 It is shipped, attested, and runnable today — the runtime is [pgCK](https://github.com/styk-tv/pgCK) `v0.4.17` on the [pgRDF](https://github.com/styk-tv/pgRDF) semantic engine; the client is [cklib](https://github.com/ConceptKernel/CK.Lib.Js) `v1.5.3`, which speaks the protocol and nothing else.
 

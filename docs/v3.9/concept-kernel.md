@@ -5,7 +5,7 @@ description: "A concept kernel is a sovereign Material Entity whose types are on
 
 # What a Concept Kernel Is
 
-A concept kernel is a sovereign unit of meaning that lives in a database. It is a **Material Entity** (BFO:0000040): a single, persistently-identified thing whose *types are ontology*. A kernel carries its own structure — RDF classes that name what kinds of thing exist, SHACL shapes that gate what may land, and OWL-RL rules that entail what follows. Meaning is the schema.
+A concept kernel is a sovereign unit of meaning — a single, persistently-identified thing that exists in its own right, a **Material Entity** in the precise sense of BFO 2020. It does not flicker in and out like a request; it persists through time, accumulates what it seals, and answers only for itself. Its *types are ontology*: RDF classes that name what kinds of thing may exist, SHACL shapes that gate what may land, and OWL-RL rules that entail what follows. Meaning is the schema.
 
 ## Types that are ontology
 

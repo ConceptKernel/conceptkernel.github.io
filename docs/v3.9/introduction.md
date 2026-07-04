@@ -5,9 +5,11 @@ description: "Sovereign, semantic, self-governing state reached through one type
 
 # Introduction to CKP v3.9.1
 
-The Concept Kernel Protocol makes a database the living home of **concept kernels** — units of meaning whose *types are ontology*, whose every change is **shape-gated, sealed, and proof-chained**, and whose only interface to the world is a single typed verb carried over NATS-WSS.
+A Concept Kernel is a unit of meaning that keeps its own counsel. Its types are ontology — RDF classes, SHACL shapes, OWL-RL rules, not hand-rolled columns. Its every change is **shape-gated, sealed, and proof-chained** the moment it lands. And it answers the world through a single typed word, carried over NATS-WSS. *Meaning is the schema; the seal is the law; the door is the whole surface.*
 
-This is **CKP v3.9.1 — Critical Isolation**. It is shipped, attested, and runnable today: the runtime is [pgCK](https://github.com/styk-tv/pgCK) `v0.4.17`, a PostgreSQL extension composed on the [pgRDF](https://github.com/styk-tv/pgRDF) semantic engine; the client is [cklib](https://github.com/ConceptKernel/CK.Lib.Js) `v1.5.3`, which speaks the protocol and nothing else.
+It lives inside PostgreSQL, and you would never know it. The engine that stores and reasons is invisible — no REST endpoint, no SQL handle, no query surface reaches it. What is sovereign is the meaning; what is provable is every step it has ever taken; what crosses the boundary is one verb and its typed payload. This is **CKP v3.9.1 — Critical Isolation**: the engine stays invisible, the meaning stays sovereign, and the proof chain stays whole.
+
+It is shipped, attested, and runnable today — the runtime is [pgCK](https://github.com/styk-tv/pgCK) `v0.4.17` on the [pgRDF](https://github.com/styk-tv/pgRDF) semantic engine; the client is [cklib](https://github.com/ConceptKernel/CK.Lib.Js) `v1.5.3`, which speaks the protocol and nothing else.
 
 ## The claim, in one paragraph
 

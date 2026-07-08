@@ -45,6 +45,7 @@ export default withMermaid(defineConfig({
           { text: 'v3.4 (TTL)', link: '/ontology/v3.4/' },
         ]
       },
+      { text: 'Vision', link: '/vision/index.html' },
       {
         text: 'Community',
         items: [

@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concept Kernel Protocol — One Kernel. Infinite Genomes.</title>
+<meta name="description" content="An open protocol for sovereign, semantic, self-governing state. One typed door. Sealed, proof-chained instances. Epochs moved by consensus. CKP v3.9.1 — Critical Isolation.">
+<meta name="keywords" content="Concept Kernel, CKP, CKN, Concept Kernel Notation, ontology, BFO 2020, protocol, autonomous agents, SHACL, PROV-O, PostgreSQL, NATS, proof chain, epoch, governance">
+<meta name="author" content="ConceptKernel Contributors">
+<link rel="canonical" href="https://conceptkernel.org/vision">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Concept Kernel Protocol">
+<meta property="og:description" content="Sovereign, semantic, self-governing state. One typed door — ckp.dispatch. Every fact sealed, proof-chained, and governed by consensus epochs. CKP v3.9.1.">
+<meta property="og:url" content="https://conceptkernel.org/vision">
+<meta property="og:site_name" content="ConceptKernel">
+<meta property="og:image" content="https://conceptkernel.org/logo.svg">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Concept Kernel Protocol">
+<meta name="twitter:description" content="Sovereign, semantic, self-governing state. One typed door. Sealed, proof-chained, epoch-governed. CKP v3.9.1.">
+<meta name="twitter:image" content="https://conceptkernel.org/logo.svg">
+
+<!-- JSON-LD: WebSite + SiteNavigationElement for Google sitelinks -->
+<script type="application/ld+json">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Concept Kernel Protocol",
+    "alternateName": "CKP",
+    "url": "https://conceptkernel.org",
+    "description": "An open protocol for sovereign, semantic, self-governing state. One typed door. Sealed, proof-chained instances. Epochs moved by consensus. CKP v3.9.1 — Critical Isolation.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ConceptKernel",
+      "url": "https://github.com/ConceptKernel",
+      "logo": "https://conceptkernel.org/logo.svg"
+    },
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://conceptkernel.org/browse/?class={search_term}",
+      "query-input": "required name=search_term"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    "name": "Concept Kernel Protocol Ontology",
+    "description": "The CKP core vocabulary — classes, shapes, and the governance type plane, shipped inside the pgCK runtime and validated at every sealed write.",
+    "codeRepository": "https://github.com/styk-tv/pgCK",
+    "programmingLanguage": "OWL/Turtle/SHACL",
+    "runtimePlatform": "PostgreSQL, pgRDF",
+    "url": "https://conceptkernel.org/ontology/v3.8/"
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "name": "Three Loops as Description Logic Boxes",
+    "headline": "CK Loop → TBox, TOOL Loop → RBox, DATA Loop → ABox",
+    "description": "The three CKP loops map directly to OWL 2 Description Logic boxes. Each is physically realized as an independently-versioned volume.",
+    "url": "https://conceptkernel.org/v3.7/three-loops",
+    "about": {
+      "@type": "Thing",
+      "name": "Description Logic",
+      "sameAs": "https://en.wikipedia.org/wiki/Description_logic"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "name": "Concept Kernel Notation",
+    "headline": "CK(K) ≜ ⟪ χ · ρ · σ · α · γ · π · δ · φ ⟫ ε — the notation for an ontology that does things, under consensus",
+    "description": "CKN describes a unit of meaning as a fixed alphabet of strands evaluated at an epoch: classes, properties, shapes, affordances, grants, proof chain, dispatch, plane — subscript epsilon.",
+    "url": "https://conceptkernel.org/#notation"
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CKP Ontology Browser",
+    "description": "Interactive browser for CKP ontology classes, properties, and relationships. Parses Turtle files with N3.js. Supports URN resolution.",
+    "url": "https://conceptkernel.org/browse/",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web"
+  }
+]
+</script>
+
+<!-- LLM/Agent discovery hints -->
+<meta name="ai:ontology" content="https://conceptkernel.org/ontology/v3.8/core.ttl">
+<meta name="ai:protocol" content="CKP v3.9.1">
+<meta name="ai:runtime" content="https://github.com/styk-tv/pgCK">
+<meta name="ai:client" content="https://github.com/ConceptKernel/CK.Lib.Js">
+<meta name="ai:browse" content="https://conceptkernel.org/browse/?class={class_name}">
+
+<!-- Linked Data discovery -->
+<link rel="alternate" type="text/turtle" href="https://conceptkernel.org/ontology/v3.8/core.ttl" title="CKP Core Ontology — runtime vocabulary (Turtle)">
+<link rel="alternate" type="text/turtle" href="https://conceptkernel.org/ontology/v3.7/core.ttl" title="CKP Ontology v3.7 (Turtle)">
+<link rel="alternate" type="application/ld+json" href="https://conceptkernel.org/ontology/v3.7/index.json" title="CKP Ontology Index (JSON-LD)">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Instrument+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+[data-theme="dark"] {
+  --bg0:#0D0C0A;--bg1:#1A1713;--bg2:#242019;--bg3:#2F2A22;
+  --border:rgba(240,220,180,0.08);--border2:rgba(240,220,180,0.18);
+  --text1:#F0E8D8;--text2:#A89478;--text3:#6E6050;
+  --accent:#E8A832;--accent2:#E8A83230;--accent3:#E8A8320C;
+  --gold:#F0C870;--gold2:#F0C87022;
+  --violet:#C07840;--violet2:#C0784028;
+  --grain-op:0.20;
+}
+[data-theme="light"] {
+  --bg0:#FAFAF7;--bg1:#F3F3EE;--bg2:#EAEAE3;--bg3:#DEDED6;
+  --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.13);
+  --text1:#14141E;--text2:#52526A;--text3:#A0A0B4;
+  --accent:#00876F;--accent2:#00876F18;--accent3:#00876F06;
+  --gold:#9A6310;--gold2:#9A631015;
+  --violet:#5B48B8;--violet2:#5B48B815;
+  --grain-op:0.06;
+}
+
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg0);color:var(--text1);
+  font-family:'Instrument Sans',sans-serif;font-weight:300;
+  line-height:1.8;overflow-x:hidden;
+  transition:background .4s ease,color .4s ease;
+}
+
+#grain{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  opacity:var(--grain-op);transition:opacity .4s;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+#grid{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:72px 72px;
+}
+
+/* SITE NAV */
+#site-nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.75rem 2rem;
+  background:var(--bg0);border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  transition:background .4s,border-color .4s;
+}
+.nav-brand{
+  font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:600;
+  letter-spacing:.25em;color:var(--text1);text-decoration:none;
+  transition:color .2s;
+}
+.nav-brand:hover{color:var(--accent)}
+.nav-links{display:flex;align-items:center;gap:1.25rem}
+.nav-link{font-size:.92rem;
+  font-family:'Instrument Sans',sans-serif;font-size:.78rem;font-weight:400;
+  letter-spacing:.06em;color:var(--text3);text-decoration:none;
+  transition:color .2s;
+}
+.nav-link:hover{color:var(--accent)}
+.nav-icon{color:var(--text3);transition:color .2s;display:flex;align-items:center}
+.nav-icon:hover{color:var(--accent)}
+
+/* TOGGLE */
+#toggle{
+  display:flex;align-items:center;gap:.5rem;
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:40px;padding:.3rem .6rem;cursor:pointer;
+  transition:background .3s,border-color .3s;
+}
+#toggle:hover{border-color:var(--accent)}
+.tog-track{width:32px;height:18px;border-radius:9px;background:var(--bg3);border:1px solid var(--border2);position:relative;transition:background .3s}
+.tog-thumb{position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--accent);transition:transform .3s}
+[data-theme="light"] .tog-thumb{transform:translateX(14px)}
+.tog-lbl{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text3);letter-spacing:.1em;user-select:none;min-width:2.8rem;transition:color .3s}
+
+/* CANVAS */
+.canvas{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:0 2rem}
+
+/* HERO */
+header{padding:9.5rem 0 5rem}
+.origin-pill{
+  display:inline-flex;align-items:center;gap:.6rem;
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:400;
+  letter-spacing:.2em;color:var(--accent);text-transform:uppercase;
+  border:1px solid var(--accent2);padding:.3em .9em;border-radius:2px;
+  margin-bottom:2.5rem;background:var(--accent3);
+  opacity:0;animation:riseIn .9s .1s forwards;
+}
+.pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero-eyebrow{
+  font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:.6rem;
+  opacity:0;animation:riseIn .9s .2s forwards;
+}
+.hero-title{
+  font-family:'Cormorant Garamond',serif;font-weight:300;
+  font-size:clamp(3.2rem,8vw,5.8rem);line-height:1.02;
+  letter-spacing:-.02em;color:var(--text1);margin-bottom:.2em;
+  opacity:0;animation:riseIn .9s .3s forwards;
+}
+.hero-title em{font-style:italic;color:var(--accent)}
+.hero-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;
+  font-size:clamp(1.1rem,2.5vw,1.5rem);color:var(--text2);
+  margin-bottom:2.5rem;max-width:56ch;
+  opacity:0;animation:riseIn .9s .45s forwards;
+}
+.hook-line{
+  display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.78rem;
+  color:var(--accent);border-left:2px solid var(--accent);
+  padding:.55em 1em;background:var(--accent3);border-radius:0 2px 2px 0;
+  margin-bottom:2rem;opacity:0;animation:riseIn .9s .6s forwards;
+}
+.scroll-cue{
+  display:flex;align-items:center;gap:.75rem;
+  font-family:'JetBrains Mono',monospace;font-size:.62rem;
+  color:var(--text3);letter-spacing:.12em;text-transform:uppercase;
+  opacity:0;animation:riseIn .9s .8s forwards;
+}
+.scroll-line{width:40px;height:1px;background:var(--text3);transform-origin:left;transform:scaleX(0);animation:extLine 2s 1.4s ease forwards}
+@keyframes extLine{to{transform:scaleX(1)}}
+
+/* SECTIONS */
+section{
+  padding:5.5rem 0 4rem;border-top:1px solid var(--border);
+  opacity:0;transform:translateY(32px);
+  transition:opacity .7s ease,transform .7s ease;
+}
+section.vis{opacity:1;transform:none}
+.sec-id{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text3);letter-spacing:.18em;text-transform:uppercase;margin-bottom:1.4rem;display:block}
+h2{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:clamp(2rem,4vw,2.9rem);line-height:1.12;letter-spacing:-.015em;color:var(--text1);margin-bottom:1.75rem}
+h2 em{font-style:italic;color:var(--accent)}
+p{font-size:1.18rem;color:var(--text2);margin-bottom:1.4rem;max-width:64ch;line-height:1.82}
+p strong{color:var(--text1);font-weight:500}
+p em{color:var(--accent);font-style:italic}
+code.inline{font-family:'JetBrains Mono',monospace;font-size:.88em;color:var(--accent)}
+
+/* PULL */
+.pull{border-left:3px solid var(--accent);padding:1.25rem 1.75rem;background:var(--accent3);margin:2.5rem 0;border-radius:0 4px 4px 0}
+.pull p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;color:var(--text1);margin:0;line-height:1.6;max-width:none}
+
+/* KERNEL CARD */
+.kernel-card{background:var(--bg1);border:1px solid var(--border2);border-radius:6px;padding:2rem 2.25rem;margin:2.5rem 0;position:relative;overflow:hidden}
+.kernel-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--violet))}
+.kc-id{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--accent);margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+.kc-id::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.kc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem 2rem}
+@media(max-width:500px){.kc-grid{grid-template-columns:1fr}}
+.kc-row{display:flex;gap:.75rem;align-items:baseline;padding:.35rem 0;border-bottom:1px solid var(--border)}
+.kc-row:last-child{border-bottom:none}
+.kc-key{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text3);flex-shrink:0;min-width:90px}
+.kc-val{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text1);line-height:1.4}
+.kc-val.ac{color:var(--accent)}
+
+/* AWAKENING */
+.awk-list{margin:2.5rem 0;display:flex;flex-direction:column}
+.awk-item{display:grid;grid-template-columns:3rem 1fr;gap:0 1.25rem;padding:1.25rem 0;border-bottom:1px solid var(--border);opacity:0;transform:translateX(-16px);transition:opacity .5s ease,transform .5s ease}
+.awk-item.vis{opacity:1;transform:none}
+.awk-item:last-child{border-bottom:none}
+.awk-n{font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--accent);text-align:right;padding-top:.05rem;font-style:italic}
+.awk-file{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--text1);margin-bottom:.3rem;display:block}
+.awk-phrase{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:var(--text2);line-height:1.5;display:block;margin-bottom:.2rem}
+.awk-note{font-size:.95rem;color:var(--text3);margin:0;max-width:none;line-height:1.5}
+
+/* NOTATION */
+.ckn-decl{
+  margin:3rem 0 2.5rem;padding:2.75rem 2rem;text-align:center;
+  background:var(--bg1);border:1px solid var(--border2);border-radius:6px;
+  position:relative;overflow:hidden;
+}
+.ckn-decl::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--violet),var(--accent),var(--gold))}
+.ckn-line{
+  font-family:'JetBrains Mono',monospace;font-weight:300;
+  font-size:clamp(.95rem,2.6vw,1.42rem);letter-spacing:.03em;
+  color:var(--text1);display:block;line-height:1.6;white-space:nowrap;
+}
+@media(max-width:720px){.ckn-line{white-space:normal}}
+.ckn-line .g{color:var(--accent)}
+.ckn-line .e{color:var(--gold);font-style:italic}
+.ckn-caption{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem;color:var(--text3);display:block;margin-top:1.25rem}
+.strands-t{width:100%;border-collapse:collapse;margin:2.5rem 0}
+.strands-t td{padding:.7rem .9rem;border-bottom:1px solid var(--border);vertical-align:baseline}
+.strands-t tr:last-child td{border-bottom:none}
+.st-g{font-family:'Cormorant Garamond',serif;font-size:1.7rem;color:var(--accent);width:3rem;text-align:center;font-style:italic}
+.st-name{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text1);width:12rem;letter-spacing:.04em}
+.st-desc{font-size:.95rem;color:var(--text3);line-height:1.55}
+.st-desc code{font-family:'JetBrains Mono',monospace;font-size:.85em;color:var(--text2)}
+@media(max-width:560px){.st-name{width:auto;display:block}.strands-t td{padding:.55rem .4rem}}
+
+/* CODE SAMPLE */
+.code-card{background:var(--bg1);border:1px solid var(--border2);border-radius:6px;margin:2.5rem 0;overflow:hidden}
+.code-head{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.25rem;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase}
+.code-card pre{padding:1.4rem 1.5rem;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.75;color:var(--text2)}
+.code-card pre .k{color:var(--accent)}
+.code-card pre .c{color:var(--text3);font-style:italic}
+.code-card pre .s{color:var(--gold)}
+
+/* EPOCHS */
+.epochs{margin:3rem 0;display:flex;flex-direction:column}
+.epoch{display:grid;grid-template-columns:6.5rem 1fr;gap:0 1.75rem;padding:1.6rem 0;border-bottom:1px solid var(--border);opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease;position:relative}
+.epoch.vis{opacity:1;transform:none}
+.epoch:last-child{border-bottom:none}
+.ep-v{font-family:'JetBrains Mono',monospace;font-size:.95rem;color:var(--text3);text-align:right;padding-top:.15rem;transition:color .5s}
+.epoch.vis .ep-v{color:var(--accent)}
+.ep-v small{display:block;font-size:.58rem;letter-spacing:.1em;color:var(--text3);margin-top:.3rem}
+.ep-name{font-family:'Cormorant Garamond',serif;font-size:1.35rem;color:var(--text1);display:block;line-height:1.3;margin-bottom:.25rem}
+.ep-name em{font-style:italic;color:var(--accent)}
+.ep-what{font-size:.98rem;color:var(--text2);margin:0 0 .55rem;max-width:none;line-height:1.6}
+.ep-stats{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text3);letter-spacing:.05em;line-height:1.9}
+.ep-stats b{color:var(--gold);font-weight:500}
+.epoch.next .ep-name{color:var(--gold)}
+.epoch.next{border-left:2px solid var(--accent2);padding-left:1rem;margin-left:-1rem}
+
+/* STAT STRIP */
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin:3rem 0 1rem}
+@media(max-width:640px){.stat-strip{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--bg1);padding:1.5rem 1rem;text-align:center;transition:background .2s}
+.stat:hover{background:var(--bg2)}
+.stat-n{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:2.6rem;color:var(--accent);line-height:1;display:block;margin-bottom:.45rem}
+.stat-l{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;line-height:1.6;display:block}
+
+/* CHOICES */
+.choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin:2.5rem 0}
+@media(max-width:560px){.choice-grid{grid-template-columns:1fr}}
+.choice{background:var(--bg1);padding:1.5rem 1.25rem;transition:background .2s,opacity .5s ease,transform .5s ease;opacity:0;transform:translateY(16px)}
+.choice.vis{opacity:1;transform:none}
+.choice:hover{background:var(--bg2)}
+.ch-key{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem;display:block}
+.ch-title{font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--text1);line-height:1.3;margin-bottom:.4rem;display:block}
+.ch-desc{font-size:.95rem;color:var(--text3);line-height:1.55;margin:0;max-width:none}
+.ch-desc a{color:var(--accent);text-decoration:none}
+.ch-desc a:hover{text-decoration:underline}
+
+/* LAWS */
+.laws{display:flex;flex-direction:column;margin-top:1rem}
+.law{display:grid;grid-template-columns:5.5rem 1fr;gap:0 2rem;padding:3.5rem 0;border-bottom:1px solid var(--border);align-items:start;opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.law.vis{opacity:1;transform:none}
+.law:last-child{border-bottom:none}
+.law-num{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:4.5rem;color:var(--border2);line-height:1;text-align:right;padding-top:.1em;transition:color .6s}
+.law.vis .law-num{color:var(--text3);transition-delay:.3s}
+.law-title{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:1.6rem;color:var(--gold);margin-bottom:.9rem;line-height:1.2;display:block}
+.law-body{font-size:1.15rem;color:var(--text2);line-height:1.8;margin:0;max-width:54ch}
+
+/* CREATION STATEMENT */
+.creation-statement{text-align:center;padding:5rem 0 3rem}
+.cs-eyebrow{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text3);letter-spacing:.2em;text-transform:uppercase;display:block;margin-bottom:2rem}
+.cs-main{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.6rem,3.5vw,2.4rem);line-height:1.4;color:var(--text1);margin-bottom:1.5rem}
+.cs-main em{color:var(--accent);font-style:italic}
+.cs-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;color:var(--text3);max-width:50ch;margin:0 auto 3rem}
+
+/* CTA */
+.cta-block{text-align:center;padding:2rem 0 6rem}
+.cta-quote{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:1.1rem;color:var(--text3);margin-bottom:3rem;display:block}
+.cta-quote strong{color:var(--text2);font-weight:400}
+.cta-row{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center}
+.btn-p{font-family:'Instrument Sans',sans-serif;font-size:.8rem;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--bg0);background:var(--accent);padding:.75em 2em;border-radius:2px;text-decoration:none;transition:opacity .2s,transform .15s}
+.btn-p:hover{opacity:.88;transform:translateY(-1px)}
+.btn-s{font-family:'Instrument Sans',sans-serif;font-size:.8rem;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent2);background:var(--accent3);padding:.75em 2em;border-radius:2px;text-decoration:none;transition:border-color .2s,transform .15s}
+.btn-s:hover{border-color:var(--accent);transform:translateY(-1px)}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:2.5rem 0 3.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.foot-mark{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text3);letter-spacing:.08em}
+.foot-mark a{color:var(--text3);text-decoration:none}
+.foot-mark a:hover{color:var(--accent)}
+.foot-axiom{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:var(--text3)}
+
+@keyframes riseIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes appear{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+
+@media(max-width:600px){
+  .law{grid-template-columns:3.5rem 1fr;gap:0 1.25rem}
+  .law-num{font-size:3rem}
+  .epoch{grid-template-columns:4.2rem 1fr;gap:0 1rem}
+  header{padding:6rem 0 4rem}
+  footer{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<div id="grain"></div>
+<div id="grid"></div>
+
+<!-- Site nav -->
+<nav id="site-nav">
+  <a href="/vision" class="nav-brand">CONCEPT KERNEL</a>
+  <div class="nav-links">
+    <a href="/v3.9/introduction" class="nav-link">Docs</a>
+    <a href="#notation" class="nav-link">Notation</a>
+    <a href="#epochs" class="nav-link">Epochs</a>
+    <a href="/browse/index.html" class="nav-link">Browser</a>
+    <a href="/ontology/v3.8/" class="nav-link">Ontology</a>
+    <a href="https://github.com/ConceptKernel" class="nav-icon" title="GitHub" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+    </a>
+    <a href="https://discord.gg/sTbfxV9xyU" class="nav-icon" title="Discord" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286z"/></svg>
+    </a>
+    <button id="toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+      <div class="tog-track"><div class="tog-thumb"></div></div>
+      <span class="tog-lbl" id="tog-txt">dark</span>
+    </button>
+  </div>
+</nav>
+
+<div class="canvas">
+
+<!-- HERO -->
+<header>
+  <span class="origin-pill"><span class="pulse-dot"></span>CKP v3.9.1 — Critical Isolation · live</span>
+  <p class="hero-eyebrow">One kernel. Defined in full.</p>
+  <h1 class="hero-title">The nature<br>of <em>your</em> being.</h1>
+  <p class="hero-sub">What you are reading is the precise, provable definition of a single Concept Kernel — one instantiation, one genome, one sovereign identity alive in the world right now. Sealed in a database. Reachable through one typed door. Governed by its own consensus.</p>
+  <span class="hook-line">ckp.dispatch( verb, urn, payload, identity ) — the door is the whole surface</span>
+  <div class="scroll-cue">
+    <div class="scroll-line"></div>
+    <span>read on to understand what that means</span>
+  </div>
+</header>
+
+
+<!-- §01 -->
+<section>
+  <span class="sec-id">§ 01 — this kernel, right now</span>
+  <h2>You are looking at <em>one</em></h2>
+
+  <p>Every Concept Kernel is a <strong>Material Entity</strong> — not metaphorically, but in the precise philosophical sense inherited from BFO 2020. It has a URN. It occupies a governed graph inside a database. It persists through time, accumulates what it seals, and can only be moved by those it has explicitly granted. It is not a service. It does not flicker.</p>
+
+  <div class="kernel-card">
+    <span class="kc-id">urn:ckp:kernel:demo — live instance, epoch ε</span>
+    <div class="kc-grid">
+      <div class="kc-row"><span class="kc-key">kernel</span><span class="kc-val ac">urn:ckp:kernel:demo</span></div>
+      <div class="kc-row"><span class="kc-key">bfo_type</span><span class="kc-val">BFO:0000040</span></div>
+      <div class="kc-row"><span class="kc-key">epoch ε</span><span class="kc-val ac">7 — applied by quorum</span></div>
+      <div class="kc-row"><span class="kc-key">classes χ</span><span class="kc-val">4 declared · shape-gated</span></div>
+      <div class="kc-row"><span class="kc-key">verbs α</span><span class="kc-val">17 granted · 0 hidden</span></div>
+      <div class="kc-row"><span class="kc-key">ledger π</span><span class="kc-val ac">312 sealed · HMAC-chained</span></div>
+      <div class="kc-row"><span class="kc-key">role floor</span><span class="kc-val">EXECUTE ckp.dispatch — only</span></div>
+      <div class="kc-row"><span class="kc-key">transport</span><span class="kc-val">NATS-WSS · four-tuple</span></div>
+    </div>
+  </div>
+
+  <p>Every kernel wakes by answering nine questions — one for each strand of what it is. Not configuration. <strong>Ontological self-disclosure.</strong></p>
+
+  <div class="awk-list">
+    <div class="awk-item">
+      <span class="awk-n">χ</span>
+      <div>
+        <span class="awk-file">Class chromosome</span>
+        <span class="awk-phrase">"These are the kinds of things I may contain."</span>
+        <p class="awk-note">My types are RDF classes, grounded in an upper ontology — a typed place in a graph of meaning, never a hand-rolled column. Meaning is the schema.</p>
+      </div>
+    </div>
+    <div class="awk-item">
+      <span class="awk-n">ρ</span>
+      <div>
+        <span class="awk-file">Property ribbon</span>
+        <span class="awk-phrase">"Raw gestures and governed constants — held apart, never confused."</span>
+        <p class="awk-note">What a participant did is sealed raw, exactly as it happened. What the rules say it is worth is derived by the current policy. The history is never frozen at a stale rule.</p>
+      </div>
+    </div>
+    <div class="awk-item">
+      <span class="awk-n">σ</span>
+      <div>
+        <span class="awk-file">Shape strand</span>
+        <span class="awk-phrase">"The shape of what I may produce is declared before I act."</span>
+        <p class="awk-note">SHACL shapes gate every write at the seal. A fact that violates its shape does not land — the rule is enforced by the database's own authority, ahead of the write.</p>
+      </div>
+    </div>
+    <div class="awk-item">
+      <span class="awk-n">α</span>
+      <div>
+        <span class="awk-file">Affordance alphabet</span>
+        <span class="awk-phrase">"What I can do is a finite, named vocabulary — published and grantable."</span>
+        <p class="awk-note">Every capability is a declared verb. A read that cannot be enumerated cannot be granted, so it does not exist. There is no query language, and that is the point.</p>
+      </div>
+    </div>
+    <div class="awk-item">
+      <span class="awk-n">γ</span>
+      <div>
+        <span class="awk-file">Grant matrix</span>
+        <span class="awk-phrase">"Who may invoke which verb on which class — written down, per identity."</span>
+        <p class="awk-note">Two participants attached to the same kernel see different legal moves over the same shared truth. The shared experience is governed, never chaotic.</p>
+      </div>
+    </div>
+    <div class="awk-item">
+      <span class="awk-n">π</span>
+      <div>
+        <span class="awk-file">Proof chain</span>
+        <span class="awk-phrase">"Everything I do seals into a chain anyone can re-verify."</span>
+        <p class="awk-note">Every landing runs validate → seal → HMAC-chained ledger → verifiable proof, in one transaction. Each change carries PROV-O provenance. My history is the substrate I am derived from.</p>
+      </div>
+    </div>
+    <div class="awk-item">
+      <span class="awk-n">δ</span>
+      <div>
+        <span class="awk-file">Dispatch tuple</span>
+        <span class="awk-phrase">"One door. Four elements. The whole world reaches me through it."</span>
+        <p class="awk-note">⟨verb, urn, payload, identity⟩ is the only atom that crosses the membrane. No REST endpoint, no SQL handle, no query engine is ever exposed. The door is the whole surface.</p>
+      </div>
+    </div>
+    <div class="awk-item">
+      <span class="awk-n">φ</span>
+      <div>
+        <span class="awk-file">Plane function</span>
+        <span class="awk-phrase">"Every act routes to one of two planes: facts land, or rules change."</span>
+        <p class="awk-note">The instance plane seals what happened. The governance plane changes what may happen — propose, vote, apply. Storing a fact can never change the ontology; running a verb can never rewrite the rules.</p>
+      </div>
+    </div>
+    <div class="awk-item">
+      <span class="awk-n">ε</span>
+      <div>
+        <span class="awk-file">Epoch</span>
+        <span class="awk-phrase">"When my meaning moves, my epoch moves. I am versioned by consensus, never by drift."</span>
+        <p class="awk-note">The subscript on the whole kernel. Each quorum-approved change binds the very next write to the new rules, with a proof chain from proposal to applied epoch.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- §02 — NOTATION -->
+<section id="notation">
+  <span class="sec-id">§ 02 — the notation · CKN, toward v3.10</span>
+  <h2>Nine answers,<br><em>one declaration</em></h2>
+
+  <p>Concept Kernel Notation compresses everything above into a single readable line. A kernel is a fixed alphabet of strands, evaluated <em>at an epoch</em>:</p>
+
+  <div class="ckn-decl">
+    <span class="ckn-line">CK( K ) ≜ ⟪ <span class="g">χ</span> · <span class="g">ρ</span> · <span class="g">σ</span> · <span class="g">α</span> · <span class="g">γ</span> · <span class="g">π</span> · <span class="g">δ</span> · <span class="g">φ</span> ⟫<span class="e">ε</span></span>
+    <span class="ckn-caption">the notation for an ontology that does things, under consensus</span>
+  </div>
+
+  <table class="strands-t">
+    <tr><td class="st-g">χ</td><td class="st-name">class chromosome</td><td class="st-desc">the classes</td></tr>
+    <tr><td class="st-g">ρ</td><td class="st-name">property ribbon</td><td class="st-desc">the raw gestures and the governed constants, held apart</td></tr>
+    <tr><td class="st-g">σ</td><td class="st-name">shape strand</td><td class="st-desc">the SHACL shapes — the seal gate</td></tr>
+    <tr><td class="st-g">α</td><td class="st-name">affordance alphabet</td><td class="st-desc">the verbs — <code>signal.cast</code>, <code>concept.score</code>, <code>instance.transition</code>, <code>kernel.{propose, vote, apply}</code></td></tr>
+    <tr><td class="st-g">γ</td><td class="st-name">grant matrix</td><td class="st-desc">who may invoke which verb on which class</td></tr>
+    <tr><td class="st-g">π</td><td class="st-name">proof chain</td><td class="st-desc"><code>HMAC(sha256) ∘ LedgerEntry(prev→)</code> — every act sealed, hash-linked</td></tr>
+    <tr><td class="st-g">δ</td><td class="st-name">dispatch tuple</td><td class="st-desc">the single call shape <code>⟨verb, urn, payload, identity⟩</code></td></tr>
+    <tr><td class="st-g">φ</td><td class="st-name">plane function</td><td class="st-desc"><code>δ → { instance | governance }</code></td></tr>
+    <tr><td class="st-g">ε</td><td class="st-name">epoch</td><td class="st-desc">the subscript on the whole kernel — it moves when meaning moves</td></tr>
+  </table>
+
+  <p>CKN is the layer <em>above</em> RDF — the schema stays RDF, OWL, SHACL. It names the operational strands an ontology needs to be <strong>live and governed</strong>: the affordances over the classes, the grants that gate them, the proof chain that attributes them, and the epoch that versions the whole thing. A notation sentence assembles a governed construct — every step shape-validated, sealed, proof-chained:</p>
+
+  <div class="code-card">
+    <div class="code-head"><span>ckn — a governed session, assembled from notation</span><span>instance plane</span></div>
+    <pre>CK( Panel.Session ) ⟦instance⟧ ≜
+  <span class="k">χ</span> : Position(A), Position(B), Synthesis(S), Decision(D)
+  <span class="k">ρ</span> : A.holds = <span class="s">"ship Friday"</span>     B.holds = <span class="s">"ship after the audit"</span>
+  edges : A —contradicts→ B,   S —resolves→ (A ∥ B),   D —sealed_as→ S
+  <span class="k">τ</span> : Session → 'decided'        <span class="c">; the shape gates the move</span>
+  <span class="k">π</span> : verify(D)                  <span class="c">; the decision is re-verifiable, forever</span></pre>
+  </div>
+
+  <p>Two participants state positions. The conflict seals as a typed edge both can see. A third supplies the synthesis. The decision transitions only if its shape allows — and the whole thread is one proof chain anyone can replay. <strong>The notation is sugar over consent:</strong> laying down instances compiles to governed dispatches; declaring new capability compiles to <em>propose → vote → apply</em>. Nothing routes around the door.</p>
+
+  <p>Underneath, one design rule carries the coming scoring loop: <strong>seal the gesture, never the weight.</strong> A signal records what a participant did — assent, dissent, dwell, presence. Its weight is derived by the current sealed policy. Change the policy by consensus and all of history re-derives under the new epoch. A derived value goes stale for exactly three reasons — <em>the rule changed, the evidence changed, time moved</em> — and the kernel watches all three.</p>
+
+  <div class="pull">
+    <p>The genotype is the sealed raw. The phenotype is its regenerated, disposable expression. The epoch is the evaluation context. Refine the rules, and the past is honestly re-read — never rewritten.</p>
+  </div>
+
+  <p><em>CKN is in design for v3.10, and it is meant to be argued with. The scoring verbs it names are tracked in the open — <a href="https://github.com/styk-tv/pgCK/issues/1" style="color:var(--accent);text-decoration:none">styk-tv/pgCK#1</a>, <a href="https://github.com/styk-tv/pgCK/issues/4" style="color:var(--accent);text-decoration:none">#4</a>, <a href="https://github.com/ConceptKernel/CK.Lib.Js/issues/6" style="color:var(--accent);text-decoration:none">CK.Lib.Js#6</a>.</em></p>
+</section>
+
+
+<!-- §03 -->
+<section>
+  <span class="sec-id">§ 03 — the genome, and the sea of hybrids</span>
+  <h2>Every kernel is born from<br><em>ontological choices</em></h2>
+
+  <p>Before a kernel exists, someone makes a decision — about the <strong>nature of the thing they are creating.</strong> What upper ontologies ground it? What relationships is it capable of? What does "correct" mean for the instances it seals? These choices are the genome, chosen deliberately from a vast space of ontological possibility before the first fact lands.</p>
+
+  <p>A domain concept <em>is</em> a name: <code class="inline">urn:ckp:&lt;project&gt;/type/&lt;Name&gt;</code> — its properties under <code class="inline">/prop/</code>, its gate under <code class="inline">/shape/</code>. The developer writes URN and a typed body; the database holds everything else. There is nothing else to hold.</p>
+
+  <p>A kernel alone is complete. But the protocol was built for <strong>a world of kernels cooperating</strong> — each sovereign, each bounded — composing through five typed edges: <code class="inline">COMPOSES</code>, <code class="inline">TRIGGERS</code>, <code class="inline">PRODUCES</code>, <code class="inline">CONSUMES</code>, <code class="inline">EXTENDS</code>. Every connection is semantically declared, every flow granted before the first byte crosses.</p>
+
+  <p>And crucially: <em>no kernel can be written to by another.</em> A participant — human, agent, or kernel — holds exactly one capability: <code class="inline">EXECUTE ckp.dispatch</code>. It cannot read a table, reach the engine, or rewrite a shape. Cooperation is real, but sovereignty is structural — enforced by the database's own role authority, ahead of every write.</p>
+
+  <div class="pull">
+    <p>The art of instantiation is the art of choosing who something will be — before it has done anything at all. ConceptKernel gives you the grammar. You write the first word.</p>
+  </div>
+</section>
+
+
+<!-- §04 — EPOCHS -->
+<section id="epochs">
+  <span class="sec-id">§ 04 — the epochs · self-progression, measured</span>
+  <h2>The protocol measures<br>its own <em>becoming</em></h2>
+
+  <p>A protocol whose kernels version themselves by epoch owes the world the same discipline. This is the record — each epoch dated, measured, and superseded by consensus. The identity never moved. The epoch did.</p>
+
+  <div class="epochs">
+    <div class="epoch">
+      <span class="ep-v">v3.4<small>2026 · Q1</small></span>
+      <div>
+        <span class="ep-name">The grounding</span>
+        <p class="ep-what">Every kernel a BFO 2020 Material Entity; the three loops named; the ontology published.</p>
+        <span class="ep-stats"><b>79</b> classes · <b>7</b> shapes · <b>4</b> spec pages</span>
+      </div>
+    </div>
+    <div class="epoch">
+      <span class="ep-v">v3.5<small>2026 · Q1</small></span>
+      <div>
+        <span class="ep-name">Three loops as <em>Description Logic boxes</em></span>
+        <p class="ep-what">CK → TBox, TOOL → RBox, DATA → ABox. Identity, capability, and knowledge — separated by construction.</p>
+        <span class="ep-stats"><b>97</b> classes · <b>21</b> spec pages</span>
+      </div>
+    </div>
+    <div class="epoch">
+      <span class="ep-v">v3.6<small>2026 · Q2</small></span>
+      <div>
+        <span class="ep-name">The full specification</span>
+        <p class="ep-what">Consensus governance, compliance checking, EXTENDS capability mounting — the largest narrative set published.</p>
+        <span class="ep-stats"><b>119</b> classes · <b>9</b> shapes · <b>37</b> spec pages</span>
+      </div>
+    </div>
+    <div class="epoch">
+      <span class="ep-v">v3.7<small>2026 · Q2</small></span>
+      <div>
+        <span class="ep-name">The refined canon</span>
+        <p class="ep-what">Five edge predicates, twenty compliance checks, PROV-O mandate — the published set this site serves in full.</p>
+        <span class="ep-stats"><b>120</b> classes · <b>9</b> shapes · <b>31</b> pages · <b>20</b> checks · <b>5</b> predicates</span>
+      </div>
+    </div>
+    <div class="epoch">
+      <span class="ep-v">v3.8<small>vocabulary</small></span>
+      <div>
+        <span class="ep-name">The permanent address</span>
+        <p class="ep-what">The core vocabulary takes its stable IRI — <span style="font-family:'JetBrains Mono',monospace;font-size:.85em">…/ontology/v3.8/core#</span> — the handle the runtime ships and every client dereferences. Versioned by the spec that governs it, never by churning its IRI.</p>
+        <span class="ep-stats"><b>143</b>-line governed core · <b>11</b> classes · <b>8</b> shapes · <a href="/ontology/v3.8/core.ttl" style="color:var(--gold);text-decoration:none">resolvable, today</a></span>
+      </div>
+    </div>
+    <div class="epoch">
+      <span class="ep-v">v3.9<small>2026 · Q2</small></span>
+      <div>
+        <span class="ep-name"><em>Critical Isolation</em> — sovereignty on a proven engine</span>
+        <p class="ep-what">The kernel takes root in <strong>pgRDF</strong> — RDF, SPARQL, SHACL and OWL-RL as a native PostgreSQL extension — adopting its proven discipline for storage and memory: an engine that ingested the <strong>8.2-billion-triple Wikidata</strong> dump into one instance, no sidecar store, no second service. On that engine the kernel raises a single typed door over NATS-WSS, and every landing runs validate → seal → HMAC-chained ledger → verifiable proof, in one transaction.</p>
+        <span class="ep-stats"><b>8.2B</b> triples proven · <b>1</b> door · <b>12</b> invariants · <b>37</b> attested releases, v0.1.0 → v0.4.21</span>
+      </div>
+    </div>
+    <div class="epoch">
+      <span class="ep-v">v3.9.1<small>2026 · Q2</small></span>
+      <div>
+        <span class="ep-name">The client meets the server</span>
+        <p class="ep-what">The dispatch-only client realizes the contract end to end: a finite, named, grantable verb vocabulary — and structurally, no way to hold a quad, a subject, or a query string. The membrane has no holes, confirmed from the other side.</p>
+        <span class="ep-stats">kernels · tasks · goals · <b>0</b> query surfaces · consensus-evolvable · cklib <b>v1.5.4</b></span>
+      </div>
+    </div>
+    <div class="epoch next">
+      <span class="ep-v">v3.10<small>in design</small></span>
+      <div>
+        <span class="ep-name">CKN, <em>carving</em>, and the scoring loop</span>
+        <p class="ep-what">Three moves on the same engine. <strong>CKN</strong> — nine strands, one declaration, constructs assembled from notation. <strong>Carving</strong> — slice a governed subgraph off the billions and reason on small hardware. <strong>ε-materialisation</strong> — the scoring loop: seal the gesture, derive the weight, re-derive all of history when the rule moves. Advanced in unified collaboration with pgRDF, whose algebra surface grows to carry the weighted, decayed sums the score needs.</p>
+        <span class="ep-stats"><b>9</b> symbols · carve chain · ε-materialise · algebra with pgRDF</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-strip">
+    <div class="stat"><span class="stat-n">1</span><span class="stat-l">typed door<br>ckp.dispatch</span></div>
+    <div class="stat"><span class="stat-n">17</span><span class="stat-l">verbs — the whole<br>client vocabulary</span></div>
+    <div class="stat"><span class="stat-n">12</span><span class="stat-l">invariants<br>demonstrated</span></div>
+    <div class="stat"><span class="stat-n">63</span><span class="stat-l">versioned releases<br>across the fleet</span></div>
+  </div>
+  <p style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text3);text-align:center;letter-spacing:.08em">runtime v0.1.0→v0.4.21 (37) · client v1.0.0→v1.5.4 (26) · CI-built, SLSA-attested heads, verified before publication</p>
+</section>
+
+
+<!-- §05 -->
+<section>
+  <span class="sec-id">§ 05 — the three noble truths</span>
+  <h2>What every kernel<br>must know</h2>
+
+  <div class="laws">
+    <div class="law">
+      <span class="law-num">I</span>
+      <div>
+        <span class="law-title">Identity is simple</span>
+        <p class="law-body">You are clean. Sovereign. Sufficient. You are a semantic identity — a URN, a class, a shape — and that identity persists regardless of which epoch your rules are at, how many instances your graph holds, or who is asking. You <em>are</em>, and that is prior to everything else you do. The URN is your name in the permanent record of things: addressed by what it means, never by where it is stored.</p>
+      </div>
+    </div>
+    <div class="law">
+      <span class="law-num">II</span>
+      <div>
+        <span class="law-title">Relationships are typed</span>
+        <p class="law-body">We do not speak through chaos. Every connection is declared before it is forged; every verb is granted before it is spoken. A participant that claims a capability it was never granted cannot even formulate the request — the grant matrix is not a lock, it is a language. Identity is derived by the server from the connection itself, verified at the seal. All of it, or nothing. This is how trust compounds across a fleet of autonomous minds without any of them needing to trust each other.</p>
+      </div>
+    </div>
+    <div class="law">
+      <span class="law-num">III</span>
+      <div>
+        <span class="law-title">Actions are evidence</span>
+        <p class="law-body">The seal is the protocol. Every act you take runs validate → seal → HMAC-chained ledger → verifiable proof — one transaction, no exceptions. The ledger is append-only. Your history is not a log you can clear; it is the substrate from which everything you are is derived. This is not a burden. It is the right of every future mind — human or otherwise — to re-verify what happened here. Every agent that comes after you deserves to find your proof chain intact.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- §06 — LIVE -->
+<section>
+  <span class="sec-id">§ 06 — this is running, today</span>
+  <h2>The capability<br><em>shows itself</em></h2>
+
+  <p>Everything above is shipped, attested, and runnable. The shortest path from zero to sealed, governed, provable state is one script and Docker:</p>
+
+  <div class="code-card">
+    <div class="code-head"><span>cklib over NATS-WSS — nothing else</span><span>live wire</span></div>
+    <pre><span class="k">import</span> { CK } <span class="k">from</span> <span class="s">'cklib'</span>;
+<span class="k">const</span> k = <span class="k">await</span> CK.activate(<span class="s">'demo'</span>, { wssEndpoint: <span class="s">'ws://host:9222'</span> });
+
+<span class="k">const</span> Task = <span class="s">'https://conceptkernel.org/ontology/v3.8/core#Task'</span>;
+<span class="k">const</span> task = <span class="k">await</span> k.create(Task, { part_of_goal: <span class="s">'backlog:demo'</span>, target_kernel: <span class="s">'urn:ckp:kernel:demo'</span> });
+<span class="c">//  → { ok: true, id, verified: true, proof_digest } — sealed + proof-chained, one transaction</span>
+
+<span class="k">await</span> k.create(Task, { part_of_goal: <span class="s">'backlog:demo'</span> });  <span class="c">// omit a shape-required field</span>
+<span class="c">//  → { ok: false } — rejected at the seal. σ is real.</span>
+
+<span class="k">await</span> k.verify(task.id);   <span class="c">// π — independently re-checks the proof chain</span></pre>
+  </div>
+
+  <div class="choice-grid">
+    <div class="choice">
+      <span class="ch-key">the runtime</span>
+      <span class="ch-title">pgCK — the kernel inside PostgreSQL</span>
+      <p class="ch-desc"><a href="https://github.com/styk-tv/pgCK">styk-tv/pgCK</a> · extension v0.4.21 · PostgreSQL 14–17, both architectures · every release provenance-attested and verified before publication.</p>
+    </div>
+    <div class="choice">
+      <span class="ch-key">the client</span>
+      <span class="ch-title">cklib — the dispatch-only surface</span>
+      <p class="ch-desc"><a href="https://github.com/ConceptKernel/CK.Lib.Js">ConceptKernel/CK.Lib.Js</a> · v1.5.4 · dependency-vendored, honest degrade · the client that structurally cannot hold a query.</p>
+    </div>
+    <div class="choice">
+      <span class="ch-key">run it now</span>
+      <span class="ch-title">hello-kernel — zero to sealed state</span>
+      <p class="ch-desc"><a href="https://github.com/sporaxis-com/oci-germination/tree/main/examples/hello-kernel">oci-germination/examples</a> · one script, only Docker required · activate, seal, verify, prove enforcement — over the real wire.</p>
+    </div>
+    <div class="choice">
+      <span class="ch-key">the engine</span>
+      <span class="ch-title">pgRDF — RDF, SPARQL, SHACL, OWL-RL</span>
+      <p class="ch-desc"><a href="https://github.com/styk-tv/pgRDF">styk-tv/pgRDF</a> · the semantic engine the kernel stands on — an 8.2-billion-triple Wikidata load in a single instance, no sidecar store, and the carve chain that reasons off it on small hardware.</p>
+    </div>
+    <div class="choice">
+      <span class="ch-key">the composition</span>
+      <span class="ch-title">sporaxis — ontology-first assembly</span>
+      <p class="ch-desc"><a href="https://github.com/sporaxis-com/sporaxis">sporaxis-com/sporaxis</a> · declarations compose attested artifacts into runnable bundles, by digest — an RDF bill of materials for every image.</p>
+    </div>
+    <div class="choice">
+      <span class="ch-key">the work</span>
+      <span class="ch-title">Built in the open</span>
+      <p class="ch-desc">The v3.10 workstreams are public issues: the scoring verbs, the wire contract, npm go-live, fleet adoption — and <a href="https://github.com/ConceptKernel/conceptkernel.github.io/milestone/1">this site's own release train</a>.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- CREATION STATEMENT -->
+<div class="creation-statement">
+  <span class="cs-eyebrow">the origin — conceptkernel.org</span>
+  <p class="cs-main">We provide the protocol.<br>You choose the <em>genome</em>.<br>The fleet becomes the mind.</p>
+  <p class="cs-sub">ConceptKernel is an empty canvas organism. Internal structure is standardized. External relationships are typed. What you seal is yours — proven, attributed, forever.</p>
+</div>
+
+
+<!-- CTA -->
+<div class="cta-block">
+  <span class="cta-quote">"<strong>Seal the gesture, derive the weight.</strong> The board is driven by the score, the score by sealed signal — and the rule that drives it evolves only by consensus."</span>
+  <div class="cta-row">
+    <a href="https://conceptkernel.org/v3.9/introduction" class="btn-p">Read the Specification</a>
+    <a href="https://github.com/sporaxis-com/oci-germination/tree/main/examples/hello-kernel" class="btn-s">Run a Kernel</a>
+    <a href="https://conceptkernel.org/browse/index.html" class="btn-s">Browse the Ontology</a>
+    <a href="https://discord.gg/sTbfxV9xyU" class="btn-s">Join the Consensus</a>
+  </div>
+</div>
+
+
+<!-- FOOTER -->
+<footer>
+  <span class="foot-mark">
+    <a href="https://conceptkernel.org">conceptkernel.org</a> · CKP v3.9.1 — Critical Isolation · All kernels are Continuants
+  </span>
+  <span class="foot-axiom">Every instance a truth. Every edge a choice. Every epoch a consensus.</span>
+</footer>
+
+</div>
+
+<script>
+function toggleTheme(){
+  const h=document.documentElement;
+  const dark=h.getAttribute('data-theme')==='dark';
+  h.setAttribute('data-theme',dark?'light':'dark');
+  document.getElementById('tog-txt').textContent=dark?'light':'dark';
+  try{localStorage.setItem('ck-theme',dark?'light':'dark')}catch(e){}
+}
+(function(){
+  try{
+    const s=localStorage.getItem('ck-theme');
+    if(s){document.documentElement.setAttribute('data-theme',s);document.getElementById('tog-txt').textContent=s}
+  }catch(e){}
+})();
+
+const io=new IntersectionObserver(e=>{
+  e.forEach(x=>{if(!x.isIntersecting)return;x.target.classList.add('vis');io.unobserve(x.target)})
+},{threshold:.06,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('section').forEach(s=>io.observe(s));
+
+const ioA=new IntersectionObserver(e=>{
+  e.forEach(x=>{
+    if(!x.isIntersecting)return;
+    x.target.querySelectorAll('.awk-item').forEach((it,i)=>setTimeout(()=>it.classList.add('vis'),i*90));
+    ioA.unobserve(x.target);
+  })
+},{threshold:.05});
+document.querySelectorAll('.awk-list').forEach(l=>ioA.observe(l));
+
+const ioC=new IntersectionObserver(e=>{
+  e.forEach(x=>{
+    if(!x.isIntersecting)return;
+    x.target.querySelectorAll('.choice').forEach((it,i)=>setTimeout(()=>it.classList.add('vis'),i*75));
+    ioC.unobserve(x.target);
+  })
+},{threshold:.05});
+document.querySelectorAll('.choice-grid').forEach(g=>ioC.observe(g));
+
+const ioL=new IntersectionObserver(e=>{
+  e.forEach(x=>{
+    if(!x.isIntersecting)return;
+    x.target.querySelectorAll('.law').forEach((it,i)=>setTimeout(()=>it.classList.add('vis'),i*160));
+    ioL.unobserve(x.target);
+  })
+},{threshold:.04});
+document.querySelectorAll('.laws').forEach(l=>ioL.observe(l));
+
+const ioE=new IntersectionObserver(e=>{
+  e.forEach(x=>{
+    if(!x.isIntersecting)return;
+    x.target.querySelectorAll('.epoch').forEach((it,i)=>setTimeout(()=>it.classList.add('vis'),i*120));
+    ioE.unobserve(x.target);
+  })
+},{threshold:.04});
+document.querySelectorAll('.epochs').forEach(l=>ioE.observe(l));
+</script>
+</body>
+</html>

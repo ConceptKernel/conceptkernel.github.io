@@ -52,6 +52,13 @@ export default withMermaid(defineConfig({
           { text: 'Discord', link: 'https://discord.gg/sTbfxV9xyU' },
           { text: 'GitHub', link: 'https://github.com/ConceptKernel' },
         ]
+      },
+      {
+        text: 'Download',
+        items: [
+          { text: 'Install & run — one docker run', link: '/v3.9/install' },
+          { text: 'GitHub releases', link: 'https://github.com/sporaxis-com/oci-germination/releases' },
+        ]
       }
     ],
 

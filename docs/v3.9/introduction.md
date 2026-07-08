@@ -5,6 +5,22 @@ description: "Sovereign, semantic, self-governing state reached through one type
 
 # Introduction to CKP v3.9.1
 
+<div class="ck-cta">
+  <a class="ck-cta-btn" href="/v3.9/install">⬇&nbsp; Download &amp; run</a>
+  <a class="ck-cta-alt" href="https://github.com/sporaxis-com/oci-germination/releases">GitHub releases</a>
+  <span class="ck-cta-note">one <code>docker run</code> · ~128&nbsp;MB · Docker only</span>
+</div>
+
+<style>
+.ck-cta{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin:1.1rem 0 1.6rem}
+.ck-cta-btn{display:inline-block;background:var(--vp-c-brand-1);color:var(--vp-c-white)!important;font-weight:600;padding:.5rem 1.15rem;border-radius:8px;text-decoration:none;transition:background .2s;white-space:nowrap}
+.ck-cta-btn:hover{background:var(--vp-c-brand-2)}
+.ck-cta-alt{display:inline-block;border:1px solid var(--vp-c-divider);color:var(--vp-c-text-1)!important;padding:.5rem 1rem;border-radius:8px;text-decoration:none;transition:border-color .2s;white-space:nowrap}
+.ck-cta-alt:hover{border-color:var(--vp-c-brand-1)}
+.ck-cta-note{font-size:.8rem;color:var(--vp-c-text-2)}
+.ck-cta-note code{font-size:.78rem}
+</style>
+
 A Concept Kernel is a self-governing unit of meaning. Its types are ontology — RDF classes, SHACL shapes, OWL-RL rules, not hand-rolled columns. Every change it makes is **shape-gated, sealed, and proof-chained** the moment it lands, and it answers the world through a single typed verb carried over NATS-WSS. Meaning is the schema; the door is the whole surface.
 
 It runs inside PostgreSQL, but the engine stays out of sight: no REST endpoint, no SQL handle, no query surface is exposed. The meaning is sovereign, every step it has taken is provable, and the only thing that crosses the boundary is one verb and its typed payload. This is **CKP v3.9.1 — Critical Isolation**: the engine stays invisible, the meaning stays sovereign, and the proof chain stays whole.

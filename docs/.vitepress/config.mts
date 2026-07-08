@@ -93,8 +93,9 @@ export default withMermaid(defineConfig({
         {
           text: 'Part V: Build',
           items: [
-            { text: 'The Client: cklib', link: '/v3.9/client' },
+            { text: 'Install & Run', link: '/v3.9/install' },
             { text: 'Quickstart', link: '/v3.9/quickstart' },
+            { text: 'The Client: cklib', link: '/v3.9/client' },
             { text: 'The Fleet', link: '/v3.9/ecosystem' },
           ]
         },

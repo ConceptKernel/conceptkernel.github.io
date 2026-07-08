@@ -31,6 +31,14 @@ The isolation is enforced by the database's own role authority. A participant ho
 The role floor is a Postgres privilege, checked by the engine on every call. A participant cannot formulate a request for something it was not granted — the type system is the language, and the grammar rejects the sentence before it is spoken.
 :::
 
+## The bundle is the embodiment
+
+Critical Isolation ships as one image. A single `docker run` of the `ck-allinone` bundle stands up the three rings in one process tree — PostgreSQL 17 carrying pgRDF as the engine (Ring 0) and pgCK as the primitives and affordances (Rings 1 and 2), a NATS core with its WebSocket door, and a static file server for the browser client — on a scratch base with no Python, around 128 MB. `ckp.dispatch` is the only opening: an app publishes a verb over NATS-WSS and the in-image relay carries it to that one function. See [the one door](/v3.9/the-door) for the wire.
+
+::: warning Identity today is a shared secret
+The isolation floor is real and structural — `ck_participant` reaches nothing but `ckp.dispatch`, whatever credential it holds. Participant identity, though, is currently the `ck_participant` SCRAM password held by the deployment; a per-user verified-JWT claim checked at the seal is an inherited upstream prerequisite (CKP v3.9 §10) that rides in on a later cut. Treat a current deployment as **alpha-trust**: sound isolation, shared-secret identity — hold the door behind your own gateway before exposing it to untrusted users.
+:::
+
 ## Why the isolation makes the guarantees real
 
 Each of a kernel's guarantees is a consequence of the rings, not a feature bolted beside them.

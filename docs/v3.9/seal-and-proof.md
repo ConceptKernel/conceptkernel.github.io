@@ -15,22 +15,21 @@ in a single transaction. A fact that satisfies its shape lands, seals, chains, a
 
 ## The seal is the gate
 
-The **seal** validates the candidate body against the kernel's own SHACL shape and admits only what conforms. As of pgCK v0.4.17 the seal gate enforces full **W3C SHACL Core** — datatype, cardinality, node-kind, and pattern constraints — so what the `validate` verb predicts is exactly what the seal accepts: **validate ⟺ seal**.
+The **seal** validates the candidate body against the kernel's own SHACL shape and admits only what conforms. As of pgCK v0.4.21 the seal gate enforces full **W3C SHACL Core** — datatype, cardinality, node-kind, and pattern constraints — so what the `validate` verb predicts is exactly what the seal accepts: **validate ⟺ seal**.
 
 A complete body lands:
 
 ```js
-const ship = await k.create('urn:ckp:demo/type/Ship', {
-  name: 'Endurance', crew_size: 28,
-});
-// → { ok: true, id, verified: true, proof_digest: '…' }
+const task = await k.create({ task: { target_kernel: 'demo', title: 'ship it' } });
+// task.create — a governed, sealed work object targeting the demo kernel
+// → { id: 'task-…', ok: true, verified: true, proof_digest: '…' }
 ```
 
 A body that misses a shape-required property is refused at the seal:
 
 ```js
-await k.create('urn:ckp:demo/type/Ship', { name: 'Endurance' });
-// crew_size is required by the Ship shape
+await k.create({ task: { target_kernel: 'demo' } });
+// the Task shape requires a title — the body is incomplete
 // → { ok: false }
 ```
 
@@ -41,8 +40,8 @@ The reply is honest: `ok:true` carries an `id`, a `verified:true` flag, and a `p
 The `validate` verb runs the same W3C SHACL Core check the seal runs, without writing anything. It returns the full `ValidationReport` — every violation typed by path, constraint, and severity — so a participant can confirm a body before landing it:
 
 ```js
-await k.validate({ type: 'urn:ckp:demo/type/Ship', name: 'Endurance' });
-// → { conforms: false, violations: [{ path: '…/crew_size', message: '…', severity: 'Violation' }] }
+await k.validate({ task: { target_kernel: 'demo' } });
+// → { conforms: false, violations: [{ path: '…/title', message: '…', severity: 'Violation' }] }
 ```
 
 Because validate and seal read the same shape, `conforms:true` guarantees the seal accepts and `conforms:false` names exactly what the seal would refuse. Validate is the dry run; the seal is the commit.
@@ -61,17 +60,18 @@ The `prev →` links chain the entries: each entry's signature commits to the on
 
 ## The proof: re-verifiable by anyone
 
-Each seal also mints a `Proof` — an `hmac+sha256` digest bound to the instance's IRI and a verified-at timestamp. The proof is re-verifiable independently: the `verify` verb — one of the kernel's named [affordances](/v3.9/affordances) — recomputes the digest against the ledger and confirms the chain.
+Each seal also mints a `Proof` — an `hmac+sha256` digest bound to the instance's IRI and a verified-at timestamp. The proof is re-verifiable independently: the `instance.verify` verb — one of the kernel's named [affordances](/v3.9/affordances) — recomputes the digest against the ledger and confirms the chain.
 
 ```js
-await k.verify(ship.id);
-// → { verified: true, proof_digest: '…' }
+await k.verify(task.id);
+// instance.verify — recomputes the digest against the ledger
+// → { id: 'task-…', ok: true, verified: true }
 ```
 
 Anyone holding the door can re-run the verification. The proof depends only on the ledger and the shared method — a reader confirms it independently of the writer.
 
 ::: tip
-`proof_digest` on the create reply and on the `verify` reply are the same value. A client can pin the digest at write time and re-check it at any later point.
+The `proof_digest` minted at `task.create` is stable. A client pins it at write time and re-checks it at any later point — `instance.verify` recomputes the seal against the ledger and returns `verified: true`.
 :::
 
 ## Provenance on every write
@@ -79,13 +79,13 @@ Anyone holding the door can re-run the verification. The proof depends only on t
 Every sealed instance carries **W3C PROV-O** provenance — three mandatory facts:
 
 - **activity** — the governed operation that produced the fact,
-- **agent** — the participant that acted, derived from the connection's verified identity,
+- **agent** — the participant that acted, taken from the connection,
 - **time** — when the fact was sealed.
 
-The acting agent is resolved from the connection — see [/v3.9/the-door](/v3.9/the-door). The `provenance` verb returns the chain for an instance:
+The acting agent is resolved from the connection — see [/v3.9/the-door](/v3.9/the-door). The `instance.provenance` verb returns the chain for an instance:
 
 ```js
-await k.provenance(ship.id);
+await k.provenance(task.id);
 // → the activity / agent / time chain for this instance, with its proof
 ```
 

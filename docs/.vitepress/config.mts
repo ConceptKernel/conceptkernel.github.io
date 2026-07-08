@@ -70,16 +70,16 @@ export default withMermaid(defineConfig({
             { text: 'What a Concept Kernel Is', link: '/v3.9/concept-kernel' },
             { text: 'The One Door: ckp.dispatch', link: '/v3.9/the-door' },
             { text: 'Seal, Ledger, Proof', link: '/v3.9/seal-and-proof' },
-            { text: 'Shapes (σ)', link: '/v3.9/shapes' },
+            { text: 'Shapes & the Seal Gate', link: '/v3.9/shapes' },
           ]
         },
         {
           text: 'Part III: Capability & Governance',
           items: [
-            { text: 'Affordances (α)', link: '/v3.9/affordances' },
+            { text: 'Affordances — the Verbs', link: '/v3.9/affordances' },
             { text: 'Governance', link: '/v3.9/governance' },
-            { text: 'Grants (γ)', link: '/v3.9/grants' },
-            { text: 'Epochs (ε)', link: '/v3.9/epochs' },
+            { text: 'Grants & the Role Floor', link: '/v3.9/grants' },
+            { text: 'Epochs', link: '/v3.9/epochs' },
           ]
         },
         {

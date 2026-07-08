@@ -1,15 +1,32 @@
 ---
-title: "Grants: the γ Strand"
-description: "A grant binds an identity to a verb, a class, and a target — an enumerable matrix of legal moves, sealed as a fact and enforced at the one door."
+title: "Grants and the Role Floor"
+description: "The live access model is a Postgres role floor: a participant reaches exactly one function. The Grant class is the governed vocabulary that keys a legal move to identity, verb, class, and target."
 ---
 
-# Grants: the γ Strand
+# Grants and the Role Floor
 
-Grants are language. A grant (γ) is a sealed sentence in the kernel's own vocabulary: it states that a given identity may speak a given verb over a given class within a given target scope. It declares an affordance an identity holds, and it is honoured at the single door every participant reaches through — [`ckp.dispatch`](/v3.9/the-door).
+Access to a concept kernel rests on a floor enforced by the database itself. A connection is issued the Postgres role `ck_participant`, and that role holds exactly one capability: `EXECUTE` on [`ckp.dispatch`](/v3.9/the-door). Above that floor the protocol defines a governed grant vocabulary — the `ckp:Grant` class — that keys a legal move to an identity, a verb, a class, and a target.
 
-## A grant is four coordinates
+## The role floor
 
-The `ckp:Grant` class binds a role to a permission expressed as domain × action × target. Every grant carries four fields, and the seal gate requires all four:
+The bundle provisions two Postgres roles at first boot:
+
+| Role | Capability |
+|---|---|
+| `ck_substrate` | owns every table, shape, and function; never logs in |
+| `ck_participant` | the role apps connect as; may `EXECUTE ckp.dispatch` and nothing else |
+
+`ck_participant` cannot read a table, cannot reach `pgrdf.*`, and cannot rewrite a shape. Storing a fact never changes the ontology; running a verb never rewrites the rules. The separation is write authority enforced by Postgres, not convention.
+
+::: tip THE FLOOR IS NEVER COSMETIC
+The participant role logs in only when `OCIGER_CK_PARTICIPANT_PASSWORD` is set. Absent that password, `ck_participant` exists yet holds no login — by design, so the one-capability floor is always load-bearing.
+:::
+
+The [ring architecture](/v3.9/the-door) makes the floor structural. Ring 2 is the named affordances a participant may speak; Ring 1 is the frozen set of primitives that touch the engine; Ring 0 is the pgRDF engine, addressable from no door. A grant grants a verb in Ring 2 — the only surface there is. A grant carries no coordinate that could name a table, a SPARQL string, or a graph id, because those live below the floor.
+
+## The grant vocabulary
+
+The core ontology defines `ckp:Grant`, which binds a role to a permission expressed as domain × action × target. A grant is a sealed sentence in the kernel's own vocabulary: a given identity may speak a given verb over a given class within a given target scope. Every grant carries four fields, and the seal gate requires all four:
 
 | Coordinate | Property | Meaning |
 |---|---|---|
@@ -22,39 +39,13 @@ The `ckp:Grant` class binds a role to a permission expressed as domain × action
 @prefix ckp: <https://conceptkernel.org/ontology/v3.8/core#> .
 
 [] a ckp:Grant ;
-   ckp:role       "crew" ;
-   ckp:permAction "instance.transition" ;
-   ckp:permDomain "urn:ckp:demo/type/Ship" ;
-   ckp:permTarget "urn:ckp:demo/ship/*" .
+   ckp:role       "contributor" ;
+   ckp:permAction "task.create" ;
+   ckp:permDomain "ckp://Kernel#demo" ;
+   ckp:permTarget "ckp://Kernel#demo" .
 ```
 
-This grant reads straight off the page: the `crew` identity may `instance.transition` a `Ship` in the `demo` project. Read its coordinates back the other way and you have the enumerable question a kernel can always answer — *which identity, which verb, which class, which target.*
-
-## Identity is server-derived
-
-The four-tuple that reaches the door is ⟨ verb, kernel_urn, payload, identity ⟩. Three coordinates travel in the request. The fourth — identity — the server derives from the verified JWT the connection carries. The payload names URNs and typed fields; the identity is the connection's own, established at login and reissued as NATS permissions when the JWT is presented.
-
-That placement is what makes a grant enforceable. Because identity is read from the verified token, a grant that names the `crew` role applies to exactly the connections that authenticated as crew — the coordinate the grant keys on is the coordinate the server already holds, sealed and out of the caller's reach.
-
-## Two participants, one kernel, different legal moves
-
-The kernel's affordances live in a sealed registry — the sole routing authority for `ckp.dispatch`. A participant's legal moves are the intersection of two sealed sets: the affordance rows the kernel exposes, and the grants the participant's identity holds.
-
-```
-legal moves = sealed affordance rows  ∩  grants(identity)
-```
-
-Because the second set is keyed on identity, two participants acting on the *same* shared kernel see *different* [affordances](/v3.9/affordances). A crew identity discovers `instance.transition` on `Ship`; a viewer identity discovers `instance.get` and `instance.query` and nothing that writes. The kernel is one governed truth; the door each participant sees is cut to their grants. Discovery and enforcement are the same computation — a participant is offered exactly the moves the seal would accept from them.
-
-## The role floor
-
-Beneath every grant sits a floor enforced by Postgres role authority, so no grant can widen past it. A connection is issued the role `ck_participant`, and `ck_participant` holds exactly one capability: `EXECUTE` on `ckp.dispatch`.
-
-::: tip THE FLOOR
-`ck_participant` cannot read a table, cannot reach `pgrdf.*`, and cannot rewrite a shape. Storing a fact can never change the ontology; running a verb can never rewrite the rules. The separation is enforced by the database's own role authority — write authority, not convention.
-:::
-
-The [ring architecture](/v3.9/the-door) makes this structural. Ring 2 is the named affordances a participant may speak; Ring 1 is the frozen set of primitives that touch the engine; Ring 0 is the pgRDF engine itself, which is never addressable from the door. A grant grants a verb in Ring 2 — the only surface there is. There is no coordinate in a grant that could name a table, a SPARQL string, or a graph id, because those live below the floor.
+This grant reads straight off the page: the `contributor` identity may `task.create` in the `demo` kernel. Read its coordinates back the other way and you have the question a kernel can always answer — which identity, which verb, which class, which target.
 
 ## Why the matrix is enumerable
 
@@ -66,11 +57,21 @@ A grant matrix is a table: identities down the side, verbs across the top, each 
 | `viewer` | — | — | `Ship` | — |
 | `steward` | `Ship` | `Ship` | `Ship` | `demo/*` |
 
-This table exists because the verb vocabulary is **closed**. CKP v3.9.1 exposes roughly sixteen verbs — `instance.{create, update, transition, link, query, get, reach, verify, provenance, snapshot, validate, retire}`, `kernel.{propose_change, vote, apply}`, and `concept.match`. A finite, sealed set of verbs is a finite set of columns, so the grant matrix has a shape that can be written down, audited, and enforced row by row.
+This table exists because the verb vocabulary is **closed**. CKP v3.9.1 exposes a small, fixed set of verbs — `instance.{create, update, transition, link, query, get, reach, verify, provenance, snapshot, validate, retire}`, `kernel.{propose_change, vote, apply}`, and `concept.match`. A finite, sealed set of verbs is a finite set of columns, so the grant matrix has a shape that can be written down, audited, and enforced row by row.
 
-"Zero query surfaces" is therefore the **precondition** that lets grants exist at all. A grant means "this identity may speak this verb over this class" — a claim that carries force only when the set of verbs is fixed and the semantics of each are sealed. Give a caller an open expression position — a SPARQL string, a WHERE clause, a raw query — and there is no finite column set to grant against; a single reachable surface swallows every distinction a grant is meant to draw. Closing the verb set is what turns access control from aspiration into an enumerable, enforceable matrix.
+"Zero query surfaces" is therefore the **precondition** that lets grants exist at all. A grant means "this identity may speak this verb over this class" — a claim that carries force only when the set of verbs is fixed and the semantics of each are sealed. An open expression position — a SPARQL string, a WHERE clause, a raw query — leaves no finite column set to grant against; one reachable surface swallows every distinction a grant is meant to draw. Closing the verb set turns access control into an enumerable, enforceable matrix.
 
-This is the load-bearing link between the strands: **γ depends on the door being [a verb, not a query surface](/v3.9/verb-vs-query-surface).** Because there is nothing to query, everything can be granted.
+This is the load-bearing point: grants depend on the door being [a verb, not a query surface](/v3.9/verb-vs-query-surface). Because there is nothing to query, everything can be granted.
+
+## Identity and fine-grained enforcement
+
+Enforcing a grant per identity asks the server to know, at seal time, who the caller is. Today a deployment authenticates participants with the `ck_participant` SCRAM password — a shared secret. That makes the isolation floor real for every connection while holding participant identity at a single trust level; a published ck-allinone v0.7.28 deployment is **alpha-trust** on that basis.
+
+Verified-JWT identity with seal-time, per-user claim checking is the capability that makes fine-grained per-verb and per-class grants meaningful: the identity coordinate a grant keys on becomes a verified claim the server reads from the token, sealed and out of the caller's reach. That identity layer is an inherited upstream prerequisite (CKP v3.9 §10). When it lands, the grant matrix above becomes enforceable per participant, and two participants on the same shared kernel discover the different [affordances](/v3.9/affordances) their grants allow.
+
+::: warning IDENTITY ROADMAP
+The role floor is live and enforced by Postgres. Fine-grained grant enforcement keyed on a verified per-user identity rides on the verified-JWT identity prerequisite (CKP v3.9 §10). Treat participant identity as a shared secret until that layer publishes.
+:::
 
 ## Related
 

@@ -36,14 +36,14 @@ features:
     details: "A kernel changes its own types only by consensus — propose → vote → apply. Each applied change advances the epoch, binding the very next write to a quorum-approved shape."
     link: /v3.9/governance
     linkText: Governance
-  - icon: "🧬"
-    title: Nine strands
-    details: "χ · ρ · σ · α · γ · π · δ · φ evaluated at an epoch ε — the anatomy of a kernel, and the alphabet of Concept Kernel Notation."
+  - icon: "📦"
+    title: Kernels, tasks, goals
+    details: "Open a named domain with kernel.create, land governed sealed tasks and goals in it, read them back and re-verify. One docker run stands up the whole substrate."
     link: /v3.9/concept-kernel
     linkText: What a kernel is
   - icon: "🔗"
-    title: The developer writes URN
-    details: "A domain concept is a name — urn:ckp:<project>/type/<Name> — sealed and shape-gated, addressed by what it means. No graph id, no quad, no query string in the developer's hands."
+    title: Address meaning, not storage
+    details: "A kernel is a named domain you open on the fly; its concepts are addressed by what they mean. No graph id, no quad, no query string in the developer's hands."
     link: /v3.9/naming
     linkText: Naming
 ---

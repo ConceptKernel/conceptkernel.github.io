@@ -13,11 +13,11 @@ CKP v3.9.1 *Critical Isolation* is implemented by a small fleet of public projec
 
 | Project | Version | Role | Repository |
 |---|---|---|---|
-| **pgCK** | v0.4.17 | The Concept Kernel runtime — the governed door, seal, ledger, and NATS bridge, as a PostgreSQL extension. | [styk-tv/pgCK](https://github.com/styk-tv/pgCK) |
-| **cklib** | v1.5.3 | The dispatch-only JavaScript client — a handle whose methods each map to one governed verb. | [ConceptKernel/CK.Lib.Js](https://github.com/ConceptKernel/CK.Lib.Js) |
+| **pgCK** | v0.4.21 | The Concept Kernel runtime — the governed door, seal, ledger, and NATS bridge, as a PostgreSQL extension. | [styk-tv/pgCK](https://github.com/styk-tv/pgCK) |
+| **cklib** | v1.5.4 | The dispatch-only JavaScript client — a handle whose methods each map to one governed verb; the `ck-allinone` bundle pins and serves `1.5.3`. | [ConceptKernel/CK.Lib.Js](https://github.com/ConceptKernel/CK.Lib.Js) |
 | **pgRDF** | v0.6.19 | The RDF substrate — RDF, SPARQL, SHACL, and OWL-RL as a native PostgreSQL extension. | [styk-tv/pgRDF](https://github.com/styk-tv/pgRDF) |
 | **sporaxis** | v0.0.5 | The composer — an ontology-first OCI bundle assembler. | [sporaxis-com/sporaxis](https://github.com/sporaxis-com/sporaxis) |
-| **oci-germination** `ck-allinone` | v0.7.25 | The runnable bundle and examples — including the [`hello-kernel`](https://github.com/sporaxis-com/oci-germination/tree/main/examples/hello-kernel) walkthrough. | [sporaxis-com/oci-germination](https://github.com/sporaxis-com/oci-germination) |
+| **oci-germination** `ck-allinone` | v0.7.28 | The runnable bundle and examples — including the [`hello-kernel`](https://github.com/sporaxis-com/oci-germination/tree/main/examples/hello-kernel) walkthrough. | [sporaxis-com/oci-germination](https://github.com/sporaxis-com/oci-germination) |
 
 ## How the roles compose
 
@@ -29,7 +29,7 @@ CKP v3.9.1 *Critical Isolation* is implemented by a small fleet of public projec
 
 **sporaxis** is the ontology-first composer that assembles OCI bundles from a declaration, turning a set of named artifacts into a by-digest bundle with an RDF bill of materials. It is the machinery that takes the attested pieces of the fleet and composes them into a single, pinned, reproducible artifact.
 
-**oci-germination** publishes the runnable `ck-allinone` bundle and the worked examples. Its `hello-kernel` example is the canonical zero-to-sealed walkthrough — see the [quickstart](/v3.9/quickstart).
+**oci-germination** publishes the runnable `ck-allinone` bundle and the worked examples. `ck-allinone` v0.7.28 composes pgRDF, pgCK, NATS, and cklib into one ~128 MB image — PostgreSQL 17, a scratch base, s6-overlay supervising every process, no Python — so a single `docker run` stands up the whole substrate. Its `hello-kernel` example is the canonical zero-to-sealed walkthrough — see the [quickstart](/v3.9/quickstart).
 
 ## Versioning convention
 
@@ -40,8 +40,8 @@ This site names the public repositories and the shipped versions of the fleet. P
 Every runtime and client release is CI-built and provenance-attested. pgCK and cklib each publish under SLSA build provenance, and the attestation is verified before the release is published — a tag is only current once `gh attestation verify` accepts its digest and the repository's `LATEST.md` advances to it.
 
 ```sh
-gh attestation verify oci://ghcr.io/styk-tv/pgck:0.4.17-pg17-amd64 --repo styk-tv/pgCK              # exit 0
-gh attestation verify oci://ghcr.io/conceptkernel/ck-lib-js:1.5.3 --repo ConceptKernel/CK.Lib.Js    # exit 0
+gh attestation verify oci://ghcr.io/styk-tv/pgck:0.4.21-pg17-amd64 --repo styk-tv/pgCK              # exit 0
+gh attestation verify oci://ghcr.io/conceptkernel/ck-lib-js:1.5.4 --repo ConceptKernel/CK.Lib.Js    # exit 0
 ```
 
 A successful verify binds the published digest to the CI workflow run that built it, recorded in a public transparency log. That is what "attested" means here: the artifact you pull is the artifact CI built, provably. The runnable bundle inherits the same discipline — `oci-germination` composes attested pieces into the `ck-allinone` image, so an adopter running `hello-kernel` is running verified builds end to end.

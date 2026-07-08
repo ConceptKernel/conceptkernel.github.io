@@ -68,7 +68,7 @@ urn:ckp:acme/prop/amount_due  # a domain property
 urn:ckp:acme/shape/Invoice    # a domain SHACL shape
 ```
 
-A domain kernel declares its own classes, properties, and shapes, and its seals are checked against them exactly as core seals are checked against the core shapes. Storing a domain fact never touches the core vocabulary, and running a governed verb never rewrites it — the two planes are held apart by write authority. The [naming](/v3.9/naming) page gives the full addressing scheme for both the stable core IRI and domain URNs.
+This `urn:ckp:<project>/type|prop|shape/<Name>` scheme is the naming for a kernel's first-class domain types — a domain class, its properties, and its SHACL shape, each addressed and checked exactly as the core terms are. The substrate ships the `Task` and `Goal` shapes armed today; declaring a fully custom first-class type and landing it through a generic typed create is the roadmap step (CKP v3.9 §4). Storing a domain fact leaves the core vocabulary untouched, and running a governed verb leaves it unrewritten — the two planes are held apart by write authority. The [naming](/v3.9/naming) page gives the full addressing scheme for both the stable core IRI and domain URNs.
 
 ## Continue
 

@@ -18,23 +18,57 @@
 # ROOT: self-contained. Every ckp: term it references, it declares.
 # owl:priorVersion records lineage, not dependency.
 #
-# TWO AUTHORING RULES, both earned by measurement:
+# THREE AUTHORING RULES, each earned by measurement:
 #
-#  1. Every constraint uses only a component MEASURED ENFORCING by the
-#     shipped engine (pgRDF 0.6.22 — twelve): minCount · maxCount ·
-#     datatype · nodeKind · in · pattern · minLength · disjoint ·
-#     hasValue · qualifiedValueShape+qualifiedMinCount · class · closed.
-#     Anything outside that set is a candidate path by another name.
-#     No sh:or, no sh:not, no sh:node — unmeasured, therefore unused.
+#  1. Every constraint uses a component MEASURED ENFORCING by the
+#     engine that gates writes: minCount · maxCount · datatype ·
+#     nodeKind · in · pattern · minLength · disjoint · hasValue ·
+#     qualifiedValueShape+qualifiedMinCount · class · closed.
+#     A component outside that set is a candidate path by another name.
 #
 #  2. NO CLASS IRI MAY BE THE SUBJECT OF A TRIPLE WHOSE PREDICATE
 #     CARRIES AN rdfs:domain. RDFS rule rdfs2 entails the class into the
 #     domain, the shape targets the class, and the ontology fails
 #     itself. This is why the Separation Axiom lives in the shapes of
-#     §13 and appears nowhere as a class-level assertion.
+#     §13 and appears nowhere as a class-level assertion. Where two
+#     classes legitimately share a property, that property carries no
+#     rdfs:domain and says so.
 #
-# STATUS: amended 2026-08-05 from the eight-component reconciliation.
-# Not yet loaded by ckp.boot().
+#  3. BODY LOCALITY. A constraint reads only what the candidate body
+#     carries, plus the parent-closure the substrate stamps onto the
+#     candidate itself. The gate composes:
+#
+#         shapes graph <- core shapes + kernel shapes + generated shape
+#         data graph   <- the candidate body + its parent closure
+#
+#     So a shape MAY target a superclass — the stamp supplies the
+#     parent type on the candidate. A shape may NOT reach a node the
+#     candidate merely references: that node's types are not composed,
+#     and every constraint depending on them refuses conformant work.
+#     This governs sh:class (usable only where the value node carries a
+#     direct rdf:type inside the body) and rules out sh:inversePath,
+#     which asks for triples pointing AT the candidate.
+#
+# DECLARED GAP — G-1, CROSS-NODE TYPE INTEGRITY.
+#     Rule 3 places one property beyond the instance gate: that a
+#     referenced IRI is of the kind the reference intends — a kernel
+#     bearing one organ of each kind, a grant targeting an organ, a
+#     membership holding a role. These are checkable, but by a
+#     store-level query over sealed rows, not by the gate that admits a
+#     single body. The core states the ranges so the check is
+#     expressible, and leaves it unclaimed here rather than carrying a
+#     constraint that reads as enforcement and refuses valid writes.
+#
+# ENGINE CAVEAT — read before trusting a conformant result.
+#     A conformant result is meaningful only against the shapes graph
+#     this file defines. The engine reports conformance against a
+#     shapes graph that is empty or absent, so the loaded graph is
+#     established by digest, not by the validator's answer. Check the
+#     digest of what is loaded before treating any pass as enforcement.
+#
+# OPERATIONAL: the enforcement surface this file defines takes effect
+# when a substrate loads it. Confirm the loaded digest matches the
+# published one.
 #######################################################################
 
 <https://conceptkernel.org/ontology/v3.11/core> a owl:Ontology ;
@@ -58,7 +92,7 @@ ckp:inProject a owl:ObjectProperty ;
 
 ckp:epoch a owl:DatatypeProperty ;
   rdfs:range xsd:integer ;
-  rdfs:comment "The version of a kernel's meaning. Advanced only by a sealed Materialization. A read is a read at an epoch; so is a tool's output." .
+  rdfs:comment "The ordinal of a version of meaning. Carried by a kernel as its current position, and by an Epoch as the position it names. No rdfs:domain: both bear it. Advanced only by a sealed Materialization." .
 
 # declaresType carries no rdfs:domain deliberately: a Kernel and a
 # Module both declare types, and §12's admitted-set query binds it to a
@@ -139,11 +173,7 @@ ckp:organKind a owl:DatatypeProperty ;
 
 ckp:dependsOn a owl:ObjectProperty ;
   rdfs:domain ckp:Organ ; rdfs:range ckp:Organ ;
-  rdfs:comment "The dependency order: TOOL depends on CK; DATA depends on TOOL and CK; CK depends on nothing." .
-
-ckp:derivedFrom a owl:ObjectProperty ;
-  rdfs:domain ckp:TOOL ; rdfs:range ckp:CK ;
-  rdfs:comment "The CK organ this tool was built from at the current epoch." .
+  rdfs:comment "The organs this one is built on. The dependency order is a gate rather than a note: CK carries none, TOOL carries the one CK organ it is derived from, DATA carries both. Counted in §13, where each organ kind states its own arity." .
 
 ckp:writeAuthority a owl:DatatypeProperty ;
   rdfs:domain ckp:Organ ;
@@ -238,8 +268,10 @@ ckp:supersedes a owl:ObjectProperty ;
 # 5. THE ACT — a disposition is realized in a process
 #
 # ckp:TOOL is a BFO disposition; a disposition is realized in a process
-# (BFO_0000015). Without Run the substrate can prove a fact was sealed
-# and cannot prove the work behind it happened.
+# (BFO_0000015). Run is that process, and ckp:Instance is its sealed
+# outcome. Together they answer what an act is: without Run the
+# substrate can prove a fact was sealed and cannot prove the work
+# behind it happened.
 #######################################################################
 
 ckp:Run a rdfs:Class ;
@@ -281,37 +313,61 @@ ckp:wasGeneratedBy a owl:ObjectProperty ;
 
 #######################################################################
 # 6. EPOCH AND MATERIALIZATION — the progression, made checkable
+#
+# An epoch is a resource because proof describes it: it carries the
+# digest of the surface it names and the ordinal that orders it, and a
+# materialization points at the one it produced. The ordinals elsewhere
+# in this file stay literal, because they are only ever read and
+# compared.
+#
+# Materialization and FailedMaterialization are SIBLINGS under
+# ckp:Instance. A derivation that completed names a surface and
+# advances an epoch; one that failed does neither. Modelling failure as
+# a kind of materialization would oblige it to carry a surface digest
+# it cannot have — and under parent-closure stamping that obligation
+# reaches it, so every failure record would be refused.
 #######################################################################
 
 ckp:Epoch a rdfs:Class ;
   rdfs:label "Epoch" ;
-  rdfs:comment "A named version of a kernel's enforcement surface, identified by the digest of the surface it materialized. An epoch is not a counter." .
+  rdfs:comment "A named version of a kernel's enforcement surface, identified by the digest of the surface it materialized and ordered by its ordinal. A decision points at an epoch, so which decision ran under which rules is a traversal rather than a reconstruction." .
 
 ckp:Materialization a rdfs:Class ;
   rdfs:subClassOf ckp:Instance ;
   rdfs:label "Materialization" ;
-  rdfs:comment "The sealed derivation of an epoch's action set from that epoch's own meaning, gated by the materialization shape as declared at the prior epoch. The engine that advances meaning is subject to the same gate as everything meaning produces." .
+  rdfs:comment "The completed derivation of an epoch's action set from that epoch's own meaning, gated by the materialization shape as declared at the prior epoch. The engine that advances meaning is subject to the same gate as everything meaning produces." .
 
 ckp:FailedMaterialization a rdfs:Class ;
-  rdfs:subClassOf ckp:Materialization ;
+  rdfs:subClassOf ckp:Instance ;
   rdfs:label "Failed Materialization" ;
-  rdfs:comment "A materialization that did not complete. A distinct kind of thing rather than a state flag: failure is a recorded, queryable outcome and the epoch does not advance." .
+  rdfs:comment "A derivation that did not complete. A sibling of Materialization rather than a kind of one: it names no surface and produces no epoch, so it is gated on carrying a reason and on claiming neither. Failure is a recorded, queryable outcome and the epoch does not advance." .
 
+# materializes and fromEpoch carry no rdfs:domain: both outcomes bear
+# them, and a domain would entail a failure into Materialization.
 ckp:materializes a owl:ObjectProperty ;
-  rdfs:domain ckp:Materialization ; rdfs:range ckp:Kernel .
+  rdfs:range ckp:Kernel ;
+  rdfs:comment "The kernel whose surface this derivation was attempted for." .
 
 ckp:fromEpoch a owl:DatatypeProperty ;
-  rdfs:domain ckp:Materialization ; rdfs:range xsd:integer .
+  rdfs:range xsd:integer ;
+  rdfs:comment "The ordinal the derivation started from." .
 
 ckp:toEpoch a owl:DatatypeProperty ;
-  rdfs:domain ckp:Materialization ; rdfs:range xsd:integer .
+  rdfs:domain ckp:Materialization ; rdfs:range xsd:integer ;
+  rdfs:comment "The ordinal reached. Only a completed derivation has one." .
 
 ckp:sourceDigest a owl:DatatypeProperty ;
   rdfs:comment "sha256 of the exact input a derivation or adoption consumed." .
 
+# surfaceDigest carries no rdfs:domain: a Materialization records the
+# surface it produced, and the Epoch it produced is named by the same
+# digest.
 ckp:surfaceDigest a owl:DatatypeProperty ;
-  rdfs:domain ckp:Materialization ;
-  rdfs:comment "sha256 of the enforcement surface produced — gate set, plans, affordance registry and transition maps together. This is what an epoch names." .
+  rdfs:comment "sha256 of the enforcement surface — gate set, plans, affordance registry and transition maps together. This is what an epoch names." .
+
+ckp:producesEpoch a owl:ObjectProperty ;
+  rdfs:domain ckp:Materialization ; rdfs:range ckp:Epoch ;
+  rdfs:comment "The epoch this derivation produced. Required of a completed materialization and refused of a failed one, so an advance without a named surface cannot seal." .
 
 ckp:producesAffordance a owl:ObjectProperty ;
   rdfs:domain ckp:Materialization ; rdfs:range ckp:Affordance .
@@ -322,6 +378,10 @@ ckp:reason a owl:DatatypeProperty ;
 
 #######################################################################
 # 7. THE SEAL CHAIN
+#
+# ckp:validation ranges over the SHACL report vocabulary the engine
+# already emits, so a report is re-readable by any conformant tool
+# without translation and the core declares no parallel term for it.
 #######################################################################
 
 ckp:LedgerEntry a rdfs:Class ;
@@ -332,12 +392,8 @@ ckp:Proof a rdfs:Class ;
   rdfs:label "Proof" ;
   rdfs:comment "A verifiable attestation about an instance, re-checkable long after the write. Integrity only — conformance is carried by conformsToShape and never shares a field with this." .
 
-ckp:ValidationReport a rdfs:Class ;
-  rdfs:label "Validation Report" ;
-  rdfs:comment "The outcome of gating a body against a shape, as a first-class record. The substrate constructs this from the engine's native report, which is not itself RDF." .
-
 ckp:validation a owl:ObjectProperty ;
-  rdfs:range ckp:ValidationReport ;
+  rdfs:range sh:ValidationReport ;
   rdfs:comment "The validation report that justified a seal or a refusal." .
 
 ckp:about a owl:ObjectProperty ;
@@ -350,8 +406,8 @@ ckp:sig a owl:DatatypeProperty ;
   rdfs:domain ckp:LedgerEntry .
 
 ckp:prev a owl:DatatypeProperty ;
-  rdfs:domain ckp:LedgerEntry ;
-  rdfs:comment "The sequence number of the preceding entry — the chain pointer." .
+  rdfs:domain ckp:LedgerEntry ; rdfs:range xsd:integer ;
+  rdfs:comment "The sequence number of the preceding entry — the chain pointer. The genesis entry carries 0, so every entry asserts its position and an omitted pointer is detectable rather than indistinguishable from the start of the chain." .
 
 ckp:ts a owl:DatatypeProperty ;
   rdfs:range xsd:dateTime .
@@ -416,14 +472,18 @@ ckp:toState a owl:DatatypeProperty ;
 #######################################################################
 # 9. IDENTITY AND AUTHORITY
 #
-# The chain must be traversable end to end, or the Separation Axiom
-# cannot bind to an identity:
+# The chain is traversable end to end, so the Separation Axiom binds to
+# an identity:
 #
 #   Participant -(memberIs)- Membership -(holdsRole)- Role
 #                                 |                     |
 #                            (memberOf)              (grant)
 #                                 v                     v
 #                              Project              Grant -(permTarget)- Organ
+#
+# Each hop's range is declared, which is what makes the traversal
+# expressible. The kind of each referenced node is checked at the store
+# level rather than the instance gate — see G-1.
 #######################################################################
 
 ckp:Participant a rdfs:Class ;
@@ -443,7 +503,7 @@ ckp:Agent a rdfs:Class ;
 ckp:Role a rdfs:Class ;
   rdfs:subClassOf bfo:0000023 ;
   rdfs:label "Role" ;
-  rdfs:comment "A realizable entity a participant bears within a project. Roles are what grants resolve against." .
+  rdfs:comment "A realizable entity a participant bears within a project. Roles are what grants resolve against, and a role bears at least one — a role granting nothing confers nothing." .
 
 ckp:Grant a rdfs:Class ;
   rdfs:label "Grant" ;
@@ -461,7 +521,7 @@ ckp:permAction a owl:DatatypeProperty ;
 
 ckp:permTarget a owl:ObjectProperty ;
   rdfs:domain ckp:Grant ; rdfs:range ckp:Organ ;
-  rdfs:comment "The organ this permission applies to. Ranged over Organ so the organ's write authority constrains what the grant can permit — the Separation Axiom bound to an identity rather than annotated." .
+  rdfs:comment "The organ this permission applies to. The declared range is what lets the organ's write authority be resolved against the grant — the Separation Axiom bound to an identity rather than annotated." .
 
 ckp:Delegation a rdfs:Class ;
   rdfs:subClassOf ckp:Instance ;
@@ -567,15 +627,21 @@ ckp:intoEpoch a owl:DatatypeProperty ;
 #      sh:closed true ; sh:ignoredProperties ( rdf:type ) ;
 #      sh:property [ sh:path rdf:type ; sh:in ( <admitted…> ) ] .
 #
-# It belongs to the SHAPES graph. Composition at the gate is:
-#   shapes graph <- core shapes + kernel shapes + generated shape
-#   data graph   <- the candidate instance ONLY
-# Composing the ontology into the data graph makes it flag itself.
+# It belongs to the SHAPES graph. Composition at the gate is stated in
+# authoring rule 3: the shapes graph carries the ontology, the data
+# graph carries the candidate body and its parent closure. Composing
+# the ontology into the data graph makes it flag itself.
 #######################################################################
 
 
 #######################################################################
 # 13. SHAPES — the core governs itself
+#
+# Every shape here targets a class the candidate carries directly or
+# receives from parent-closure stamping, and reads only paths the
+# candidate body holds. Constraints on the kind of a referenced node
+# are stated as ranges in the sections above and checked at the store
+# level — see G-1.
 #######################################################################
 
 ckp:KernelShape a sh:NodeShape ;
@@ -584,34 +650,40 @@ ckp:KernelShape a sh:NodeShape ;
   sh:property [ sh:path ckp:inProject ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
   sh:property [ sh:path ckp:epoch     ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
   sh:property [ sh:path ckp:hasOrgan  ; sh:minCount 3 ; sh:maxCount 3 ; sh:nodeKind sh:IRI ] ;
-  sh:property [ sh:path ckp:hasOrgan ; sh:qualifiedValueShape [ sh:class ckp:CK   ] ; sh:qualifiedMinCount 1 ] ;
-  sh:property [ sh:path ckp:hasOrgan ; sh:qualifiedValueShape [ sh:class ckp:TOOL ] ; sh:qualifiedMinCount 1 ] ;
-  sh:property [ sh:path ckp:hasOrgan ; sh:qualifiedValueShape [ sh:class ckp:DATA ] ; sh:qualifiedMinCount 1 ] .
+  sh:property [ sh:path ckp:declaresType       ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:declaresPredicate  ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:declaresShape      ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:declaresAffordance ; sh:nodeKind sh:IRI ] .
 
 ckp:OrganShape a sh:NodeShape ;
   sh:targetClass ckp:Organ ;
-  sh:property [ sh:path [ sh:inversePath ckp:hasOrgan ] ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
   sh:property [ sh:path ckp:organKind ; sh:minCount 1 ; sh:maxCount 1 ;
                 sh:in ( "ck" "tool" "data" ) ] ;
   sh:property [ sh:path ckp:writeAuthority ; sh:minCount 1 ; sh:maxCount 1 ;
-                sh:in ( "governed-only" "readonly-on-ontology" "readwrite" ) ] .
+                sh:in ( "governed-only" "readonly-on-ontology" "readwrite" ) ] ;
+  sh:property [ sh:path ckp:dependsOn ; sh:nodeKind sh:IRI ] .
 
-# The Separation Axiom as a gate. sh:hasValue is measured enforcing, so
-# a CK organ claiming readwrite is refused rather than merely wrong.
+# The Separation Axiom and the dependency order as gates. sh:hasValue
+# is measured enforcing, so a CK organ claiming readwrite is refused
+# rather than merely wrong; the dependsOn arities are counted in the
+# organ's own body, which is where they are readable.
 ckp:CKOrganShape a sh:NodeShape ;
   sh:targetClass ckp:CK ;
   sh:property [ sh:path ckp:organKind      ; sh:hasValue "ck" ] ;
-  sh:property [ sh:path ckp:writeAuthority ; sh:hasValue "governed-only" ] .
+  sh:property [ sh:path ckp:writeAuthority ; sh:hasValue "governed-only" ] ;
+  sh:property [ sh:path ckp:dependsOn      ; sh:maxCount 0 ] .
 
 ckp:TOOLOrganShape a sh:NodeShape ;
   sh:targetClass ckp:TOOL ;
   sh:property [ sh:path ckp:organKind      ; sh:hasValue "tool" ] ;
-  sh:property [ sh:path ckp:writeAuthority ; sh:hasValue "readonly-on-ontology" ] .
+  sh:property [ sh:path ckp:writeAuthority ; sh:hasValue "readonly-on-ontology" ] ;
+  sh:property [ sh:path ckp:dependsOn      ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
 
 ckp:DATAOrganShape a sh:NodeShape ;
   sh:targetClass ckp:DATA ;
   sh:property [ sh:path ckp:organKind      ; sh:hasValue "data" ] ;
-  sh:property [ sh:path ckp:writeAuthority ; sh:hasValue "readwrite" ] .
+  sh:property [ sh:path ckp:writeAuthority ; sh:hasValue "readwrite" ] ;
+  sh:property [ sh:path ckp:dependsOn      ; sh:minCount 2 ; sh:maxCount 2 ; sh:nodeKind sh:IRI ] .
 
 ckp:AffordanceShape a sh:NodeShape ;
   sh:targetClass ckp:Affordance ;
@@ -640,7 +712,8 @@ ckp:InstanceShape a sh:NodeShape ;
   sh:property [ sh:path ckp:createdBy       ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
   sh:property [ sh:path ckp:onBehalfOf      ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
   sh:property [ sh:path ckp:producedByAffordance ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
-  sh:property [ sh:path ckp:wasGeneratedBy  ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+  sh:property [ sh:path ckp:wasGeneratedBy  ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:preEnforcementEpoch ; sh:maxCount 1 ; sh:datatype xsd:integer ] .
 
 ckp:RunShape a sh:NodeShape ;
   sh:targetClass ckp:Run ;
@@ -653,29 +726,47 @@ ckp:RunShape a sh:NodeShape ;
   sh:property [ sh:path ckp:processRef    ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
   sh:property [ sh:path ckp:executingHost ; sh:maxCount 1 ; sh:datatype xsd:string ] .
 
-ckp:MaterializationShape a sh:NodeShape ;
-  sh:targetClass ckp:Materialization ;
-  sh:property [ sh:path ckp:materializes  ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
-  sh:property [ sh:path ckp:fromEpoch     ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
-  sh:property [ sh:path ckp:toEpoch       ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
-  sh:property [ sh:path ckp:sourceDigest  ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
-                sh:pattern "^[0-9a-f]{64}$" ] ;
+ckp:EpochShape a sh:NodeShape ;
+  sh:targetClass ckp:Epoch ;
+  sh:property [ sh:path ckp:epoch         ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
   sh:property [ sh:path ckp:surfaceDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
                 sh:pattern "^[0-9a-f]{64}$" ] .
 
-# A failure is a distinct kind of thing, targeted directly, so requiring
-# a reason needs no disjunction.
+ckp:MaterializationShape a sh:NodeShape ;
+  sh:targetClass ckp:Materialization ;
+  sh:property [ sh:path ckp:materializes      ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:fromEpoch         ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:toEpoch           ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:sourceDigest      ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] ;
+  sh:property [ sh:path ckp:surfaceDigest     ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] ;
+  sh:property [ sh:path ckp:producesEpoch     ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:producesAffordance ; sh:nodeKind sh:IRI ] .
+
+# A failure is a sibling kind, targeted directly, so requiring a reason
+# and refusing a claimed surface needs no disjunction.
 ckp:FailedMaterializationShape a sh:NodeShape ;
   sh:targetClass ckp:FailedMaterialization ;
-  sh:property [ sh:path ckp:reason ; sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] .
+  sh:property [ sh:path ckp:materializes  ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:fromEpoch     ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:sourceDigest  ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] ;
+  sh:property [ sh:path ckp:reason        ; sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+  sh:property [ sh:path ckp:validation    ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:toEpoch       ; sh:maxCount 0 ] ;
+  sh:property [ sh:path ckp:surfaceDigest ; sh:maxCount 0 ] ;
+  sh:property [ sh:path ckp:producesEpoch ; sh:maxCount 0 ] .
 
 ckp:LedgerEntryShape a sh:NodeShape ;
   sh:targetClass ckp:LedgerEntry ;
-  sh:property [ sh:path ckp:about   ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
-  sh:property [ sh:path ckp:bodySha ; sh:minCount 1 ; sh:datatype xsd:string ;
+  sh:property [ sh:path ckp:about      ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:bodySha    ; sh:minCount 1 ; sh:datatype xsd:string ;
                 sh:pattern "^[0-9a-f]{64}$" ] ;
-  sh:property [ sh:path ckp:sig     ; sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 16 ] ;
-  sh:property [ sh:path ckp:ts      ; sh:minCount 1 ; sh:datatype xsd:dateTime ] .
+  sh:property [ sh:path ckp:sig        ; sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 16 ] ;
+  sh:property [ sh:path ckp:ts         ; sh:minCount 1 ; sh:datatype xsd:dateTime ] ;
+  sh:property [ sh:path ckp:prev       ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:validation ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
 
 ckp:ProofShape a sh:NodeShape ;
   sh:targetClass ckp:Proof ;
@@ -713,12 +804,20 @@ ckp:ParticipantShape a sh:NodeShape ;
   sh:property [ sh:path ckp:participantKind ; sh:minCount 1 ; sh:maxCount 1 ;
                 sh:in ( "person" "process" ) ] .
 
+ckp:AgentShape a sh:NodeShape ;
+  sh:targetClass ckp:Agent ;
+  sh:property [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] .
+
+ckp:RoleShape a sh:NodeShape ;
+  sh:targetClass ckp:Role ;
+  sh:property [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:grant  ; sh:minCount 1 ; sh:nodeKind sh:IRI ] .
+
 ckp:GrantShape a sh:NodeShape ;
   sh:targetClass ckp:Grant ;
   sh:property [ sh:path ckp:permDomain ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
   sh:property [ sh:path ckp:permAction ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
-  sh:property [ sh:path ckp:permTarget ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ;
-                sh:class ckp:Organ ] .
+  sh:property [ sh:path ckp:permTarget ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
 
 ckp:DelegationShape a sh:NodeShape ;
   sh:targetClass ckp:Delegation ;
@@ -736,8 +835,7 @@ ckp:MembershipShape a sh:NodeShape ;
   sh:targetClass ckp:Membership ;
   sh:property [ sh:path ckp:memberIs  ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
   sh:property [ sh:path ckp:memberOf  ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
-  sh:property [ sh:path ckp:holdsRole ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ;
-                sh:class ckp:Role ] .
+  sh:property [ sh:path ckp:holdsRole ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
 
 ckp:ModuleShape a sh:NodeShape ;
   sh:targetClass ckp:Module ;

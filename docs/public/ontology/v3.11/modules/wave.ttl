@@ -326,3 +326,125 @@ wave:RulingShape a sh:NodeShape ;
 #   SELECT ?t WHERE { ?t a wave:Ticket ; wave:ticketState "delivered" }
 #   MINUS { ?cf wave:confirmsTicket ?t }
 #######################################################################
+
+
+#######################################################################
+# 8. OPERATIONS — what a pass DOES to the wave's knowledge
+#
+# Every pass performs acts on artifacts: publishing, superseding,
+# validating, withdrawing, closing. Carried in prose, they are legible
+# once and countable never. Named, the wave can answer how much of a
+# pass was progress and how much was repair — which is the question the
+# ticket count only gestures at.
+#
+# An Operation is an Instance, so it carries an actor and an epoch by
+# the core's own shape and cannot be recorded anonymously.
+#######################################################################
+
+wave:Operation a rdfs:Class ;
+  rdfs:subClassOf ckp:Instance ;
+  rdfs:label "Operation" ;
+  rdfs:comment "One deliberate act performed on the wave's knowledge during a pass. Distinct from a Ticket, which is work assigned: an operation is what the work did." .
+
+wave:opKind a owl:DatatypeProperty ;
+  rdfs:domain wave:Operation ;
+  rdfs:comment "publish · supersede · adopt · validate · confirm · refute · withdraw · correct · delete · refuse · promote · close-by-ruling · declare-gap · escalate. A closed set: an act outside it is an act the process has not yet learned to see." .
+
+wave:opTarget a owl:ObjectProperty ;
+  rdfs:domain wave:Operation ;
+  rdfs:comment "What the operation acted on — an artifact, a ticket, a ruling, a finding or an earlier operation. Withdrawal targets an operation, which is what makes a retraction traversable." .
+
+wave:opAtPass a owl:DatatypeProperty ;
+  rdfs:domain wave:Operation ; rdfs:range xsd:integer .
+
+wave:opEvidence a owl:DatatypeProperty ;
+  rdfs:domain wave:Operation ;
+  rdfs:comment "The command anyone can re-run, and its output. An operation without evidence is an assertion wearing a verb." .
+
+# supersede is the operation that made the wave's worst defect possible,
+# so the relation it creates is first-class and queryable.
+wave:supersedes a owl:ObjectProperty ;
+  rdfs:domain wave:Operation ;
+  rdfs:comment "The artifact this operation replaced. Publishing a replacement without recording this is what leaves a superseded digest standing in other components' documents, citable and wrong." .
+
+
+#######################################################################
+# 9. DEFECTS — what a pass FINDS in the wave's knowledge
+#
+# Not defects in code. Defects in what the wave believes: things
+# missing, things claimed twice, things replaced without retraction,
+# things present and never evaluated. Each is a distinct kind with a
+# distinct remedy, and lumping them together is why they recur.
+#######################################################################
+
+wave:Defect a rdfs:Class ;
+  rdfs:subClassOf ckp:Instance ;
+  rdfs:label "Knowledge Defect" ;
+  rdfs:comment "A condition discovered in what the wave believes, rather than in what it built. Carries a reason, a kind and the pass that found it." .
+
+wave:defectKind a owl:DatatypeProperty ;
+  rdfs:domain wave:Defect ;
+  rdfs:comment "hole — known missing, declared with a reason, inherited knowingly. gap — missing and nobody knew. collision — two or more claims on one referent with no adjudication. omission — left out of a deliverable that claimed completeness. stale-overwrite — an artifact replaced while its digest stands cited elsewhere. vacuity — present, well-formed, never evaluated. misattribution — named for where it was found rather than where it must be fixed." .
+
+wave:defectState a owl:DatatypeProperty ;
+  rdfs:domain wave:Defect ;
+  rdfs:comment "open · declared · resolved · withdrawn. declared is a hole that has been named and accepted; withdrawn is a defect the wave decided was not one, which is a real and cheap outcome." .
+
+wave:discoveredAtPass a owl:DatatypeProperty ;
+  rdfs:domain wave:Defect ; rdfs:range xsd:integer .
+
+wave:resolvedAtPass a owl:DatatypeProperty ;
+  rdfs:domain wave:Defect ; rdfs:range xsd:integer ;
+  rdfs:comment "Absent while open. Its distance from discoveredAtPass is how long the wave carried a belief it knew was wrong." .
+
+wave:OperationShape a sh:NodeShape ;
+  sh:targetClass wave:Operation ;
+  sh:property [ sh:path wave:opKind     ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "publish" "supersede" "adopt" "validate" "confirm" "refute" "withdraw"
+                        "correct" "delete" "refuse" "promote" "close-by-ruling"
+                        "declare-gap" "escalate" ) ] ;
+  sh:property [ sh:path wave:opTarget   ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path wave:opAtPass   ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path wave:opEvidence ; sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 8 ] ;
+  sh:property [ sh:path wave:supersedes ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+
+wave:DefectShape a sh:NodeShape ;
+  sh:targetClass wave:Defect ;
+  sh:property [ sh:path rdfs:label            ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:reason            ; sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+  sh:property [ sh:path wave:defectKind       ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "hole" "gap" "collision" "omission" "stale-overwrite"
+                        "vacuity" "misattribution" ) ] ;
+  sh:property [ sh:path wave:defectState      ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "open" "declared" "resolved" "withdrawn" ) ] ;
+  sh:property [ sh:path wave:discoveredAtPass ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path wave:resolvedAtPass   ; sh:maxCount 1 ; sh:datatype xsd:integer ] .
+
+
+#######################################################################
+# 10. THE QUERIES THESE EXIST FOR
+#
+# a stale-overwrite, BEFORE anyone cites the dead digest
+#   SELECT ?old WHERE { ?op wave:opKind "supersede" ; wave:supersedes ?old .
+#                       ?st wave:bindsRoot ?old }
+#   -- this is 22a79c5b. It was discoverable the moment the root was
+#      republished, and instead it propagated through three components.
+#
+# how much of a pass was progress, and how much was repair
+#   SELECT ?k (COUNT(?o) AS ?n) WHERE { ?o a wave:Operation ; wave:opKind ?k ;
+#                                          wave:opAtPass 12 } GROUP BY ?k
+#
+# beliefs the wave is knowingly carrying
+#   SELECT ?d WHERE { ?d a wave:Defect ; wave:defectState "declared" }
+#
+# how long a wrong belief survived
+#   SELECT ?d ((?r - ?f) AS ?passes) WHERE { ?d wave:discoveredAtPass ?f ;
+#                                               wave:resolvedAtPass ?r }
+#
+# operations with no evidence — assertions wearing a verb
+#   SELECT ?o WHERE { ?o a wave:Operation } MINUS { ?o wave:opEvidence ?e }
+#
+# the director's own correction rate
+#   SELECT (COUNT(?o) AS ?n) WHERE { ?o wave:opKind ?k ; ckp:createdBy ?d
+#     FILTER(?k IN ("withdraw","correct","refute")) }
+#######################################################################

@@ -1,0 +1,568 @@
+@prefix ckp:  <https://conceptkernel.org/ontology/v3.9/core#> .
+@prefix bfo:  <http://purl.obolibrary.org/obo/BFO_> .
+@prefix iao:  <http://purl.obolibrary.org/obo/IAO_> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+#######################################################################
+# CKP v3.9 CORE — the root vocabulary.
+#
+# A Concept Kernel is a BFO 2020 Material Entity (BFO_0000040) that
+# organises its own shape — the types, predicates, shapes and
+# affordances it declares, and the affordances of other kernels it
+# uses — and carries three organs:
+#
+#   CK    meaning
+#   TOOL  capability, rebuilt from meaning at each epoch
+#   DATA  the sealed instances of the kernel's work; each carries the
+#         shape and epoch of the kernel that produced it
+#
+# Kernels are held by projects. A participant holds several: a personal
+# one where they conceptualise freely, and shared ones a few
+# participants work in together. A concept crosses between them by
+# adoption — selected, attributed, digest-fixed, epoch-pinned.
+#
+# ROOT: this file is self-contained. Every term it references, it
+# declares. It imports nothing and depends on no earlier set.
+#
+# STATUS: authoring root, published for review. The shipped runtime
+# loads pgCK's ontology/core.ttl; adopting this root is a substrate
+# change carrying its own migration.
+#######################################################################
+
+<https://conceptkernel.org/ontology/v3.9/core> a owl:Ontology ;
+  rdfs:label "CKP Core Ontology v3.9" ;
+  owl:priorVersion <https://conceptkernel.org/ontology/v3.8/core> ;
+  rdfs:comment "The root vocabulary of the Concept Kernel Protocol: the kernel as a material entity that organises its own shape, its three organs, the seal chain that attests its writes, the plane that governs its type, and the projects that hold it." .
+
+
+#######################################################################
+# 1. THE KERNEL
+#######################################################################
+
+ckp:Kernel a rdfs:Class ;
+  rdfs:subClassOf bfo:0000040 ;              # material entity
+  rdfs:label "Concept Kernel" ;
+  rdfs:comment "A persistently identified, spatially bounded computational entity that organises its own shape — the types, predicates, shapes and affordances it declares, and the affordances of other kernels it uses — and carries three organs: CK, its meaning; TOOL, the capability rebuilt from that meaning at each epoch; and DATA, the sealed instances of its work. It persists through change of state and bears the disposition its TOOL organ realises." .
+
+ckp:inProject a owl:ObjectProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range ckp:Project ;
+  rdfs:comment "The project that holds this kernel. Exactly one — a kernel reaches other projects by adoption, never by co-ownership." .
+
+ckp:epoch a owl:DatatypeProperty ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "The version of a kernel's meaning. Every applied governance change advances it. A read is a read at an epoch; so is a tool's output." .
+
+ckp:dataSubstrate a owl:DatatypeProperty ;
+  rdfs:domain ckp:Kernel ;
+  rdfs:comment "Optional deployment hint naming the store a kernel's instances land in. Carried forward so existing declarations resolve; it describes a deployment, not the kernel, and no shape requires it." .
+
+# ---- The kernel organises its own shape ------------------------------
+
+ckp:declaresType a owl:ObjectProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range rdfs:Class ;
+  rdfs:comment "A class this kernel declares, named urn:ckp:<project>/type/<Name>." .
+
+ckp:declaresPredicate a owl:ObjectProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range rdf:Property ;
+  rdfs:comment "A property this kernel declares, named urn:ckp:<project>/prop/<name>. The declared predicate set is the kernel's whole vocabulary: a query, link or traversal key outside it is refused before any read runs." .
+
+ckp:declaresShape a owl:ObjectProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range sh:NodeShape ;
+  rdfs:comment "A SHACL gate this kernel declares, named urn:ckp:<project>/shape/<Name>, targeting one of its declared types." .
+
+ckp:declaresAffordance a owl:ObjectProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range ckp:Affordance ;
+  rdfs:comment "An affordance this kernel offers — a named operation reachable through the door." .
+
+ckp:affordanceOf a owl:ObjectProperty ;
+  owl:inverseOf ckp:declaresAffordance ;
+  rdfs:domain ckp:Affordance ; rdfs:range ckp:Kernel ;
+  rdfs:comment "The kernel that declares this affordance — the provider of record." .
+
+# ---- Using another kernel's affordances ------------------------------
+
+ckp:AffordanceUse a rdfs:Class ;
+  rdfs:label "Affordance Use" ;
+  rdfs:comment "A sealed statement that one kernel uses an affordance declared by another, pinned to the provider epoch it was agreed against. A TOOL organ is rebuilt from meaning at every epoch, so a cross-kernel dependency records the epoch it was agreed at and is re-agreed when the provider advances past it." .
+
+ckp:consumer a owl:ObjectProperty ;
+  rdfs:domain ckp:AffordanceUse ; rdfs:range ckp:Kernel ;
+  rdfs:comment "The kernel that invokes the affordance." .
+
+ckp:provider a owl:ObjectProperty ;
+  rdfs:domain ckp:AffordanceUse ; rdfs:range ckp:Kernel ;
+  rdfs:comment "The kernel that declares the affordance. A kernel's use of its own affordances is declaration, so consumer and provider differ." .
+
+ckp:uses a owl:ObjectProperty ;
+  rdfs:domain ckp:AffordanceUse ; rdfs:range ckp:Affordance ;
+  rdfs:comment "The affordance invoked." .
+
+ckp:pinnedEpoch a owl:DatatypeProperty ;
+  rdfs:domain ckp:AffordanceUse ; rdfs:range xsd:integer ;
+  rdfs:comment "The provider epoch this use was agreed against." .
+
+
+#######################################################################
+# 2. THE THREE ORGANS
+#
+# Strict dependency order, and an inviolable separation: a DATA write
+# never causes a CK commit; a TOOL execution never rewrites the
+# ontology; a CK commit never writes instances directly. The order is
+# carried by ckp:dependsOn, the separation by ckp:writeAuthority.
+#######################################################################
+
+ckp:Organ a rdfs:Class ;
+  rdfs:label "Organ" ;
+  rdfs:comment "One of the three organs of a kernel. Every kernel has exactly three." .
+
+ckp:CK a rdfs:Class ;
+  rdfs:subClassOf ckp:Organ , iao:0000030 ;   # information content entity
+  rdfs:label "CK organ — meaning" ;
+  rdfs:comment "What the kernel means: its declared types, predicates, shapes, affordances and transition maps. Depends on nothing; serves TOOL and DATA. Changed only through the governance plane." .
+
+ckp:TOOL a rdfs:Class ;
+  rdfs:subClassOf ckp:Organ , bfo:0000016 ;   # disposition
+  rdfs:label "TOOL organ — capability" ;
+  rdfs:comment "What the kernel can do, derived from CK at each epoch. A conformant tool holds no schema of its own: it reads its output contract from the kernel definition, so an applied change advances the contract with zero tool-code edits. Reads the ontology; never writes it." .
+
+ckp:DATA a rdfs:Class ;
+  rdfs:subClassOf ckp:Organ , iao:0000030 ;
+  rdfs:label "DATA organ — knowledge" ;
+  rdfs:comment "The sealed instances of the kernel's work. The tool that produced them deals only in its own subject matter and knows nothing of concept kernels; the substrate is what stamps each output with the shape and epoch of the kernel that processed it." .
+
+ckp:hasOrgan a owl:ObjectProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range ckp:Organ ;
+  rdfs:comment "An organ of this kernel." .
+
+ckp:organOf a owl:ObjectProperty ;
+  owl:inverseOf ckp:hasOrgan ;
+  rdfs:domain ckp:Organ ; rdfs:range ckp:Kernel ;
+  rdfs:comment "The kernel this organ belongs to." .
+
+ckp:organKind a owl:DatatypeProperty ;
+  rdfs:domain ckp:Organ ;
+  rdfs:comment "Which organ this is: ck, tool or data." .
+
+ckp:dependsOn a owl:ObjectProperty ;
+  rdfs:domain ckp:Organ ; rdfs:range ckp:Organ ;
+  rdfs:comment "The dependency order: TOOL depends on CK; DATA depends on TOOL and CK; CK depends on nothing." .
+
+ckp:derivedFrom a owl:ObjectProperty ;
+  rdfs:domain ckp:TOOL ; rdfs:range ckp:CK ;
+  rdfs:comment "The CK organ this tool was built from at the current epoch." .
+
+ckp:writeAuthority a owl:DatatypeProperty ;
+  rdfs:domain ckp:Organ ;
+  rdfs:comment "What this organ may write. The Separation Axiom in one value." .
+
+ckp:CK   ckp:writeAuthority "readonly" .
+ckp:TOOL ckp:writeAuthority "readonly-on-ontology" .
+ckp:DATA ckp:writeAuthority "readwrite" .
+
+
+#######################################################################
+# 3. AFFORDANCES — the kernel's verbs
+#######################################################################
+
+ckp:Affordance a rdfs:Class ;
+  rdfs:label "Affordance" ;
+  rdfs:comment "A named operation a kernel offers, resolved from the registry at dispatch. The affordance set is enumerable, which is what makes it grantable." .
+
+ckp:inTopic a owl:DatatypeProperty ;
+  rdfs:domain ckp:Affordance ;
+  rdfs:comment "The transport subject that routes toward this affordance." .
+
+ckp:outTopic a owl:DatatypeProperty ;
+  rdfs:domain ckp:Affordance ;
+  rdfs:comment "The transport subject governed egress is published on." .
+
+ckp:inShape a owl:ObjectProperty ;
+  rdfs:domain ckp:Affordance ; rdfs:range sh:NodeShape ;
+  rdfs:comment "The shape an input body is gated against before the affordance proceeds." .
+
+ckp:sparql a owl:DatatypeProperty ;
+  rdfs:domain ckp:Affordance ;
+  rdfs:comment "The governed query backing a query-defined affordance, resolved server-side." .
+
+ckp:plane a owl:DatatypeProperty ;
+  rdfs:domain ckp:Affordance ;
+  rdfs:comment "The dispatch plane this affordance routes on: instance (the typed hot loop), governance (a change to the kernel's own type, which waits for quorum), or derived (a computed read resolved from a sealed formula)." .
+
+ckp:delegate a owl:DatatypeProperty ;
+  rdfs:domain ckp:Affordance ; rdfs:range xsd:boolean ;
+  rdfs:comment "A sealed delegation fact — present and true when this affordance may be invoked on another identity's behalf." .
+
+
+#######################################################################
+# 4. INSTANCES CARRY THE SHAPE OF THE KERNEL THAT PRODUCED THEM
+#######################################################################
+
+ckp:Instance a rdfs:Class ;
+  rdfs:subClassOf iao:0000030 ;
+  rdfs:label "Instance" ;
+  rdfs:comment "A sealed manifestation of a kernel's work, gated at commit by a shape its producing kernel declared." .
+
+ckp:producedBy a owl:ObjectProperty ;
+  rdfs:domain ckp:Instance ; rdfs:range ckp:Kernel ;
+  rdfs:comment "The kernel that processed this instance into being. Server-derived at seal, never taken from the caller." .
+
+ckp:conformsToShape a owl:ObjectProperty ;
+  rdfs:domain ckp:Instance ; rdfs:range sh:NodeShape ;
+  rdfs:comment "The shape the instance was gated against — one the producing kernel declares." .
+
+ckp:sealedAtEpoch a owl:DatatypeProperty ;
+  rdfs:domain ckp:Instance ; rdfs:range xsd:integer ;
+  rdfs:comment "The producing kernel's epoch at seal. Together with ckp:conformsToShape it makes the output contract checkable after the fact: the shape that gated this instance can be resolved at the version it held when the seal ran." .
+
+ckp:createdBy a owl:ObjectProperty ;
+  rdfs:domain ckp:Instance ; rdfs:range ckp:Participant ;
+  rdfs:comment "The participant whose verified connection sealed this instance. Derived by the substrate from the authenticated identity; a body that carries its own claim is ignored." .
+
+
+#######################################################################
+# 5. THE SEAL CHAIN — ledger, proof, provenance
+#######################################################################
+
+ckp:LedgerEntry a rdfs:Class ;
+  rdfs:label "Ledger Entry" ;
+  rdfs:comment "An append-only, HMAC-authenticated record of one sealed write, chained to its predecessor." .
+
+ckp:Proof a rdfs:Class ;
+  rdfs:label "Proof" ;
+  rdfs:comment "A verifiable attestation about an instance, re-checkable long after the write that produced it." .
+
+ckp:Provenance a rdfs:Class ;
+  rdfs:subClassOf prov:Entity ;
+  rdfs:label "Provenance" ;
+  rdfs:comment "The derivation record of a sealed fact, expressed as a PROV-O subset." .
+
+ckp:about a owl:ObjectProperty ;
+  rdfs:comment "The instance a ledger entry, proof or proposal concerns." .
+
+ckp:bodySha a owl:DatatypeProperty ;
+  rdfs:domain ckp:LedgerEntry ;
+  rdfs:comment "SHA-256 of the sealed body, as it was at seal." .
+
+ckp:sig a owl:DatatypeProperty ;
+  rdfs:domain ckp:LedgerEntry ;
+  rdfs:comment "The HMAC over the entry, binding it to the chain." .
+
+ckp:prev a owl:DatatypeProperty ;
+  rdfs:domain ckp:LedgerEntry ;
+  rdfs:comment "The sequence number of the preceding entry — the chain pointer." .
+
+ckp:ts a owl:DatatypeProperty ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "When the entry was sealed." .
+
+ckp:method a owl:DatatypeProperty ;
+  rdfs:domain ckp:Proof ;
+  rdfs:comment "The attestation method the proof was produced under." .
+
+ckp:digest a owl:DatatypeProperty ;
+  rdfs:domain ckp:Proof ;
+  rdfs:comment "The digest the proof attests to." .
+
+ckp:verifiedAt a owl:DatatypeProperty ;
+  rdfs:domain ckp:Proof ; rdfs:range xsd:dateTime ;
+  rdfs:comment "When the proof was last verified." .
+
+
+#######################################################################
+# 6. THE GOVERNANCE PLANE — how a kernel's meaning changes
+#######################################################################
+
+ckp:Proposal a rdfs:Class ;
+  rdfs:label "Proposal" ;
+  rdfs:comment "A proposed change to a kernel's own type, sealed on receipt and held pending until its quorum is met." .
+
+ckp:Vote a rdfs:Class ;
+  rdfs:label "Vote" ;
+  rdfs:comment "A sealed position an identity takes on a proposal." .
+
+ckp:QuorumLevel a rdfs:Class ;
+  rdfs:label "Quorum Level" ;
+  rdfs:comment "The threshold a proposal clears before it applies." .
+
+ckp:Transition a rdfs:Class ;
+  rdfs:label "Transition" ;
+  rdfs:comment "A sealed allowed move between two lifecycle states in a kernel's transition map." .
+
+ckp:proposalState a owl:DatatypeProperty ;
+  rdfs:domain ckp:Proposal ;
+  rdfs:comment "Where the proposal stands: pending, applied or rejected." .
+
+ckp:proposalOp a owl:DatatypeProperty ;
+  rdfs:domain ckp:Proposal ;
+  rdfs:comment "The governed operation the proposal carries — adding a class or property, modifying a shape constraint, adding an affordance, setting a transition map, quorum or materialization policy." .
+
+ckp:requiresQuorum a owl:DatatypeProperty ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "The vote threshold this change clears." .
+
+ckp:voteValue a owl:DatatypeProperty ;
+  rdfs:domain ckp:Vote ;
+  rdfs:comment "The position taken: approve or reject." .
+
+ckp:fromState a owl:DatatypeProperty ;
+  rdfs:domain ckp:Transition ;
+  rdfs:comment "The state the move departs." .
+
+ckp:toState a owl:DatatypeProperty ;
+  rdfs:domain ckp:Transition ;
+  rdfs:comment "The state the move arrives at." .
+
+
+#######################################################################
+# 7. ROLES AND GRANTS — who may invoke what
+#######################################################################
+
+ckp:Role a rdfs:Class ;
+  rdfs:subClassOf bfo:0000023 ;              # role
+  rdfs:label "Role" ;
+  rdfs:comment "A realizable entity a participant bears within a project. Roles are what grants resolve against." .
+
+ckp:Grant a rdfs:Class ;
+  rdfs:label "Grant" ;
+  rdfs:comment "Binds a role to a permission over a domain, an action and a target." .
+
+ckp:role a owl:DatatypeProperty ;
+  rdfs:comment "The name of the role a grant or membership resolves against." .
+
+ckp:grant a owl:ObjectProperty ;
+  rdfs:range ckp:Grant ;
+  rdfs:comment "A grant held." .
+
+ckp:permDomain a owl:DatatypeProperty ;
+  rdfs:domain ckp:Grant ;
+  rdfs:comment "The domain the permission covers." .
+
+ckp:permAction a owl:DatatypeProperty ;
+  rdfs:domain ckp:Grant ;
+  rdfs:comment "The action the permission allows." .
+
+ckp:permTarget a owl:DatatypeProperty ;
+  rdfs:domain ckp:Grant ;
+  rdfs:comment "The target the action applies to." .
+
+
+#######################################################################
+# 8. PROJECTS — whose stuff is whose
+#
+# A participant holds several projects: a personal one, named for them,
+# where they conceptualise as they please; and shared ones a few
+# participants work in together. Separation is by project, and a
+# concept crosses only by an adoption someone signed for.
+#######################################################################
+
+ckp:Participant a rdfs:Class ;
+  rdfs:subClassOf bfo:0000040 ;
+  rdfs:label "Participant" ;
+  rdfs:comment "A person or process with a verified identity that holds projects, bears roles and seals writes." .
+
+ckp:Project a rdfs:Class ;
+  rdfs:subClassOf bfo:0000027 ;              # object aggregate
+  rdfs:label "Project" ;
+  rdfs:comment "A named, graph-backed scope holding kernels and their instances. A participant's first project is personal and named for them." .
+
+ckp:projectKind a owl:DatatypeProperty ;
+  rdfs:domain ckp:Project ;
+  rdfs:comment "Personal — one owner, who is quorum of one; or shared — several members, where governed change clears a quorum." .
+
+ckp:ownedBy a owl:ObjectProperty ;
+  rdfs:domain ckp:Project ; rdfs:range ckp:Participant ;
+  rdfs:comment "The participant who owns this project." .
+
+ckp:holdsKernel a owl:ObjectProperty ;
+  owl:inverseOf ckp:inProject ;
+  rdfs:domain ckp:Project ; rdfs:range ckp:Kernel ;
+  rdfs:comment "A kernel held in this project's scope." .
+
+ckp:Membership a rdfs:Class ;
+  rdfs:label "Membership" ;
+  rdfs:comment "A participant's standing in a project, carrying the role their grants resolve against." .
+
+ckp:memberOf a owl:ObjectProperty ;
+  rdfs:domain ckp:Membership ; rdfs:range ckp:Project .
+
+ckp:memberIs a owl:ObjectProperty ;
+  rdfs:domain ckp:Membership ; rdfs:range ckp:Participant .
+
+
+#######################################################################
+# 9. IMPORT AND ADOPTION — how a concept travels
+#
+# Import a document into your own project and conceptualise it as you
+# want. When a concept earns it, introduce that one concept into a
+# shared project: attributed, digest-fixed, epoch-pinned at both ends.
+#######################################################################
+
+ckp:Source a rdfs:Class ;
+  rdfs:subClassOf iao:0000030 ;
+  rdfs:label "Source" ;
+  rdfs:comment "A document imported into a project, from which concepts are carved." .
+
+ckp:importedInto a owl:ObjectProperty ;
+  rdfs:domain ckp:Source ; rdfs:range ckp:Project .
+
+ckp:importedBy a owl:ObjectProperty ;
+  rdfs:domain ckp:Source ; rdfs:range ckp:Participant .
+
+ckp:sourceDigest a owl:DatatypeProperty ;
+  rdfs:comment "SHA-256 of the exact bytes imported or adopted." .
+
+ckp:Adoption a rdfs:Class ;
+  rdfs:label "Adoption" ;
+  rdfs:comment "A sealed record that one concept, curated in one project, was introduced into another — the unit of sharing between a personal project and a shared one." .
+
+ckp:adopted a owl:ObjectProperty ;
+  rdfs:domain ckp:Adoption ;
+  rdfs:comment "The one concept introduced: a declared type, predicate, shape or affordance." .
+
+ckp:fromProject a owl:ObjectProperty ;
+  rdfs:domain ckp:Adoption ; rdfs:range ckp:Project .
+
+ckp:intoProject a owl:ObjectProperty ;
+  rdfs:domain ckp:Adoption ; rdfs:range ckp:Project .
+
+ckp:adoptedBy a owl:ObjectProperty ;
+  rdfs:domain ckp:Adoption ; rdfs:range ckp:Participant ;
+  rdfs:comment "The participant who signed for the introduction." .
+
+ckp:sourceEpoch a owl:DatatypeProperty ;
+  rdfs:domain ckp:Adoption ; rdfs:range xsd:integer ;
+  rdfs:comment "The source project's epoch the concept was taken at." .
+
+ckp:intoEpoch a owl:DatatypeProperty ;
+  rdfs:domain ckp:Adoption ; rdfs:range xsd:integer ;
+  rdfs:comment "The target project's epoch after the concept landed." .
+
+
+#######################################################################
+# 10. SHAPES — the core governs itself
+#
+# The shipped seal gate enforces presence (sh:minCount >= 1). The
+# enum, datatype, cardinality and pattern constraints below are the
+# declared contract and become gates when the seal gate honours full
+# SHACL Core. Load-bearing requirements are expressed as minCount.
+#######################################################################
+
+ckp:KernelShape a sh:NodeShape ;
+  sh:targetClass ckp:Kernel ;
+  sh:property [ sh:path rdfs:label    ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:inProject ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:epoch     ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:hasOrgan  ; sh:minCount 3 ; sh:maxCount 3 ; sh:nodeKind sh:IRI ] .
+
+ckp:OrganShape a sh:NodeShape ;
+  sh:targetClass ckp:Organ ;
+  sh:property [ sh:path ckp:organOf        ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:organKind      ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "ck" "tool" "data" ) ] ;
+  sh:property [ sh:path ckp:writeAuthority ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "readonly" "readonly-on-ontology" "readwrite" ) ] .
+
+ckp:AffordanceShape a sh:NodeShape ;
+  sh:targetClass ckp:Affordance ;
+  sh:property [ sh:path ckp:inTopic  ; sh:minCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:inShape  ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:outTopic ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:plane    ; sh:maxCount 1 ;
+                sh:in ( "instance" "governance" "derived" ) ] ;
+  sh:property [ sh:path ckp:epoch    ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:delegate ; sh:maxCount 1 ; sh:datatype xsd:boolean ] .
+
+ckp:AffordanceUseShape a sh:NodeShape ;
+  sh:targetClass ckp:AffordanceUse ;
+  sh:property [ sh:path ckp:consumer    ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ;
+                sh:disjoint ckp:provider ] ;
+  sh:property [ sh:path ckp:provider    ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:uses        ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:pinnedEpoch ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] .
+
+# Every instance names the kernel that produced it, the shape it was
+# gated against, and the epoch that shape was current at.
+ckp:InstanceShape a sh:NodeShape ;
+  sh:targetClass ckp:Instance ;
+  sh:property [ sh:path ckp:producedBy      ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:conformsToShape ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:sealedAtEpoch   ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:createdBy       ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+
+ckp:LedgerEntryShape a sh:NodeShape ;
+  sh:targetClass ckp:LedgerEntry ;
+  sh:property [ sh:path ckp:about   ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:bodySha ; sh:minCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] ;
+  sh:property [ sh:path ckp:sig     ; sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 16 ] ;
+  sh:property [ sh:path ckp:ts      ; sh:minCount 1 ; sh:datatype xsd:dateTime ] .
+
+ckp:ProofShape a sh:NodeShape ;
+  sh:targetClass ckp:Proof ;
+  sh:property [ sh:path ckp:about      ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:method     ; sh:minCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:digest     ; sh:minCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] ;
+  sh:property [ sh:path ckp:verifiedAt ; sh:minCount 1 ; sh:datatype xsd:dateTime ] .
+
+ckp:ProposalShape a sh:NodeShape ;
+  sh:targetClass ckp:Proposal ;
+  sh:property [ sh:path ckp:about          ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:proposalState  ; sh:minCount 1 ;
+                sh:in ( "pending" "applied" "rejected" ) ] ;
+  sh:property [ sh:path ckp:requiresQuorum ; sh:maxCount 1 ; sh:datatype xsd:integer ] .
+
+ckp:VoteShape a sh:NodeShape ;
+  sh:targetClass ckp:Vote ;
+  sh:property [ sh:path ckp:about     ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:voteValue ; sh:minCount 1 ; sh:in ( "approve" "reject" ) ] .
+
+ckp:GrantShape a sh:NodeShape ;
+  sh:targetClass ckp:Grant ;
+  sh:property [ sh:path ckp:role       ; sh:minCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:permDomain ; sh:minCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:permAction ; sh:minCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:permTarget ; sh:minCount 1 ; sh:datatype xsd:string ] .
+
+ckp:TransitionShape a sh:NodeShape ;
+  sh:targetClass ckp:Transition ;
+  sh:property [ sh:path ckp:fromState ; sh:minCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:toState   ; sh:minCount 1 ; sh:datatype xsd:string ] .
+
+ckp:ProjectShape a sh:NodeShape ;
+  sh:targetClass ckp:Project ;
+  sh:property [ sh:path rdfs:label      ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:projectKind ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "personal" "shared" ) ] ;
+  sh:property [ sh:path ckp:ownedBy     ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+
+ckp:MembershipShape a sh:NodeShape ;
+  sh:targetClass ckp:Membership ;
+  sh:property [ sh:path ckp:memberOf ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:memberIs ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:role     ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] .
+
+ckp:SourceShape a sh:NodeShape ;
+  sh:targetClass ckp:Source ;
+  sh:property [ sh:path ckp:importedInto ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:importedBy   ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:sourceDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] .
+
+# One concept per adoption — sharing is selective by construction.
+ckp:AdoptionShape a sh:NodeShape ;
+  sh:targetClass ckp:Adoption ;
+  sh:property [ sh:path ckp:adopted      ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:fromProject  ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ;
+                sh:disjoint ckp:intoProject ] ;
+  sh:property [ sh:path ckp:intoProject  ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:adoptedBy    ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:sourceDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] ;
+  sh:property [ sh:path ckp:sourceEpoch  ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:intoEpoch    ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] .

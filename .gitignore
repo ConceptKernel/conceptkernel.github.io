@@ -4,3 +4,8 @@ docs/.vitepress/dist
 test-results
 playwright-report
 _WIP/
+
+# Internal working documents — never committed to a public repo.
+# CKP.* wave statements and SPEC.* drafts name private paths, hosts and credentials.
+CK*.md
+SPEC*.md

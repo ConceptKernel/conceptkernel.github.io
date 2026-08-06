@@ -36,7 +36,7 @@
 #   owl:inverseOf                 DERIVED   one write, two facts
 #   owl:equivalentClass           DERIVED   alignment
 #   rdfs:subClassOf transitivity  DERIVED   hierarchy
-#   owl:propertyChainAxiom        NOT DERIVED — see LEX-1
+#   owl:propertyChainAxiom        DERIVED — with `prp-spo2`, see LEX-1
 #   counting                      structurally absent from OWL RL
 #
 # NOTHING IN THIS FILE DEPENDS ON AN UNMEASURED ENTAILMENT.
@@ -48,10 +48,26 @@
 # identical instance count. Measured, not predicted. The canonical form
 # is in §7 and it carries the filter.
 #
-# LEX-1 — no chained attribution. "the owner of the artifact this
-# defect is in" is a property chain and this reasoner does not derive
-# it. Attribution is therefore asserted directly or reached by an
-# inverse. Recorded so nobody re-derives the disappointment.
+# LEX-1 — CHAINED ATTRIBUTION, AND WHAT IT REQUIRES.
+# The rule `prp-spo2` (`owl:propertyChainAxiom`, general n-hop) is
+# implemented on the `feat/prp-spo2-property-chain-axiom` branch of the
+# reasoner and is FEATURE-GATED, off by default.
+#
+#   reasonable = { git = "…/reasonable",
+#                  branch = "feat/prp-spo2-property-chain-axiom",
+#                  features = ["rdf-12", "prp-spo2"] }
+#
+# MEASURED, not assumed, on that branch:
+#   feature OFF        100 tests pass — upstream behaviour unchanged
+#   feature ON         115 pass, 0 fail — strictly additive
+#   rdf-12 + prp-spo2  115 pass — the combination this stack needs
+#   2-hop and 3-hop chains both derive; with the feature off the same
+#   fixture derives nothing, which is the control.
+#
+# UNTIL THE ENGINE SHIPS THAT FEATURE, §5.1 DERIVES NOTHING. Stated
+# here rather than discovered later: a chain axiom under an engine
+# without the rule is a well-formed constraint that is never evaluated,
+# and this file exists to name that condition, not to produce it.
 #######################################################################
 
 <https://conceptkernel.org/ontology/v3.11/lexicon> a owl:Ontology ;
@@ -206,6 +222,36 @@ lex:blockedBy a owl:ObjectProperty ;
 lex:confirmedBy a owl:ObjectProperty ;
   owl:inverseOf wave:confirmsTicket ;
   rdfs:comment "Derived from the confirmation. A ticket knows who measured it without the ticket being edited, which is what makes confirmation cheap enough to actually do." .
+
+#######################################################################
+# 5.1 CHAINED ATTRIBUTION — n-hop, requires `prp-spo2`
+#
+# One assertion per fact, and the composition is derived. Without the
+# rule a component must assert `defectOwner` by hand on every defect,
+# which is a fact they can get wrong; with it, ownership follows from
+# where the defect is and who owns that, both of which are already
+# recorded for other reasons.
+#
+# This is the first place the lexicon asks the reasoner for something a
+# component would otherwise have to remember.
+#######################################################################
+
+lex:defectIn a owl:ObjectProperty ;
+  rdfs:domain wave:Defect ;
+  rdfs:comment "The artifact this defect is in — a file, a routine, a shape, a PR." .
+
+lex:defectOwner a owl:ObjectProperty ;
+  owl:propertyChainAxiom ( lex:defectIn wave:owner ) ;
+  rdfs:comment "Derived: the component owning the artifact the defect is in. Never asserted. Requires prp-spo2." .
+
+lex:confirmedTicketOwner a owl:ObjectProperty ;
+  owl:propertyChainAxiom ( wave:confirmsTicket wave:owner ) ;
+  rdfs:comment "Derived: whose ticket a confirmation measured. Makes 'who confirmed whom' a query rather than a reading. Requires prp-spo2." .
+
+lex:passDirector a owl:ObjectProperty ;
+  owl:propertyChainAxiom ( wave:forPass wave:director ) ;
+  rdfs:comment "Derived: the director of the pass an index was filed for. Requires prp-spo2." .
+
 
 lex:recurrenceOf a owl:ObjectProperty ;
   rdfs:domain wave:Defect ; rdfs:range lex:Pattern ;

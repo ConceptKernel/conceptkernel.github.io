@@ -23,18 +23,8 @@
 #  1. Every constraint uses a component MEASURED ENFORCING by the
 #     engine that gates writes: minCount · maxCount · datatype ·
 #     nodeKind · in · pattern · minLength · disjoint · hasValue ·
-#     qualifiedValueShape+qualifiedMinCount · class · closed —
-#     plus sh:sparql, WHICH REQUIRES MODE 'pgrdf'.
+#     qualifiedValueShape+qualifiedMinCount · class · closed.
 #     A component outside that set is a candidate path by another name.
-#
-#     MODE REQUIREMENT, and it is not optional. Modes 'native' and
-#     'sparql' SKIP sh:sparql SILENTLY — conforms=true, zero results,
-#     no error. This root requires the gate to validate in mode
-#     'pgrdf'; ckp.validate passes it. Validating this root under
-#     'native' leaves §13.1 present, well-formed and never evaluated,
-#     which is the one thing this file exists to prevent. Mode 'pgrdf'
-#     is also the FASTEST of the three — ~27% below 'native', measured
-#     independently by two components — so there is no trade to weigh.
 #
 #  2. NO CLASS IRI MAY BE THE SUBJECT OF A TRIPLE WHOSE PREDICATE
 #     CARRIES AN rdfs:domain. RDFS rule rdfs2 entails the class into the
@@ -59,11 +49,7 @@
 #     direct rdf:type inside the body) and rules out sh:inversePath,
 #     which asks for triples pointing AT the candidate.
 #
-# G-1 — CROSS-NODE TYPE INTEGRITY: CLOSED at PASS-17, see §13.1.
-# The text below is retained because the reasoning was sound and the
-# premise was not — SHACL Core was never the ceiling.
-#
-# FORMER GAP — G-1, CROSS-NODE TYPE INTEGRITY.
+# DECLARED GAP — G-1, CROSS-NODE TYPE INTEGRITY.
 #     Rule 3 places one property beyond the instance gate: that a
 #     referenced IRI is of the kind the reference intends — a kernel
 #     bearing one organ of each kind, a grant targeting an organ, a
@@ -850,59 +836,6 @@ ckp:MembershipShape a sh:NodeShape ;
   sh:property [ sh:path ckp:memberIs  ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
   sh:property [ sh:path ckp:memberOf  ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
   sh:property [ sh:path ckp:holdsRole ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
-
-
-#######################################################################
-# 13.1 CROSS-NODE INTEGRITY — G-1, CLOSED
-#
-# RULE-3 keeps a constraint inside the candidate body, so sh:class
-# cannot check the kind of a node the candidate merely REFERENCES.
-# That property was declared out of reach on the belief that SHACL Core
-# was the ceiling. It was not: sh:sparql is available and reaches the
-# store.
-#
-# THE GRAPH IS A VARIABLE, DELIBERATELY. A fixed graph IRI would bind
-# this root to one project. `GRAPH ?g` asks whether the referenced node
-# is an organ ANYWHERE the gate can see, which is the question the
-# constraint actually means.
-#
-# CHAINED MINUS, not UNION: the MINUS right side must be a basic graph
-# pattern and a UNION inside it errors. Three chained MINUS clauses read
-# as "is none of the three kinds", which is the intent exactly.
-#
-# EACH REFUSES A REFERENCE, never a body. A body carrying a well-formed
-# reference to the wrong kind of thing is the failure these catch, and
-# it is the failure nothing else in this file can see.
-#######################################################################
-
-ckp:GrantTargetIsOrgan a sh:NodeShape ;
-  sh:targetClass ckp:Grant ;
-  rdfs:comment "permTarget must name an organ. Requires mode 'pgrdf'." ;
-  sh:sparql [ a sh:SPARQLConstraint ;
-    sh:message "permTarget does not name an Organ" ;
-    sh:select """SELECT $this WHERE {
-        $this <https://conceptkernel.org/ontology/v3.11/core#permTarget> ?t .
-        MINUS { GRAPH ?g1 { ?t a <https://conceptkernel.org/ontology/v3.11/core#CK> } }
-        MINUS { GRAPH ?g2 { ?t a <https://conceptkernel.org/ontology/v3.11/core#TOOL> } }
-        MINUS { GRAPH ?g3 { ?t a <https://conceptkernel.org/ontology/v3.11/core#DATA> } } }""" ] .
-
-ckp:MembershipRoleIsRole a sh:NodeShape ;
-  sh:targetClass ckp:Membership ;
-  rdfs:comment "holdsRole must name a Role. Requires mode 'pgrdf'." ;
-  sh:sparql [ a sh:SPARQLConstraint ;
-    sh:message "holdsRole does not name a Role" ;
-    sh:select """SELECT $this WHERE {
-        $this <https://conceptkernel.org/ontology/v3.11/core#holdsRole> ?r .
-        MINUS { GRAPH ?g { ?r a <https://conceptkernel.org/ontology/v3.11/core#Role> } } }""" ] .
-
-ckp:AffordanceDerivedByIsMaterialization a sh:NodeShape ;
-  sh:targetClass ckp:Affordance ;
-  rdfs:comment "derivedBy must name a Materialization, so a hand-registered action cannot hide behind a well-formed IRI. Requires mode 'pgrdf'." ;
-  sh:sparql [ a sh:SPARQLConstraint ;
-    sh:message "derivedBy does not name a Materialization" ;
-    sh:select """SELECT $this WHERE {
-        $this <https://conceptkernel.org/ontology/v3.11/core#derivedBy> ?m .
-        MINUS { GRAPH ?g { ?m a <https://conceptkernel.org/ontology/v3.11/core#Materialization> } } }""" ] .
 
 ckp:ModuleShape a sh:NodeShape ;
   sh:targetClass ckp:Module ;

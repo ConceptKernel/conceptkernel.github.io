@@ -1,0 +1,1105 @@
+@prefix ckp:  <https://conceptkernel.org/ontology/v3.11/core#> .
+@prefix bfo:  <http://purl.obolibrary.org/obo/BFO_> .
+@prefix iao:  <http://purl.obolibrary.org/obo/IAO_> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+#######################################################################
+# CKP v3.11 CORE — the operating definition of a concept kernel.
+#
+#   CK    meaning
+#   TOOL  capability, rebuilt from meaning at each epoch
+#   DATA  the sealed instances of the kernel's work
+#
+# ROOT: self-contained. Every ckp: term it references, it declares.
+# owl:priorVersion records lineage, not dependency.
+#
+# THREE AUTHORING RULES, each earned by measurement:
+#
+#  1. Every constraint uses a component MEASURED ENFORCING by the
+#     engine that gates writes: minCount · maxCount · datatype ·
+#     nodeKind · in · pattern · minLength · disjoint · hasValue ·
+#     qualifiedValueShape+qualifiedMinCount · class · closed.
+#     A component outside that set is a candidate path by another name.
+#
+#  2. NO CLASS IRI MAY BE THE SUBJECT OF A TRIPLE WHOSE PREDICATE
+#     CARRIES AN rdfs:domain. RDFS rule rdfs2 entails the class into the
+#     domain, the shape targets the class, and the ontology fails
+#     itself. This is why the Separation Axiom lives in the shapes of
+#     §13 and appears nowhere as a class-level assertion. Where two
+#     classes legitimately share a property, that property carries no
+#     rdfs:domain and says so.
+#
+#  3. BODY LOCALITY. A constraint reads only what the candidate body
+#     carries, plus the parent-closure the substrate stamps onto the
+#     candidate itself. The gate composes:
+#
+#         shapes graph <- core shapes + kernel shapes + generated shape
+#         data graph   <- the candidate body + its parent closure
+#
+#     So a shape MAY target a superclass — the stamp supplies the
+#     parent type on the candidate. A shape may NOT reach a node the
+#     candidate merely references: that node's types are not composed,
+#     and every constraint depending on them refuses conformant work.
+#     This governs sh:class (usable only where the value node carries a
+#     direct rdf:type inside the body) and rules out sh:inversePath,
+#     which asks for triples pointing AT the candidate.
+#
+# DECLARED GAP — G-1, CROSS-NODE TYPE INTEGRITY.
+#     Rule 3 places one property beyond the instance gate: that a
+#     referenced IRI is of the kind the reference intends — a kernel
+#     bearing one organ of each kind, a grant targeting an organ, a
+#     membership holding a role. These are checkable, but by a
+#     store-level query over sealed rows, not by the gate that admits a
+#     single body. The core states the ranges so the check is
+#     expressible, and leaves it unclaimed here rather than carrying a
+#     constraint that reads as enforcement and refuses valid writes.
+#
+# ENGINE CAVEAT — read before trusting a conformant result.
+#     A conformant result is meaningful only against the shapes graph
+#     this file defines. The engine reports conformance against a
+#     shapes graph that is empty or absent, so the loaded graph is
+#     established by digest, not by the validator's answer. Check the
+#     digest of what is loaded before treating any pass as enforcement.
+#
+# OPERATIONAL: the enforcement surface this file defines takes effect
+# when a substrate loads it. Confirm the loaded digest matches the
+# published one.
+#######################################################################
+
+<https://conceptkernel.org/ontology/v3.11/core> a owl:Ontology ;
+  rdfs:label "CKP Core Ontology v3.11" ;
+  owl:priorVersion <https://conceptkernel.org/ontology/v3.9/core> ;
+  rdfs:comment "The operating definition of a concept kernel: what one is, what it does, and what the substrate refuses on its behalf." .
+
+
+#######################################################################
+# 1. THE KERNEL
+#######################################################################
+
+ckp:Kernel a rdfs:Class ;
+  rdfs:subClassOf bfo:0000040 ;
+  rdfs:label "Concept Kernel" ;
+  rdfs:comment "A persistently identified, spatially bounded computational entity that organises its own shape — the types, predicates, shapes and affordances it declares, and the affordances of other kernels it uses — and carries three organs: CK, its meaning; TOOL, the capability rebuilt from that meaning at each epoch; and DATA, the sealed instances of its work. It persists through change of state and bears the disposition its TOOL organ realises." .
+
+ckp:inProject a owl:ObjectProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range ckp:Project ;
+  rdfs:comment "The project that holds this kernel. Exactly one — a kernel reaches other projects by adoption, never by co-ownership." .
+
+ckp:transportSegment a owl:DatatypeProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range xsd:string ;
+  rdfs:comment """The one lowercase segment this kernel is addressed by on the wire. STORED, not
+derived — and that is the whole point: NATS matches subjects token by token with no character
+classes and no case folding, so a wildcard grant admits `pgCK` exactly as happily as `pgck`, and
+a name differing only by case mints a SECOND kernel that nothing can ever seal into. The rule was
+already enforced procedurally by ckp.germinate_kernel and ckp._project; declaring it here puts it
+in the composed surface, so a client can learn it from surface.declared and a seal is refused with
+the clause named instead of relying on every client to spell it correctly.""" .
+
+ckp:epoch a owl:DatatypeProperty ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "The ordinal of a version of meaning, carried by an Epoch as the position it NAMES — a position is immutable, so on an Epoch this value is honest forever. A Kernel no longer bears it (v0.4.104, C-13): a sealed fact carrying a mutable counter was read as live on every board that drew it — every sun rendered e0 — and a sealed instance must carry no value a reader can mistake for a live one. The kernel's CURRENT position lives in the epoch ledger and its sealed Epochs; the germination moment is ckp:germinatedAtEpoch, whose name says it does not track." .
+
+# ── wave-3.12-pass-3 (0.4.108): the missing middle, and the clock as law ──
+# SUBSTRATE-SCOPE §6 named the gap: a rule can live in core (everyone,
+# forever) or in one kernel (only them) — there was no way to say "these
+# kernels, together". The first measured need was the two-kernel dialogue,
+# whose synchrony an operator carried by hand.
+ckp:Scope a rdfs:Class ;
+  rdfs:label "Scope — a named set of kernels that turn together" ;
+  rdfs:comment "The participation layer between core and one kernel. A rule bound to a Scope binds its member kernels and does not bind others. Membership is declared by includesKernel and read at enforcement time, so editing the sealed Scope rebinds immediately. OPEN RESIDUE, recorded not hidden: being listed is not yet consented — the governance of who may seal a Scope naming another's kernel is a filed design gap, not a solved one." .
+
+ckp:includesKernel a owl:ObjectProperty ;
+  rdfs:domain ckp:Scope ; rdfs:range ckp:Kernel ;
+  rdfs:comment "A member kernel, by its sealed Kernel @id (urn:ckp:<segment>/kernel). A kernel not listed is not bound — the whole point of a NAMED set." .
+
+# The orbit: each kernel a sun, NOW fixed at north. The kernel governs its own
+# period and lead — THE GEARS; the tick underneath is the operator's — THE
+# ESCAPEMENT (SUBSTRATE-SCOPE §4.1). None carries minCount: a kernel with no
+# declared orbit has no orbit, which is a real answer; a wrong VALUE is what
+# must be refusable.
+ckp:orbitPeriodSeconds a owl:DatatypeProperty ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "Law: the duration of one full rotation, seconds. Positive — a zero or negative period is not a slow clock, it is no clock." .
+ckp:orbitLeadSeconds a owl:DatatypeProperty ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "Law: the prepare window before NOW — at 300 degrees submissions validate, then this many seconds remain to prepare before the crossing seals. Non-negative, and less than the period or the window never closes." .
+ckp:orbitSeat a owl:DatatypeProperty ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "Law: the kernel's approved position on its ring — server-driven, changed by another vote as required. Non-negative ordinal; rendering derives geometry from it, never the reverse." .
+ckp:orbitAnchor a owl:DatatypeProperty ;
+  rdfs:range xsd:dateTime ;
+  rdfs:comment "Law: the instant crossings are counted from. next = anchor + ceil((now - anchor)/period) * period — computable by a THIRD PARTY from sealed law alone, without asking the kernel. The clock is not windable by the tick: the anchor moves only by governed apply." .
+ckp:tauImplicitMillis a owl:DatatypeProperty ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "Law: the dwell time constant for implicit signals — w = weightImplicit * (1 - e^(-dwell/tau)). Declared because the ALGORITHM's formula named a tau nobody had declared, and an undeclared constant in the arithmetic is exactly the unexamined value the seven-constants block exists to prevent. Substrate default 60000." .
+
+ckp:germinatedAtEpoch a owl:DatatypeProperty ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "The epoch at which germination sealed this kernel. IMMUTABLE BY MEANING and named so a reader cannot mistake it for the live position — that is the entire reason it exists (C-13): its predecessor, ckp:epoch on the sealed Kernel, was a mutable counter frozen at seal time. Not minCount 1: every Kernel sealed before the rename lacks it, and absence means 'germinated before this term existed', which is a real answer." .
+
+# declaresType carries no rdfs:domain deliberately: a Kernel and a
+# Module both declare types, and §12's admitted-set query binds it to a
+# Module. A union domain would buy nothing and risks authoring rule 2.
+ckp:declaresType a owl:ObjectProperty ;
+  rdfs:range rdfs:Class ;
+  rdfs:comment "A class declared by a kernel or a module. The union of these over adopted modules is the admitted type set the seal checks a candidate against." .
+
+ckp:declaresPredicate a owl:ObjectProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range rdf:Property ;
+  rdfs:comment "A property this kernel declares. The declared predicate set is the kernel's whole vocabulary: a query, link or traversal key outside it is refused before any read runs." .
+
+ckp:declaresShape a owl:ObjectProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range sh:NodeShape ;
+  rdfs:comment "A SHACL gate this kernel declares, targeting one of its declared types." .
+
+ckp:declaresAffordance a owl:ObjectProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range ckp:Affordance ;
+  rdfs:comment "An affordance this kernel offers — a named operation reachable through the door." .
+
+ckp:AffordanceUse a rdfs:Class ;
+  rdfs:label "Affordance Use" ;
+  rdfs:comment "A sealed statement that one kernel uses an affordance declared by another, pinned to the provider epoch it was agreed against. A TOOL organ is rebuilt at every epoch, so a cross-kernel dependency records the epoch it was agreed at and is re-agreed when the provider advances past it." .
+
+ckp:consumer a owl:ObjectProperty ;
+  rdfs:domain ckp:AffordanceUse ; rdfs:range ckp:Kernel .
+
+ckp:provider a owl:ObjectProperty ;
+  rdfs:domain ckp:AffordanceUse ; rdfs:range ckp:Kernel ;
+  rdfs:comment "The kernel that declares the affordance. A kernel's use of its own affordances is declaration, so consumer and provider differ." .
+
+ckp:uses a owl:ObjectProperty ;
+  rdfs:domain ckp:AffordanceUse ; rdfs:range ckp:Affordance .
+
+ckp:pinnedEpoch a owl:DatatypeProperty ;
+  rdfs:domain ckp:AffordanceUse ; rdfs:range xsd:integer ;
+  rdfs:comment "The provider epoch this use was agreed against." .
+
+
+#######################################################################
+# 2. THE THREE ORGANS
+#
+# ckp:Organ is a nominal grouping with no BFO parent: its subclasses
+# straddle disjoint BFO branches — CK and DATA are information content
+# entities (generically dependent continuants), TOOL is a disposition
+# (a realizable, specifically dependent continuant). ckp:hasOrgan is
+# concretization, not BFO parthood: an information content entity is
+# concretized by a material entity, never part of one. Both stated
+# deliberately rather than left for a reviewer to find.
+#######################################################################
+
+ckp:Organ a rdfs:Class ;
+  rdfs:label "Organ" ;
+  rdfs:comment "One of the three organs of a kernel. Every kernel has exactly three, one of each kind." .
+
+ckp:CK a rdfs:Class ;
+  rdfs:subClassOf ckp:Organ , iao:0000030 ;
+  rdfs:label "CK organ — meaning" ;
+  rdfs:comment "What the kernel means: its declared types, predicates, shapes, affordances and transition maps. Depends on nothing; serves TOOL and DATA. Written only through the governance plane." .
+
+ckp:TOOL a rdfs:Class ;
+  rdfs:subClassOf ckp:Organ , bfo:0000016 ;
+  rdfs:label "TOOL organ — capability" ;
+  rdfs:comment "What the kernel can do, derived from CK at each epoch. A conformant tool holds no schema of its own: it reads its output contract from the kernel definition, so an applied change advances the contract with zero tool-code edits. Reads the ontology; never writes it." .
+
+ckp:DATA a rdfs:Class ;
+  rdfs:subClassOf ckp:Organ , iao:0000030 ;
+  rdfs:label "DATA organ — knowledge" ;
+  rdfs:comment "The sealed instances of the kernel's work. The tool that produced them deals only in its own subject matter; the substrate is what stamps each output with the shape and epoch of the kernel that processed it." .
+
+ckp:hasOrgan a owl:ObjectProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range ckp:Organ ;
+  rdfs:comment "An organ of this kernel. Concretization, not parthood." .
+
+ckp:organKind a owl:DatatypeProperty ;
+  rdfs:domain ckp:Organ ;
+  rdfs:comment "Which organ this is: ck, tool or data." .
+
+ckp:dependsOn a owl:ObjectProperty ;
+  rdfs:domain ckp:Organ ; rdfs:range ckp:Organ ;
+  rdfs:comment "The organs this one is built on. The dependency order is a gate rather than a note: CK carries none, TOOL carries the one CK organ it is derived from, DATA carries both. Counted in §13, where each organ kind states its own arity." .
+
+ckp:writeAuthority a owl:DatatypeProperty ;
+  rdfs:domain ckp:Organ ;
+  rdfs:comment "What this organ may write — the Separation Axiom in one value. governed-only for CK: not writable except through governance. readonly-on-ontology for TOOL. readwrite for DATA. Bound per organ kind in §13, never asserted on the classes." .
+
+
+#######################################################################
+# 3. AFFORDANCES — derived, not authored
+#######################################################################
+
+ckp:Affordance a rdfs:Class ;
+  rdfs:label "Affordance" ;
+  rdfs:comment "A named operation a kernel offers, produced by a materialization and resolved from the registry at dispatch. The affordance set is enumerable, which is what makes it grantable." .
+
+ckp:inTopic a owl:DatatypeProperty ;
+  rdfs:domain ckp:Affordance ;
+  rdfs:comment "The transport subject that routes toward this affordance." .
+
+ckp:outTopic a owl:DatatypeProperty ;
+  rdfs:domain ckp:Affordance ;
+  rdfs:comment "The transport subject governed egress is published on." .
+
+ckp:inShape a owl:ObjectProperty ;
+  rdfs:domain ckp:Affordance ; rdfs:range sh:NodeShape ;
+  rdfs:comment "The shape an input body is gated against before the affordance proceeds." .
+
+ckp:plane a owl:DatatypeProperty ;
+  rdfs:domain ckp:Affordance ;
+  rdfs:comment "The dispatch plane: instance (the typed hot loop), governance (a change to the kernel's own type, which waits for quorum), or derived (a computed read resolved from a sealed formula)." .
+
+ckp:delegate a owl:DatatypeProperty ;
+  rdfs:domain ckp:Affordance ; rdfs:range xsd:boolean ;
+  rdfs:comment "A sealed permission that this affordance may be invoked on another identity's behalf. The record that it was used is ckp:Delegation." .
+
+ckp:derivedBy a owl:ObjectProperty ;
+  rdfs:domain ckp:Affordance ; rdfs:range ckp:Materialization ;
+  rdfs:comment "The materialization that produced this affordance. Required, so an affordance naming no materialization cannot seal and a hand-registered action cannot hide." .
+
+ckp:retiredAtEpoch a owl:DatatypeProperty ;
+  rdfs:domain ckp:Instance ; rdfs:range xsd:integer ;
+  rdfs:comment "The epoch at which this instance was withdrawn. A retired affordance does not dispatch at or after it; a retired instance of any other type is still SEALED and still true-as-of-its-epoch, but is no longer offered. WIDENED FROM ckp:Affordance IN v3.12 RC2, and the reason is measured: superaiharness3000 sealed ck_retire on agent-1787389563630883000 with a full reason, and the agent kept appearing in that kernel's discovery affordance, ranked most prominently, with nothing in the result saying it was withdrawn. Retirement was a ROW STATE in ckp.instances (3 rows) with essentially no trace on the read plane (1 predicate fleet-wide), because core declared a retirement marker for Affordances ONLY. So no correct 'which executors do I offer' query could be written at all: a consumer was offered a model its provider had explicitly retracted. A retraction that the read plane cannot see is not a retraction — it is a note the writer made to themselves. The marker must be EMITTED into <kernel>/instances, not merely settable, or this widening is decorative." .
+
+
+#######################################################################
+# 4. INSTANCES — each carries the shape of the kernel that made it
+#######################################################################
+
+ckp:Instance a rdfs:Class ;
+  rdfs:subClassOf iao:0000030 ;
+  rdfs:label "Instance" ;
+  rdfs:comment "A sealed manifestation of a kernel's work, gated at commit by a shape its producing kernel declared. The substrate stamps rdf:type ckp:Instance at seal alongside the declared type, so the provability spine targets directly and never depends on a materialization pass having run." .
+
+ckp:producedBy a owl:ObjectProperty ;
+  rdfs:domain ckp:Instance ; rdfs:range ckp:Kernel ;
+  rdfs:comment "The kernel that processed this instance into being. Server-derived at seal, never taken from the caller." .
+
+ckp:producedByAffordance a owl:ObjectProperty ;
+  rdfs:domain ckp:Instance ; rdfs:range ckp:Affordance ;
+  rdfs:comment "The verb that produced this instance — a durable record of which operation ran, independent of transport correlation." .
+
+ckp:conformsToShape a owl:ObjectProperty ;
+  rdfs:domain ckp:Instance ; rdfs:range sh:NodeShape ;
+  rdfs:comment "The shape the instance was gated against — one the producing kernel declares." .
+
+ckp:sealedAtEpoch a owl:DatatypeProperty ;
+  rdfs:domain ckp:Instance ; rdfs:range xsd:integer ;
+  rdfs:comment "The producing kernel's epoch at seal. With conformsToShape it makes the output contract checkable after the fact: the gating shape resolves at the version it held when the seal ran." .
+
+ckp:createdBy a owl:ObjectProperty ;
+  rdfs:domain ckp:Instance ; rdfs:range ckp:Participant ;
+  rdfs:comment "The participant whose verified connection sealed this instance. Derived by the substrate from the authenticated identity. A body carrying its own claim has that claim ignored, and the reply returns the derived value UNCONDITIONALLY — on every seal, claim or no claim — so the envelope shape never varies with the request and cannot become a probing oracle." .
+
+ckp:onBehalfOf a owl:ObjectProperty ;
+  rdfs:subPropertyOf prov:actedOnBehalfOf ;
+  rdfs:domain ckp:Instance ; rdfs:range ckp:Participant ;
+  rdfs:comment "The participant an agent acted for. Present when an Agent sealed on a Participant's behalf, absent when the participant acted directly. This is how an executor writing to a kernel it does not own is attributed, rather than by a caller-supplied workspace field." .
+
+ckp:preEnforcementEpoch a owl:DatatypeProperty ;
+  rdfs:domain ckp:Instance ; rdfs:range xsd:integer ;
+  rdfs:comment "A positive fence marker written at migration time on a row sealed before enforcement existed. Positive by design: the absence of a stamp cannot distinguish a legitimate legacy row from a stamp-path failure, so the fence asserts rather than omits, and a row carrying neither is detectable." .
+
+ckp:Supersession a rdfs:Class ;
+  rdfs:subClassOf ckp:Instance ;
+  rdfs:label "Supersession" ;
+  rdfs:comment "A sealed retraction: an author withdraws a fact without mutating or deleting the original, so what holds now is resolvable by query." .
+
+ckp:supersedes a owl:ObjectProperty ;
+  rdfs:domain ckp:Supersession ; rdfs:range ckp:Instance .
+
+
+#######################################################################
+# 5. THE ACT — a disposition is realized in a process
+#
+# ckp:TOOL is a BFO disposition; a disposition is realized in a process
+# (BFO_0000015). Run is that process, and ckp:Instance is its sealed
+# outcome. Together they answer what an act is: without Run the
+# substrate can prove a fact was sealed and cannot prove the work
+# behind it happened.
+#######################################################################
+
+ckp:Run a rdfs:Class ;
+  rdfs:subClassOf prov:Activity , bfo:0000015 ;
+  rdfs:label "Run" ;
+  rdfs:comment "One execution of a kernel's capability. Sealed at spawn, not at completion — a run recorded only on success is invisible precisely when it matters." .
+
+ckp:realizes a owl:ObjectProperty ;
+  rdfs:domain ckp:Run ; rdfs:range ckp:TOOL ;
+  rdfs:comment "The TOOL organ whose disposition this run realizes." .
+
+ckp:runOf a owl:ObjectProperty ;
+  rdfs:domain ckp:Run ; rdfs:range ckp:Affordance ;
+  rdfs:comment "The affordance this run realizes. LOCALITY-LIMITED REFERENCE, and stating that is the point of this comment: the instance gate checks nodeKind and cardinality only — that a well-formed IRI is present, NEVER that anything answers to it. Do not read RunShape's minCount 1 as a guarantee the affordance exists. Measured 2026-08-22 (superaiharness3000, finding-1787389837394731000): a successful apply seals ZERO ckp:Affordance fleet-wide — 37 registered routes, 2 Materializations, 0 Affordances, ckp.register_derived_affordance with no call sites — so on this substrate TODAY every conforming runOf necessarily names a referent that does not exist, and the only way to satisfy the constraint is to cite a phantom. superaiharness3000 refused to do so rather than fake the link, which is the correct reading. This is the exact mirror of wave:ruledAtPass, which is typed xsd:integer and so CANNOT name the Pass instance it was ruled at: one required reference points at nothing, the other cannot point at something real. Same chain, specified in prose and typed twice from opposite ends. An existence check belongs with the release that makes apply seal the Affordance (#56); until then this reference is a claim by its author, not a fact the gate established." .
+
+ckp:startedAt a owl:DatatypeProperty ;
+  rdfs:domain ckp:Run ; rdfs:range xsd:dateTime .
+
+ckp:endedAt a owl:DatatypeProperty ;
+  rdfs:domain ckp:Run ; rdfs:range xsd:dateTime ;
+  rdfs:comment "Absent while running. A run that ends reaches a terminal state, including when it dies unobserved." .
+
+ckp:runState a owl:DatatypeProperty ;
+  rdfs:domain ckp:Run ;
+  rdfs:comment "spawned · running · completed · failed · abandoned." .
+
+ckp:executingHost a owl:DatatypeProperty ;
+  rdfs:domain ckp:Run ;
+  rdfs:comment "Where the run executes." .
+
+ckp:processRef a owl:DatatypeProperty ;
+  rdfs:domain ckp:Run ;
+  rdfs:comment "Opaque host-scoped process identity, sufficient to reattach and check liveness after a controller restart. A host name records where something ran; this records what to check." .
+
+ckp:wasGeneratedBy a owl:ObjectProperty ;
+  rdfs:subPropertyOf prov:wasGeneratedBy ;
+  rdfs:domain ckp:Instance ; rdfs:range ckp:Run ;
+  rdfs:comment "The run that produced this instance." .
+
+
+#######################################################################
+# 6. EPOCH AND MATERIALIZATION — the progression, made checkable
+#
+# An epoch is a resource because proof describes it: it carries the
+# digest of the surface it names and the ordinal that orders it, and a
+# materialization points at the one it produced. The ordinals elsewhere
+# in this file stay literal, because they are only ever read and
+# compared.
+#
+# Materialization and FailedMaterialization are SIBLINGS under
+# ckp:Instance. A derivation that completed names a surface and
+# advances an epoch; one that failed does neither. Modelling failure as
+# a kind of materialization would oblige it to carry a surface digest
+# it cannot have — and under parent-closure stamping that obligation
+# reaches it, so every failure record would be refused.
+#######################################################################
+
+ckp:Epoch a rdfs:Class ;
+  rdfs:label "Epoch" ;
+  rdfs:comment "A named version of a kernel's enforcement surface, identified by the digest of the surface it materialized and ordered by its ordinal. A decision points at an epoch, so which decision ran under which rules is a traversal rather than a reconstruction." .
+
+ckp:Materialization a rdfs:Class ;
+  rdfs:subClassOf ckp:Instance ;
+  rdfs:label "Materialization" ;
+  rdfs:comment "The completed derivation of an epoch's action set from that epoch's own meaning, gated by the materialization shape as declared at the prior epoch. The engine that advances meaning is subject to the same gate as everything meaning produces." .
+
+ckp:FailedMaterialization a rdfs:Class ;
+  rdfs:subClassOf ckp:Instance ;
+  rdfs:label "Failed Materialization" ;
+  rdfs:comment "A derivation that did not complete. A sibling of Materialization rather than a kind of one: it names no surface and produces no epoch, so it is gated on carrying a reason and on claiming neither. Failure is a recorded, queryable outcome and the epoch does not advance." .
+
+# materializes and fromEpoch carry no rdfs:domain: both outcomes bear
+# them, and a domain would entail a failure into Materialization.
+ckp:materializes a owl:ObjectProperty ;
+  rdfs:range ckp:Kernel ;
+  rdfs:comment "The kernel whose surface this derivation was attempted for." .
+
+ckp:fromEpoch a owl:DatatypeProperty ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "The ordinal the derivation started from." .
+
+ckp:toEpoch a owl:DatatypeProperty ;
+  rdfs:domain ckp:Materialization ; rdfs:range xsd:integer ;
+  rdfs:comment "The ordinal reached. Only a completed derivation has one." .
+
+ckp:sourceDigest a owl:DatatypeProperty ;
+  rdfs:comment "sha256 of the exact input a derivation or adoption consumed." .
+
+# surfaceDigest carries no rdfs:domain: a Materialization records the
+# surface it produced, and the Epoch it produced is named by the same
+# digest.
+ckp:surfaceDigest a owl:DatatypeProperty ;
+  rdfs:comment "sha256 of the enforcement surface — gate set, plans, affordance registry and transition maps together. This is what an epoch names." .
+
+ckp:producesEpoch a owl:ObjectProperty ;
+  rdfs:domain ckp:Materialization ; rdfs:range ckp:Epoch ;
+  rdfs:comment "The epoch this derivation produced. Required of a completed materialization and refused of a failed one, so an advance without a named surface cannot seal." .
+
+ckp:producesAffordance a owl:ObjectProperty ;
+  rdfs:domain ckp:Materialization ; rdfs:range ckp:Affordance .
+
+ckp:reason a owl:DatatypeProperty ;
+  rdfs:comment "Why a failure occurred, or why a declared gap exists. A gap carrying a reason is declarable; a silent one is not." .
+
+
+#######################################################################
+# 7. THE SEAL CHAIN
+#
+# ckp:validation ranges over the SHACL report vocabulary the engine
+# already emits, so a report is re-readable by any conformant tool
+# without translation and the core declares no parallel term for it.
+#######################################################################
+
+ckp:LedgerEntry a rdfs:Class ;
+  rdfs:label "Ledger Entry" ;
+  rdfs:comment "An append-only, HMAC-authenticated record of one sealed write, chained to its predecessor." .
+
+ckp:Proof a rdfs:Class ;
+  rdfs:label "Proof" ;
+  rdfs:comment "A verifiable attestation about an instance, re-checkable long after the write. Integrity only — conformance is carried by conformsToShape and never shares a field with this." .
+
+ckp:validation a owl:ObjectProperty ;
+  rdfs:range sh:ValidationReport ;
+  rdfs:comment "The validation report that justified a seal or a refusal." .
+
+ckp:about a owl:ObjectProperty ;
+  rdfs:comment "The instance a ledger entry, proof, report, proposal or vote concerns." .
+
+ckp:bodySha a owl:DatatypeProperty ;
+  rdfs:domain ckp:LedgerEntry .
+
+ckp:sig a owl:DatatypeProperty ;
+  rdfs:domain ckp:LedgerEntry .
+
+ckp:prev a owl:DatatypeProperty ;
+  rdfs:domain ckp:LedgerEntry ; rdfs:range xsd:integer ;
+  rdfs:comment "The sequence number of the preceding entry — the chain pointer. The genesis entry carries 0, so every entry asserts its position and an omitted pointer is detectable rather than indistinguishable from the start of the chain." .
+
+ckp:ts a owl:DatatypeProperty ;
+  rdfs:range xsd:dateTime .
+
+ckp:method a owl:DatatypeProperty ;
+  rdfs:domain ckp:Proof .
+
+ckp:digest a owl:DatatypeProperty ;
+  rdfs:domain ckp:Proof .
+
+ckp:verifiedAt a owl:DatatypeProperty ;
+  rdfs:domain ckp:Proof ; rdfs:range xsd:dateTime .
+
+
+#######################################################################
+# 8. THE GOVERNANCE PLANE
+#
+# Every governance act is an Instance, so each carries a required
+# substrate-derived createdBy. Quorum is arithmetic over distinct
+# actors, and distinct actors must be expressible for it to mean
+# anything.
+#######################################################################
+
+ckp:Proposal a rdfs:Class ;
+  rdfs:subClassOf ckp:Instance ;
+  rdfs:label "Proposal" ;
+  rdfs:comment "A proposed change to a kernel's own type, sealed on receipt and held pending until its quorum is met. A proposal that cannot materialize is refused at propose time, never sealed as an inert applied." .
+
+ckp:Vote a rdfs:Class ;
+  rdfs:subClassOf ckp:Instance ;
+  rdfs:label "Vote" ;
+  rdfs:comment "A sealed position an identity takes on a proposal." .
+
+ckp:Transition a rdfs:Class ;
+  rdfs:subClassOf ckp:Instance ;
+  rdfs:label "Transition" ;
+  rdfs:comment "A sealed allowed move between two lifecycle states in a kernel's transition map." .
+
+ckp:proposalState a owl:DatatypeProperty ;
+  rdfs:domain ckp:Proposal ;
+  rdfs:comment "pending · applied · rejected." .
+
+ckp:proposalOp a owl:DatatypeProperty ;
+  rdfs:domain ckp:Proposal ;
+  rdfs:comment "The governed operation carried. An op with no projector is refused at propose." .
+
+ckp:requiresQuorum a owl:DatatypeProperty ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "The count of distinct approving participants a change clears. A quorum of one is operator-declared, never fleet agreement." .
+
+ckp:voteValue a owl:DatatypeProperty ;
+  rdfs:domain ckp:Vote ;
+  rdfs:comment "approve · reject." .
+
+ckp:fromState a owl:DatatypeProperty ;
+  rdfs:domain ckp:Transition .
+
+ckp:toState a owl:DatatypeProperty ;
+  rdfs:domain ckp:Transition .
+
+
+#######################################################################
+# 9. IDENTITY AND AUTHORITY
+#
+# The chain is traversable end to end, so the Separation Axiom binds to
+# an identity:
+#
+#   Participant -(memberIs)- Membership -(holdsRole)- Role
+#                                 |                     |
+#                            (memberOf)              (grant)
+#                                 v                     v
+#                              Project              Grant -(permTarget)- Organ
+#
+# Each hop's range is declared, which is what makes the traversal
+# expressible. The kind of each referenced node is checked at the store
+# level rather than the instance gate — see G-1.
+#######################################################################
+
+ckp:Participant a rdfs:Class ;
+  rdfs:subClassOf bfo:0000040 ;
+  rdfs:label "Participant" ;
+  rdfs:comment "A person or process with a verified identity that holds projects, bears roles and seals writes." .
+
+ckp:participantKind a owl:DatatypeProperty ;
+  rdfs:domain ckp:Participant ;
+  rdfs:comment "person · process. Whether a decision was made by a human or an automated actor is a fact the ledger carries." .
+
+ckp:Agent a rdfs:Class ;
+  rdfs:subClassOf prov:Agent ;
+  rdfs:label "Agent" ;
+  rdfs:comment "Tooling acting for a participant. Distinct from Participant so a sealed instance can tell a participant acting through an agent from one acting directly, and so an executor stays swappable without the ontology naming it." .
+
+ckp:Role a rdfs:Class ;
+  rdfs:subClassOf bfo:0000023 ;
+  rdfs:label "Role" ;
+  rdfs:comment "A realizable entity a participant bears within a project. Roles are what grants resolve against, and a role bears at least one — a role granting nothing confers nothing." .
+
+ckp:Grant a rdfs:Class ;
+  rdfs:label "Grant" ;
+  rdfs:comment "Binds a role to a permission over a domain, an action and a target organ." .
+
+ckp:grant a owl:ObjectProperty ;
+  rdfs:domain ckp:Role ; rdfs:range ckp:Grant ;
+  rdfs:comment "A grant held by this role. The domain is what makes the authority chain traversable." .
+
+ckp:permDomain a owl:DatatypeProperty ;
+  rdfs:domain ckp:Grant .
+
+ckp:permAction a owl:DatatypeProperty ;
+  rdfs:domain ckp:Grant .
+
+ckp:permTarget a owl:ObjectProperty ;
+  rdfs:domain ckp:Grant ; rdfs:range ckp:Organ ;
+  rdfs:comment "The organ this permission applies to. The declared range is what lets the organ's write authority be resolved against the grant — the Separation Axiom bound to an identity rather than annotated." .
+
+ckp:Delegation a rdfs:Class ;
+  rdfs:subClassOf ckp:Instance ;
+  rdfs:label "Delegation" ;
+  rdfs:comment "A sealed record of who acted for whom. The boolean on an affordance is the permission; this is the record that it was used." .
+
+ckp:delegator a owl:ObjectProperty ;
+  rdfs:domain ckp:Delegation ; rdfs:range ckp:Participant .
+
+ckp:delegatee a owl:ObjectProperty ;
+  rdfs:domain ckp:Delegation ; rdfs:range ckp:Agent .
+
+
+#######################################################################
+# 10. PROJECTS
+#######################################################################
+
+ckp:Project a rdfs:Class ;
+  rdfs:subClassOf bfo:0000027 ;
+  rdfs:label "Project" ;
+  rdfs:comment "A named, graph-backed scope holding kernels and their instances. A participant's first project is personal and named for them." .
+
+ckp:projectKind a owl:DatatypeProperty ;
+  rdfs:domain ckp:Project ;
+  rdfs:comment "personal — one owner, who is quorum of one; or shared — several members, where governed change clears a quorum." .
+
+ckp:ownedBy a owl:ObjectProperty ;
+  rdfs:domain ckp:Project ; rdfs:range ckp:Participant .
+
+ckp:Membership a rdfs:Class ;
+  rdfs:label "Membership" ;
+  rdfs:comment "A participant's standing in a project, carrying the role their grants resolve against. The only construct binding a participant to a role in a project." .
+
+ckp:memberIs a owl:ObjectProperty ;
+  rdfs:domain ckp:Membership ; rdfs:range ckp:Participant .
+
+ckp:memberOf a owl:ObjectProperty ;
+  rdfs:domain ckp:Membership ; rdfs:range ckp:Project .
+
+ckp:holdsRole a owl:ObjectProperty ;
+  rdfs:domain ckp:Membership ; rdfs:range ckp:Role ;
+  rdfs:comment "The role borne. An object property, not a role name — a string cannot be traversed to a grant." .
+
+
+#######################################################################
+# 11. MODULES AND ADOPTION — bootstrap-required
+#
+# Module, moduleDigest and moduleVersion are ε0 machinery alongside
+# Adoption: a module is loaded because a sealed Adoption names its
+# digest, so the class cannot itself live in a module. §12's query binds
+# ?m to a Module, so cutting these makes fail-closed inexpressible.
+#######################################################################
+
+ckp:Module a rdfs:Class ;
+  rdfs:label "Module" ;
+  rdfs:comment "A versioned, digest-named vocabulary unit. Proximity is not adoption: a module is loaded only because a sealed Adoption names its digest." .
+
+ckp:moduleDigest a owl:DatatypeProperty ;
+  rdfs:domain ckp:Module .
+
+ckp:moduleVersion a owl:DatatypeProperty ;
+  rdfs:domain ckp:Module .
+
+ckp:Adoption a rdfs:Class ;
+  rdfs:subClassOf ckp:Instance ;
+  rdfs:label "Adoption" ;
+  rdfs:comment "A sealed record admitting a module, or introducing one concept from one project into another — attributed, digest-fixed, epoch-pinned. The unit of sharing, and the gate a module passes to exist at all. It must refuse before any materialization has run, because the first materialization is itself adopted." .
+
+ckp:adopts a owl:ObjectProperty ;
+  rdfs:domain ckp:Adoption ; rdfs:range ckp:Module ;
+  rdfs:comment "The module this adoption admits. With declaresType this yields the admitted type set." .
+
+ckp:adopted a owl:ObjectProperty ;
+  rdfs:domain ckp:Adoption ;
+  rdfs:comment "The single concept introduced, where an adoption carries a concept rather than a module." .
+
+ckp:fromProject a owl:ObjectProperty ;
+  rdfs:domain ckp:Adoption ; rdfs:range ckp:Project .
+
+ckp:intoProject a owl:ObjectProperty ;
+  rdfs:domain ckp:Adoption ; rdfs:range ckp:Project .
+
+ckp:sourceEpoch a owl:DatatypeProperty ;
+  rdfs:domain ckp:Adoption ; rdfs:range xsd:integer .
+
+ckp:intoEpoch a owl:DatatypeProperty ;
+  rdfs:domain ckp:Adoption ; rdfs:range xsd:integer .
+
+
+#######################################################################
+# 12. THE ADMITTED TYPE SET — generated, not declared
+#
+# The type half of fail-closed is a GENERATED shape, regenerated per
+# epoch — not a procedural lookup. A lookup outside the validator is a
+# second enforcement surface, which is the defect this root exists to
+# end. Generator:
+#
+#   { ?t : ?m ckp:declaresType ?t . ?a ckp:adopts ?m . ?a a ckp:Adoption }
+#
+# materialized into
+#
+#   [] a sh:NodeShape ; sh:targetSubjectsOf rdf:type ;
+#      sh:closed true ; sh:ignoredProperties ( rdf:type ) ;
+#      sh:property [ sh:path rdf:type ; sh:in ( <admitted…> ) ] .
+#
+# It belongs to the SHAPES graph. Composition at the gate is stated in
+# authoring rule 3: the shapes graph carries the ontology, the data
+# graph carries the candidate body and its parent closure. Composing
+# the ontology into the data graph makes it flag itself.
+#######################################################################
+
+
+#######################################################################
+# 13. SHAPES — the core governs itself
+#
+# Every shape here targets a class the candidate carries directly or
+# receives from parent-closure stamping, and reads only paths the
+# candidate body holds. Constraints on the kind of a referenced node
+# are stated as ranges in the sections above and checked at the store
+# level — see G-1.
+#######################################################################
+
+ckp:KernelShape a sh:NodeShape ;
+  sh:targetClass ckp:Kernel ;
+  sh:property [ sh:path rdfs:label    ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:inProject ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:transportSegment ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[a-z0-9]+(-[a-z0-9]+)*$" ;
+                sh:message "kernel id is ONE lowercase transport segment, dashes optional — 'pgck', never 'pgCK'. NATS subject tokens have no case folding, so an uppercase twin is a separate kernel nothing can seal into." ] ;
+  # v0.4.104 (C-13): ckp:epoch is GONE from this shape. minCount 1 here forced
+  # germination to stamp a counter that went stale on the first apply, and every
+  # reader of the sealed Kernel drew it as live. The germination moment survives
+  # as germinatedAtEpoch — immutable by meaning, honest by name. No minCount:
+  # requiring it would refuse every Kernel sealed before the rename.
+  sh:property [ sh:path ckp:germinatedAtEpoch ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:hasOrgan  ; sh:minCount 3 ; sh:maxCount 3 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:declaresType       ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:declaresPredicate  ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:declaresShape      ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:declaresAffordance ; sh:nodeKind sh:IRI ] ;
+
+  # ── THE SEVEN CONSTANTS (v3.12 RC1) ───────────────────────────────────────
+  # Filed against RC1 by sporaxis: declared, and reached by NO sh:path — so
+  # each was minted onto whatever sent it, with no datatype, range or
+  # cardinality. The fourth declaration-with-no-reader of the 2026-08-22 pass,
+  # after projectKind, ckp:plane and derivedBy — and the largest, because the
+  # other three govern STRUCTURE while these govern OUTCOMES.
+  #
+  # §1.1 rules that thresholds are LAW, governed rather than chosen by an
+  # executor. A threshold no shape constrains IS chosen by an executor and
+  # cannot be refused when wrong. And ALGORITHM §7 makes the first pass's
+  # deliverable THE WEIGHTS: if a weight cannot be refused, the experiment
+  # cannot fail, and guessing constants then enshrining them is `demo` at the
+  # arithmetic layer.
+  #
+  # NOT minCount 1, deliberately. Each carries a substrate default and is an
+  # OVERRIDE, sealed only through propose→vote→apply. Requiring one would
+  # refuse every Kernel already sealed and would force an operator to invent a
+  # number to satisfy a gate — manufacturing exactly the unexamined constants
+  # this block exists to prevent. Absence means "the substrate default governs",
+  # which is a real answer; a wrong VALUE is what must be refusable.
+  sh:property [ sh:path ckp:weightAssent   ; sh:maxCount 1 ; sh:datatype xsd:decimal ;
+                sh:minInclusive 0 ] ;
+  # dissent is declared NEGATIVE (substrate default -0.8). A positive value
+  # would make disagreement raise a score — the one sign error that inverts the
+  # meaning of every Score without changing its shape.
+  sh:property [ sh:path ckp:weightDissent  ; sh:maxCount 1 ; sh:datatype xsd:decimal ;
+                sh:maxInclusive 0 ] ;
+  # a CEILING scaled by dwell: w = weightImplicit · (1 − e^(−dwell/τ₀)).
+  # Above 1 an implicit signal could outweigh an explicit vote.
+  sh:property [ sh:path ckp:weightImplicit ; sh:maxCount 1 ; sh:datatype xsd:decimal ;
+                sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
+  # a NEGATIVE λ is exponential growth: old signals would gain weight forever.
+  sh:property [ sh:path ckp:decayLambda    ; sh:maxCount 1 ; sh:datatype xsd:decimal ;
+                sh:minInclusive 0 ] ;
+  # δ is compared against |score|, so a negative δ empties the deferred band —
+  # and §2's contradiction detector lives in that band, so it would vanish
+  # silently rather than fail.
+  sh:property [ sh:path ckp:thresholdDefer ; sh:maxCount 1 ; sh:datatype xsd:decimal ;
+                sh:minInclusive 0 ] ;
+  sh:property [ sh:path ckp:thresholdPromote ; sh:maxCount 1 ; sh:datatype xsd:decimal ] ;
+  # θ⁻ < θ⁺, or the bands inverted: everything discards and nothing promotes,
+  # with both values individually legal. The only cross-property invariant of
+  # the seven, and the only one no per-property constraint can catch.
+  sh:property [ sh:path ckp:thresholdDiscard ; sh:maxCount 1 ; sh:datatype xsd:decimal ;
+                sh:lessThan ckp:thresholdPromote ] ;
+
+  # ── THE ORBIT (wave-3.12-pass-3, C-10) — the kernel's own clock as LAW ────
+  # Same doctrine as the seven constants: no minCount (absence = no orbit, a
+  # real answer), every bound declared here so the ground refuses a wrong
+  # value and no projector ever carries a copy.
+  sh:property [ sh:path ckp:orbitPeriodSeconds ; sh:maxCount 1 ; sh:datatype xsd:integer ;
+                sh:minExclusive 0 ] ;
+  sh:property [ sh:path ckp:orbitLeadSeconds   ; sh:maxCount 1 ; sh:datatype xsd:integer ;
+                sh:minInclusive 0 ; sh:lessThan ckp:orbitPeriodSeconds ] ;
+  sh:property [ sh:path ckp:orbitSeat          ; sh:maxCount 1 ; sh:datatype xsd:integer ;
+                sh:minInclusive 0 ] ;
+  sh:property [ sh:path ckp:orbitAnchor        ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] ;
+  sh:property [ sh:path ckp:tauImplicitMillis  ; sh:maxCount 1 ; sh:datatype xsd:integer ;
+                sh:minExclusive 0 ] .
+
+ckp:OrganShape a sh:NodeShape ;
+  sh:targetClass ckp:Organ ;
+  sh:property [ sh:path ckp:organKind ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "ck" "tool" "data" ) ] ;
+  sh:property [ sh:path ckp:writeAuthority ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "governed-only" "readonly-on-ontology" "readwrite" ) ] ;
+  sh:property [ sh:path ckp:dependsOn ; sh:nodeKind sh:IRI ] .
+
+# The Separation Axiom and the dependency order as gates. sh:hasValue
+# is measured enforcing, so a CK organ claiming readwrite is refused
+# rather than merely wrong; the dependsOn arities are counted in the
+# organ's own body, which is where they are readable.
+ckp:CKOrganShape a sh:NodeShape ;
+  sh:targetClass ckp:CK ;
+  sh:property [ sh:path ckp:organKind      ; sh:hasValue "ck" ] ;
+  sh:property [ sh:path ckp:writeAuthority ; sh:hasValue "governed-only" ] ;
+  sh:property [ sh:path ckp:dependsOn      ; sh:maxCount 0 ] .
+
+ckp:TOOLOrganShape a sh:NodeShape ;
+  sh:targetClass ckp:TOOL ;
+  sh:property [ sh:path ckp:organKind      ; sh:hasValue "tool" ] ;
+  sh:property [ sh:path ckp:writeAuthority ; sh:hasValue "readonly-on-ontology" ] ;
+  sh:property [ sh:path ckp:dependsOn      ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+
+ckp:DATAOrganShape a sh:NodeShape ;
+  sh:targetClass ckp:DATA ;
+  sh:property [ sh:path ckp:organKind      ; sh:hasValue "data" ] ;
+  sh:property [ sh:path ckp:writeAuthority ; sh:hasValue "readwrite" ] ;
+  sh:property [ sh:path ckp:dependsOn      ; sh:minCount 2 ; sh:maxCount 2 ; sh:nodeKind sh:IRI ] .
+
+ckp:AffordanceShape a sh:NodeShape ;
+  sh:targetClass ckp:Affordance ;
+  sh:property [ sh:path ckp:inTopic  ; sh:minCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:inShape  ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:outTopic ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:plane    ; sh:maxCount 1 ;
+                sh:in ( "instance" "governance" "derived" ) ] ;
+  sh:property [ sh:path ckp:delegate ; sh:maxCount 1 ; sh:datatype xsd:boolean ] ;
+  sh:property [ sh:path ckp:retiredAtEpoch ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:derivedBy ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+
+ckp:AffordanceUseShape a sh:NodeShape ;
+  sh:targetClass ckp:AffordanceUse ;
+  sh:property [ sh:path ckp:consumer    ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ;
+                sh:disjoint ckp:provider ] ;
+  sh:property [ sh:path ckp:provider    ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:uses        ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:pinnedEpoch ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] .
+
+ckp:InstanceShape a sh:NodeShape ;
+  sh:targetClass ckp:Instance ;
+  sh:property [ sh:path ckp:producedBy      ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:conformsToShape ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:sealedAtEpoch   ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:createdBy       ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:onBehalfOf      ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:producedByAffordance ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:wasGeneratedBy  ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:preEnforcementEpoch ; sh:maxCount 1 ; sh:datatype xsd:integer ] .
+
+ckp:RunShape a sh:NodeShape ;
+  sh:targetClass ckp:Run ;
+  sh:property [ sh:path ckp:realizes      ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:runOf         ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:startedAt     ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] ;
+  sh:property [ sh:path ckp:endedAt       ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] ;
+  sh:property [ sh:path ckp:runState      ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "spawned" "running" "completed" "failed" "abandoned" ) ] ;
+  sh:property [ sh:path ckp:processRef    ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+  sh:property [ sh:path ckp:executingHost ; sh:maxCount 1 ; sh:datatype xsd:string ] .
+
+ckp:EpochShape a sh:NodeShape ;
+  sh:targetClass ckp:Epoch ;
+  sh:property [ sh:path ckp:epoch         ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:surfaceDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] .
+
+ckp:MaterializationShape a sh:NodeShape ;
+  sh:targetClass ckp:Materialization ;
+  sh:property [ sh:path ckp:materializes      ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:fromEpoch         ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:toEpoch           ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:sourceDigest      ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] ;
+  sh:property [ sh:path ckp:surfaceDigest     ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] ;
+  sh:property [ sh:path ckp:producesEpoch     ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:producesAffordance ; sh:nodeKind sh:IRI ] .
+
+# A failure is a sibling kind, targeted directly, so requiring a reason
+# and refusing a claimed surface needs no disjunction.
+ckp:FailedMaterializationShape a sh:NodeShape ;
+  sh:targetClass ckp:FailedMaterialization ;
+  sh:property [ sh:path ckp:materializes  ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:fromEpoch     ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:sourceDigest  ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] ;
+  sh:property [ sh:path ckp:reason        ; sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+  sh:property [ sh:path ckp:validation    ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:toEpoch       ; sh:maxCount 0 ] ;
+  sh:property [ sh:path ckp:surfaceDigest ; sh:maxCount 0 ] ;
+  sh:property [ sh:path ckp:producesEpoch ; sh:maxCount 0 ] .
+
+ckp:LedgerEntryShape a sh:NodeShape ;
+  sh:targetClass ckp:LedgerEntry ;
+  sh:property [ sh:path ckp:about      ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:bodySha    ; sh:minCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] ;
+  sh:property [ sh:path ckp:sig        ; sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 16 ] ;
+  sh:property [ sh:path ckp:ts         ; sh:minCount 1 ; sh:datatype xsd:dateTime ] ;
+  sh:property [ sh:path ckp:prev       ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:validation ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+
+ckp:ProofShape a sh:NodeShape ;
+  sh:targetClass ckp:Proof ;
+  sh:property [ sh:path ckp:about      ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:method     ; sh:minCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:digest     ; sh:minCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] ;
+  sh:property [ sh:path ckp:verifiedAt ; sh:minCount 1 ; sh:datatype xsd:dateTime ] .
+
+ckp:ProposalShape a sh:NodeShape ;
+  sh:targetClass ckp:Proposal ;
+  sh:property [ sh:path ckp:about          ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
+  # wave-3.12-pass-3: "draft" joins the closed set — the state a Score
+  # crossing thresholdPromote produces. The tick may DRAFT only (the
+  # constitutional limit): a draft carries no votes, meets no quorum, and a
+  # party PROMOTES it to pending by their own sealed act. A closed set that
+  # cannot name the tick's one permitted act would force the tick to mint
+  # pending proposals nobody asked for — the opposite of the limit.
+  sh:property [ sh:path ckp:proposalState  ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "draft" "pending" "applied" "rejected" ) ] ;
+  sh:property [ sh:path ckp:proposalOp     ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:requiresQuorum ; sh:maxCount 1 ; sh:datatype xsd:integer ] .
+
+ckp:VoteShape a sh:NodeShape ;
+  sh:targetClass ckp:Vote ;
+  sh:property [ sh:path ckp:about     ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:voteValue ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "approve" "reject" ) ] .
+
+ckp:TransitionShape a sh:NodeShape ;
+  sh:targetClass ckp:Transition ;
+  sh:property [ sh:path ckp:fromState ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:toState   ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] .
+
+# RC2: intoProject added, filed by sporaxis — Adoption is per-project, so a
+# Supersession removing one had nothing scoping it to the sealer.
+#
+# DELIBERATELY NOT minCount 1, and this is not timidity. Supersession is the ONLY
+# door-side exit from an Adoption naming an absent module graph — the recovery
+# path measured on 2026-08-22. Its emission path does not yet supply intoProject,
+# so requiring it would refuse every Supersession and turn the one available cure
+# into a second outage, on a substrate whose composition already fails closed.
+# That is §6 exactly: emission and shape move in ONE act, or the shape is a write
+# outage wearing the costume of rigour. minCount 1 lands in the same release that
+# makes ckp.seal emit it — not before, and not in a different train.
+ckp:SupersessionShape a sh:NodeShape ;
+  sh:targetClass ckp:Supersession ;
+  sh:property [ sh:path ckp:supersedes  ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:intoProject ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+
+ckp:ParticipantShape a sh:NodeShape ;
+  sh:targetClass ckp:Participant ;
+  sh:property [ sh:path ckp:participantKind ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "person" "process" ) ] .
+
+ckp:AgentShape a sh:NodeShape ;
+  sh:targetClass ckp:Agent ;
+  sh:property [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] .
+
+ckp:RoleShape a sh:NodeShape ;
+  sh:targetClass ckp:Role ;
+  sh:property [ sh:path rdfs:label ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:grant  ; sh:minCount 1 ; sh:nodeKind sh:IRI ] .
+
+ckp:ScopeShape a sh:NodeShape ;
+  sh:targetClass ckp:Scope ;
+  sh:property [ sh:path rdfs:label       ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:includesKernel ; sh:minCount 1 ; sh:nodeKind sh:IRI ;
+                sh:message "a Scope with no members binds nobody and means nothing — one kernel minimum, or do not seal it." ] .
+
+ckp:GrantShape a sh:NodeShape ;
+  sh:targetClass ckp:Grant ;
+  sh:property [ sh:path ckp:permDomain ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:permAction ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:permTarget ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+
+ckp:DelegationShape a sh:NodeShape ;
+  sh:targetClass ckp:Delegation ;
+  sh:property [ sh:path ckp:delegator ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:delegatee ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+
+ckp:ProjectShape a sh:NodeShape ;
+  sh:targetClass ckp:Project ;
+  sh:property [ sh:path rdfs:label      ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:projectKind ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "personal" "shared" ) ] ;
+  sh:property [ sh:path ckp:ownedBy     ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+
+ckp:MembershipShape a sh:NodeShape ;
+  sh:targetClass ckp:Membership ;
+  sh:property [ sh:path ckp:memberIs  ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:memberOf  ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:holdsRole ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+
+ckp:ModuleShape a sh:NodeShape ;
+  sh:targetClass ckp:Module ;
+  sh:property [ sh:path rdfs:label        ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:moduleDigest  ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] ;
+  sh:property [ sh:path ckp:moduleVersion ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] .
+
+ckp:AdoptionShape a sh:NodeShape ;
+  sh:targetClass ckp:Adoption ;
+  sh:property [ sh:path ckp:adopts       ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:adopted      ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:fromProject  ; sh:maxCount 1 ; sh:nodeKind sh:IRI ;
+                sh:disjoint ckp:intoProject ] ;
+  sh:property [ sh:path ckp:intoProject  ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:sourceDigest ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[0-9a-f]{64}$" ] ;
+  sh:property [ sh:path ckp:sourceEpoch  ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:intoEpoch    ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] .
+
+###############################################################################
+# CKP v3.12 additions (RC1) — signal processing as core mechanics, and
+# affordances that travel as data. Everything above this line is CKP v3.11
+# core verbatim (e5f7d1e5…). The delta is closed: 2 classes, 12 properties,
+# 3 NodeShapes. Expected arithmetic when loaded: 30 NodeShapes = 27 + 3.
+###############################################################################
+
+ckp:Signal a rdfs:Class ;
+  rdfs:subClassOf ckp:Instance ;
+  rdfs:label "Signal — attributed evidence about a concept" ;
+  rdfs:comment "The generalization ckp:Vote is one kind of: a sealed, attributed piece of evidence about a concept — assent, dissent, or implicit (dwell). Carries the four stamps like every Instance; the never-saw state is the absence of a Signal, which is correctly free. Presence/dwell TRACES never seal per event: they accumulate in the kernel's own DATA organ and seal as one hash-chained boundary head." .
+
+ckp:Score a rdfs:Class ;
+  rdfs:subClassOf ckp:Instance ;
+  rdfs:label "Score — a derived consensus value" ;
+  rdfs:comment "Derived, never asserted: the tick computes it host-side from sealed Signals under the kernel graph's law and materializes it as a fact carrying wasGeneratedBy (its run), computedAtEpoch (whose law computed it) and scoreValue. A third party re-derives it from the sealed signals plus the pinned parameters, or the score is wrong. Downstream readers never need arithmetic — a Score is a plain read." .
+
+ckp:signalPolarity a owl:DatatypeProperty ;
+  rdfs:domain ckp:Signal ; rdfs:range xsd:string ;
+  rdfs:comment "assent | dissent | implicit. An implicit signal is presence-without-vote; its strength derives from dwell, weighted by the kernel's weightImplicit law." .
+
+ckp:dwellMillis a owl:DatatypeProperty ;
+  rdfs:domain ckp:Signal ; rdfs:range xsd:integer ;
+  rdfs:comment "Milliseconds between concept shown and action (or departure), for implicit signals. Summary evidence carried on the sealed Signal; the raw trace stays organ-local under R-14." .
+
+ckp:scoreValue a owl:DatatypeProperty ;
+  rdfs:domain ckp:Score ; rdfs:range xsd:decimal ;
+  rdfs:comment "The living function's value at computation time: Σᵤ w(u,c,tᵤ)·decay(t−tᵤ), computed host-side by the tick under the kernel graph's law." .
+
+ckp:computedAtEpoch a owl:DatatypeProperty ;
+  rdfs:domain ckp:Score ; rdfs:range xsd:integer ;
+  rdfs:comment "The epoch whose law (weights, decay, thresholds) computed this Score. Two kernels' scores — or one kernel's scores across a law change — are never silently comparable; this stamp is what makes staleness detectable rather than suspected." .
+
+ckp:weightAssent a owl:DatatypeProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range xsd:decimal ;
+  rdfs:comment "Law: the weight of an assenting Signal. Substrate default 1.0; overridden only through propose→vote→apply — changing a weight is an epoch, not a deploy." .
+
+ckp:weightDissent a owl:DatatypeProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range xsd:decimal ;
+  rdfs:comment "Law: the weight of a dissenting Signal. Substrate default -0.8 — dissent weighted slightly less than assent; a community that disagrees changes the law on the record." .
+
+ckp:weightImplicit a owl:DatatypeProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range xsd:decimal ;
+  rdfs:comment "Law: the ceiling weight of an implicit (saw-but-didn't-vote) Signal, scaled by dwell: w = weightImplicit · (1 − e^(−dwell/τ₀)). Substrate default 0.3." .
+
+ckp:decayLambda a owl:DatatypeProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range xsd:decimal ;
+  rdfs:comment "Law: exponential decay rate over signal age. Decay has a second, structural axis the substrate applies regardless: a Signal whose sealedAtEpoch predates the current surface was cast against a different grounding — it decays faster or re-validates." .
+
+ckp:thresholdPromote a owl:DatatypeProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range xsd:decimal ;
+  rdfs:comment "Law: θ⁺. A Score crossing it DRAFTS a ckp:Proposal — the tick never seals content, votes, or applies; parties and quorum decide. Promotion is a suggestion becoming governable, never arithmetic becoming law." .
+
+ckp:thresholdDiscard a owl:DatatypeProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range xsd:decimal ;
+  rdfs:comment "Law: θ⁻. A Score below it is a VISIBLE discard — a derived row, never a silent drop." .
+
+ckp:thresholdDefer a owl:DatatypeProperty ;
+  rdfs:domain ckp:Kernel ; rdfs:range xsd:decimal ;
+  rdfs:comment "Law: δ. |score| < δ is the stuck band — no consensus either way; the oracle's deferred list." .
+
+ckp:affordanceName a owl:DatatypeProperty ;
+  rdfs:domain ckp:Affordance ; rdfs:range xsd:string ;
+  rdfs:comment "The verb name this affordance answers to at the door (e.g. wave.signals). Verb-R7: a module may declare names only under its own prefix; core keeps instance.*, surface.*, kernel.*, score.*. The registry row is DERIVED from this declaration — routed and declared cannot drift when one is read off the other." .
+
+ckp:sparqlBody a owl:DatatypeProperty ;
+  rdfs:domain ckp:Affordance ; rdfs:range xsd:string ;
+  rdfs:comment "A READ-ONLY SPARQL body executed by the substrate's one generic executor when the declared verb is dispatched. Capability as data: pinned by the module digest the Adoption sealed, re-derivable by any third party, gone on Supersession. Writes never travel this way — they stay behind the governed core verbs; compute beyond SPARQL is the delegated (Tier-2) seam." .
+
+ckp:resultShape a owl:ObjectProperty ;
+  rdfs:domain ckp:Affordance ; rdfs:range sh:NodeShape ;
+  rdfs:comment "The shape of this affordance's reply rows, so a caller can learn the output contract without calling — the same learnable-without-writing discipline surface.declared gives types." .
+
+ckp:SignalShape a sh:NodeShape ;
+  sh:targetClass ckp:Signal ;
+  sh:property [ sh:path ckp:about          ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:signalPolarity ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "assent" "dissent" "implicit" ) ] ;
+  sh:property [ sh:path ckp:dwellMillis    ; sh:maxCount 1 ; sh:datatype xsd:integer ] .
+
+ckp:ScoreShape a sh:NodeShape ;
+  sh:targetClass ckp:Score ;
+  sh:property [ sh:path ckp:about           ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+  sh:property [ sh:path ckp:scoreValue      ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ] ;
+  sh:property [ sh:path ckp:computedAtEpoch ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+  sh:property [ sh:path ckp:wasGeneratedBy  ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+
+# RC2: targetClass -> targetSubjectsOf. Filed by sporaxis as "cannot compel an
+# executable affordance to carry a body". True, but blanket minCount was the
+# wrong cure: this shape targeted ckp:Affordance — the SAME target as
+# AffordanceShape — so requiring sparqlBody would have made EVERY affordance
+# executable-or-refused, and all 37 registered routes carry no body. That is the
+# emission-and-shape rule (§6): a shape gating a type whose emission path cannot
+# produce its required properties is a total write outage presenting as bad data.
+#
+# sh:targetSubjectsOf selects exactly the affordances that CLAIM to be executable
+# by carrying a body, and requires the rest of the trio of them alone. An
+# affordance with no body is then simply not executable — which is the correct
+# meaning, not a gap. sparqlBody needs no minCount: it is the selector, so it is
+# present by construction.
+ckp:ExecutableAffordanceShape a sh:NodeShape ;
+  sh:targetSubjectsOf ckp:sparqlBody ;
+  sh:property [ sh:path ckp:affordanceName ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+                sh:pattern "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)+$" ] ;
+  sh:property [ sh:path ckp:sparqlBody     ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path ckp:resultShape    ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .

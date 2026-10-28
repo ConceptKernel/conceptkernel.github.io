@@ -8,11 +8,64 @@
   <!-- Ontology Browser -->
   <url><loc>https://conceptkernel.org/browse/</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
 
-  <!-- Runtime core vocabulary (stable namespace) -->
+  <!-- v3.8 core vocabulary -->
   <url><loc>https://conceptkernel.org/ontology/v3.8/</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://conceptkernel.org/ontology/v3.8/core.ttl</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
 
-  <!-- Spec: v3.7 (current) -->
+  <!-- Spec: v3.12 (current) -->
+  <url><loc>https://conceptkernel.org/v3.12/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://conceptkernel.org/v3.12/introduction</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.12/the-door</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.12/reading-a-reply</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.12/know-before-you-act</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.12/germination</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.12/governance</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.12/authority</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.12/signals-and-scores</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.12/the-clock</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.12/affordances</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.12/epochs-and-digests</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.12/install</loc><priority>0.9</priority></url>
+  <url><loc>https://conceptkernel.org/v3.12/changelog</loc><priority>0.9</priority></url>
+
+  <!-- Published law: v3.12 root and the v3.11 namespace line -->
+  <url><loc>https://conceptkernel.org/ontology/v3.12/</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.12/core.ttl</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.11/</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.11/core.ttl</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.11/core</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.11/modules/wave.ttl</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.11/modules/lexicon.ttl</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://conceptkernel.org/ontology/v3.11/modules/recon.ttl</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+
+  <!-- Spec: v3.11 -->
+  <url><loc>https://conceptkernel.org/v3.11/</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.11/introduction</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.11/declaring-becomes-binding</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.11/anatomy</loc><priority>0.7</priority></url>
+  <url><loc>https://conceptkernel.org/v3.11/processes</loc><priority>0.7</priority></url>
+
+  <!-- Spec: v3.9.1 (previous) -->
+  <url><loc>https://conceptkernel.org/v3.9/affordances</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/changelog</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/client</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/concept-kernel</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/critical-isolation</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/ecosystem</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/epochs</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/governance</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/grants</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/install</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/introduction</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/naming</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/ontology</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/quickstart</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/seal-and-proof</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/shapes</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/the-door</loc><priority>0.6</priority></url>
+  <url><loc>https://conceptkernel.org/v3.9/verb-vs-query-surface</loc><priority>0.6</priority></url>
+
+  <!-- Spec: v3.7 (previous) -->
   <url><loc>https://conceptkernel.org/v3.7/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://conceptkernel.org/v3.7/introduction</loc><priority>1.0</priority></url>
   <url><loc>https://conceptkernel.org/v3.7/conformance</loc><priority>0.9</priority></url>

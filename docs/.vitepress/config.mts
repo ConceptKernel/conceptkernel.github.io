@@ -24,8 +24,9 @@ export default withMermaid(defineConfig({
       {
         text: 'Docs',
         items: [
-          { text: 'v3.11 (In progress)', link: '/v3.11/' },
-          { text: 'v3.9.1 (Current)', link: '/v3.9/introduction' },
+          { text: 'v3.12 (Current)', link: '/v3.12/' },
+          { text: 'v3.11', link: '/v3.11/' },
+          { text: 'v3.9.1', link: '/v3.9/introduction' },
           { text: 'v3.10 (Parked) — CKN', link: '/v3.10/' },
           { text: 'v3.7', link: '/v3.7/introduction' },
           { text: 'v3.6 (Frozen)', link: '/v3.6/introduction' },
@@ -36,11 +37,12 @@ export default withMermaid(defineConfig({
       },
       {
         text: 'Ontology',
-        link: '/ontology/v3.8/',
+        link: '/ontology/v3.12/',
         items: [
-          { text: 'Browse Ontology', link: '/browse/index.html' },
-          { text: 'v3.11 core (TTL) — In progress', link: '/ontology/v3.11/' },
-          { text: 'v3.8 core (TTL) — Runtime', link: '/ontology/v3.8/' },
+          { text: 'v3.12 core (TTL) — Current', link: '/ontology/v3.12/' },
+          { text: 'v3.11 core (TTL) — namespace line', link: '/ontology/v3.11/' },
+          { text: 'Browse Ontology (v3.7)', link: '/browse/index.html' },
+          { text: 'v3.8 core (TTL)', link: '/ontology/v3.8/' },
           { text: 'v3.7 (TTL)', link: '/ontology/v3.7/' },
           { text: 'v3.6 (TTL)', link: '/ontology/v3.6/' },
           { text: 'v3.5-alpha6 (TTL)', link: '/ontology/v3.5-alpha6/' },
@@ -58,13 +60,85 @@ export default withMermaid(defineConfig({
       {
         text: 'Download',
         items: [
-          { text: 'Install & run — one docker run', link: '/v3.9/install' },
+          { text: 'Install & run — one docker run', link: '/v3.12/install' },
           { text: 'GitHub releases', link: 'https://github.com/sporaxis-com/oci-germination/releases' },
         ]
       }
     ],
 
     sidebar: {
+      '/v3.12/': [
+        {
+          text: 'Part I: The Kernel',
+          items: [
+            { text: 'Overview', link: '/v3.12/' },
+            { text: 'Introduction', link: '/v3.12/introduction' },
+            { text: 'The Door', link: '/v3.12/the-door' },
+            { text: 'Stamps & Refusals', link: '/v3.12/reading-a-reply' },
+            { text: 'Know Before You Act', link: '/v3.12/know-before-you-act' },
+          ]
+        },
+        {
+          text: 'Part II: Existence & Law',
+          items: [
+            { text: 'Germination & Naming', link: '/v3.12/germination' },
+            { text: 'Governance', link: '/v3.12/governance' },
+            { text: 'Ownership & Authority', link: '/v3.12/authority' },
+          ]
+        },
+        {
+          text: 'Part III: The Living Kernel',
+          items: [
+            { text: 'Signals, Scores & the Law of Weights', link: '/v3.12/signals-and-scores' },
+            { text: 'The Orbit & the Tick', link: '/v3.12/the-clock' },
+            { text: 'Affordances', link: '/v3.12/affordances' },
+          ]
+        },
+        {
+          text: 'Part IV: Proof',
+          items: [
+            { text: 'Epochs, Digests & Proof', link: '/v3.12/epochs-and-digests' },
+          ]
+        },
+        {
+          text: 'Part V: Build',
+          items: [
+            { text: 'Install & Run', link: '/v3.12/install' },
+          ]
+        },
+        {
+          text: 'Reference',
+          collapsed: true,
+          items: [
+            { text: 'Changelog', link: '/v3.12/changelog' },
+          ]
+        },
+        {
+          text: 'The Root Ontology',
+          items: [
+            { text: 'v3.12 core (Turtle)', link: '/ontology/v3.12/' },
+            { text: 'v3.11 namespace line', link: '/ontology/v3.11/' },
+          ]
+        },
+        {
+          text: 'Previous Versions',
+          collapsed: true,
+          items: [
+            { text: 'v3.11', link: '/v3.11/' },
+            { text: 'v3.9.1', link: '/v3.9/introduction' },
+            { text: 'v3.10 (Parked) — CKN', link: '/v3.10/' },
+            { text: 'v3.7', link: '/v3.7/introduction' },
+            { text: 'v3.6 (Frozen)', link: '/v3.6/introduction' },
+          ]
+        },
+        {
+          text: 'Community',
+          items: [
+            { text: 'Discord', link: 'https://discord.gg/sTbfxV9xyU' },
+            { text: 'GitHub', link: 'https://github.com/ConceptKernel' },
+          ]
+        }
+      ],
       '/v3.9/': [
         {
           text: 'Part I: Foundations',
@@ -116,9 +190,10 @@ export default withMermaid(defineConfig({
           ]
         },
         {
-          text: 'Toward v3.11',
+          text: 'Newer Versions',
           items: [
-            { text: 'Where Declaring Becomes Binding', link: '/v3.11/' },
+            { text: 'v3.12 — Self-Moving, Never Self-Ruling (current)', link: '/v3.12/' },
+            { text: 'v3.11 — Where Declaring Becomes Binding', link: '/v3.11/' },
             { text: 'CKN — the notation (parked)', link: '/v3.10/' },
           ]
         },
@@ -165,9 +240,9 @@ export default withMermaid(defineConfig({
           ]
         },
         {
-          text: 'Current runtime',
+          text: 'Current version',
           items: [
-            { text: '← v3.9.1 (shipped)', link: '/v3.9/introduction' },
+            { text: '→ v3.12 (current)', link: '/v3.12/' },
           ]
         },
         {
@@ -189,9 +264,9 @@ export default withMermaid(defineConfig({
           ]
         },
         {
-          text: 'Current runtime',
+          text: 'Current version',
           items: [
-            { text: '← v3.9.1 (shipped)', link: '/v3.9/introduction' },
+            { text: '→ v3.12 (current)', link: '/v3.12/' },
           ]
         },
         {

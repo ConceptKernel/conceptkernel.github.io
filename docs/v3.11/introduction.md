@@ -100,7 +100,7 @@ A **Module** is a versioned, digest-named vocabulary unit. It is loaded because 
 
 ## Where v3.11 stands
 
-The root ontology is published, digest-pinned, and self-governing. The shipped runtime is [v3.9.1](/v3.9/introduction) — the `ck-allinone` bundle, attested and runnable today — and adoption of the v3.11 root into the running substrate is the work in progress. The specification set on this site grows with it.
+The root ontology is published, digest-pinned, and self-governing — and it is in force: [v3.12](/v3.12/introduction) carries this root verbatim, binds its namespace, and is the law the current runtime enforces. Every `ckp:` IRI on this page is the IRI a v3.12 kernel writes.
 
 ## Where to go next
 

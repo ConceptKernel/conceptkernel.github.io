@@ -4,7 +4,9 @@ This is a **publicly exposed normative specification site**. Readers landing her
 
 ## Methodology — ontology-first
 
-When answering or editing anything CKP-related (paths, fields, gateway names, deployment modes, kernel types, etc.), consult the ontology TTL files at `https://conceptkernel.org/ontology/v3.7/` (or the local mirror at `docs/public/ontology/v3.7/`) **before** prose docs. The TTL is the contract; prose is description that drifts.
+When answering or editing anything CKP-related (paths, fields, gateway names, deployment modes, kernel types, etc.), consult the current root ontology at `https://conceptkernel.org/ontology/v3.12/` (locally `docs/public/ontology/v3.12/core.ttl`; namespace `https://conceptkernel.org/ontology/v3.11/core#`) **before** prose docs. The TTL is the contract; prose is description that drifts.
+
+The ontology bytes are authored in `styk-tv/pgCK` under `ontology/` and are never edited in this repo. Pull them from a pgCK release tag with `scripts/sync-ontology.sh <pgCK-checkout> <tag>`; `scripts/verify-ontology-digests.sh` (run in CI, with `--self-test` as its negative control) refuses any `.ttl` whose bytes match none of its sidecars.
 
 Never invent strings for ontology-controlled values. If you don't know whether a value is ontology-defined or freeform, fetch the relevant TTL and check before writing it.
 
@@ -75,12 +77,12 @@ The one exception: a single inline note where the change is genuinely operationa
 
 | Surface | Audience | Tone |
 |---|---|---|
-| `docs/v3.7/*.md` (this repo) | New readers, public | Affirmative, canonical, no change-history |
-| `docs/v3.7/changelog.md` | Implementers tracking version changes | Historical, comparative, dated |
+| `docs/v3.12/*.md` (current, this repo) | New readers, public | Affirmative, canonical, no change-history |
+| `docs/v3.12/changelog.md` | Implementers tracking version changes | Historical, comparative, dated |
 | Internal SPEC.* drafts in adjacent repos (e.g. `xr-websockets-v4/SPEC.CK.NEW.v3.7.4.md`) | Spec authors, internal | Working notes, deltas, drift commentary OK |
 | Auto-memory + this `CLAUDE.md` | Agents working on the docs | Discipline rules |
 
-Any agent editing this repo's `docs/v3.7/*.md` (and the ontology TTLs) should re-read this `CLAUDE.md` before each session. The discipline above is what keeps the public spec readable.
+Any agent editing this repo's `docs/v3.12/*.md` (and the ontology TTLs) should re-read this `CLAUDE.md` before each session. The discipline above is what keeps the public spec readable.
 
 ## Last revision
 

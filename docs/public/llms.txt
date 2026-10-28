@@ -2,15 +2,51 @@
 # https://conceptkernel.org
 
 ## What is this?
-An open protocol for sovereign, semantic, self-governing state. Every kernel is a Material Entity (BFO:0000040) whose types are ontology (RDF/OWL/SHACL), whose every change is shape-gated, sealed, and proof-chained (validate → seal → HMAC-chained ledger → verifiable proof, in one transaction), and whose only interface is a single typed verb: ckp.dispatch(verb, urn, payload, identity) over NATS-WSS. A kernel changes its own types by consensus (propose → vote → apply); each applied change advances its epoch ε.
+An open protocol for sovereign, semantic, self-governing state. A concept kernel is a place where meaning lives and is answerable for itself: it declares what kinds of things exist for it (RDF classes with SHACL shapes), accepts only facts that honour those declarations, stamps every fact with who made it (createdBy), whose law governed it (producedBy), at which version of that law (sealedAtEpoch) and under which shape it was judged (conformsToShape), and changes its law only by the agreement of those who live under it (propose → vote → apply). Its only interface is one verified door: clients speak NATS over /wss; the relay behind the door calls the substrate's one SQL function, ckp.dispatch(verb, payload). No REST, no query surface.
 
 ## Current version
-CKP v3.9.1 (Critical Isolation) is the current protocol epoch, implemented and shipped as one runnable image — ck-allinone v0.7.28 (https://github.com/sporaxis-com/oci-germination): PostgreSQL 17 + the pgCK runtime v0.4.21 (https://github.com/styk-tv/pgCK) + pgRDF v0.6.19 + NATS + the dispatch-only client cklib v1.5.4 (https://github.com/ConceptKernel/CK.Lib.Js), ~128 MB. The live surface is kernels + tasks + goals + typed reads + governance (propose→vote→apply); first-class custom types and per-user verified identity are roadmap. The v3.9.1 documentation set is published (key pages below); the v3.7 set remains browseable as a previous epoch. CKN — Concept Kernel Notation, CK(K) ≜ ⟪ χ · ρ · σ · α · γ · π · δ · φ ⟫ε — is the v3.10 design direction (in design): https://conceptkernel.org/v3.10/
+CKP v3.12 — "Self-Moving, Never Self-Ruling". The kernel notices what its participants care about (sealed Signals: assent, dissent, implicit dwell), derives Scores under weights that are themselves bounded law, and drafts its own next change when a score crosses its threshold — the tick never votes, applies, or advances an epoch. Each kernel keeps its own clock (orbit law: period, lead, anchor; the next crossing is computable from sealed law). Ownership is immovable, quorum follows the project's declared kind, only the owner enacts, in-kernel roles narrow and never widen, every refusal carries a registered code, every routed verb carries a sealed declaration, and every stored digest names its method.
+- Law: https://conceptkernel.org/ontology/v3.12/core.ttl — sha256 2e90a6512c7aae567714be69b92b37af4393e8da8d65a05c047c5d51e1bed07b (sidecar wave-3.12-pass-3); 30 classes, 31 NodeShapes, 102 properties
+- Namespace: https://conceptkernel.org/ontology/v3.11/core# (the v3.12 law binds the v3.11 namespace deliberately; the law carries the version, the IRIs stay stable)
+- Runtime: pgCK 0.4.112 (PostgreSQL 18 extension, attested) — https://github.com/styk-tv/pgCK
+- Engine: pgRDF 0.6.34 (RDF / SHACL / SPARQL / OWL-RL inside PostgreSQL) — https://github.com/styk-tv/pgRDF
+- Client: cklib, served by every door at /cklib/ — https://github.com/ConceptKernel/CK.Lib.Js
+- Bundle: ghcr.io/sporaxis-com/ociger-ck-allinone:v0.7.45 (index sha256:9d18e2b0d6ae1646f22582dbdd25e8e5c1cd9e99862b741e7a6d04f73092707d) — https://github.com/sporaxis-com/oci-germination
 
 ## The distinction the protocol rests on
-A caller reaches a kernel through a VERB, not a query surface. A query surface (SQL/SPARQL/GraphQL/ORM) lets the caller author logic the engine runs — unbounded, unenumerable. A verb is a finite, named, pre-declared operation with a typed payload the engine knows before it runs. CKP ships a closed set of ~17 verbs and no query surface; even query-shaped verbs (instance.query, concept.match) bind typed parameters into logic sealed at germination. This is the precondition that makes grants enumerable and shapes unbypassable — the whole of Critical Isolation. https://conceptkernel.org/v3.9/verb-vs-query-surface
+A caller reaches a kernel through a VERB, not a query surface. A query surface (SQL/SPARQL/GraphQL/ORM) lets the caller author logic the engine runs — unbounded, unenumerable. A verb is a finite, named, pre-declared operation with a typed payload the engine knows before it runs. Even query-shaped verbs bind typed parameters into logic sealed by governance. This is what makes grants enumerable and shapes unbypassable.
 
-## Key pages (v3.9.1 — current set)
+## Key pages (v3.12 — current set)
+- Overview: https://conceptkernel.org/v3.12/
+- Introduction: https://conceptkernel.org/v3.12/introduction
+- The Door (one origin, verified identity at CONNECT, closed subject grammar, published replies): https://conceptkernel.org/v3.12/the-door
+- Stamps & Refusals (the five stamps, completeness verdicts, typed refusals): https://conceptkernel.org/v3.12/reading-a-reply
+- Know Before You Act (the validation ladder: learn, validate, act, audit): https://conceptkernel.org/v3.12/know-before-you-act
+- Germination & Naming: https://conceptkernel.org/v3.12/germination
+- Governance (propose → vote → apply, quorum floors, obligations, kernel policy): https://conceptkernel.org/v3.12/governance
+- Ownership & Authority (immovable ownership, narrowing roles, agents, scopes): https://conceptkernel.org/v3.12/authority
+- Signals, Scores & the Law of Weights: https://conceptkernel.org/v3.12/signals-and-scores
+- The Orbit & the Tick: https://conceptkernel.org/v3.12/the-clock
+- Affordances — Both Halves or Neither: https://conceptkernel.org/v3.12/affordances
+- Epochs, Digests & Proof: https://conceptkernel.org/v3.12/epochs-and-digests
+- Install & Run: https://conceptkernel.org/v3.12/install
+- Changelog: https://conceptkernel.org/v3.12/changelog
+
+## Root ontology (published law, digest-pinned)
+- v3.12 index: https://conceptkernel.org/ontology/v3.12/
+- v3.12 core: https://conceptkernel.org/ontology/v3.12/core.ttl
+- v3.11 root (namespace line): https://conceptkernel.org/ontology/v3.11/core.ttl
+- Modules: https://conceptkernel.org/ontology/v3.11/modules/wave.ttl · https://conceptkernel.org/ontology/v3.11/modules/lexicon.ttl · https://conceptkernel.org/ontology/v3.11/modules/recon.ttl · https://conceptkernel.org/ontology/v3.12/modules/wave.ttl
+- Every .ttl carries <file>.<wave-tag>.sha256 sidecars; the current one is the sidecar `shasum -a 256 -c` passes. Authored in https://github.com/styk-tv/pgCK/tree/main/ontology and republished here when the digest changes.
+
+## v3.11 — Where Declaring Becomes Binding
+- Overview: https://conceptkernel.org/v3.11/
+- Introduction: https://conceptkernel.org/v3.11/introduction
+- Declaring Becomes Binding: https://conceptkernel.org/v3.11/declaring-becomes-binding
+- The Anatomy of a Kernel: https://conceptkernel.org/v3.11/anatomy
+- Processes: https://conceptkernel.org/v3.11/processes
+
+## Key pages (v3.9.1 — Critical Isolation, previous)
 - Introduction: https://conceptkernel.org/v3.9/introduction
 - A Verb, Not a Query Surface: https://conceptkernel.org/v3.9/verb-vs-query-surface
 - Critical Isolation (the three-ring architecture): https://conceptkernel.org/v3.9/critical-isolation
@@ -29,28 +65,22 @@ A caller reaches a kernel through a VERB, not a query surface. A query surface (
 - The Fleet (ecosystem): https://conceptkernel.org/v3.9/ecosystem
 - Changelog: https://conceptkernel.org/v3.9/changelog
 
-## v3.10 — CKN (in design)
+## v3.10 — CKN (parked)
 - Overview: https://conceptkernel.org/v3.10/
 - Concept Kernel Notation: https://conceptkernel.org/v3.10/concept-kernel-notation
 - Notation In, Construct Out: https://conceptkernel.org/v3.10/assembled-constructs
 - The Scoring Loop: https://conceptkernel.org/v3.10/scoring-loop
-
-## Runtime core vocabulary (stable namespace, enforced at every sealed write)
-- Namespace: https://conceptkernel.org/ontology/v3.8/core#
-- Turtle: https://conceptkernel.org/ontology/v3.8/core.ttl
-- Index: https://conceptkernel.org/ontology/v3.8/
-- 11 classes (Kernel, Organ, Affordance, LedgerEntry, Proof, Provenance, Proposal, Vote, QuorumLevel, Grant, Transition) + 8 SHACL seal-gate shapes
-- Domain kernels are project-scoped URNs: urn:ckp:<project>/type/<Name>, /prop/<name>, /shape/<Name>
 
 ## Epochs (self-progression, measured)
 - v3.4 (2026 Q1): 79 classes, 4 pages — the grounding
 - v3.5 (2026 Q1): 97 classes, 21 pages — three loops as Description Logic boxes
 - v3.6 (2026 Q2): 119 classes, 37 pages — the full specification
 - v3.7 (2026 Q2): 120 classes, 9 shapes, 31 pages, 20 checks, 5 edge predicates — the refined canon
-- v3.8: the core vocabulary's permanent namespace (see above)
-- v3.9 (2026 Q2): Critical Isolation — the kernel takes root in pgRDF (native PostgreSQL extension), proven at the 8.2B-triple Wikidata scale; 1 door; 37 attested runtime releases (v0.1.0 → v0.4.21)
-- v3.9.1 (2026 Q2): the client meets the server — 17 verbs, 0 query surfaces, urn:ckp: naming proven live
-- v3.10 (in design): CKN, the notation; the scoring loop (signal.cast, concept.score) — tracked in public issues
+- v3.8: the first permanent core namespace
+- v3.9 / v3.9.1 (2026 Q2): Critical Isolation — one door, a closed verb vocabulary, the role floor
+- v3.10: CKN, the notation — parked
+- v3.11 (2026 Q3): Where Declaring Becomes Binding — a self-contained root, 27 classes, 27 shapes, every constraint measured enforcing
+- v3.12 (2026 Q3): Self-Moving, Never Self-Ruling — 30 classes, 31 shapes; signals, scores, the kernel's own clock, scopes, and the floors that hold them
 
 ## Key pages (v3.7 published set)
 - Introduction: https://conceptkernel.org/v3.7/introduction
@@ -101,7 +131,7 @@ A caller reaches a kernel through a VERB, not a query surface. A query surface (
 - By class: https://conceptkernel.org/browse/?class=Kernel
 - By URN: https://conceptkernel.org/browse/?urn=ckp://Kernel#CK.Task:v1.0
 
-## Namespace
+## Namespace (v3.7 corpus)
 - CKP: https://conceptkernel.org/ontology/v3.7/
 - Prefix: @prefix ckp: <https://conceptkernel.org/ontology/v3.7/> .
 
@@ -116,9 +146,10 @@ A caller reaches a kernel through a VERB, not a query surface. A query surface (
 - v3.6 (frozen): https://conceptkernel.org/v3.6/introduction
 
 ## Run it now
+- Install & run (v3.12): https://conceptkernel.org/v3.12/install
+- All-in-one bundle (PostgreSQL 18 + pgRDF + pgCK + NATS + cklib, attested): https://github.com/sporaxis-com/oci-germination
 - Runtime (PostgreSQL extension, attested releases): https://github.com/styk-tv/pgCK
-- Client (dispatch-only, zero-dependency): https://github.com/ConceptKernel/CK.Lib.Js
-- hello-kernel (zero to sealed state, Docker only): https://github.com/sporaxis-com/oci-germination/tree/main/examples/hello-kernel
+- Client (zero-dependency, served by the door): https://github.com/ConceptKernel/CK.Lib.Js
 - Semantic substrate (RDF/SPARQL/SHACL/OWL-RL in PostgreSQL): https://github.com/styk-tv/pgRDF
 - Ontology-first OCI composition: https://github.com/sporaxis-com/sporaxis
 

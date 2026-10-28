@@ -23,7 +23,7 @@ The substrate stamps every sealed instance. None of these values comes from the 
 
 | Stamp | Answers | Derived from | Absent means |
 |---|---|---|---|
-| `ckp:createdBy` | who made it | the connection's verified identity | — required on every instance |
+| `ckp:createdBy` | who sealed this version of it | the connection's verified identity | — required on every instance. An update re-seals, so it names whoever sealed the current version |
 | `ckp:producedBy` | whose law governs it | the kernel the act was addressed to | — required; a session that names no kernel cannot seal |
 | `ckp:sealedAtEpoch` | against which version of that law | the kernel's position at seal time | — required |
 | `ckp:conformsToShape` | under which shape it was gated | the shape the gate selected for the body | — required by the root; a reply withholds the key rather than faking it |

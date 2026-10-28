@@ -55,9 +55,9 @@ A kernel's epoch ledger is seeded at germination, at position **0**. ε0 is a st
 
 The germination moment is sealed as `ckp:germinatedAtEpoch` — a name chosen so that no reader mistakes it for the kernel's live position. It is immutable by meaning. The kernel's *current* position lives in its sealed `ckp:Epoch` facts and the epoch ledger, which move forward one governed act at a time. See [Epochs & Digests](/v3.12/epochs-and-digests).
 
-## Project kind is a permanent choice
+## Project kind sets the quorum floor
 
-`ckp:projectKind` is required at germination — `ProjectShape` refuses a Project without it and names the clause. It takes one of two values, and the choice binds the kernel's quorum floor for as long as the kernel exists:
+`ckp:projectKind` is required at germination — `ProjectShape` refuses a Project without it and names the clause. It takes one of two values, and the choice sets the kernel's quorum floor:
 
 | `projectKind` | Meaning, as the core declares it | Quorum floor |
 |---|---|---|
@@ -66,7 +66,7 @@ The germination moment is sealed as `ckp:germinatedAtEpoch` — a name chosen so
 
 A `shared` kernel refuses any proposal declaring a quorum of one, and says why. A `personal` kernel may decide alone — that is its declared meaning — and every such decision is **rehearsal**, never fleet agreement. The ledger carries the kind, so anyone reading the record can tell which they are looking at.
 
-Only the declared owner may change `projectKind` after germination. See [Governance](/v3.12/governance) for how the floor is applied and [Ownership & Authority](/v3.12/authority) for why the owner gate exists.
+Only the declared owner may change `projectKind` after germination, and the change is a sealed, attributed re-seal of the Project. See [Governance](/v3.12/governance) for how the floor is applied and [Ownership & Authority](/v3.12/authority) for why the owner gate exists.
 
 ## The naming law — one kernel, one spelling
 

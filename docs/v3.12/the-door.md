@@ -46,6 +46,8 @@ The verified subject then becomes part of the wire itself. The broker grants eac
 
 A person, a bot and an agent differ only in whose key signed their token. The solo operator is a self-issued realm — their own key, their own JWKS document — and stands on the same floor as everyone else.
 
+A conformant door runs with `pgck.admit_anonymous` off; the [all-in-one bundle](/v3.12/install) ships that way and refuses to boot without a realm. Admission grants reach, not authority: every kernel the door routes is reachable by every verified identity on it, and what an identity may do inside a kernel is decided by that kernel's law, its roles and its owner — see [Ownership & Authority](/v3.12/authority).
+
 ## The subject grammar is closed
 
 | Direction | Subject | Carries |

@@ -7,7 +7,7 @@ description: "Who may do what inside a concept kernel: ownership that cannot be 
 
 **Authority in a concept kernel is a traversal over sealed facts.** Nobody holds authority by asserting it. A participant's standing is read from the ledger — who owns the project, which Membership binds them, which Role it holds, which Grant that Role carries — at the moment an act needs it. Four rules follow; the status table at the end of this page states exactly how far each is enforced in this release:
 
-1. **Ownership is immovable.** It is stamped at germination and no patch can change it.
+1. **The owner is fixed.** A germinated project's owner is stamped from the verified connection, and no patch can change it.
 2. **Authority narrows, never widens.** In-kernel roles can only restrict what a participant may do.
 3. **Acting for someone is a server-derived fact.** An agent's claim about whom it serves is never taken from its payload.
 4. **Rules can bind a named set of kernels.** A Scope binds its members and nobody else.
@@ -34,7 +34,7 @@ A `ckp:Participant` is a person or a process with a verified identity; which one
 
 The reply names the identity, its tier, its Memberships and the Grants they resolve to. An identity with no chain receives an empty chain **reported as empty**, with a note saying so — never a confident zero that reads like an answer.
 
-## Ownership is immovable
+## The owner is fixed
 
 Every project has exactly one owner, sealed as `ckp:ownedBy` on the `ckp:Project` at [germination](/v3.12/germination) and derived from the verified connection that germinated it. Two gates read it:
 
@@ -45,6 +45,10 @@ A patchable owner would void both gates in one step, so `ckp:ownedBy` is **not p
 
 ::: warning The honest edge
 There is **no ownership-transfer verb** in this release. A lawful hand-over must itself be a governed act — agreed, attributed and sealed — and until that verb exists, ownership does not move. Its absence is recorded as a standing gap, not hidden behind a patch path.
+:::
+
+::: warning What a door's participants share
+In this release, the verified participants of one door are **peers inside every kernel the door routes**. Roles narrow governance — who may propose, vote and apply — and the owner gates enactment, re-germination and the ownership fields. Instance writes are not yet owner-gated: any verified participant may create, update, retire or transition instances in any routed kernel, and every such seal is attributed to whoever made it. Per-row ownership of those writes is the next floor. Run a door for people who may write to each other's kernels, or one door per trust boundary.
 :::
 
 ## Authority narrows, never widens
@@ -109,6 +113,7 @@ Everything on this page converges on the record. Each sealed fact names who seal
 | `ownedBy` not patchable by anyone | `ProjectShape` requires `ownedBy` | `ownership_not_patchable` (`42501`) | implemented | [s82](https://github.com/styk-tv/pgCK/blob/v0.4.112/sql/test/s82_ownership_patch_guard.sql) |
 | `projectKind` patchable by the owner only | `projectKind` | non-owner patch refused | implemented | [s82](https://github.com/styk-tv/pgCK/blob/v0.4.112/sql/test/s82_ownership_patch_guard.sql) |
 | ownership transfer | — | — | declared gap, no verb | — |
+| per-row ownership of instance writes (update, retire, transition) | — | — | not yet gated — every verified participant on a door may write instances in every routed kernel, attributed | — |
 | roles narrow per action; owner never narrowed | `permAction` on `GrantShape` | `role_required` (`42501`) | consulted by propose, vote, apply | [s87](https://github.com/styk-tv/pgCK/blob/v0.4.112/sql/test/s87_agents_and_roles.sql) |
 | Memberships owner-sealed | `MembershipShape` | stranger's Membership refused (`42501`) | implemented | [s87](https://github.com/styk-tv/pgCK/blob/v0.4.112/sql/test/s87_agents_and_roles.sql) |
 | `onBehalfOf` derived at seal, payload claims stripped | `onBehalfOf` on `InstanceShape` | forged claims stripped | the seal stamps it from the trusted ingress; the wire relay naming an agent's principal from its verified token is declared, not yet built | [s87](https://github.com/styk-tv/pgCK/blob/v0.4.112/sql/test/s87_agents_and_roles.sql) |

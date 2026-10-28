@@ -26,7 +26,7 @@ features:
     linkText: The door
   - icon: "🧾"
     title: Every reply reads as a result
-    details: "A seal returns its stamps one by one — who made it, whose law governed it, at which epoch, under which shape — never folded into one green tick. A refusal returns a registered code, its sqlstate and what it teaches. Nothing fails silently."
+    details: "A seal returns its stamps one by one — who sealed it, whose law governed it, at which epoch, under which shape — never folded into one green tick. A refusal returns a registered code, its sqlstate and what it teaches. Nothing fails silently."
     link: /v3.12/reading-a-reply
     linkText: Stamps & refusals
   - icon: "🔭"
@@ -35,8 +35,8 @@ features:
     link: /v3.12/know-before-you-act
     linkText: The validation ladder
   - icon: "🪪"
-    title: Ownership is immovable; authority only narrows
-    details: "The owner is stamped at germination and patchable by nobody. Quorum follows the project's declared kind, only the owner enacts, and in-kernel roles can restrict a participant but never lift them above the floor."
+    title: A fixed owner; authority only narrows
+    details: "A kernel's owner is stamped from the verified connection at germination, and that stamp is patchable by nobody. Quorum follows the project's declared kind, only the owner enacts, and in-kernel roles restrict who may propose, vote and apply — never lifting anyone above the floor."
     link: /v3.12/authority
     linkText: Ownership & authority
   - icon: "📈"

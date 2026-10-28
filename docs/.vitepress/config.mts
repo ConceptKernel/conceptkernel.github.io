@@ -24,8 +24,9 @@ export default withMermaid(defineConfig({
       {
         text: 'Docs',
         items: [
+          { text: 'v3.11 (In progress)', link: '/v3.11/' },
           { text: 'v3.9.1 (Current)', link: '/v3.9/introduction' },
-          { text: 'v3.10 (In design) — CKN', link: '/v3.10/' },
+          { text: 'v3.10 (Parked) — CKN', link: '/v3.10/' },
           { text: 'v3.7', link: '/v3.7/introduction' },
           { text: 'v3.6 (Frozen)', link: '/v3.6/introduction' },
           { text: 'v3.5-alpha6', link: '/v3.5-alpha6/introduction' },
@@ -38,6 +39,7 @@ export default withMermaid(defineConfig({
         link: '/ontology/v3.8/',
         items: [
           { text: 'Browse Ontology', link: '/browse/index.html' },
+          { text: 'v3.11 core (TTL) — In progress', link: '/ontology/v3.11/' },
           { text: 'v3.8 core (TTL) — Runtime', link: '/ontology/v3.8/' },
           { text: 'v3.7 (TTL)', link: '/ontology/v3.7/' },
           { text: 'v3.6 (TTL)', link: '/ontology/v3.6/' },
@@ -114,9 +116,10 @@ export default withMermaid(defineConfig({
           ]
         },
         {
-          text: 'Toward v3.10',
+          text: 'Toward v3.11',
           items: [
-            { text: 'CKN — the notation', link: '/v3.10/' },
+            { text: 'Where Declaring Becomes Binding', link: '/v3.11/' },
+            { text: 'CKN — the notation (parked)', link: '/v3.10/' },
           ]
         },
         {
@@ -134,6 +137,37 @@ export default withMermaid(defineConfig({
             { text: 'v3.6 (Frozen)', link: '/v3.6/introduction' },
             { text: 'v3.5-alpha6', link: '/v3.5-alpha6/introduction' },
             { text: 'v3.4', link: '/v3.4/introduction' },
+          ]
+        },
+        {
+          text: 'Community',
+          items: [
+            { text: 'Discord', link: 'https://discord.gg/sTbfxV9xyU' },
+            { text: 'GitHub', link: 'https://github.com/ConceptKernel' },
+          ]
+        }
+      ],
+      '/v3.11/': [
+        {
+          text: 'v3.11 — Where Declaring Becomes Binding',
+          items: [
+            { text: 'Overview', link: '/v3.11/' },
+            { text: 'Introduction', link: '/v3.11/introduction' },
+            { text: 'Declaring Becomes Binding', link: '/v3.11/declaring-becomes-binding' },
+            { text: 'The Anatomy of a Kernel', link: '/v3.11/anatomy' },
+            { text: 'Processes', link: '/v3.11/processes' },
+          ]
+        },
+        {
+          text: 'The Root Ontology',
+          items: [
+            { text: 'v3.11 core (Turtle)', link: '/ontology/v3.11/' },
+          ]
+        },
+        {
+          text: 'Current runtime',
+          items: [
+            { text: '← v3.9.1 (shipped)', link: '/v3.9/introduction' },
           ]
         },
         {

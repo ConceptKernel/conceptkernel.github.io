@@ -9,3 +9,6 @@ _WIP/
 # CKP.* wave statements and SPEC.* drafts name private paths, hosts and credentials.
 CK*.md
 SPEC*.md
+
+# macOS Finder metadata
+.DS_Store

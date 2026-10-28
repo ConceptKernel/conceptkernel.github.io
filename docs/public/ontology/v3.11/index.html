@@ -33,11 +33,15 @@
 <body>
 <div class="header">
   <span class="title"><a href="https://conceptkernel.org">Concept Kernel Protocol</a></span>
-  <span><a href="https://conceptkernel.org/v3.11/">v3.11 docs</a></span>
+  <span><a href="https://conceptkernel.org/v3.12/">v3.12 docs (current)</a> · <a href="https://conceptkernel.org/v3.11/">v3.11 docs</a></span>
 </div>
 <div class="container">
 
-<h1>CKP Core Ontology v3.11 <span class="status status-progress">in progress</span></h1>
+<h1>CKP Core Ontology v3.11 <span class="status status-progress">namespace line</span></h1>
+
+<p class="abstract"><strong>The current law is <a href="https://conceptkernel.org/ontology/v3.12/">v3.12</a></strong>, which
+carries this root verbatim and binds this same namespace — so every <code>ckp:</code> IRI below is the IRI a v3.12
+kernel writes. This page documents the v3.11 root as published.</p>
 
 <p class="abstract">The operating definition of a concept kernel: what one is, what it does, and what the substrate
 refuses on its behalf. The root is <strong>self-contained</strong> — every <code>ckp:</code> term it references, it
@@ -81,9 +85,10 @@ declared as a gap, with a reason.</p>
 
 <h2>Modules</h2>
 <table>
-  <tr><th>Module</th><th>File</th><th>Purpose</th></tr>
-  <tr><td>Wave</td><td><a href="https://conceptkernel.org/ontology/v3.11/modules/wave.ttl">modules/wave.ttl</a></td><td>Coordination vocabulary — waves, passes, components, tickets, findings, rulings, operations — used to run multi-component development as sealed, harvestable statements</td></tr>
-  <tr><td>Lexicon</td><td><a href="https://conceptkernel.org/ontology/v3.11/modules/lexicon.ttl">modules/lexicon.ttl</a></td><td>A closed set of defect symptoms with derived patterns — the vocabulary findings are classified against, so failure modes are named rather than described</td></tr>
+  <tr><th>Module</th><th>File</th><th>sha256</th><th>Purpose</th></tr>
+  <tr><td>Wave</td><td><a href="https://conceptkernel.org/ontology/v3.11/modules/wave.ttl">modules/wave.ttl</a></td><td><code>f4ad27ce…</code></td><td>Coordination vocabulary — waves, passes, components, tickets, findings, rulings, operations — used to run multi-component development as sealed, harvestable statements</td></tr>
+  <tr><td>Lexicon</td><td><a href="https://conceptkernel.org/ontology/v3.11/modules/lexicon.ttl">modules/lexicon.ttl</a></td><td><code>5def86ba…</code></td><td>A closed set of defect symptoms with derived patterns — the vocabulary findings are classified against, so failure modes are named rather than described. Its closed sets are gated and its derived terms fenced (sidecar <a href="https://conceptkernel.org/ontology/v3.11/modules/lexicon.ttl.wave-3.12.sha256">wave-3.12</a>; the original revision's <code>pass-19</code> sidecar is retained and fails by design)</td></tr>
+  <tr><td>Recon</td><td><a href="https://conceptkernel.org/ontology/v3.11/modules/recon.ttl">modules/recon.ttl</a></td><td><code>b2b11f1b…</code></td><td>The reference module, issued in this line's namespace</td></tr>
 </table>
 <p class="abstract">Modules are loaded the only way anything is: a sealed Adoption naming the module's digest. The
 root itself is self-contained and carries no imports.</p>
@@ -96,9 +101,10 @@ a store-level query over sealed rows, and declares the gap rather than carrying 
 enforcement while refusing valid writes.</p>
 
 <div class="footer">
-  <p>Part of the <a href="https://conceptkernel.org">Concept Kernel Protocol</a>. The v3.11 specification set is
-  <a href="https://conceptkernel.org/v3.11/">in progress</a>; the shipped runtime is
-  <a href="https://conceptkernel.org/v3.9/introduction">v3.9.1 — Critical Isolation</a>.</p>
+  <p>Part of the <a href="https://conceptkernel.org">Concept Kernel Protocol</a>. The current specification is
+  <a href="https://conceptkernel.org/v3.12/">v3.12</a> and its law is
+  <a href="https://conceptkernel.org/ontology/v3.12/">the v3.12 root</a>; the
+  <a href="https://conceptkernel.org/v3.11/">v3.11 specification set</a> remains published.</p>
 </div>
 
 </div>

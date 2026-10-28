@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CKP Core Ontology v3.12 — Self-Moving, Never Self-Ruling — Concept Kernel Protocol</title>
+  <meta name="description" content="The CKP v3.12 root ontology: the v3.11 core plus signal processing as core mechanics, the kernel's own clock as law, the participation layer, and affordances that carry their contract as data. Digest-pinned.">
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
+  <style>
+    body { font-family: 'Noto Sans', 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background: #fff; color: #333; line-height: 1.6; }
+    .header { background: #005a9c; color: #fff; padding: 0.8rem 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+    .header a { color: #fff; text-decoration: none; font-size: 0.95rem; }
+    .header .title { font-weight: 600; }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem 16px; }
+    .meta { background: #f8f9fa; border-left: 4px solid #059669; padding: 1rem 1.5rem; margin-bottom: 2rem; font-size: 0.88rem; }
+    .meta dt { font-weight: 600; color: #005a9c; }
+    .meta dd { margin: 0 0 0.4rem 0; overflow-wrap: anywhere; }
+    .meta a { color: #005a9c; }
+    h1 { color: #005a9c; font-size: 1.6rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.15rem; color: #005a9c; border-bottom: 1px solid #ddd; padding-bottom: 0.3rem; margin-top: 2rem; }
+    .status { display: inline-block; padding: 2px 10px; border-radius: 3px; font-size: 0.75rem; font-weight: 600; vertical-align: middle; }
+    .status-current { background: #d1fae5; color: #047857; }
+    .prefix-box { background: #f0f4f8; border: 1px solid #d0dae4; padding: 0.7rem 1rem; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.88rem; margin: 1rem 0; overflow-x: auto; }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; margin: 0.8rem 0; }
+    th { text-align: left; background: #f0f0f0; padding: 0.45rem 0.7rem; border: 1px solid #ddd; font-size: 0.8rem; color: #555; }
+    td { padding: 0.45rem 0.7rem; border: 1px solid #ddd; font-size: 0.88rem; vertical-align: top; }
+    td a { color: #005a9c; text-decoration: none; }
+    td a:hover { text-decoration: underline; }
+    code { background: #f4f4f4; padding: 0.1em 0.35em; border-radius: 2px; font-size: 0.82rem; font-family: 'Consolas', monospace; overflow-wrap: anywhere; }
+    pre { background: #f4f4f4; padding: 0.8rem 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.82rem; }
+    pre code { background: none; padding: 0; }
+    .footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #ddd; color: #999; font-size: 0.78rem; }
+    .footer a { color: #005a9c; }
+    p.abstract { font-size: 0.92rem; max-width: 720px; }
+    .muted { color: #777; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <span class="title"><a href="https://conceptkernel.org">Concept Kernel Protocol</a></span>
+  <span><a href="https://conceptkernel.org/v3.12/">v3.12 docs</a></span>
+</div>
+<div class="container">
+
+<h1>CKP Core Ontology v3.12 <span class="status status-current">current</span></h1>
+
+<p class="abstract">The operating definition of a concept kernel, and the law every kernel is judged against.
+v3.12 is the <a href="https://conceptkernel.org/ontology/v3.11/">v3.11 root</a> carried verbatim, plus a closed delta:
+<strong>signal processing as core mechanics</strong> (attributed signals, derived scores, and the seven constants
+that weigh them, each a bounded law), <strong>the kernel's own clock</strong> as law, <strong>the participation
+layer</strong> between core and one kernel (a named set of kernels that turn together), and
+<strong>affordances that carry their contract as data</strong>. The three authoring rules of v3.11 hold unchanged:
+every constraint is one the gating engine is measured to enforce; no class IRI is the subject of a domain-carrying
+predicate; every constraint reads only the candidate body plus its stamped parent closure.</p>
+
+<dl class="meta">
+  <dt>This version</dt>
+  <dd><a href="https://conceptkernel.org/ontology/v3.12/">https://conceptkernel.org/ontology/v3.12/</a></dd>
+  <dt>Namespace URI</dt>
+  <dd><code>https://conceptkernel.org/ontology/v3.11/core#</code> — the v3.12 law binds the v3.11 namespace deliberately.
+    The law carries the version; the IRIs a client writes stay stable across the revision.</dd>
+  <dt>Turtle file</dt>
+  <dd><a href="https://conceptkernel.org/ontology/v3.12/core.ttl">core.ttl</a> — 30 classes · 31 NodeShapes · 102 properties
+    <span class="muted">(counted by declaration over the published file)</span></dd>
+  <dt>Integrity — file digest</dt>
+  <dd>sha256 <code>2e90a6512c7aae567714be69b92b37af4393e8da8d65a05c047c5d51e1bed07b</code> —
+    <a href="https://conceptkernel.org/ontology/v3.12/core.ttl.wave-3.12-pass-3.sha256">current sidecar (wave-3.12 pass-3)</a></dd>
+  <dt>Integrity — structural pin</dt>
+  <dd><code>pgrdf-fd1-sha256</code> <code>2a7b14d81aab303708097eee8acef56c9ebd0f59506539f559c01eafec82c034</code> —
+    survives reload and reserialization; equality is evidence of isomorphism, never proof of it</dd>
+  <dt>Enforced by</dt>
+  <dd><a href="https://github.com/styk-tv/pgCK/releases/tag/v0.4.112">pgCK 0.4.112</a> on
+    <a href="https://github.com/styk-tv/pgRDF">pgRDF 0.6.34</a> — <code>ckp.boot()</code> grounds a new database on this file.
+    Published here byte-for-byte from that release's <code>ontology/</code> tree.</dd>
+  <dt>Prior version</dt>
+  <dd><a href="https://conceptkernel.org/ontology/v3.11/">v3.11 core</a> (<code>e5f7d1e5…</code>), carried verbatim above the v3.12 section of the file</dd>
+  <dt>Grounding</dt>
+  <dd>BFO 2020 · IAO · PROV-O · SHACL — a Kernel is a material entity; CK and DATA are information content entities;
+    TOOL is a disposition realized in a Run</dd>
+</dl>
+
+<div class="prefix-box">@prefix ckp: &lt;https://conceptkernel.org/ontology/v3.11/core#&gt; .</div>
+
+<h2>What v3.12 adds to the root</h2>
+<div class="table-wrap"><table>
+  <tr><th>Area</th><th>Constructs</th><th>Gated by</th></tr>
+  <tr><td>Signals</td><td><code>Signal</code> (⊂ Instance) — attributed evidence about a concept · <code>signalPolarity</code> ∈ assent | dissent | implicit · <code>dwellMillis</code></td><td><code>SignalShape</code></td></tr>
+  <tr><td>Scores</td><td><code>Score</code> (⊂ Instance) — derived, never asserted · <code>scoreValue</code> · <code>computedAtEpoch</code> · <code>wasGeneratedBy</code> its Run</td><td><code>ScoreShape</code></td></tr>
+  <tr><td>The law of weights</td><td><code>weightAssent</code> ≥ 0 · <code>weightDissent</code> ≤ 0 · <code>weightImplicit</code> ∈ [0,1] · <code>decayLambda</code> ≥ 0 · <code>thresholdDefer</code> ≥ 0 · <code>thresholdPromote</code> · <code>thresholdDiscard</code> &lt; <code>thresholdPromote</code> · <code>tauImplicitMillis</code> &gt; 0 — each an override of a substrate default, its governed route <code>set_kernel_policy</code>; a value outside its bound is refused</td><td><code>KernelShape</code></td></tr>
+  <tr><td>The clock</td><td><code>orbitPeriodSeconds</code> &gt; 0 · <code>orbitLeadSeconds</code> ∈ [0, period) · <code>orbitSeat</code> ≥ 0 · <code>orbitAnchor</code> — the next crossing is computable by anyone from sealed law</td><td><code>KernelShape</code></td></tr>
+  <tr><td>Participation</td><td><code>Scope</code> — a named set of kernels; <code>includesKernel</code>. A rule bound to a Scope binds its members and no one else</td><td><code>ScopeShape</code></td></tr>
+  <tr><td>Executable affordances</td><td><code>affordanceName</code> (dotted, lowercase) · <code>sparqlBody</code> (read-only) · <code>resultShape</code> — selected by carrying a body</td><td><code>ExecutableAffordanceShape</code></td></tr>
+  <tr><td>Naming</td><td><code>transportSegment</code> — one lowercase segment, <code>^[a-z0-9]+(-[a-z0-9]+)*$</code> · <code>germinatedAtEpoch</code> — immutable by meaning</td><td><code>KernelShape</code></td></tr>
+  <tr><td>Governance</td><td><code>proposalState</code> gains <code>"draft"</code> — the one act the scheduled tick may perform; a draft carries no votes and meets no quorum</td><td><code>ProposalShape</code></td></tr>
+  <tr><td>Retraction</td><td><code>retiredAtEpoch</code> widened from Affordance to every Instance — a withdrawal the read plane can see</td><td>—</td></tr>
+</table></div>
+
+<h2>Revisions of this file</h2>
+<p class="abstract">Every revision ships its bytes and its sidecar in one act. The sidecar that passes against the current bytes
+is the current one; historical sidecars are retained and <strong>fail by design</strong>, so an earlier citation stays checkable.</p>
+<div class="table-wrap"><table>
+  <tr><th>Sidecar</th><th>sha256</th><th>Revision</th></tr>
+  <tr><td><a href="core.ttl.wave-3.12-rc1.sha256">wave-3.12-rc1</a></td><td><code>f36961d1…</code></td><td>Release candidate 1 — the signal-processing delta</td></tr>
+  <tr><td><a href="core.ttl.wave-3.12-rc2.sha256">wave-3.12-rc2</a> · <a href="core.ttl.wave-3.12.sha256">wave-3.12</a></td><td><code>7de02b35…</code></td><td>The seven constants gated; retirement widened. Promoted to FINAL with its bytes unchanged</td></tr>
+  <tr><td><a href="core.ttl.wave-3.12-pass-1.sha256">wave-3.12-pass-1</a></td><td><code>97f97cb2…</code></td><td><code>transportSegment</code> declared and pattern-gated</td></tr>
+  <tr><td><a href="core.ttl.wave-3.12-pass-2.sha256">wave-3.12-pass-2</a></td><td><code>a6cc1ce8…</code></td><td><code>germinatedAtEpoch</code> replaces the epoch counter on a sealed Kernel</td></tr>
+  <tr><td><a href="core.ttl.wave-3.12-pass-3.sha256"><strong>wave-3.12-pass-3</strong></a></td><td><code>2e90a651…</code></td><td><strong>Current.</strong> <code>Scope</code>, the orbit law, <code>tauImplicitMillis</code>, <code>"draft"</code> — 31 NodeShapes</td></tr>
+</table></div>
+
+<h2>Modules</h2>
+<p class="abstract">A module reaches a kernel's surface only through a sealed Adoption naming its digest — proximity is never
+adoption. Adoption is per-project.</p>
+<div class="table-wrap"><table>
+  <tr><th>Module</th><th>File</th><th>sha256</th><th>Purpose</th></tr>
+  <tr><td>Wave</td><td><a href="https://conceptkernel.org/ontology/v3.11/modules/wave.ttl">v3.11/modules/wave.ttl</a></td><td><code>f4ad27ce…</code></td><td>Coordination vocabulary — waves, passes, tickets, findings, rulings, operations — run as sealed, harvestable statements</td></tr>
+  <tr><td>Wave (v3.12 shelf)</td><td><a href="modules/wave.ttl">v3.12/modules/wave.ttl</a></td><td><code>ad887db2…</code></td><td>The same vocabulary, same namespace: a Finding requires a label; the ruled-at-pass value is retyped</td></tr>
+  <tr><td>Lexicon</td><td><a href="https://conceptkernel.org/ontology/v3.11/modules/lexicon.ttl">v3.11/modules/lexicon.ttl</a></td><td><code>5def86ba…</code></td><td>The closed set of defect symptoms findings are classified against — its closed sets gated, its derived terms fenced</td></tr>
+  <tr><td>Recon</td><td><a href="https://conceptkernel.org/ontology/v3.11/modules/recon.ttl">v3.11/modules/recon.ttl</a></td><td><code>b2b11f1b…</code></td><td>The reference module, issued in the namespace of the line it belongs to</td></tr>
+  <tr><td class="muted">Recon (superseded)</td><td><a href="modules/recon.ttl">v3.12/modules/recon.ttl</a></td><td><code>6a7c199e…</code></td><td class="muted">Retained only because sealed Adoptions cite it — composition fails closed on an absent adopted graph</td></tr>
+</table></div>
+
+<h2>Verify it yourself</h2>
+<p class="abstract">The surface in force is established by digest, never inferred from a validation report: a validator reports
+conformance against an empty shapes graph too. Check the bytes, then ask the door what it loaded.</p>
+<pre><code>curl -sO https://conceptkernel.org/ontology/v3.12/core.ttl
+curl -sO https://conceptkernel.org/ontology/v3.12/core.ttl.wave-3.12-pass-3.sha256
+shasum -a 256 -c core.ttl.wave-3.12-pass-3.sha256        # core.ttl: OK</code></pre>
+<p class="abstract">Through the door, <code>surface.grounding</code> reports every graph in a kernel's world on each digest plane, and
+<code>surface.check</code> compares the surface in force with the digests its epoch sealed. See
+<a href="https://conceptkernel.org/v3.12/epochs-and-digests">Epochs, Digests &amp; Proof</a>.</p>
+
+<h2>The declared gap</h2>
+<p class="abstract"><strong>G-1 — cross-node kind integrity</strong> carries forward from v3.11. Body locality places one property
+beyond the instance gate: that a referenced IRI is of the kind the reference intends. The root states the ranges so the
+check is expressible as a store-level query over sealed rows — served through the door as <code>integrity.check</code> — and
+declares the gap rather than carrying a constraint that would read as enforcement while refusing valid writes.</p>
+
+<div class="footer">
+  <p>Part of the <a href="https://conceptkernel.org">Concept Kernel Protocol</a> ·
+  <a href="https://conceptkernel.org/v3.12/">v3.12 specification</a> ·
+  authored in <a href="https://github.com/styk-tv/pgCK/tree/v0.4.112/ontology">styk-tv/pgCK <code>ontology/</code></a>,
+  republished here when its digest changes.</p>
+</div>
+
+</div>
+</body>
+</html>
